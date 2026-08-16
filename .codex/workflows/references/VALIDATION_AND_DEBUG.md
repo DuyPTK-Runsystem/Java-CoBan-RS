@@ -5,14 +5,14 @@ Reference này quy định cách AI Agent kiểm tra chất lượng và xử l�
 
 ## 2. Checkstyle
 Trước khi hoàn tất:
-- đọc `config/checkstyle/checkstyle.xml`;
+- đọc `BE/BaiTap-RS/config/checkstyle/checkstyle.xml`;
 - tuân thủ format, naming, import, whitespace, line length và convention liên quan;
 - không tự ý disable rule;
 - không dùng suppression nếu không có lý do kỹ thuật rõ ràng;
 - sửa lỗi Checkstyle do code hiện tại gây ra.
 
 ## 3. PMD
-Phải chạy PMD nếu project đã cấu hình.
+Đọc cấu hình PMD tại `BE/BaiTap-RS/config/pmd/ruleset.xml` và phải chạy PMD.
 Lỗi do thay đổi hiện tại phải được xử lý trước khi báo hoàn thành.
 
 ## 4. Build

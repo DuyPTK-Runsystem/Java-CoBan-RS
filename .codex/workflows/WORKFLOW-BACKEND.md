@@ -3,29 +3,29 @@
 ## 1. Mục đích
 Quy định quy trình bắt buộc cho AI Agent khi tạo, sửa, refactor hoặc bổ sung mã nguồn.
 Tài liệu:
-- Rule: `.codex/AGENTS.md` v
+- Rule: `.codex/AGENTS.md`
 - Docs: `document/application-doc/`
-- Developer Plan: `document/dev-impl-plan`
-- References: `.codex/workflows/references`
+- Developer Plan: `document/dev-impl-plan/`
+- References: `.codex/workflows/references/`
 ## 2. Nguyên tắc bắt buộc
 1. Đọc rule, docs và code liên quan trước khi lập kế hoạch hoặc sửa code.
 2. Không suy đoán requirement nếu thông tin đã tồn tại.
-3. Không code khi approval gate hoặc Developer Plan bắt buộc chưa được phê duyệt.
+3. Không code khi Developer Plan chưa được người dùng phê duyệt bằng tin nhắn qua agent.
 4. Chỉ thay đổi trong scope đã được duyệt.
 5. Không tự ý đổi kiến trúc, dependency, build, CI/CD hoặc refactor ngoài scope.
 6. Không báo thành công khi validation bắt buộc vẫn thất bại.
 ## 3. Bước 1 — Hiểu yêu cầu
 Trước khi hành động:
-- đọc rule áp dụng trong `.claude/rules/`;
-- đọc docs liên quan trong `.claude/docs/`;
+- đọc rule áp dụng trong `.codex/AGENTS.md` và `AGENTS.override.md` nếu có;
+- đọc docs liên quan trong `document/application-doc/`;
 - đọc implementation hiện tại và Developer Plan liên quan;
 - xác định requirement, kiến trúc, flow, module, dependency và rủi ro.
 Không chỉnh sửa mã nguồn ở bước này.
 ## 4. Bước 2 — Developer Plan
 Nếu chưa có plan được phê duyệt:
 1. Phân tích requirement và implementation hiện tại.
-2. Tạo plan theo `references/DEVELOPER_PLAN.md`.
-3. Trình bày và chờ người dùng phê duyệt rõ ràng.
+2. Tạo plan theo `.codex/workflows/references/DEVELOPER_PLAN.md`.
+3. Trình bày và chờ người dùng phê duyệt rõ ràng bằng tin nhắn qua agent.
 Nếu đã có plan:
 1. Đọc toàn bộ plan.
 2. Đối chiếu với requirement và code hiện tại.
@@ -39,8 +39,8 @@ Báo cáo ngắn gọn:
 - phạm vi và file/class/method dự kiến thay đổi;
 - API/database/integration bị ảnh hưởng nếu có;
 - output, rủi ro và validation dự kiến.
-Dùng `references/REPORT_TEMPLATES.md` khi cần.
-Chỉ code sau khi đáp ứng approval gate áp dụng.
+Dùng `.codex/workflows/references/REPORT_TEMPLATES.md` khi cần.
+Chỉ code sau khi Developer Plan đã được người dùng phê duyệt bằng tin nhắn qua agent.
 ## 6. Bước 4 — Thực hiện code
 - Tuân thủ rule, Developer Plan và convention hiện có.
 - Chỉ sửa file/khu vực thuộc scope.
@@ -49,17 +49,18 @@ Chỉ code sau khi đáp ứng approval gate áp dụng.
 - Xử lý error, validation, security và performance phù hợp.
 - Không thêm feature ngoài requirement.
 Nếu plan sai hoặc thiếu: dừng phần bị ảnh hưởng, báo nguyên nhân/tác động,
-đề xuất plan mới và chờ phê duyệt trước khi tiếp tục.
+đề xuất plan mới và chờ người dùng phê duyệt bằng tin nhắn qua agent trước khi tiếp tục.
 ## 7. Bước 5 — Validation
 Trước khi hoàn tất:
-- đọc và tuân thủ `config/checkstyle/checkstyle.xml`;
+- đọc và tuân thủ `BE/BaiTap-RS/config/checkstyle/checkstyle.xml`;
 - chạy Checkstyle;
+- đọc và tuân thủ `BE/BaiTap-RS/config/pmd/ruleset.xml`;
 - chạy PMD;
 - chạy build;
 - chạy test liên quan.
 Sửa lỗi do thay đổi hiện tại gây ra rồi chạy lại validation.
 Lỗi cũ ngoài scope phải được phân biệt và báo cáo; không tự ý refactor.
-Chi tiết: `references/VALIDATION_AND_DEBUG.md`.
+Chi tiết: `.codex/workflows/references/VALIDATION_AND_DEBUG.md`.
 
 ## 8. Bước 6 — Giới hạn debug
 Tối đa **10 vòng**: code → validation → phân tích → sửa → chạy lại.
@@ -79,7 +80,7 @@ Báo cáo cuối phải phản ánh đúng thực tế:
 - Checkstyle / PMD / build / test;
 - sai lệch so với Developer Plan nếu có;
 - lỗi, giới hạn hoặc bước tiếp theo nếu còn.
-Dùng `references/REPORT_TEMPLATES.md`.
+Dùng `.codex/workflows/references/REPORT_TEMPLATES.md`.
 
 ## 10. Thứ tự ưu tiên
 1. Yêu cầu trực tiếp của người dùng trong task hiện tại.
@@ -92,7 +93,7 @@ Không dùng mức thấp hơn để vi phạm mức cao hơn.
 
 ## 11. Completion checklist
 - [ ] Đã đọc rule, docs và code liên quan.
-- [ ] Developer Plan hợp lệ và được phê duyệt khi bắt buộc.
+- [ ] Developer Plan hợp lệ và đã được người dùng phê duyệt bằng tin nhắn qua agent.
 - [ ] Thay đổi đúng scope.
 - [ ] Checkstyle, PMD, build và test liên quan đã được chạy.
 - [ ] Debug không vượt quá 10 vòng.

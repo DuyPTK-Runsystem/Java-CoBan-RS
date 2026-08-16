@@ -20,19 +20,20 @@ Trước khi tạo, sửa, di chuyển hoặc xóa mã nguồn, Agent phải:
 
 Không tự ý giả định requirement hoặc kiến trúc nếu có thể xác định từ tài liệu hoặc mã nguồn hiện có.
 
-## 2. Developer Plan
-Với thay đổi không đơn giản, Agent phải kiểm tra Developer Plan trước khi code.
+## 2. Developer Plan và approval
+Với mọi thay đổi, Agent phải kiểm tra hoặc lập Developer Plan trước khi code.
+Plan chỉ được xem là approved khi người dùng xác nhận bằng tin nhắn qua agent.
 
 Nếu đã có plan được phê duyệt:
 - đọc đầy đủ phần liên quan;
 - kiểm tra plan còn phù hợp với mã nguồn hiện tại;
 - triển khai đúng phạm vi và hướng kỹ thuật đã duyệt.
 
-Nếu chưa có plan:
+Nếu chưa có plan được phê duyệt:
 - phân tích requirement và implementation hiện tại;
-- lập plan theo `agent-references/DEVELOPMENT_WORKFLOW.md`;
+- lập plan theo `.codex/AGENTS_DETAIL.md` và `.codex/workflows/references/DEVELOPER_PLAN.md`;
 - trình bày cho người dùng;
-- chỉ bắt đầu code sau khi được phê duyệt rõ ràng.
+- chỉ bắt đầu code sau khi người dùng phê duyệt rõ ràng bằng tin nhắn qua agent.
 
 Không được âm thầm thay đổi kiến trúc, phạm vi hoặc quyết định kỹ thuật đã được duyệt.
 

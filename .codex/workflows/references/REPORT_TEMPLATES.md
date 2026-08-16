@@ -29,7 +29,7 @@
 - Test: ...
 
 ### Trạng thái
-- Chờ phê duyệt trước khi code.   # chỉ dùng khi approval gate yêu cầu
+- Chờ người dùng phê duyệt bằng tin nhắn qua agent trước khi code.
 ```
 
 ## 2. Báo cáo cuối

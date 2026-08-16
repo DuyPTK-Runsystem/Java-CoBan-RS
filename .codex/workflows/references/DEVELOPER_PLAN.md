@@ -4,7 +4,9 @@
 Reference này quy định nội dung tối thiểu của Developer Plan trước khi AI Agent triển khai code.
 
 ## Khi nào phải tạo plan
-Tạo Developer Plan khi:
+Tạo Developer Plan cho mọi thay đổi. Với thay đổi nhỏ, plan có thể ngắn gọn.
+
+Plan cần được tạo lại hoặc cập nhật khi:
 - feature/module chưa có plan;
 - plan hiện tại chưa được phê duyệt;
 - scope thay đổi đáng kể;
@@ -73,7 +75,7 @@ Nếu có, nêu rõ:
 Mô tả kết quả quan sát được sau khi hoàn thành.
 
 ## Approval gate
-Plan chỉ được coi là hợp lệ khi người dùng đã phê duyệt rõ ràng nếu workflow/rule yêu cầu.
+Plan chỉ được coi là hợp lệ sau khi người dùng đã phê duyệt rõ ràng bằng tin nhắn qua agent. Quy tắc này áp dụng cho mọi thay đổi, không phụ thuộc kích thước task.
 
 Trước khi được phê duyệt:
 - không sửa mã nguồn;

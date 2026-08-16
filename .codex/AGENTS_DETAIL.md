@@ -1,4 +1,4 @@
-# DEVELOPMENT_WORKFLOW.md
+# AGENTS_DETAIL.md
 
 Tài liệu này mô tả quy trình tham chiếu cho các task triển khai không đơn giản.
 Các `AGENTS.override.md` có thể bổ sung hoặc thu hẹp quy trình này cho từng khu vực.
@@ -17,7 +17,7 @@ Plan nên bao gồm:
 - Test và validation dự kiến.
 - Rủi ro, assumption và output mong đợi.
 
-Không cần tạo plan dài cho thay đổi nhỏ, hiển nhiên và ít rủi ro.
+Với thay đổi nhỏ, hiển nhiên và ít rủi ro, vẫn phải có plan ngắn và được người dùng phê duyệt bằng tin nhắn qua agent; không cần tạo plan dài.
 
 ## 2. Báo cáo trước khi code
 

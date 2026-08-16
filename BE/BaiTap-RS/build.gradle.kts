@@ -2,10 +2,58 @@ plugins {
 	java
 	id("org.springframework.boot") version "4.0.7"
 	id("io.spring.dependency-management") version "1.1.7"
+	checkstyle
+	// jacoco
+	pmd
 }
 
 group = "com.JavaTraining"
 version = "0.0.1-SNAPSHOT"
+
+// =====================================================
+// Checkstyle
+// =====================================================
+
+checkstyle {
+    toolVersion = "10.26.1"
+
+    // File chứa các rule của Checkstyle
+    configFile = file("$rootDir/config/checkstyle/checkstyle.xml")
+
+    // Có thể bật/tắt việc fail build khi có warning
+    isIgnoreFailures = false
+}
+
+tasks.withType<Checkstyle>().configureEach {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
+// =====================================================
+// PMD
+// =====================================================
+
+pmd {
+    toolVersion = "7.16.0"
+
+    // Nếu có lỗi PMD thì fail build
+    isIgnoreFailures = false
+
+    // Hiển thị rule bị vi phạm trên console
+    isConsoleOutput = true
+
+    ruleSetFiles = files("$rootDir/config/pmd/ruleset.xml")
+    ruleSets = emptyList()
+}
+
+tasks.withType<Pmd>().configureEach {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
 
 java {
 	toolchain {

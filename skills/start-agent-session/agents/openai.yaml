@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Agent Session"
+  short_description: "Shared Vietnamese project workflow"
+  default_prompt: "Use $start-agent-session to begin a shared project session."
