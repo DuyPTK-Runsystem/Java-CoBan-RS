@@ -36,19 +36,15 @@ Database mapping:
 
 | Property | Table | Column | Constraint |
 |---|---|---|---|
-| userId | user | user_id | PK, NOT NULL, auto increment |
+| userId | user | user_id | PK, NOT NULL, auto increment, Java `Long` |
 | userName | user | user_name | VARCHAR(20), NOT NULL |
-| password | user | password | VARCHAR(15), NOT NULL in supplied schema |
+| password | user | password | VARCHAR(255), NOT NULL, stores password hash |
 
 ### Security note
 
-The supplied database design gives `password VARCHAR(15)`, while secure password hashing normally requires a much larger column and the stored value is a hash rather than the raw password.
+The supplied database design originally gave `password VARCHAR(15)`, while secure password hashing requires a larger column. The project decision is to use `password VARCHAR(255)` and store only the password hash.
 
-This creates a specification conflict.
-
-For strict replication of the training sheet, keep the supplied schema. For a security-correct implementation, change the password column length and store only a hash. This decision must be confirmed before implementation and then reflected in `DataStructure.md`.
-
-Never silently truncate a password hash into the supplied 15-character column.
+The raw password entered by the user still follows the screen validation rules: required, minimum length 6, maximum length 15, and ASCII/single-byte characters.
 
 ---
 

@@ -35,48 +35,30 @@ student_info
 
 | No. | Field | Type | Length | PK | NOT NULL | Note |
 |---:|---|---|---:|---|---|---|
-| 1 | `user_id` | INT | - | Yes | Yes | Auto increment |
+| 1 | `user_id` | BIGINT | - | Yes | Yes | Auto increment; Java `Long` |
 | 2 | `user_name` | VARCHAR | 20 | No | Yes | Login/registration username |
-| 3 | `password` | VARCHAR | 15 | No | Yes | Supplied schema |
+| 3 | `password` | VARCHAR | 255 | No | Yes | Password hash storage |
 
 Recommended DDL matching the supplied sheet:
 
 ```sql
 CREATE TABLE `user` (
-    user_id INT NOT NULL AUTO_INCREMENT,
+    user_id BIGINT NOT NULL AUTO_INCREMENT,
     user_name VARCHAR(20) NOT NULL,
-    password VARCHAR(15) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     PRIMARY KEY (user_id)
 );
 ```
 
-## Important password-schema issue
+## Password storage decision
 
-A 15-character password column cannot safely hold normal modern password hashes.
-
-Therefore one of these must be selected explicitly:
-
-### Strict training-sheet mode
-
-Keep:
-
-```sql
-password VARCHAR(15)
-```
-
-This reproduces the sheet but is not a production-grade credential-storage design.
-
-### Security-correct mode
-
-Change to a sufficiently large hash column, for example:
+The supplied training sheet originally used `password VARCHAR(15)`, but the application stores password hashes. The project decision is:
 
 ```sql
 password VARCHAR(255) NOT NULL
 ```
 
-and store a password hash.
-
-Do not claim the project uses secure password hashing unless the schema supports it.
+Raw password input is still validated by the User module rules: required, minimum length 6, maximum length 15, and ASCII/single-byte characters.
 
 ---
 
@@ -459,9 +441,8 @@ FK/UNIQUE student_id -> student.student_id
 
 Open schema decisions:
 
-1. Secure password storage vs literal `VARCHAR(15)` assignment schema.
-2. `student_code` uniqueness.
-3. `DATETIME` vs `DATE` for date of birth.
-4. Whether the trainer intended `student_info.student_id` as part of a composite primary key.
+1. `student_code` uniqueness.
+2. `DATETIME` vs `DATE` for date of birth.
+3. Whether the trainer intended `student_info.student_id` as part of a composite primary key.
 
 Resolve these before freezing the first production migration/schema script.
