@@ -12,7 +12,12 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @Entity
 @Table(
         name = "user",
@@ -25,9 +30,11 @@ public class User {
     private Long id;
 
     @Column(name = "user_name", nullable = false, length = 20)
+    @Setter(lombok.AccessLevel.PACKAGE)
     private String username;
 
     @Column(name = "password", nullable = false, length = 255)
+    @Setter(lombok.AccessLevel.PACKAGE)
     private String password;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -41,9 +48,6 @@ public class User {
 
     @Column(name = "updated_by", length = 100)
     private String updatedBy;
-
-    protected User() {
-    }
 
     public User(String username, String password) {
         this.username = username;
@@ -63,33 +67,5 @@ public class User {
     /* default */ void onUpdate() {
         updatedAt = Instant.now();
         updatedBy = AuditUtil.currentUsername();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public String getUpdatedBy() {
-        return updatedBy;
     }
 }

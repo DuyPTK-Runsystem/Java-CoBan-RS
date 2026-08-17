@@ -46,14 +46,14 @@ public class StudentController {
     @PutMapping("/{studentId}")
     @ApiMessage("Cập nhật sinh viên")
     public ResStudentDTO updateStudent(
-            @PathVariable Long studentId,
+            @PathVariable("studentId") Long studentId,
             @Valid @RequestBody ReqUpdateStudentDTO request) {
         return studentService.updateStudent(studentId, request);
     }
 
     @DeleteMapping("/{studentId}")
     @ApiMessage("Xóa sinh viên")
-    public ResponseEntity<Void> deleteStudent(@PathVariable Long studentId) {
+    public ResponseEntity<Void> deleteStudent(@PathVariable("studentId") Long studentId) {
         studentService.deleteStudent(studentId);
         return ResponseEntity.noContent().build();
     }

@@ -7,6 +7,7 @@
 | 003 | [Postman Collection Skill](workflow-skill/003-postman-collection-skill-2026-08-17.md) | Project skill for user-requested Postman collection updates | Approved | 2026-08-17 |
 | 004 | [Lombok Annotation Guidance](workflow-skill/004-lombok-annotation-guidance-2026-08-17.md) | Project Lombok usage skill and backend skill references | Approved | 2026-08-17 |
 | 005 | [Student Module Backend](student/005-student-module-backend-2026-08-17.md) | Student list/search/sort/page, CRUD, generate code | Approved | 2026-08-17 |
+| 006 | [Refactor Lombok Entity and Explicit Controller Params](006-lombok-entity-controller-param-refactor-2026-08-17.md) | Lombok for existing entities, explicit controller `@PathVariable`/`@RequestParam` names | Approved | 2026-08-17 |
 
 ## Module folders
 
@@ -27,3 +28,5 @@
 - `student_info.student_id` is a unique foreign key to `student.student_id`.
 - Student delete uses entity relationship cascade/orphan removal with service transaction boundary.
 - Student repository uses `JpaSpecificationExecutor<Student>`.
+- Entity Lombok refactor should avoid `@Data` on JPA entities.
+- Controller `@PathVariable` and `@RequestParam` annotations should declare explicit parameter names.
