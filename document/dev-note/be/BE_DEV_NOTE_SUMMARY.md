@@ -7,8 +7,10 @@
 | 003 | workflow-skill | [Postman Collection Skill](workflow-skill/003-postman-collection-skill-2026-08-17.md) | Completed | 2026-08-17 |
 | 004 | user-auth | [Auth Postman Collection](user-auth/004-auth-postman-collection-2026-08-17.md) | Completed | 2026-08-17 |
 | 004 | workflow-skill | [Lombok Annotation Guidance](workflow-skill/004-lombok-annotation-guidance-2026-08-17.md) | Completed | 2026-08-17 |
+| 005 | student | [Student Module Backend](student/005-student-module-backend-2026-08-17.md) | Completed | 2026-08-17 |
 
 ## Module folders
 
 - `user-auth/`: User registration, login/logout, account, and authentication implementation notes.
+- `student/`: Student list/search/sort/page, CRUD, and generated-code backend implementation notes.
 - `workflow-skill/`: Backend/project workflow and skill implementation notes.

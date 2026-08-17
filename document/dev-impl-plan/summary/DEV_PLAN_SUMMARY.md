@@ -30,3 +30,4 @@ Example:
 | 002 | BE | [Dev Note Skill and Workflow Enforcement](../be/workflow-skill/002-dev-note-skill-workflow-2026-08-17.md) | Approved | 2026-08-17 |
 | 003 | BE | [Postman Collection Skill](../be/workflow-skill/003-postman-collection-skill-2026-08-17.md) | Approved | 2026-08-17 |
 | 004 | BE | [Lombok Annotation Guidance](../be/workflow-skill/004-lombok-annotation-guidance-2026-08-17.md) | Approved | 2026-08-17 |
+| 005 | BE | [Student Module Backend](../be/student/005-student-module-backend-2026-08-17.md) | Approved | 2026-08-17 |
