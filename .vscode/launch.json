@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-BaiTapRsApplication<BaiTap-RS>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.JavaTraining.BaiTap_RS.BaiTapRsApplication",
+            "projectName": "BaiTap-RS",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
