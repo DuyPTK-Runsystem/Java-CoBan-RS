@@ -341,6 +341,253 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Student",
+      "description": "Student management endpoints from `/api/v1/students`.",
+      "item": [
+        {
+          "name": "Fetch Students",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/students?page=0&size=10&studentCode=&studentName=&birthday=&sortField=studentCode&sortDirection=asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "students"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "Zero-based page index."
+                },
+                {
+                  "key": "size",
+                  "value": "10",
+                  "description": "Page size. Empty/0 defaults to 10 in service."
+                },
+                {
+                  "key": "studentCode",
+                  "value": "",
+                  "description": "Optional student code filter."
+                },
+                {
+                  "key": "studentName",
+                  "value": "",
+                  "description": "Optional student name filter."
+                },
+                {
+                  "key": "birthday",
+                  "value": "",
+                  "description": "Optional birthday filter, yyyy-MM-dd."
+                },
+                {
+                  "key": "sortField",
+                  "value": "studentCode",
+                  "description": "studentCode, studentName, dateOfBirth, address, averageScore."
+                },
+                {
+                  "key": "sortDirection",
+                  "value": "asc",
+                  "description": "asc or desc."
+                }
+              ]
+            },
+            "description": "Fetch student page with optional filters and supported sorting."
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Student Code",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/students/code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "students",
+                "code"
+              ]
+            },
+            "description": "Generate a student code using STU plus seven digits."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Student",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/students",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "students"
+              ]
+            },
+            "description": "Create a student and related student info in one transaction.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentCode\": \"STU1234567\",\n  \"studentName\": \"Nguyen Van A\",\n  \"dateOfBirth\": \"2012-04-22\",\n  \"address\": \"Ho Chi Minh City\",\n  \"averageScore\": 8.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Student",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/students/{{studentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "students",
+                "{{studentId}}"
+              ]
+            },
+            "description": "Update mutable student fields. Student code is not editable.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentName\": \"Tran Van B\",\n  \"dateOfBirth\": \"2013-05-23\",\n  \"address\": \"Da Nang\",\n  \"averageScore\": 9.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Student",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/students/{{studentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "students",
+                "{{studentId}}"
+              ]
+            },
+            "description": "Delete a student. StudentInfo is removed through the entity relationship."
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "auth": {
@@ -362,6 +609,11 @@
     {
       "key": "accessToken",
       "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentId",
+      "value": "1",
       "type": "string"
     }
   ]

@@ -32,6 +32,10 @@
   - list query DTO is `ReqFetchStudentDTO`;
   - student code generation creates 20 candidates per batch and checks existing DB codes in one repository query per batch;
   - max generate-code retry is 5 batches, so worst-case DB lookup count is 5 instead of 100.
+- Follow-up Postman collection update applied after explicit user request:
+  - added Student folder to `document/postman/Java-CoBan.postman_collection.json`;
+  - added fetch, generate code, create, update, and delete student requests;
+  - requests use `{{baseUrl}}`, `{{accessToken}}`, and `{{studentId}}` variables.
 
 ## 3. Files Changed
 
@@ -71,6 +75,10 @@
 - `document/dev-note/be/BE_DEV_NOTE_SUMMARY.md`
 - `document/dev-note/summary/DEV_NOTE_SUMMARY.md`
 
+### API Client Artifact
+
+- `document/postman/Java-CoBan.postman_collection.json`
+
 ## 4. Important Implementation Decisions
 
 - `StudentRepository` extends `JpaRepository<Student, Long>` and `JpaSpecificationExecutor<Student>`.
@@ -92,6 +100,14 @@ Commands run from `BE/BaiTap-RS`:
 | `./gradlew build` | PASS | Includes compile, test, Checkstyle, PMD, and build lifecycle. |
 | `./gradlew checkstyleMain checkstyleTest` | PASS | Final run after code cleanup. |
 | `./gradlew pmdMain pmdTest` | PASS | Final run after refactor without PMD suppressions. |
+
+Postman collection validation:
+
+| Check | Result | Notes |
+|---|---|---|
+| JSON parse | PASS | `document/postman/Java-CoBan.postman_collection.json` parsed successfully. |
+| Collection schema | PASS | Uses Postman Collection v2.1 schema. |
+| Secret scan | PASS | No config secret copied; only safe sample values and variables are present. |
 
 ## 6. JaCoCo Coverage Evidence
 
