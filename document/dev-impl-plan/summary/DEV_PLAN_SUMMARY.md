@@ -28,3 +28,4 @@ Example:
 |---:|---|---|---|---|
 | 001 | BE | [Base Backend Theo Boilerplate, Rút Gọn User/Auth](../be/user-auth/001-base-boilerplate-user-auth-2026-08-17.md) | Approved | 2026-08-17 |
 | 002 | BE | [Dev Note Skill and Workflow Enforcement](../be/workflow-skill/002-dev-note-skill-workflow-2026-08-17.md) | Approved | 2026-08-17 |
+| 003 | BE | [Postman Collection Skill](../be/workflow-skill/003-postman-collection-skill-2026-08-17.md) | Approved | 2026-08-17 |
