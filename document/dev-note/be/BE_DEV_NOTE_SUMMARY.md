@@ -5,6 +5,8 @@
 | 001 | user-auth | [Base Backend Theo Boilerplate, Rút Gọn User/Auth](user-auth/001-base-boilerplate-user-auth-2026-08-17.md) | Completed | 2026-08-17 |
 | 002 | workflow-skill | [Dev Note Skill and Workflow Enforcement](workflow-skill/002-dev-note-skill-workflow-2026-08-17.md) | Completed | 2026-08-17 |
 | 003 | workflow-skill | [Postman Collection Skill](workflow-skill/003-postman-collection-skill-2026-08-17.md) | Completed | 2026-08-17 |
+| 004 | user-auth | [Auth Postman Collection](user-auth/004-auth-postman-collection-2026-08-17.md) | Completed | 2026-08-17 |
+| 004 | workflow-skill | [Lombok Annotation Guidance](workflow-skill/004-lombok-annotation-guidance-2026-08-17.md) | Completed | 2026-08-17 |
 
 ## Module folders
 

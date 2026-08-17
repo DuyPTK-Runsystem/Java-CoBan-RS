@@ -11,7 +11,8 @@ description: Define, scaffold, implement, or review a feature-first Spring Boot 
 2. Define the module boundary and invariants before creating files. Keep one business capability per module.
 3. Create the structure below. Treat each leaf as a package; Java package segments should normally be lowercase. If the repository already uses `requestDTO`/`responseDTO`, preserve it instead of creating duplicate conventions.
 4. Implement dependency direction: `controller -> service -> repository -> entity/database`. DTOs may cross the HTTP boundary; entities must not.
-5. Run focused tests, compilation, and formatting available in the repository. Report files created, behavior, and unresolved decisions.
+5. Apply `@lombok-usage` when generating Java classes that use Lombok annotations.
+6. Run focused tests, compilation, and formatting available in the repository. Report files created, behavior, and unresolved decisions.
 
 ## Required structure
 
@@ -55,11 +56,13 @@ Example: `ExamController.java`, `ExamService.java`, `ExamRepository.java`, `Exam
 - Use pagination for growing collections; use the project default (20 in Exam Service) unless requirements differ.
 - Reuse global exception and response formatting. Do not catch broad exceptions in each controller.
 - Prefer constructor injection with `final` dependencies.
+- Prefer Lombok `@RequiredArgsConstructor` for service/controller dependencies when Lombok is available; avoid `@Data` on JPA entities.
 
 ## Composition
 
 - Use `@controller-impl` for controllers.
 - Use `@service-impl` for services.
 - Use `@entity-impl` for JPA entities/tables.
+- Use `@lombok-usage` for Lombok annotation decisions.
 
 Read [module-example.md](references/module-example.md) when file names, package layout, repository, or DTO examples are needed.

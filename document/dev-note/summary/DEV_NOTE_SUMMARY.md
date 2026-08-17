@@ -18,3 +18,5 @@ NNN-short-topic-yyyy-mm-dd.md
 | 001 | BE | [Base Backend Theo Boilerplate, Rút Gọn User/Auth](../be/user-auth/001-base-boilerplate-user-auth-2026-08-17.md) | Completed | 2026-08-17 |
 | 002 | BE | [Dev Note Skill and Workflow Enforcement](../be/workflow-skill/002-dev-note-skill-workflow-2026-08-17.md) | Completed | 2026-08-17 |
 | 003 | BE | [Postman Collection Skill](../be/workflow-skill/003-postman-collection-skill-2026-08-17.md) | Completed | 2026-08-17 |
+| 004 | BE | [Auth Postman Collection](../be/user-auth/004-auth-postman-collection-2026-08-17.md) | Completed | 2026-08-17 |
+| 004 | BE | [Lombok Annotation Guidance](../be/workflow-skill/004-lombok-annotation-guidance-2026-08-17.md) | Completed | 2026-08-17 |

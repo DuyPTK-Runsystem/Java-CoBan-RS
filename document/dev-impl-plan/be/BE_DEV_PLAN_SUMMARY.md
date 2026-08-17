@@ -5,6 +5,7 @@
 | 001 | [Base Backend Theo Boilerplate, Rút Gọn User/Auth](user-auth/001-base-boilerplate-user-auth-2026-08-17.md) | Spring Boot base, User/Auth, no Role/Permission | Approved | 2026-08-17 |
 | 002 | [Dev Note Skill and Workflow Enforcement](workflow-skill/002-dev-note-skill-workflow-2026-08-17.md) | Project workflow skill, Dev Note artifact | Approved | 2026-08-17 |
 | 003 | [Postman Collection Skill](workflow-skill/003-postman-collection-skill-2026-08-17.md) | Project skill for user-requested Postman collection updates | Approved | 2026-08-17 |
+| 004 | [Lombok Annotation Guidance](workflow-skill/004-lombok-annotation-guidance-2026-08-17.md) | Project Lombok usage skill and backend skill references | Approved | 2026-08-17 |
 
 ## Module folders
 
