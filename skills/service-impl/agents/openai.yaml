@@ -1,0 +1,13 @@
+interface:
+  display_name: Service Implementation
+  short_description: Create transactional Spring services
+  default_prompt: Use @service-impl to create or review a Spring service implementation.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

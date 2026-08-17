@@ -1,0 +1,14 @@
+interface:
+  display_name: Entity Implementation
+  short_description: Create production-ready JPA entities
+  default_prompt: Use @entity-impl to create or review a JPA entity and its table
+    mapping.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

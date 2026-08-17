@@ -1,0 +1,14 @@
+interface:
+  display_name: Module Implementation
+  short_description: Create a complete Spring Boot feature module
+  default_prompt: Use @module-impl to implement a Spring Boot module with controller,
+    service, repository, entity, and request/response DTOs.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true
