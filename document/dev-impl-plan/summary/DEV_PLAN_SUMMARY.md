@@ -31,3 +31,6 @@ Example:
 | 003 | BE | [Postman Collection Skill](../be/workflow-skill/003-postman-collection-skill-2026-08-17.md) | Approved | 2026-08-17 |
 | 004 | BE | [Lombok Annotation Guidance](../be/workflow-skill/004-lombok-annotation-guidance-2026-08-17.md) | Approved | 2026-08-17 |
 | 005 | BE | [Student Module Backend](../be/student/005-student-module-backend-2026-08-17.md) | Approved | 2026-08-17 |
+| 006 | BE | [Refactor Lombok Entity and Explicit Controller Params](../be/006-lombok-entity-controller-param-refactor-2026-08-17.md) | Approved | 2026-08-17 |
+| 007 | BE | [Student Integration Test](../be/student/007-student-integration-test-2026-08-18.md) | Approved | 2026-08-18 |
+| 008 | BE | [User Integration Test](../be/user-auth/008-user-integration-test-2026-08-18.md) | Approved | 2026-08-18 |

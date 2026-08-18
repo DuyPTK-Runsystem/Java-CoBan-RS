@@ -9,6 +9,7 @@
 | 005 | [Student Module Backend](student/005-student-module-backend-2026-08-17.md) | Student list/search/sort/page, CRUD, generate code | Approved | 2026-08-17 |
 | 006 | [Refactor Lombok Entity and Explicit Controller Params](006-lombok-entity-controller-param-refactor-2026-08-17.md) | Lombok for existing entities, explicit controller `@PathVariable`/`@RequestParam` names | Approved | 2026-08-17 |
 | 007 | [Student Integration Test](student/007-student-integration-test-2026-08-18.md) | Student API integration tests with MockMvc and H2 | Approved | 2026-08-18 |
+| 008 | [User Integration Test](user-auth/008-user-integration-test-2026-08-18.md) | User/Auth integration tests with MockMvc, H2 and JWT | Approved | 2026-08-18 |
 
 ## Module folders
 

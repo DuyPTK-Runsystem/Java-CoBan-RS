@@ -10,6 +10,7 @@
 | 005 | student | [Student Module Backend](student/005-student-module-backend-2026-08-17.md) | Completed | 2026-08-17 |
 | 006 | refactor | [Refactor Lombok Entity and Explicit Controller Params](refactor/006-lombok-entity-controller-param-refactor-2026-08-17.md) | Completed | 2026-08-17 |
 | 007 | student | [Student Integration Test](student/007-student-integration-test-2026-08-18.md) | Completed with validation blocker | 2026-08-18 |
+| 008 | user-auth | [User Integration Test](user-auth/008-user-integration-test-2026-08-18.md) | Completed | 2026-08-18 |
 
 ## Module folders
 
