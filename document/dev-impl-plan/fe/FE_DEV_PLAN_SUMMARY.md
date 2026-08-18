@@ -3,6 +3,7 @@
 | No. | Plan | Scope | Status | Created |
 |---:|---|---|---|---|
 | 009 | [FE Project Skeleton](009-fe-project-skeleton-2026-08-18.md) | Vue 3 + Vite + TypeScript skeleton, routes/views/components for four supplied screens, PrimeVue and Storybook setup | Approved | 2026-08-18 |
+| 011 | [FE Test/Coverage Foundation](011-fe-test-coverage-foundation-2026-08-18.md) | Test runner, coverage foundation and deterministic component tests to remove the FE validation blocker | Approved | 2026-08-18 |
 
 ## Current FE notes
 
