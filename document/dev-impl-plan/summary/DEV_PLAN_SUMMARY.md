@@ -35,3 +35,4 @@ Example:
 | 007 | BE | [Student Integration Test](../be/student/007-student-integration-test-2026-08-18.md) | Approved | 2026-08-18 |
 | 008 | BE | [User Integration Test](../be/user-auth/008-user-integration-test-2026-08-18.md) | Approved | 2026-08-18 |
 | 009 | FE | [FE Project Skeleton](../fe/009-fe-project-skeleton-2026-08-18.md) | Approved | 2026-08-18 |
+| 010 | BE/FE | [API Contract and TBD Resolution](../be/010-api-contract-and-tbd-resolution-2026-08-18.md) | Approved | 2026-08-18 |

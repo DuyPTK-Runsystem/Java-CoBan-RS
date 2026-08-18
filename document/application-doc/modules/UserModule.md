@@ -112,10 +112,18 @@ Failure:
 Success:
 
 - Establish the application's authenticated state.
+- Store the access token and UI-safe user summary in `sessionStorage`.
+- The user summary may contain `id`, `username`/`name`, and other fields needed by the UI, but never `password` or a password hash.
 - Navigate to Student List.
 - Student List displays the logged-in username.
 
 Do not return the stored password to the frontend.
+
+Authentication error behavior:
+
+- `401 Unauthorized` means the session is no longer valid. Clear authentication state and navigate to Login.
+- `403 Forbidden` means the authenticated user has no permission. Keep authentication state and show an access-denied message.
+- Expired, malformed, or invalid-signature JWTs are handled as `401 Unauthorized`.
 
 ---
 
@@ -203,12 +211,12 @@ From Student List or Student Form:
 ```text
 Logout
   ->
-clear authenticated state
+ clear authenticated state from sessionStorage
   ->
 navigate to Login
 ```
 
-The exact server-side logout behavior depends on the selected authentication mechanism.
+The backend is stateless and returns `204 No Content`; frontend logout is responsible for clearing the local token and user summary.
 
 ---
 
@@ -262,19 +270,19 @@ boolean existsByUserName(String userName);
 
 # 7. Recommended REST Contract
 
-Exact paths can be renamed consistently.
+The current paths use the `/api/v1` prefix.
 
 ## Register user
 
 ```http
-POST /api/users/register
+POST /api/v1/auth/register
 ```
 
 Request:
 
 ```json
 {
-  "userName": "NguyenVanA",
+  "username": "NguyenVanA",
   "password": "secret1",
   "confirmPassword": "secret1"
 }
@@ -283,14 +291,14 @@ Request:
 ## Login
 
 ```http
-POST /api/auth/login
+POST /api/v1/auth/login
 ```
 
 Request:
 
 ```json
 {
-  "userName": "NguyenVanA",
+  "username": "NguyenVanA",
   "password": "secret1"
 }
 ```
@@ -300,10 +308,18 @@ Response must not expose the persisted password.
 ## Logout
 
 ```http
-POST /api/auth/logout
+POST /api/v1/auth/logout
 ```
 
-Whether this endpoint is required depends on the selected session/token design.
+The endpoint requires a valid Bearer JWT and returns `204 No Content`. The current authentication mechanism is stateless JWT.
+
+## Current account
+
+```http
+GET /api/v1/auth/account
+```
+
+The endpoint requires a valid Bearer JWT and returns the current UI-safe user summary.
 
 ---
 

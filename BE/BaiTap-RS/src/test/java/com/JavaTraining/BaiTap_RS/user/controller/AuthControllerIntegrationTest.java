@@ -31,6 +31,7 @@ class AuthControllerIntegrationTest {
     private static final String LOGIN_PATH = "/api/v1/auth/login";
     private static final String ACCOUNT_PATH = "/api/v1/auth/account";
     private static final String LOGOUT_PATH = "/api/v1/auth/logout";
+    private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String USERNAME = "student01";
     private static final String PASSWORD = "secret1";
     private static final String DUPLICATE_MESSAGE = "Tên đăng nhập đã tồn tại";
@@ -156,13 +157,13 @@ class AuthControllerIntegrationTest {
 
         MvcResult accountResult = mockMvc.perform(MockMvcRequestBuilders
                         .get(ACCOUNT_PATH)
-                        .header("Authorization", "Bearer " + accessToken))
+                        .header(AUTHORIZATION_HEADER, "Bearer " + accessToken))
                 .andReturn();
         String accountResponse = accountResult.getResponse().getContentAsString();
 
         MvcResult logoutResult = mockMvc.perform(MockMvcRequestBuilders
                         .post(LOGOUT_PATH)
-                        .header("Authorization", "Bearer " + accessToken))
+                        .header(AUTHORIZATION_HEADER, "Bearer " + accessToken))
                 .andReturn();
 
         Assertions.assertTrue(
@@ -205,8 +206,8 @@ class AuthControllerIntegrationTest {
                 loginResult.getResponse().getStatus() == 401
                         && loginResponse.contains("\"statusCode\":401")
                         && loginResponse.contains(INVALID_CREDENTIALS_MESSAGE)
-                        && accountResult.getResponse().getStatus() == 403
-                        && logoutResult.getResponse().getStatus() == 403,
+                        && accountResult.getResponse().getStatus() == 401
+                        && logoutResult.getResponse().getStatus() == 401,
                 "invalid credentials and anonymous protected requests should be rejected");
     }
 

@@ -26,3 +26,4 @@ NNN-short-topic-yyyy-mm-dd.md
 | 008 | BE | [User Integration Test](../be/user-auth/008-user-integration-test-2026-08-18.md) | Completed | 2026-08-18 |
 | 009 | FE | [FE Project Skeleton](../fe/009-fe-project-skeleton-2026-08-18.md) | Completed with validation blocker | 2026-08-18 |
 | 010 | FE | [Frontend Validation Quality Gates](../fe/010-frontend-validation-quality-gates-2026-08-18.md) | Completed with test/coverage blocker | 2026-08-18 |
+| 010 | BE | [API Contract and TBD Resolution](../be/010-api-contract-and-tbd-resolution-2026-08-18.md) | Completed | 2026-08-18 |

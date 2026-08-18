@@ -104,6 +104,9 @@ Frontend and backend are separate application layers.
 - Display API validation/business errors.
 - Use PrimeVue where required by the supplied screens.
 - Provide Storybook stories for `LoginForm` and `RegisterForm`.
+- Store the access token and UI-safe user summary in `sessionStorage` after login.
+- Clear all authentication state from `sessionStorage` on logout or `401 Unauthorized`.
+- Keep the authentication state on `403 Forbidden` and display an access-denied message.
 
 ### Backend responsibilities
 
@@ -222,7 +225,7 @@ The assignment explicitly requires APIs for:
 
 The project also requires user registration from the supplied Register screen. Therefore the backend needs a user-registration endpoint even though the assignment's short API list does not name it separately.
 
-Exact URI naming is an implementation-level decision. Recommended REST naming is documented in each module.
+The current API contract uses the `/api/v1` prefix and the endpoint paths documented in the User and Student modules.
 
 ---
 
@@ -252,6 +255,7 @@ General rules supplied by the screens include:
 - Student code maximum length 10.
 - Student name maximum length 20.
 - Address maximum length 255.
+- UI date display format is `dd-mm-yyy`; API date values use `yyyy-MM-dd`.
 
 Where a screen does not explicitly specify required/optional behavior, follow the database `NOT NULL` constraints in `DataStructure.md`.
 
@@ -365,19 +369,25 @@ PrimeVue DataTable is particularly appropriate for sorting, pagination, and list
 
 ## 13. Error Handling
 
-Backend errors should be returned using a consistent JSON shape. Example:
+Backend responses use the `RestResponse` envelope. Successful controller bodies are wrapped by `FormatRestResponse`, implemented as `@RestControllerAdvice` and `ResponseBodyAdvice`. Student page data is placed in `RestResponse.data`.
+
+The current response shape is:
 
 ```json
 {
-  "code": "VALIDATION_ERROR",
-  "message": "Invalid request",
-  "errors": {
-    "userName": "User name is required"
-  }
+  "statusCode": 200,
+  "error": null,
+  "message": "CALL API SUCCESS",
+  "data": {}
 }
 ```
 
-Exact error schema may be adjusted, but one consistent format should be used project-wide.
+Errors use the same envelope with the HTTP status, reason phrase in `error`, and business or validation details in `message`.
+
+Authentication behavior:
+
+- Anonymous requests and expired, malformed, or invalid-signature bearer tokens return `401 Unauthorized`.
+- A `403 Forbidden` response represents an authenticated user without permission and must not clear frontend authentication state.
 
 Frontend must display meaningful errors rather than relying only on console output.
 
@@ -394,7 +404,7 @@ Unless separately required, this assignment does not require:
 - Kubernetes.
 - Complex role/permission management.
 
-Authentication/session implementation details are **TBD**. Keep the solution proportional to the assignment.
+Authentication uses a stateless JWT access token. The frontend stores the token and a UI-safe user summary in `sessionStorage`; the backend does not revoke the token on logout.
 
 ---
 
@@ -402,12 +412,8 @@ Authentication/session implementation details are **TBD**. Keep the solution pro
 
 The following must be confirmed before treating them as source-of-truth rules:
 
-- Exact API URI convention.
-- Whether login uses session, token, or a simpler training-only mechanism.
-- Whether `student_code` must be globally unique.
-- Exact random-number format/length after `STU`.
 - Exact valid range for `average_score`.
 - Batch CSV file path/name and whether exports are separate or joined.
-- Whether search is AND/OR when multiple filters are populated.
+- Whether a production migration/schema script is required instead of the current JPA-managed schema.
 
 Until confirmed, code must avoid assumptions that are difficult to change.

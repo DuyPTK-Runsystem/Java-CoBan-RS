@@ -66,7 +66,7 @@ Raw password input is still validated by the User module rules: required, minimu
 
 | No. | Field | Type | Length | PK | NOT NULL | Note |
 |---:|---|---|---:|---|---|---|
-| 1 | `student_id` | INT | - | Yes | Yes | Auto increment |
+| 1 | `student_id` | BIGINT | - | Yes | Yes | Auto increment; Java `Long` |
 | 2 | `student_name` | VARCHAR | 20 | No | Yes | |
 | 3 | `student_code` | VARCHAR | 10 | No | Yes | |
 
@@ -74,22 +74,20 @@ DDL:
 
 ```sql
 CREATE TABLE student (
-    student_id INT NOT NULL AUTO_INCREMENT,
+    student_id BIGINT NOT NULL AUTO_INCREMENT,
     student_name VARCHAR(20) NOT NULL,
     student_code VARCHAR(10) NOT NULL,
     PRIMARY KEY (student_id)
 );
 ```
 
-The supplied schema does not explicitly mark `student_code` as unique.
+The current application treats `student_code` as globally unique because the UI uses it as a visible generated identifier.
 
-Because the UI has a generated Student Code and uses it as a visible identifier, a uniqueness constraint is reasonable but remains **TBD** until confirmed.
-
-If confirmed:
+The application model enforces this constraint:
 
 ```sql
 ALTER TABLE student
-ADD CONSTRAINT uk_student_code UNIQUE (student_code);
+ADD CONSTRAINT uk_student_student_code UNIQUE (student_code);
 ```
 
 ---
@@ -98,11 +96,11 @@ ADD CONSTRAINT uk_student_code UNIQUE (student_code);
 
 | No. | Field | Type | Length | PK | NOT NULL | Note |
 |---:|---|---|---:|---|---|---|
-| 1 | `info_id` | INT | - | Yes | Yes | Auto increment |
-| 2 | `student_id` | INT | - | Yes* | Yes | Student reference |
+| 1 | `info_id` | BIGINT | - | Yes | Yes | Auto increment; Java `Long` |
+| 2 | `student_id` | BIGINT | - | Yes* | Yes | Student reference |
 | 3 | `address` | VARCHAR | 255 | No | No | |
 | 4 | `average_score` | DOUBLE | - | No | No | |
-| 5 | `date_of_birth` | DATETIME | - | No | No | Display format noted as yyyy/mm/dd |
+| 5 | `date_of_birth` | DATETIME | - | No | No | API uses `yyyy-MM-dd`; UI displays `dd-mm-yyy` |
 
 \*The supplied sheet visually marks `student_id` in the PK column. This is ambiguous because `info_id` is already marked as a primary key.
 
@@ -117,8 +115,8 @@ Recommended DDL:
 
 ```sql
 CREATE TABLE student_info (
-    info_id INT NOT NULL AUTO_INCREMENT,
-    student_id INT NOT NULL,
+    info_id BIGINT NOT NULL AUTO_INCREMENT,
+    student_id BIGINT NOT NULL,
     address VARCHAR(255),
     average_score DOUBLE,
     date_of_birth DATETIME,
@@ -185,7 +183,8 @@ Database sheet uses:
 
 ```text
 date_of_birth: dateTime
-display: yyyy/mm/dd
+API: yyyy-MM-dd
+UI: dd-mm-yyy
 ```
 
 Recommended Java mapping:
@@ -216,7 +215,7 @@ MySQL DATE
 <-> JSON yyyy-MM-dd
 ```
 
-Formatting in the UI may still be `yyyy/MM/dd` or another specified display format.
+The current UI display format is `dd-mm-yyy`.
 
 ---
 
@@ -429,7 +428,7 @@ PK user_id
 student
 PK student_id
    student_name NOT NULL
-   student_code NOT NULL
+   student_code NOT NULL UNIQUE
 
 student_info
 PK info_id
@@ -441,8 +440,7 @@ FK/UNIQUE student_id -> student.student_id
 
 Open schema decisions:
 
-1. `student_code` uniqueness.
-2. `DATETIME` vs `DATE` for date of birth.
-3. Whether the trainer intended `student_info.student_id` as part of a composite primary key.
+1. `DATETIME` vs `DATE` for date of birth.
+2. Whether the trainer intended `student_info.student_id` as part of a composite primary key.
 
 Resolve these before freezing the first production migration/schema script.

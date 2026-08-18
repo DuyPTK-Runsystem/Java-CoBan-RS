@@ -3,6 +3,7 @@ package com.JavaTraining.BaiTap_RS.config;
 import java.util.List;
 
 import com.JavaTraining.BaiTap_RS.security.JwtAuthenticationFilter;
+import com.JavaTraining.BaiTap_RS.security.RestAuthenticationEntryPoint;
 import com.JavaTraining.BaiTap_RS.security.UserPrincipal;
 import com.JavaTraining.BaiTap_RS.user.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
@@ -44,7 +45,10 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            JwtAuthenticationFilter jwtFilter,
+            RestAuthenticationEntryPoint authenticationEntryPoint) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -59,8 +63,9 @@ public class SecurityConfiguration {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html")
                         .permitAll()
-                        .anyRequest()
-                        .authenticated())
+                 .anyRequest()
+                 .authenticated())
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

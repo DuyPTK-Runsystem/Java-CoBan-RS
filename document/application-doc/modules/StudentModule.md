@@ -79,6 +79,7 @@ Birthday validation:
 
 - Maximum display/input length according to supplied screen.
 - Must be a valid date.
+- UI display format is `dd-mm-yyy`; API date values use `yyyy-MM-dd`.
 
 Recommended behavior:
 
@@ -225,14 +226,14 @@ When clicked:
 
 The generated code is then used when registering the student.
 
-Exact numeric length/range is not specified and remains **TBD**.
+The current backend format is `STU` plus 7 random digits, for a total of 10 characters.
 
 Recommended backend rule:
 
-- The final code must be unique.
+- The final code must be unique; `student_code` has a database uniqueness constraint in the current application model.
 - Do not rely exclusively on frontend random generation.
 
-Because the supplied database sheet does not explicitly declare `student_code` unique, uniqueness must be confirmed before enforcing it as a database constraint.
+The backend validates generated and client-provided codes against the uniqueness rule.
 
 ## Save in Add mode
 
