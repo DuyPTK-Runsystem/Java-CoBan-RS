@@ -111,14 +111,20 @@ Use Vite environment variables for configurable public frontend values such as A
 
 Inspect `FE/package.json` and run the relevant existing scripts.
 
-At minimum, when available:
+The following are mandatory quality gates before reporting frontend work as complete:
 
 ```bash
 npm run lint
+npm run test
+npm run test:coverage
 npm run build
 ```
 
-Also run relevant tests/type checks/Storybook validation when configured.
+- Use the exact test and coverage script names configured by `FE/package.json`; do not invent commands.
+- If a test or coverage script is missing, the frontend task is blocked and must not be reported as complete.
+- Also run relevant type checks and Storybook validation when configured.
+- Read test/coverage reports and command output as evidence. Do not manually create, edit, rewrite, delete, or patch report artifacts.
+- A failed, skipped, or unrun mandatory gate must be reported as `FAIL` or `BLOCKED`, never as success.
 
 Do not claim completion if required checks fail.
 
