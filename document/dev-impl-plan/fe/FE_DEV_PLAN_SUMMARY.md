@@ -2,7 +2,7 @@
 
 | No. | Plan | Scope | Status | Created |
 |---:|---|---|---|---|
-| - | - | No frontend dev plan created yet | - | - |
+| 009 | [FE Project Skeleton](009-fe-project-skeleton-2026-08-18.md) | Vue 3 + Vite + TypeScript skeleton, routes/views/components for four supplied screens, PrimeVue and Storybook setup | Approved | 2026-08-18 |
 
 ## Current FE notes
 

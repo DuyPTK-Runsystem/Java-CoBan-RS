@@ -34,3 +34,4 @@ Example:
 | 006 | BE | [Refactor Lombok Entity and Explicit Controller Params](../be/006-lombok-entity-controller-param-refactor-2026-08-17.md) | Approved | 2026-08-17 |
 | 007 | BE | [Student Integration Test](../be/student/007-student-integration-test-2026-08-18.md) | Approved | 2026-08-18 |
 | 008 | BE | [User Integration Test](../be/user-auth/008-user-integration-test-2026-08-18.md) | Approved | 2026-08-18 |
+| 009 | FE | [FE Project Skeleton](../fe/009-fe-project-skeleton-2026-08-18.md) | Approved | 2026-08-18 |
