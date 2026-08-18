@@ -15,7 +15,11 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'json-summary'],
-      include: ['src/components/{LoginForm,RegisterForm,StudentSearchForm}.vue'],
+      include: [
+        'src/components/{LoginForm,RegisterForm,StudentSearchForm}.vue',
+        'src/services/{authSession,userApi}.ts',
+        'src/views/{LoginView,RegisterView}.vue',
+      ],
     },
   },
 })

@@ -37,3 +37,4 @@ Example:
 | 009 | FE | [FE Project Skeleton](../fe/009-fe-project-skeleton-2026-08-18.md) | Approved | 2026-08-18 |
 | 010 | BE/FE | [API Contract and TBD Resolution](../be/010-api-contract-and-tbd-resolution-2026-08-18.md) | Approved | 2026-08-18 |
 | 011 | FE | [FE Test/Coverage Foundation](../fe/011-fe-test-coverage-foundation-2026-08-18.md) | Approved | 2026-08-18 |
+| 012 | FE | [User/Auth API và Route Guard](../fe/012-user-auth-api-route-guard-2026-08-18.md) | Approved | 2026-08-18 |

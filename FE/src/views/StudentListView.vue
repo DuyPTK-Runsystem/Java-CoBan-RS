@@ -8,6 +8,8 @@ import { useRouter } from 'vue-router'
 import AuthenticatedLayout from '@/components/AuthenticatedLayout.vue'
 import StudentSearchForm from '@/components/StudentSearchForm.vue'
 import StudentTable from '@/components/StudentTable.vue'
+import { clearAuthSession, getAuthSession } from '@/services/authSession'
+import { logout as logoutApi } from '@/services/userApi'
 import type { Student, StudentSearchValues } from '@/types/student'
 
 const router = useRouter()
@@ -69,12 +71,24 @@ function confirmDelete(student: Student): void {
 }
 
 function logout(): void {
-  router.push('/login')
+  const session = getAuthSession()
+  if (!session) {
+    clearAuthSession()
+    void router.replace('/login')
+    return
+  }
+
+  void logoutApi(session.accessToken)
+    .catch(() => undefined)
+    .finally(() => {
+      clearAuthSession()
+      return router.replace('/login')
+    })
 }
 </script>
 
 <template>
-  <AuthenticatedLayout @logout="logout">
+  <AuthenticatedLayout :user-name="getAuthSession()?.user.username ?? ''" @logout="logout">
     <ConfirmDialog />
     <div class="page-heading">
       <div>

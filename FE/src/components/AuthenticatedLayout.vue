@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 
-withDefaults(defineProps<{ userName?: string }>(), { userName: 'demo.user' })
+defineProps<{ userName: string }>()
 const emit = defineEmits<{ logout: [] }>()
 </script>
 
