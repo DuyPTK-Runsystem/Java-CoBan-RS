@@ -9,6 +9,7 @@
 | 004 | workflow-skill | [Lombok Annotation Guidance](workflow-skill/004-lombok-annotation-guidance-2026-08-17.md) | Completed | 2026-08-17 |
 | 005 | student | [Student Module Backend](student/005-student-module-backend-2026-08-17.md) | Completed | 2026-08-17 |
 | 006 | refactor | [Refactor Lombok Entity and Explicit Controller Params](refactor/006-lombok-entity-controller-param-refactor-2026-08-17.md) | Completed | 2026-08-17 |
+| 007 | student | [Student Integration Test](student/007-student-integration-test-2026-08-18.md) | Completed with validation blocker | 2026-08-18 |
 
 ## Module folders
 

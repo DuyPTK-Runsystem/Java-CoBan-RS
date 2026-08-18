@@ -8,6 +8,7 @@
 | 004 | [Lombok Annotation Guidance](workflow-skill/004-lombok-annotation-guidance-2026-08-17.md) | Project Lombok usage skill and backend skill references | Approved | 2026-08-17 |
 | 005 | [Student Module Backend](student/005-student-module-backend-2026-08-17.md) | Student list/search/sort/page, CRUD, generate code | Approved | 2026-08-17 |
 | 006 | [Refactor Lombok Entity and Explicit Controller Params](006-lombok-entity-controller-param-refactor-2026-08-17.md) | Lombok for existing entities, explicit controller `@PathVariable`/`@RequestParam` names | Approved | 2026-08-17 |
+| 007 | [Student Integration Test](student/007-student-integration-test-2026-08-18.md) | Student API integration tests with MockMvc and H2 | Approved | 2026-08-18 |
 
 ## Module folders
 

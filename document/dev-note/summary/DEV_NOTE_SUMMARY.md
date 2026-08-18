@@ -22,3 +22,4 @@ NNN-short-topic-yyyy-mm-dd.md
 | 004 | BE | [Lombok Annotation Guidance](../be/workflow-skill/004-lombok-annotation-guidance-2026-08-17.md) | Completed | 2026-08-17 |
 | 005 | BE | [Student Module Backend](../be/student/005-student-module-backend-2026-08-17.md) | Completed | 2026-08-17 |
 | 006 | BE | [Refactor Lombok Entity and Explicit Controller Params](../be/refactor/006-lombok-entity-controller-param-refactor-2026-08-17.md) | Completed | 2026-08-17 |
+| 007 | BE | [Student Integration Test](../be/student/007-student-integration-test-2026-08-18.md) | Completed with validation blocker | 2026-08-18 |
