@@ -54,6 +54,7 @@ public class FormatRestResponse implements ResponseBodyAdvice<Object> {
                 || path.startsWith("/swagger-ui")
                 || body instanceof RestResponse<?>
                 || body instanceof String
+                || body instanceof byte[]
                 || body instanceof Resource;
     }
 

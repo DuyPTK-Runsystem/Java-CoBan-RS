@@ -375,36 +375,31 @@ These indexes are implementation optimizations, not mandatory business rules.
 
 The batch requirement states that information should be read from tables and written to CSV.
 
-Potential source structures:
+The export source is the following inner join:
 
-### Separate CSV files
-
-```text
-users.csv
-students.csv
-student_info.csv
+```sql
+select
+    s.student_id,
+    s.student_name,
+    s.student_code,
+    si.address,
+    si.average_score,
+    si.date_of_birth
+from student s
+join student_info si on s.student_id = si.student_id
 ```
 
-### Joined student CSV
+The CSV column order is:
 
 ```text
-student_id,
-student_code,
-student_name,
-date_of_birth,
-address,
-average_score
+student_id,student_name,student_code,address,average_score,date_of_birth
 ```
 
-The assignment does not specify the exact CSV shape.
-
-Therefore:
-
-- File layout: **TBD**.
-- Output path: **TBD**.
-- Trigger/schedule: **TBD**.
-
-Spring Batch should own reading and writing rather than implementing the export as an unstructured loop in a controller.
+The export is triggered by an authenticated API call and returned as CSV `byte[]`.
+The application does not write or retain a CSV file on its filesystem. Spring Batch owns
+the table reading and CSV mapping/writing, rather than an unstructured controller loop.
+An object that cannot be processed is skipped while remaining objects continue; the CSV
+contains successful rows only and the skipped object is logged.
 
 ---
 

@@ -1,5 +1,6 @@
 package com.JavaTraining.BaiTap_RS.student.controller;
 
+import com.JavaTraining.BaiTap_RS.batch.studentcsv.StudentCsvExportService;
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
 import com.JavaTraining.BaiTap_RS.student.domain.DTOs.requests.ReqCreateStudentDTO;
 import com.JavaTraining.BaiTap_RS.student.domain.DTOs.requests.ReqFetchStudentDTO;
@@ -10,7 +11,9 @@ import com.JavaTraining.BaiTap_RS.student.domain.DTOs.response.ResStudentPageDTO
 import com.JavaTraining.BaiTap_RS.student.service.StudentService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,9 +31,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class StudentController {
 
     private final StudentService studentService;
+    private final StudentCsvExportService studentCsvExportService;
 
-    public StudentController(StudentService studentService) {
+    public StudentController(StudentService studentService, StudentCsvExportService studentCsvExportService) {
         this.studentService = studentService;
+        this.studentCsvExportService = studentCsvExportService;
     }
 
     @GetMapping
@@ -73,5 +78,13 @@ public class StudentController {
     @ApiMessage("Tạo mã sinh viên")
     public ResStudentCodeDTO generateStudentCode() {
         return studentService.generateStudentCode();
+    }
+
+    @GetMapping(value = "/export", produces = "text/csv")
+    public ResponseEntity<byte[]> exportStudents() {
+        return ResponseEntity.ok()
+                .contentType(new MediaType("text", "csv", java.nio.charset.StandardCharsets.UTF_8))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=students.csv")
+                .body(studentCsvExportService.exportStudents());
     }
 }

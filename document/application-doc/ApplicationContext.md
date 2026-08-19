@@ -331,14 +331,16 @@ transform/map rows
 write CSV file
 ```
 
-Recommended scope:
+Confirmed scope:
 
-- Read from `user`, `student`, and `student_info`, either as separate exports or a clearly defined joined export.
 - Use Spring Batch.
-- CSV output directory/name is **TBD** unless already specified elsewhere.
-- Batch trigger mechanism (manual endpoint, scheduler, command line, etc.) is **TBD**.
+- Read `student` joined with `student_info` on `student_id`; do not export `user` data.
+- Select `student_id`, `student_name`, `student_code`, `address`, `average_score` and `date_of_birth` in that order.
+- Trigger through an authenticated API call and return the CSV as `byte[]`; do not write or retain a server-side CSV file.
+- Skip and log an object-level processing failure, then continue the remaining objects; do not fail the complete export for that object-level failure.
 
-Do not silently choose a business-critical batch schedule without an explicit requirement.
+The exact API path, response headers and Spring Batch implementation details are specified
+by the approved Developer Plan before code is written.
 
 ---
 

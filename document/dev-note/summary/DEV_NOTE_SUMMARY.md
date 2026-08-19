@@ -35,3 +35,6 @@ NNN-short-topic-yyyy-mm-dd.md
 | 015 | FE | [Student API, CRUD, Search, Sort, Page và Delete](../fe/015-student-api-crud-search-sort-page-delete-2026-08-19.md) | Completed | 2026-08-19 |
 | 016 | FE | [Student UI Date Format, Input Examples và Storybook](../fe/016-student-ui-date-format-input-examples-storybook-2026-08-19.md) | Completed; amendment 16.1 implemented | 2026-08-19 |
 | 017 | BE | [Student Backend Input Validation](../be/student/017-student-input-validation-2026-08-19.md) | Completed | 2026-08-19 |
+| 018 | BE | [Batch CSV Export](../be/batch/018-batch-csv-export-2026-08-19.md) | Completed | 2026-08-19 |
+| 019 | BE | [Dev Trace Logging Skill](../be/workflow-skill/019-dev-trace-logging-skill-2026-08-19.md) | Completed | 2026-08-19 |
+| 020 | BE | [Backend Per-Run Log File](../be/020-backend-per-run-log-file-2026-08-19.md) | Completed | 2026-08-19 |

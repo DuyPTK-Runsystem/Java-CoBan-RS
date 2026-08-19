@@ -44,3 +44,6 @@ Example:
 | 016 | FE | [Student UI Date Format, Input Examples và Storybook](../fe/016-student-ui-date-format-input-examples-storybook-2026-08-19.md) | Approved; amendment 16.1 implemented | 2026-08-19 |
 | 015.1 | BE/Document | [StudentInfo Cardinality, Document và Student Detail API](../be/student/015.1-student-info-cardinality-document-get-api-2026-08-19.md) | Approved | 2026-08-19 |
 | 017 | BE | [Student Backend Input Validation](../be/student/017-student-input-validation-2026-08-19.md) | Approved | 2026-08-19 |
+| 018 | BE | [Batch CSV Export](../be/018-batch-csv-export-2026-08-19.md) | Approved | 2026-08-19 |
+| 019 | BE | [Shared Dev Trace Logging Skill](../be/workflow-skill/019-dev-trace-logging-skill-2026-08-19.md) | Approved | 2026-08-19 |
+| 020 | BE | [Backend Per-Run Log File](../be/020-backend-per-run-log-file-2026-08-19.md) | Approved | 2026-08-19 |

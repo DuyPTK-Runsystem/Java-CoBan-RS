@@ -2,6 +2,7 @@ package com.JavaTraining.BaiTap_RS.config;
 
 import java.util.List;
 
+import com.JavaTraining.BaiTap_RS.common.filter.RequestIdFilter;
 import com.JavaTraining.BaiTap_RS.security.JwtAuthenticationFilter;
 import com.JavaTraining.BaiTap_RS.security.RestAuthenticationEntryPoint;
 import com.JavaTraining.BaiTap_RS.security.UserPrincipal;
@@ -48,6 +49,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(
             HttpSecurity http,
+            RequestIdFilter requestIdFilter,
             JwtAuthenticationFilter jwtFilter,
             RestAuthenticationEntryPoint authenticationEntryPoint) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
@@ -69,7 +71,8 @@ public class SecurityConfiguration {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(requestIdFilter, JwtAuthenticationFilter.class);
         return http.build();
     }
 

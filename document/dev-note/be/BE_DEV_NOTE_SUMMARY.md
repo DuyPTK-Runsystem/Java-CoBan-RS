@@ -14,6 +14,9 @@
 | 010 | cross-area | [API Contract and TBD Resolution](010-api-contract-and-tbd-resolution-2026-08-18.md) | Completed | 2026-08-18 |
 | 015.1 | student | [StudentInfo Cardinality, Document và Student Detail API](student/015.1-student-info-cardinality-document-get-api-2026-08-19.md) | Completed; MySQL schema alter not run | 2026-08-19 |
 | 017 | student | [Student Backend Input Validation](student/017-student-input-validation-2026-08-19.md) | Completed | 2026-08-19 |
+| 018 | batch | [Batch CSV Export](batch/018-batch-csv-export-2026-08-19.md) | Completed | 2026-08-19 |
+| 019 | workflow-skill | [Dev Trace Logging Skill](workflow-skill/019-dev-trace-logging-skill-2026-08-19.md) | Completed | 2026-08-19 |
+| 020 | backend | [Backend Per-Run Log File](020-backend-per-run-log-file-2026-08-19.md) | Completed | 2026-08-19 |
 
 ## Module folders
 
@@ -21,3 +24,4 @@
 - `student/`: Student list/search/sort/page, CRUD, and generated-code backend implementation notes.
 - `refactor/`: Backend refactor implementation notes that span modules.
 - `workflow-skill/`: Backend/project workflow and skill implementation notes.
+- `batch/`: Spring Batch and CSV export planning/implementation notes.
