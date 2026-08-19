@@ -1,6 +1,22 @@
+import { setup } from '@storybook/vue3'
 import type { Preview } from '@storybook/vue3'
+import Aura from '@primevue/themes/aura'
+import PrimeVue from 'primevue/config'
 
 import '../src/styles.css'
+import 'primeicons/primeicons.css'
+
+setup((app) => {
+  app.use(PrimeVue, {
+    theme: {
+      preset: Aura,
+      options: {
+        prefix: 'p',
+        darkModeSelector: 'none',
+      },
+    },
+  })
+})
 
 const preview: Preview = {
   parameters: {
