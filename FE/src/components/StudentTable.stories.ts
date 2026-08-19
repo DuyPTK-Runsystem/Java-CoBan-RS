@@ -29,6 +29,7 @@ const meta = {
     students,
     loading: false,
     totalRecords: students.length,
+    totalPages: 1,
     page: 0,
     rowsPerPage: 10,
     sortField: 'studentCode',

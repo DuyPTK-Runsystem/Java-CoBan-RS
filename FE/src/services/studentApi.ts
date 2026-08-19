@@ -45,6 +45,22 @@ export function fetchStudents(token: string, query: StudentQuery): Promise<Stude
   return request<StudentPage>(`/api/v1/students?${params.toString()}`, token)
 }
 
+export async function downloadStudentsCsv(token: string): Promise<Blob> {
+  const response = await fetch(toUrl('/api/v1/students/export'), {
+    headers: { Accept: 'text/csv', Authorization: `Bearer ${token}` },
+  })
+  if (!response.ok) {
+    let body: ApiErrorBody | null = null
+    try {
+      body = await response.json() as ApiErrorBody
+    } catch {
+      body = null
+    }
+    throw new ApiError(response.status, errorMessage(body, response.statusText))
+  }
+  return response.blob()
+}
+
 export function getStudent(token: string, studentId: number): Promise<Student> { return request<Student>(`/api/v1/students/${studentId}`, token) }
 export function generateStudentCode(token: string): Promise<{ studentCode: string }> { return request<{ studentCode: string }>('/api/v1/students/code', token, jsonRequest('POST', {})) }
 export function createStudent(token: string, payload: StudentPayload): Promise<Student> { return request<Student>('/api/v1/students', token, jsonRequest('POST', payload)) }
