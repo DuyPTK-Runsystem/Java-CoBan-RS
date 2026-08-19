@@ -16,7 +16,7 @@ import lombok.Setter;
 public class ReqUpdateStudentDTO {
 
     @NotBlank(message = "Tên sinh viên không được để trống")
-    @Size(max = 20, message = "Tên sinh viên tối đa 20 ký tự")
+    @Size(max = 35, message = "Tên sinh viên tối đa 35 ký tự")
     private String studentName;
 
     private LocalDate dateOfBirth;

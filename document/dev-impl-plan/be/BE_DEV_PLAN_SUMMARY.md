@@ -11,6 +11,7 @@
 | 007 | [Student Integration Test](student/007-student-integration-test-2026-08-18.md) | Student API integration tests with MockMvc and H2 | Approved | 2026-08-18 |
 | 008 | [User Integration Test](user-auth/008-user-integration-test-2026-08-18.md) | User/Auth integration tests with MockMvc, H2 and JWT | Approved | 2026-08-18 |
 | 010 | [API Contract and TBD Resolution](010-api-contract-and-tbd-resolution-2026-08-18.md) | Cross-area API baseline, documented decisions, unresolved TBD and contract tests | Approved | 2026-08-18 |
+| 015.1 | [StudentInfo Cardinality, Document và Student Detail API](student/015.1-student-info-cardinality-document-get-api-2026-08-19.md) | Mandatory StudentInfo association, nullable detail fields, Student name length 35, documentation and GET Student detail contract | Approved | 2026-08-19 |
 
 ## Module folders
 

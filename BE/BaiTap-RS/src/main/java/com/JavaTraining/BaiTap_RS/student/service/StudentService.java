@@ -54,6 +54,11 @@ public class StudentService {
                 page.getTotalPages());
     }
 
+    @Transactional(readOnly = true)
+    public ResStudentDTO getStudent(Long studentId) {
+        return toStudentDTO(findStudent(studentId));
+    }
+
     @Transactional
     public ResStudentDTO createStudent(ReqCreateStudentDTO request) {
         if (studentRepository.existsByStudentCode(request.getStudentCode())) {

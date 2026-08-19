@@ -36,6 +36,12 @@ public class StudentController {
         return studentService.fetchStudents(request);
     }
 
+    @GetMapping("/{studentId}")
+    @ApiMessage("Lấy thông tin sinh viên")
+    public ResStudentDTO getStudent(@PathVariable("studentId") Long studentId) {
+        return studentService.getStudent(studentId);
+    }
+
     @PostMapping
     @ApiMessage("Tạo sinh viên")
     public ResponseEntity<ResStudentDTO> createStudent(@Valid @RequestBody ReqCreateStudentDTO request) {

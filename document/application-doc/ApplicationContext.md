@@ -219,6 +219,7 @@ The assignment explicitly requires APIs for:
 
 - Login
 - Get List Student
+- Get Student Detail
 - Register Student
 - Update Student
 - Delete Student
@@ -253,7 +254,7 @@ General rules supplied by the screens include:
 - Password confirmation must match password.
 - Birthday/date values must be valid.
 - Student code maximum length 10.
-- Student name maximum length 20.
+- Student name maximum length 35.
 - Address maximum length 255.
 - UI date display format is `dd-mm-yyy`; API date values use `yyyy-MM-dd`.
 

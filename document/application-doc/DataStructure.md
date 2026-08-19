@@ -67,7 +67,7 @@ Raw password input is still validated by the User module rules: required, minimu
 | No. | Field | Type | Length | PK | NOT NULL | Note |
 |---:|---|---|---:|---|---|---|
 | 1 | `student_id` | BIGINT | - | Yes | Yes | Auto increment; Java `Long` |
-| 2 | `student_name` | VARCHAR | 20 | No | Yes | |
+| 2 | `student_name` | VARCHAR | 35 | No | Yes | |
 | 3 | `student_code` | VARCHAR | 10 | No | Yes | |
 
 DDL:
@@ -75,7 +75,7 @@ DDL:
 ```sql
 CREATE TABLE student (
     student_id BIGINT NOT NULL AUTO_INCREMENT,
-    student_name VARCHAR(20) NOT NULL,
+    student_name VARCHAR(35) NOT NULL,
     student_code VARCHAR(10) NOT NULL,
     PRIMARY KEY (student_id)
 );
@@ -100,7 +100,7 @@ ADD CONSTRAINT uk_student_student_code UNIQUE (student_code);
 | 2 | `student_id` | BIGINT | - | Yes* | Yes | Student reference |
 | 3 | `address` | VARCHAR | 255 | No | No | |
 | 4 | `average_score` | DOUBLE | - | No | No | |
-| 5 | `date_of_birth` | DATETIME | - | No | No | API uses `yyyy-MM-dd`; UI displays `dd-mm-yyy` |
+| 5 | `date_of_birth` | DATE | - | No | No | API uses `yyyy-MM-dd`; UI displays `dd-mm-yyy` |
 
 \*The supplied sheet visually marks `student_id` in the PK column. This is ambiguous because `info_id` is already marked as a primary key.
 
@@ -119,7 +119,7 @@ CREATE TABLE student_info (
     student_id BIGINT NOT NULL,
     address VARCHAR(255),
     average_score DOUBLE,
-    date_of_birth DATETIME,
+    date_of_birth DATE,
     PRIMARY KEY (info_id),
     CONSTRAINT uk_student_info_student UNIQUE (student_id),
     CONSTRAINT fk_student_info_student
@@ -137,43 +137,35 @@ If the trainer explicitly intended a composite primary key `(info_id, student_id
 Intended application relationship:
 
 ```text
-Student 1 -------- 0..1 StudentInfo
+Student 1 -------- 1 StudentInfo
 ```
 
-A student must have a `student` row.
+A StudentInfo must belong to exactly one Student through its NOT NULL, UNIQUE foreign
+key. The application aggregate requires exactly one StudentInfo for each Student via
+the bidirectional JPA association with `optional = false`, `cascade = ALL` and
+`orphanRemoval = true`.
 
-The supplied form contains Student Name/Code plus Birthday/Address/Score as one logical record. In normal application usage, create both records together.
+The supplied form contains Student Name/Code plus Birthday/Address/Score as one
+logical record, so application services create both rows together. `date_of_birth`,
+`address` and `average_score` remain nullable; mandatory StudentInfo does not make
+its descriptive fields mandatory.
 
-Because the DB sheet marks `student_info.student_id` NOT NULL, any `student_info` row must belong to a student.
+The child-to-parent foreign key cannot by itself enforce that every `student` row has
+a child row; that invariant is maintained by the application aggregate lifecycle.
 
 ---
 
 # 6. Delete Strategy
 
-Recommended:
+The current application uses the JPA aggregate lifecycle:
 
-```sql
-FOREIGN KEY (student_id)
-REFERENCES student(student_id)
-ON DELETE CASCADE
+```text
+Student.studentInfo: cascade = ALL, orphanRemoval = true
+StudentService.deleteStudent: delete Student in a transaction
 ```
 
-This allows deleting a Student to remove its StudentInfo automatically.
-
-Alternative:
-
-- Service explicitly deletes `student_info` then `student` in one transaction.
-
-Choose one strategy and use it consistently.
-
-If `ON DELETE CASCADE` is used, DDL becomes:
-
-```sql
-CONSTRAINT fk_student_info_student
-    FOREIGN KEY (student_id)
-    REFERENCES student(student_id)
-    ON DELETE CASCADE
-```
+Deleting Student therefore deletes its associated StudentInfo through JPA cascade.
+The database foreign key does not currently rely on `ON DELETE CASCADE`.
 
 ---
 
@@ -316,10 +308,11 @@ Reads joined data:
 
 ```text
 student
-LEFT/INNER JOIN student_info
+INNER JOIN student_info
 ```
 
-depending on whether a StudentInfo record is guaranteed.
+StudentInfo is mandatory in the application aggregate; its three descriptive columns
+can still be null.
 
 ## Add student
 
@@ -351,7 +344,7 @@ student
 student_info
 ```
 
-through FK cascade or service transaction.
+through JPA cascade in the service transaction.
 
 ---
 

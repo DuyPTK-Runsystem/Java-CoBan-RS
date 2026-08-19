@@ -28,7 +28,7 @@ public class Student {
     @Column(name = "student_id", nullable = false)
     private Long id;
 
-    @Column(name = "student_name", nullable = false, length = 20)
+    @Column(name = "student_name", nullable = false, length = 35)
     private String studentName;
 
     @Column(name = "student_code", nullable = false, length = 10, unique = true)

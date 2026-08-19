@@ -237,4 +237,5 @@ class StudentControllerIntegrationTest {
                 }
                 """.formatted(studentCode, studentName, DATE_OF_BIRTH, ADDRESS, AVERAGE_SCORE);
     }
+
 }

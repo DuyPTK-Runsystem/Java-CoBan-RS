@@ -47,6 +47,9 @@ Persistence is split between `student` and `student_info`.
 
 The UI/API should normally treat this as one student record rather than forcing the frontend to manage two independent database tables.
 
+Each Student aggregate contains exactly one StudentInfo. StudentInfo is mandatory,
+while `dateOfBirth`, `address` and `averageScore` are individually nullable.
+
 ---
 
 # 3. Student List Screen
@@ -68,7 +71,7 @@ Search fields:
 | Field | Max length/source |
 |---|---|
 | Student Code | 10, `student.student_code` |
-| Student Name | 20, `student.student_name` |
+| Student Name | 35, `student.student_name` |
 | Birthday | `student_info.date_of_birth` |
 
 Action:
@@ -282,6 +285,10 @@ update database
 
 Client-provided `studentId` must not be allowed to change an unrelated student accidentally.
 
+The Edit screen loads the current aggregate through `GET /api/v1/students/{studentId}`.
+The response has the same Student fields as a list item, so it is safe to use after a
+browser refresh or direct navigation.
+
 ---
 
 # 7. Delete Student
@@ -412,13 +419,13 @@ Do not add unnecessary query libraries for this small assignment.
 ## Get students
 
 ```http
-GET /api/students
+GET /api/v1/students
 ```
 
 Example:
 
 ```text
-/api/students?page=0&size=10&studentCode=STU001&studentName=Nguyen&birthday=2012-04-22&sort=studentName,asc
+/api/v1/students?page=0&size=10&studentCode=STU001&studentName=Nguyen&birthday=2012-04-22&sortField=studentName&sortDirection=asc
 ```
 
 Response:
@@ -442,14 +449,37 @@ Response:
 }
 ```
 
-The exact envelope may use Spring's `Page` serialization or a custom page DTO. Prefer a custom stable DTO if API stability matters.
+The actual success envelope is `{ statusCode, message, data }`; the JSON above is
+the page value inside `data`.
+
+## Get student detail
+
+```http
+GET /api/v1/students/{studentId}
+```
+
+Success is `200 OK` with `{ statusCode, message, data }`. `data` is:
+
+```json
+{
+  "studentId": 1,
+  "studentCode": "STU1234567",
+  "studentName": "Nguyen Van A",
+  "dateOfBirth": "2012-04-22",
+  "address": "Ho Chi Minh City",
+  "averageScore": 8.5
+}
+```
+
+`dateOfBirth`, `address` and `averageScore` may be `null`. A missing id returns the
+standard `404` error envelope.
 
 ---
 
 ## Create student
 
 ```http
-POST /api/students
+POST /api/v1/students
 ```
 
 Example request:
@@ -469,7 +499,7 @@ Example request:
 ## Update student
 
 ```http
-PUT /api/students/{studentId}
+PUT /api/v1/students/{studentId}
 ```
 
 Student Id and Student Code should not be editable from the specified Edit screen.
@@ -479,7 +509,7 @@ Student Id and Student Code should not be editable from the specified Edit scree
 ## Delete student
 
 ```http
-DELETE /api/students/{studentId}
+DELETE /api/v1/students/{studentId}
 ```
 
 ---
@@ -489,11 +519,10 @@ DELETE /api/students/{studentId}
 Two valid designs exist:
 
 1. Generate client-side, then backend validates uniqueness.
-2. Generate server-side, e.g. `POST /api/students/code`.
+2. Generate server-side, e.g. `POST /api/v1/students/code`.
 
-Server-side generation is safer if uniqueness is a requirement.
-
-The assignment specifies the format but not an API for generation, so this endpoint is optional.
+The current backend uses server-side generation and returns an envelope whose `data`
+is `{ "studentCode": "STU1234567" }`.
 
 ---
 
@@ -553,7 +582,7 @@ The exact component name for dates depends on installed PrimeVue version.
 At minimum, align with database/screen limits:
 
 - Student Code max 10.
-- Student Name max 20.
+- Student Name max 35.
 - Address max 255.
 - Birthday must be valid.
 - Required fields follow database `NOT NULL`.
@@ -578,3 +607,5 @@ The valid numeric range for `average_score` is not specified. Do not invent a 0â
 11. Save in edit mode updates the existing database record.
 12. Back returns to Student List.
 13. Create/update/delete involving both tables must be transactional.
+14. Each Student aggregate contains one StudentInfo; birthday, address and average
+    score may be null.

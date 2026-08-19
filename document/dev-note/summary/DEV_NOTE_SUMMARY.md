@@ -31,3 +31,4 @@ NNN-short-topic-yyyy-mm-dd.md
 | 012 | FE | [User/Auth API và Route Guard](../fe/012-user-auth-api-route-guard-2026-08-18.md) | Completed | 2026-08-18 |
 | 013 | FE | [Storybook PrimeVue Preview Runtime](../fe/013-storybook-primevue-preview-2026-08-19.md) | Completed | 2026-08-19 |
 | 014 | FE | [Auth Password Input Width](../fe/014-auth-password-input-width-2026-08-19.md) | Completed | 2026-08-19 |
+| 015.1 | BE | [StudentInfo Cardinality, Document và Student Detail API](../be/student/015.1-student-info-cardinality-document-get-api-2026-08-19.md) | Completed; MySQL schema alter not run | 2026-08-19 |
