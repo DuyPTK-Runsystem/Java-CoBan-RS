@@ -13,6 +13,7 @@
 | 008 | user-auth | [User Integration Test](user-auth/008-user-integration-test-2026-08-18.md) | Completed | 2026-08-18 |
 | 010 | cross-area | [API Contract and TBD Resolution](010-api-contract-and-tbd-resolution-2026-08-18.md) | Completed | 2026-08-18 |
 | 015.1 | student | [StudentInfo Cardinality, Document và Student Detail API](student/015.1-student-info-cardinality-document-get-api-2026-08-19.md) | Completed; MySQL schema alter not run | 2026-08-19 |
+| 017 | student | [Student Backend Input Validation](student/017-student-input-validation-2026-08-19.md) | Completed | 2026-08-19 |
 
 ## Module folders
 

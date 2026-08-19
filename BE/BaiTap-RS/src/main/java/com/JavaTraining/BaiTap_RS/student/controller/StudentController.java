@@ -9,8 +9,10 @@ import com.JavaTraining.BaiTap_RS.student.domain.DTOs.response.ResStudentDTO;
 import com.JavaTraining.BaiTap_RS.student.domain.DTOs.response.ResStudentPageDTO;
 import com.JavaTraining.BaiTap_RS.student.service.StudentService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Validated
 @RequestMapping("/api/v1/students")
 public class StudentController {
 
@@ -32,13 +35,14 @@ public class StudentController {
 
     @GetMapping
     @ApiMessage("Lấy danh sách sinh viên")
-    public ResStudentPageDTO fetchStudents(ReqFetchStudentDTO request) {
+    public ResStudentPageDTO fetchStudents(@Valid ReqFetchStudentDTO request) {
         return studentService.fetchStudents(request);
     }
 
     @GetMapping("/{studentId}")
     @ApiMessage("Lấy thông tin sinh viên")
-    public ResStudentDTO getStudent(@PathVariable("studentId") Long studentId) {
+    public ResStudentDTO getStudent(
+            @PathVariable("studentId") @Positive(message = "ID sinh viên phải lớn hơn 0") Long studentId) {
         return studentService.getStudent(studentId);
     }
 
@@ -52,14 +56,15 @@ public class StudentController {
     @PutMapping("/{studentId}")
     @ApiMessage("Cập nhật sinh viên")
     public ResStudentDTO updateStudent(
-            @PathVariable("studentId") Long studentId,
+            @PathVariable("studentId") @Positive(message = "ID sinh viên phải lớn hơn 0") Long studentId,
             @Valid @RequestBody ReqUpdateStudentDTO request) {
         return studentService.updateStudent(studentId, request);
     }
 
     @DeleteMapping("/{studentId}")
     @ApiMessage("Xóa sinh viên")
-    public ResponseEntity<Void> deleteStudent(@PathVariable("studentId") Long studentId) {
+    public ResponseEntity<Void> deleteStudent(
+            @PathVariable("studentId") @Positive(message = "ID sinh viên phải lớn hơn 0") Long studentId) {
         studentService.deleteStudent(studentId);
         return ResponseEntity.noContent().build();
     }

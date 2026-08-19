@@ -413,7 +413,6 @@ Authentication uses a stateless JWT access token. The frontend stores the token 
 
 The following must be confirmed before treating them as source-of-truth rules:
 
-- Exact valid range for `average_score`.
 - Batch CSV file path/name and whether exports are separate or joined.
 - Whether a production migration/schema script is required instead of the current JPA-managed schema.
 

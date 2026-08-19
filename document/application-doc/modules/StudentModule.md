@@ -586,9 +586,8 @@ At minimum, align with database/screen limits:
 - Address max 255.
 - Birthday must be valid.
 - Required fields follow database `NOT NULL`.
-- Average Score is numeric.
-
-The valid numeric range for `average_score` is not specified. Do not invent a 0–10 rule unless confirmed, even though that would be a common school-score range.
+- Average Score is optional and, when provided, must be numeric from `0` to `10`
+  inclusive.
 
 ---
 
