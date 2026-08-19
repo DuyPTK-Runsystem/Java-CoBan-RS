@@ -7,3 +7,4 @@
 | 011 | FE Test/Coverage Foundation | [FE Test/Coverage Foundation](011-fe-test-coverage-foundation-2026-08-18.md) | Completed | 2026-08-18 |
 | 012 | User/Auth API và Route Guard | [User/Auth API và Route Guard](012-user-auth-api-route-guard-2026-08-18.md) | Completed | 2026-08-18 |
 | 013 | Storybook PrimeVue Preview Runtime | [Storybook PrimeVue Preview Runtime](013-storybook-primevue-preview-2026-08-19.md) | Completed | 2026-08-19 |
+| 014 | Auth Password Input Width | [Auth Password Input Width](014-auth-password-input-width-2026-08-19.md) | Completed | 2026-08-19 |
