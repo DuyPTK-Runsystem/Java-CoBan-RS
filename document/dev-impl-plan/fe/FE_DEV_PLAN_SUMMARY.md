@@ -8,6 +8,7 @@
 | 013 | [Storybook PrimeVue Preview Runtime](013-storybook-primevue-preview-2026-08-19.md) | Register the existing PrimeVue/Aura configuration in Storybook preview to fix Auth story runtime rendering | Approved | 2026-08-19 |
 | 014 | [Auth Password Input Width](014-auth-password-input-width-2026-08-19.md) | Align Login/Register password input widths with User name | Approved | 2026-08-19 |
 | 015 | [Student API, CRUD, Search, Sort, Page và Delete](015-student-api-crud-search-sort-page-delete-2026-08-19.md) | Connect Student screens to API for CRUD, server-side search/sort/pagination and delete confirmation | Approved; awaiting user review | 2026-08-19 |
+| 016 | [Student UI Date Format, Input Examples và Storybook](016-student-ui-date-format-input-examples-storybook-2026-08-19.md) | Student date format `dd-mm-yyyy`, required input examples and deterministic component Storybook stories | Approved; amendment 16.1 implemented | 2026-08-19 |
 
 ## Current FE notes
 

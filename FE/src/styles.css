@@ -33,6 +33,7 @@ a { color: inherit; text-decoration: none; }
 .field-group > .p-inputtext, .field-group > .p-password, .field-group > .p-inputnumber { width: 100%; }
 .field-group > .p-password .p-password-input { width: 100%; }
 .field-error { color: var(--error); font-size: 13px; }
+.field-hint { color: var(--secondary); font-size: 13px; }
 .form-alert { padding: 12px 14px; border-radius: 8px; font-size: 14px; }
 .form-alert-error { color: #93000a; background: #ffdad6; }
 .form-alert-info { color: #1e3a8a; background: #dbeafe; }

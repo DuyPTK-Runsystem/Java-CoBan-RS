@@ -5,6 +5,7 @@ import DataTable, { type DataTableSortEvent } from 'primevue/datatable'
 import Paginator, { type PageState } from 'primevue/paginator'
 
 import type { Student } from '@/types/student'
+import { formatStudentDate } from '@/utils/studentDate'
 
 const props = withDefaults(defineProps<{
   students?: Student[]
@@ -70,7 +71,11 @@ function handlePage(event: PageState): void {
       </Column>
       <Column field="studentCode" header="Code" sortable />
       <Column field="studentName" header="Name" sortable />
-      <Column field="dateOfBirth" header="Birthday" sortable />
+      <Column field="dateOfBirth" header="Birthday" sortable>
+        <template #body="slotProps">
+          {{ formatStudentDate(slotProps.data.dateOfBirth) }}
+        </template>
+      </Column>
       <Column field="address" header="Address" sortable />
       <Column field="averageScore" header="Score" sortable />
       <Column header="Actions" style="width: 9rem">

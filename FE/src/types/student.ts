@@ -29,3 +29,19 @@ export interface StudentQuery {
   sortOrder: 1 | -1
   search: StudentSearchValues
 }
+
+export interface StudentPage {
+  content: Student[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
+export interface StudentPayload {
+  studentCode?: string
+  studentName: string
+  dateOfBirth: string | null
+  address: string
+  averageScore: number | null
+}

@@ -24,15 +24,15 @@ function submit(): void {
   <form class="search-grid" @submit.prevent="submit">
     <div class="field-group">
       <label for="search-student-code">Student code</label>
-      <InputText id="search-student-code" v-model="values.studentCode" maxlength="10" />
+      <InputText id="search-student-code" v-model="values.studentCode" maxlength="10" placeholder="Example: STU1234567" />
     </div>
     <div class="field-group">
       <label for="search-student-name">Student name</label>
-      <InputText id="search-student-name" v-model="values.studentName" maxlength="20" />
+      <InputText id="search-student-name" v-model="values.studentName" maxlength="35" placeholder="Example: John Doe" />
     </div>
     <div class="field-group">
       <label for="search-date-of-birth">Birthday</label>
-      <DatePicker id="search-date-of-birth" v-model="values.dateOfBirth" date-format="yy-mm-dd" show-icon fluid />
+      <DatePicker id="search-date-of-birth" v-model="values.dateOfBirth" date-format="dd-mm-yy" placeholder="dd-mm-yyyy" show-icon fluid />
     </div>
     <Button class="search-action" type="submit" label="Search" icon="pi pi-search" :loading="loading" />
   </form>

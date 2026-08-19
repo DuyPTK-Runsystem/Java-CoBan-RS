@@ -1,130 +1,27 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useConfirm } from 'primevue/useconfirm'
 import ConfirmDialog from 'primevue/confirmdialog'
 import Button from 'primevue/button'
 import { useRouter } from 'vue-router'
-
 import AuthenticatedLayout from '@/components/AuthenticatedLayout.vue'
 import StudentSearchForm from '@/components/StudentSearchForm.vue'
 import StudentTable from '@/components/StudentTable.vue'
 import { clearAuthSession, getAuthSession } from '@/services/authSession'
-import { logout as logoutApi } from '@/services/userApi'
-import type { Student, StudentSearchValues } from '@/types/student'
+import { deleteStudent, fetchStudents } from '@/services/studentApi'
+import { isApiError, logout as logoutApi } from '@/services/userApi'
+import type { Student, StudentQuery, StudentSearchValues } from '@/types/student'
 
-const router = useRouter()
-const confirm = useConfirm()
-const loading = ref(false)
-const page = ref(0)
-const sortField = ref<keyof Student>('studentCode')
-const sortOrder = ref<1 | -1>(1)
-const query = ref<StudentSearchValues>({ studentCode: '', studentName: '', dateOfBirth: null })
-const statusMessage = ref('')
-
-const students = ref<Student[]>([
-  {
-    studentId: 1,
-    studentCode: 'STU100001',
-    studentName: 'Nguyen An',
-    dateOfBirth: '2002-04-18',
-    address: 'District 1',
-    averageScore: 8.4,
-  },
-  {
-    studentId: 2,
-    studentCode: 'STU100002',
-    studentName: 'Tran Minh',
-    dateOfBirth: '2001-11-09',
-    address: 'District 3',
-    averageScore: 7.8,
-  },
-])
-
-const filteredStudents = computed(() => {
-  const searchCode = query.value.studentCode.trim().toLowerCase()
-  const searchName = query.value.studentName.trim().toLowerCase()
-  return students.value.filter((student) =>
-    (!searchCode || student.studentCode.toLowerCase().includes(searchCode))
-    && (!searchName || student.studentName.toLowerCase().includes(searchName)),
-  )
-})
-
-function search(values: StudentSearchValues): void {
-  query.value = values
-  page.value = 0
-  statusMessage.value = 'Search state updated locally. Server-side filtering will be connected later.'
-}
-
-function confirmDelete(student: Student): void {
-  confirm.require({
-    message: `Delete ${student.studentName}?`,
-    header: 'Confirm deletion',
-    icon: 'pi pi-exclamation-triangle',
-    rejectLabel: 'Cancel',
-    acceptLabel: 'Delete',
-    acceptClass: 'p-button-danger',
-    accept: () => {
-      students.value = students.value.filter((item) => item.studentId !== student.studentId)
-      statusMessage.value = 'The demo row was removed. The delete API will be connected later.'
-    },
-  })
-}
-
-function logout(): void {
-  const session = getAuthSession()
-  if (!session) {
-    clearAuthSession()
-    void router.replace('/login')
-    return
-  }
-
-  void logoutApi(session.accessToken)
-    .catch(() => undefined)
-    .finally(() => {
-      clearAuthSession()
-      return router.replace('/login')
-    })
-}
+const router = useRouter(); const confirm = useConfirm(); const loading = ref(false); const students = ref<Student[]>([]); const totalRecords = ref(0); const errorMessage = ref(''); const statusMessage = ref('')
+const query = ref<StudentQuery>({ page: 0, pageSize: 10, sortField: 'studentCode', sortOrder: 1, search: { studentCode: '', studentName: '', dateOfBirth: null } })
+function token(): string | null { const session = getAuthSession(); if (session) return session.accessToken; clearAuthSession(); void router.replace('/login'); return null }
+async function load(): Promise<void> { const accessToken = token(); if (!accessToken) return; loading.value = true; errorMessage.value = ''; try { const response = await fetchStudents(accessToken, query.value); students.value = response.content; totalRecords.value = response.totalElements; query.value.page = response.page } catch (error) { if (isApiError(error, 401)) { clearAuthSession(); await router.replace('/login') } else errorMessage.value = error instanceof Error ? error.message : 'Unable to load students.' } finally { loading.value = false } }
+function search(values: StudentSearchValues): void { query.value = { ...query.value, page: 0, search: values }; void load() }
+function page(value: number): void { query.value.page = value; void load() }
+function sort(field: keyof Student, order: 1 | -1): void { query.value = { ...query.value, page: 0, sortField: field, sortOrder: order }; void load() }
+function confirmDelete(student: Student): void { confirm.require({ message: `Delete ${student.studentName}?`, header: 'Confirm deletion', icon: 'pi pi-exclamation-triangle', accept: () => { void remove(student) } }) }
+async function remove(student: Student): Promise<void> { const accessToken = token(); if (!accessToken) return; try { await deleteStudent(accessToken, student.studentId); if (students.value.length === 1 && query.value.page > 0) query.value.page -= 1; await load(); statusMessage.value = 'Student deleted.' } catch (error) { errorMessage.value = error instanceof Error ? error.message : 'Unable to delete student.' } }
+function logout(): void { const session = getAuthSession(); if (!session) { clearAuthSession(); void router.replace('/login'); return }; void logoutApi(session.accessToken).catch(() => undefined).finally(() => { clearAuthSession(); return router.replace('/login') }) }
+onMounted(() => { void load() })
 </script>
-
-<template>
-  <AuthenticatedLayout :user-name="getAuthSession()?.user.username ?? ''" @logout="logout">
-    <ConfirmDialog />
-    <div class="page-heading">
-      <div>
-        <p class="eyebrow">Student workspace</p>
-        <h1>Students</h1>
-        <p>Search, review and maintain student records.</p>
-      </div>
-      <Button label="Add student" icon="pi pi-plus" @click="router.push('/students/new')" />
-    </div>
-    <div v-if="statusMessage" class="form-alert form-alert-info" role="status">{{ statusMessage }}</div>
-    <section class="content-surface" aria-labelledby="student-search-title">
-      <div class="section-heading">
-        <h2 id="student-search-title">Find a student</h2>
-        <span class="section-caption">Page size: 10</span>
-      </div>
-      <StudentSearchForm :loading="loading" @search="search" />
-    </section>
-    <section class="content-surface" aria-labelledby="student-table-title">
-      <div class="section-heading">
-        <div>
-          <h2 id="student-table-title">Student records</h2>
-          <span class="section-caption">{{ filteredStudents.length }} demo records</span>
-        </div>
-      </div>
-      <StudentTable
-        :students="filteredStudents"
-        :loading="loading"
-        :total-records="filteredStudents.length"
-        :page="page"
-        :sort-field="sortField"
-        :sort-order="sortOrder"
-        @page-change="page = $event"
-        @sort-change="(field, order) => { sortField = field; sortOrder = order }"
-        @edit="router.push(`/students/${$event.studentId}/edit`)"
-        @delete="confirmDelete"
-      />
-    </section>
-  </AuthenticatedLayout>
-</template>
+<template><AuthenticatedLayout :user-name="getAuthSession()?.user.username ?? ''" @logout="logout"><ConfirmDialog /><div class="page-heading"><div><p class="eyebrow">Student workspace</p><h1>Students</h1><p>Search, review and maintain student records.</p></div><Button label="Add student" icon="pi pi-plus" @click="router.push('/students/new')" /></div><div v-if="statusMessage" class="form-alert form-alert-info" role="status">{{ statusMessage }}</div><div v-if="errorMessage" class="form-alert form-alert-error" role="alert">{{ errorMessage }}</div><section class="content-surface"><StudentSearchForm :loading="loading" @search="search" /></section><section class="content-surface"><StudentTable :students="students" :loading="loading" :total-records="totalRecords" :page="query.page" :sort-field="query.sortField" :sort-order="query.sortOrder" @page-change="page" @sort-change="sort" @edit="router.push(`/students/${$event.studentId}/edit`)" @delete="confirmDelete" /></section></AuthenticatedLayout></template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import Button from 'primevue/button'
 import DatePicker from 'primevue/datepicker'
 import InputNumber from 'primevue/inputnumber'
@@ -11,16 +11,19 @@ const props = withDefaults(defineProps<{
   mode?: 'add' | 'edit'
   initialValue?: Partial<StudentFormValues>
   saving?: boolean
+  generating?: boolean
   errorMessage?: string
 }>(), {
   mode: 'add',
   initialValue: () => ({}),
   saving: false,
+  generating: false,
   errorMessage: '',
 })
 
 const emit = defineEmits<{
   save: [values: StudentFormValues]
+  generateCode: []
   back: []
 }>()
 
@@ -34,19 +37,65 @@ const values = reactive<StudentFormValues>({
 })
 const errors = reactive<Record<string, string | undefined>>({})
 const isEdit = computed(() => props.mode === 'edit')
+const studentCodePattern = /^STU\d{7}$/
+const studentCodeTypingPattern = /^(?:\d{0,7}|STU\d{0,7})$/
 
-function generateCode(): void {
-  values.studentCode = `STU${Math.floor(100000 + Math.random() * 900000)}`
+watch(() => props.initialValue, (initialValue) => {
+  Object.assign(values, {
+    studentId: initialValue.studentId,
+    studentCode: initialValue.studentCode ?? '',
+    studentName: initialValue.studentName ?? '',
+    dateOfBirth: initialValue.dateOfBirth ?? null,
+    address: initialValue.address ?? '',
+    averageScore: initialValue.averageScore ?? null,
+  })
+  validateStudentCode(false)
+}, { deep: true, immediate: true })
+
+function validateStudentCode(showRequiredError: boolean): boolean {
+  const studentCode = values.studentCode.trim()
+  values.studentCode = studentCode
+
+  if (!studentCode) {
+    errors.studentCode = showRequiredError ? 'Enter a student code or generate one before saving.' : undefined
+    return false
+  }
+
+  errors.studentCode = studentCodePattern.test(studentCode)
+    ? undefined
+    : 'Use the format STU followed by exactly 7 digits.'
+  return !errors.studentCode
+}
+
+function updateStudentCode(value: string): void {
+  values.studentCode = value
+  if (studentCodeTypingPattern.test(value.trim())) {
+    errors.studentCode = undefined
+    return
+  }
+  validateStudentCode(false)
+}
+
+function normalizeStudentCode(): void {
+  const value = values.studentCode.trim()
+  if (/^\d{1,7}$/.test(value)) {
+    values.studentCode = `STU${value.padStart(7, '0')}`
+  }
+  validateStudentCode(true)
 }
 
 function validate(): boolean {
-  errors.studentCode = values.studentCode ? undefined : 'Generate a student code before saving.'
+  const isStudentCodeValid = validateStudentCode(true)
   errors.studentName = values.studentName.trim() ? undefined : 'Student name is required.'
-  if (!errors.studentName && values.studentName.length > 20) {
-    errors.studentName = 'Student name must be 20 characters or fewer.'
+  if (!errors.studentName && values.studentName.length > 35) {
+    errors.studentName = 'Student name must be 35 characters or fewer.'
   }
   errors.address = values.address.length <= 255 ? undefined : 'Address must be 255 characters or fewer.'
-  return !errors.studentCode && !errors.studentName && !errors.address
+  errors.averageScore = values.averageScore === null
+    || (values.averageScore >= 0 && values.averageScore <= 10)
+    ? undefined
+    : 'Average score must be between 0 and 10.'
+  return isStudentCodeValid && !errors.studentName && !errors.address && !errors.averageScore
 }
 
 function save(): void {
@@ -68,28 +117,38 @@ function save(): void {
     <div class="field-group">
       <label for="student-code">Student code</label>
       <div class="inline-field">
-        <InputText id="student-code" v-model="values.studentCode" maxlength="10" readonly :invalid="Boolean(errors.studentCode)" />
-        <Button type="button" label="Generate code" icon="pi pi-refresh" :disabled="isEdit" @click="generateCode" />
+        <InputText
+          id="student-code"
+          :model-value="values.studentCode"
+          placeholder="Example: STU1234567"
+          :disabled="isEdit"
+          :invalid="Boolean(errors.studentCode)"
+          @update:model-value="updateStudentCode"
+          @blur="normalizeStudentCode"
+        />
+        <Button type="button" label="Generate code" icon="pi pi-refresh" :disabled="isEdit" :loading="props.generating" @click="emit('generateCode')" />
       </div>
+      <small class="field-hint">Format: STUxxxxxxx</small>
       <small v-if="errors.studentCode" class="field-error">{{ errors.studentCode }}</small>
     </div>
     <div class="field-group">
       <label for="student-name">Student name</label>
-      <InputText id="student-name" v-model="values.studentName" maxlength="20" :invalid="Boolean(errors.studentName)" />
+      <InputText id="student-name" v-model="values.studentName" maxlength="35" placeholder="Example: John Doe" :invalid="Boolean(errors.studentName)" />
       <small v-if="errors.studentName" class="field-error">{{ errors.studentName }}</small>
     </div>
     <div class="field-group">
       <label for="student-birthday">Birthday</label>
-      <DatePicker id="student-birthday" v-model="values.dateOfBirth" date-format="yy-mm-dd" show-icon fluid />
+      <DatePicker id="student-birthday" v-model="values.dateOfBirth" date-format="dd-mm-yy" placeholder="dd-mm-yyyy" show-icon fluid />
     </div>
     <div class="field-group">
       <label for="student-address">Address</label>
-      <InputText id="student-address" v-model="values.address" maxlength="255" :invalid="Boolean(errors.address)" />
+      <InputText id="student-address" v-model="values.address" maxlength="255" placeholder="Example: HCMC, Vietnam" :invalid="Boolean(errors.address)" />
       <small v-if="errors.address" class="field-error">{{ errors.address }}</small>
     </div>
     <div class="field-group">
       <label for="student-score">Average score</label>
-      <InputNumber id="student-score" v-model="values.averageScore" :min-fraction-digits="0" :max-fraction-digits="2" fluid />
+      <InputNumber id="student-score" v-model="values.averageScore" placeholder="Example: 6.7" :min="0" :max="10" :min-fraction-digits="0" :max-fraction-digits="2" :invalid="Boolean(errors.averageScore)" fluid />
+      <small v-if="errors.averageScore" class="field-error">{{ errors.averageScore }}</small>
     </div>
     <div class="form-actions">
       <Button type="button" label="Back" icon="pi pi-arrow-left" severity="secondary" outlined @click="emit('back')" />

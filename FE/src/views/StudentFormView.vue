@@ -1,64 +1,20 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-
 import AuthenticatedLayout from '@/components/AuthenticatedLayout.vue'
 import StudentForm from '@/components/StudentForm.vue'
 import { clearAuthSession, getAuthSession } from '@/services/authSession'
+import { createStudent, generateStudentCode, getStudent, updateStudent } from '@/services/studentApi'
 import { logout as logoutApi } from '@/services/userApi'
-import type { StudentFormValues } from '@/types/student'
-
-const route = useRoute()
-const router = useRouter()
-const saving = ref(false)
-const statusMessage = ref('')
-const isEdit = computed(() => Boolean(route.params.studentId))
-
-const initialValue: StudentFormValues = {
-  studentId: isEdit.value ? Number(route.params.studentId) : undefined,
-  studentCode: isEdit.value ? 'STU100001' : '',
-  studentName: isEdit.value ? 'Nguyen An' : '',
-  dateOfBirth: isEdit.value ? new Date('2002-04-18') : null,
-  address: isEdit.value ? 'District 1' : '',
-  averageScore: isEdit.value ? 8.4 : null,
-}
-
-function save(_values: StudentFormValues): void {
-  statusMessage.value = 'Save API integration is ready for a later implementation plan.'
-}
-
-function logout(): void {
-  const session = getAuthSession()
-  if (!session) {
-    clearAuthSession()
-    void router.replace('/login')
-    return
-  }
-
-  void logoutApi(session.accessToken)
-    .catch(() => undefined)
-    .finally(() => {
-      clearAuthSession()
-      return router.replace('/login')
-    })
-}
+import type { Student, StudentFormValues } from '@/types/student'
+const route = useRoute(); const router = useRouter(); const saving = ref(false); const generating = ref(false); const errorMessage = ref('')
+const isEdit = computed(() => Boolean(route.params.studentId)); const initialValue = ref<StudentFormValues>({ studentCode: '', studentName: '', dateOfBirth: null, address: '', averageScore: null })
+function token(): string | null { const session = getAuthSession(); if (session) return session.accessToken; clearAuthSession(); void router.replace('/login'); return null }
+function date(value: Date | null): string | null { return value ? `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}` : null }
+async function load(): Promise<void> { const accessToken = token(); const id = Number(route.params.studentId); if (!accessToken || !id) return; try { const student: Student = await getStudent(accessToken, id); initialValue.value = { ...student, dateOfBirth: student.dateOfBirth ? new Date(`${student.dateOfBirth}T00:00:00`) : null } } catch (error) { errorMessage.value = error instanceof Error ? error.message : 'Unable to load student.' } }
+async function generate(): Promise<void> { const accessToken = token(); if (!accessToken) return; generating.value = true; try { initialValue.value = { ...initialValue.value, studentCode: (await generateStudentCode(accessToken)).studentCode } } catch (error) { errorMessage.value = error instanceof Error ? error.message : 'Unable to generate code.' } finally { generating.value = false } }
+async function save(values: StudentFormValues): Promise<void> { const accessToken = token(); if (!accessToken) return; saving.value = true; try { const body = { studentCode: values.studentCode, studentName: values.studentName.trim(), dateOfBirth: date(values.dateOfBirth), address: values.address, averageScore: values.averageScore }; if (isEdit.value) await updateStudent(accessToken, Number(route.params.studentId), body); else await createStudent(accessToken, body); await router.push('/students') } catch (error) { errorMessage.value = error instanceof Error ? error.message : 'Unable to save student.' } finally { saving.value = false } }
+function logout(): void { const session = getAuthSession(); if (!session) { clearAuthSession(); void router.replace('/login'); return }; void logoutApi(session.accessToken).catch(() => undefined).finally(() => { clearAuthSession(); return router.replace('/login') }) }
+onMounted(() => { if (isEdit.value) void load() })
 </script>
-
-<template>
-  <AuthenticatedLayout :user-name="getAuthSession()?.user.username ?? ''" @logout="logout">
-    <div class="page-heading">
-      <div>
-        <p class="eyebrow">Student workspace</p>
-        <h1>{{ isEdit ? 'Update student' : 'Add student' }}</h1>
-        <p>{{ isEdit ? 'Review the record and update its editable details.' : 'Create a student record for the workspace.' }}</p>
-      </div>
-    </div>
-    <section class="content-surface form-surface" aria-labelledby="student-form-title">
-      <div class="section-heading">
-        <h2 id="student-form-title">{{ isEdit ? 'Student details' : 'New student details' }}</h2>
-      </div>
-      <div v-if="statusMessage" class="form-alert form-alert-info" role="status">{{ statusMessage }}</div>
-      <StudentForm :mode="isEdit ? 'edit' : 'add'" :initial-value="initialValue" :saving="saving" @save="save" @back="router.push('/students')" />
-    </section>
-  </AuthenticatedLayout>
-</template>
+<template><AuthenticatedLayout :user-name="getAuthSession()?.user.username ?? ''" @logout="logout"><div class="page-heading"><h1>{{ isEdit ? 'Update student' : 'Add student' }}</h1></div><section class="content-surface form-surface"><StudentForm :mode="isEdit ? 'edit' : 'add'" :initial-value="initialValue" :saving="saving" :generating="generating" :error-message="errorMessage" @save="save" @generate-code="generate" @back="router.push('/students')" /></section></AuthenticatedLayout></template>
