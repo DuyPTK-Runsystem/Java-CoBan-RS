@@ -11,7 +11,7 @@
 
 - `FE/AGENTS.override.md`: duy trì các stories bắt buộc cho `LoginForm` và
   `RegisterForm`, không phụ thuộc live backend.
-- `document/dev-impl-plan/fe/009-fe-project-skeleton-2026-08-18.md`: PrimeVue và
+- `document/dev-impl-plan/fe/foundation/009-fe-project-skeleton-2026-08-18.md`: PrimeVue và
   Storybook là một phần của FE skeleton đã được phê duyệt.
 - `FE/src/main.ts`: nguồn cấu hình PrimeVue runtime hiện tại, gồm Aura theme và
   options `prefix: 'p'`, `darkModeSelector: 'none'`.
@@ -68,7 +68,7 @@ nhỏ nhất để Storybook có cùng plugin context mà các component yêu c�
 | Path | Thao tác | Mục đích |
 |---|---|---|
 | `FE/.storybook/preview.ts` | Sửa | Cài PrimeVue/Aura vào Storybook preview và import PrimeIcons. |
-| `document/dev-note/fe/013-storybook-primevue-preview-2026-08-19.md` | Tạo sau implementation | Ghi nhận thay đổi thực tế, validation và cảnh báo còn lại. |
+| `document/dev-note/fe/tooling/013-storybook-primevue-preview-2026-08-19.md` | Tạo sau implementation | Ghi nhận thay đổi thực tế, validation và cảnh báo còn lại. |
 | `document/dev-note/fe/FE_DEV_NOTE_SUMMARY.md` | Sửa sau implementation | Thêm Dev Note 013. |
 | `document/dev-note/summary/DEV_NOTE_SUMMARY.md` | Sửa sau implementation | Thêm Dev Note 013 vào summary toàn project. |
 

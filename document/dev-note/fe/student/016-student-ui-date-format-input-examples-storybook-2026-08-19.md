@@ -2,7 +2,7 @@
 
 ## 1. Related Developer Plan and approval
 
-- Plan: `document/dev-impl-plan/fe/016-student-ui-date-format-input-examples-storybook-2026-08-19.md`.
+- Plan: `document/dev-impl-plan/fe/student/016-student-ui-date-format-input-examples-storybook-2026-08-19.md`.
 - Approved by user on 2026-08-19.
 
 ## 2. Actual scope completed

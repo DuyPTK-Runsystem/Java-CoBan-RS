@@ -153,7 +153,7 @@ Student UI components                 -> no Storybook stories
 | `FE/src/utils/studentDate.spec.ts` | Tạo | Test Birthday formatter và fallback không throw. |
 | `document/dev-impl-plan/fe/FE_DEV_PLAN_SUMMARY.md` | Sửa | Đăng ký Plan 016, trạng thái theo approval. |
 | `document/dev-impl-plan/summary/DEV_PLAN_SUMMARY.md` | Sửa | Đăng ký Plan 016, trạng thái theo approval. |
-| `document/dev-note/fe/016-student-ui-date-format-input-examples-storybook-2026-08-19.md` | Tạo sau implementation | Ghi nhận thay đổi thực tế và validation. |
+| `document/dev-note/fe/student/016-student-ui-date-format-input-examples-storybook-2026-08-19.md` | Tạo sau implementation | Ghi nhận thay đổi thực tế và validation. |
 
 ## 7. API / Database / Integration
 

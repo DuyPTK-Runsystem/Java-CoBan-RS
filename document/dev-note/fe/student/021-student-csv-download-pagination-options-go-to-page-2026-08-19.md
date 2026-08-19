@@ -2,7 +2,7 @@
 
 ## Related plan and approval
 
-- Plan: `document/dev-impl-plan/fe/021-student-csv-download-pagination-options-go-to-page-2026-08-19.md`.
+- Plan: `document/dev-impl-plan/fe/student/021-student-csv-download-pagination-options-go-to-page-2026-08-19.md`.
 - Approved by user on 2026-08-19.
 
 ## Actual scope completed

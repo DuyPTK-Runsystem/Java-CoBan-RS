@@ -2,7 +2,7 @@
 
 ## 1. Related Developer Plan and approval
 
-- Plan: `document/dev-impl-plan/fe/012-user-auth-api-route-guard-2026-08-18.md`.
+- Plan: `document/dev-impl-plan/fe/user-auth/012-user-auth-api-route-guard-2026-08-18.md`.
 - User approved implementation on 2026-08-18.
 
 ## 2. Actual scope completed
@@ -55,7 +55,7 @@
 - `FE/src/services/authSession.spec.ts`.
 - `FE/src/services/userApi.spec.ts`.
 - `FE/src/router/index.spec.ts`.
-- `document/dev-impl-plan/fe/012-user-auth-api-route-guard-2026-08-18.md`.
+- `document/dev-impl-plan/fe/user-auth/012-user-auth-api-route-guard-2026-08-18.md`.
 - `document/dev-impl-plan/fe/FE_DEV_PLAN_SUMMARY.md`.
 - `document/dev-impl-plan/summary/DEV_PLAN_SUMMARY.md`.
 - `document/dev-note/fe/FE_DEV_NOTE_SUMMARY.md`.

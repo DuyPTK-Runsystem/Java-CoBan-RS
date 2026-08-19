@@ -147,7 +147,7 @@ StudentForm -> client-side random code generation
 | `FE/src/components/StudentTable.vue` | Có thể sửa nhỏ | Đồng bộ lazy/page event hoặc accessible busy/error presentation nếu cần. |
 | `FE/src/components/StudentSearchForm.vue` | Có thể sửa nhỏ | Disable submit/controls theo loading nếu cần. |
 | `FE/src/**/*.spec.ts` phù hợp | Tạo/sửa | Regression tests ở API service, list/form và components bị đổi. |
-| `document/dev-note/fe/015-student-api-crud-search-sort-page-delete-2026-08-19.md` | Tạo sau implementation | Ghi nhận scope thực tế và validation. |
+| `document/dev-note/fe/student/015-student-api-crud-search-sort-page-delete-2026-08-19.md` | Tạo sau implementation | Ghi nhận scope thực tế và validation. |
 | Các Dev Plan/Dev Note summary | Sửa theo trạng thái thực tế | Đồng bộ links/status sau approval/implementation. |
 
 ## 8. Test và validation dự kiến

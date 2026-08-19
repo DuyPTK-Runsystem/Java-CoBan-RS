@@ -2,7 +2,7 @@
 
 ## 1. Related Developer Plan and approval
 
-- Related plan: `document/dev-impl-plan/fe/009-fe-project-skeleton-2026-08-18.md`.
+- Related plan: `document/dev-impl-plan/fe/foundation/009-fe-project-skeleton-2026-08-18.md`.
 - Approval: Direct user instruction on 2026-08-18 to enforce frontend tests, ESLint, coverage, and read-only report handling.
 - Central skill update: blocked because `.agents/skills/frontend-validation/SKILL.md` is read-only in this environment.
 

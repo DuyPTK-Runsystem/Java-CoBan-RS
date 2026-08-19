@@ -2,7 +2,7 @@
 
 ## 1. Related Developer Plan and approval
 
-- Plan: `document/dev-impl-plan/fe/014-auth-password-input-width-2026-08-19.md`.
+- Plan: `document/dev-impl-plan/fe/user-auth/014-auth-password-input-width-2026-08-19.md`.
 - User approved implementation on 2026-08-19.
 
 ## 2. Actual scope completed
@@ -15,10 +15,10 @@
 ## 3. Files changed
 
 - `FE/src/styles.css`.
-- `document/dev-impl-plan/fe/014-auth-password-input-width-2026-08-19.md`.
+- `document/dev-impl-plan/fe/user-auth/014-auth-password-input-width-2026-08-19.md`.
 - `document/dev-impl-plan/fe/FE_DEV_PLAN_SUMMARY.md`.
 - `document/dev-impl-plan/summary/DEV_PLAN_SUMMARY.md`.
-- `document/dev-note/fe/014-auth-password-input-width-2026-08-19.md`.
+- `document/dev-note/fe/user-auth/014-auth-password-input-width-2026-08-19.md`.
 - `document/dev-note/fe/FE_DEV_NOTE_SUMMARY.md`.
 - `document/dev-note/summary/DEV_NOTE_SUMMARY.md`.
 

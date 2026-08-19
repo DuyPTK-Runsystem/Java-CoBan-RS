@@ -2,7 +2,7 @@
 
 ## 1. Related Developer Plan
 
-- Plan: `document/dev-impl-plan/fe/009-fe-project-skeleton-2026-08-18.md`
+- Plan: `document/dev-impl-plan/fe/foundation/009-fe-project-skeleton-2026-08-18.md`
 - Approval: Approved by user on 2026-08-18.
 
 ## 2. Actual scope completed

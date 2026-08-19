@@ -60,7 +60,7 @@ con. Vì vậy control Password trông ngắn hơn User name dù thuộc cùng f
 | Path | Thao tác | Mục đích |
 |---|---|---|
 | `FE/src/styles.css` | Sửa | Đặt chiều rộng 100% cho input PrimeVue Password trong field group. |
-| `document/dev-note/fe/014-auth-password-input-width-2026-08-19.md` | Tạo sau implementation | Ghi nhận thay đổi và validation thực tế. |
+| `document/dev-note/fe/user-auth/014-auth-password-input-width-2026-08-19.md` | Tạo sau implementation | Ghi nhận thay đổi và validation thực tế. |
 | `document/dev-note/fe/FE_DEV_NOTE_SUMMARY.md` | Sửa sau implementation | Thêm Dev Note 014. |
 | `document/dev-note/summary/DEV_NOTE_SUMMARY.md` | Sửa sau implementation | Thêm Dev Note 014 vào summary toàn project. |
 

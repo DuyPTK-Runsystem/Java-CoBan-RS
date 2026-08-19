@@ -2,7 +2,7 @@
 
 ## Related plan and approval
 
-- Plan: `document/dev-impl-plan/fe/015-student-api-crud-search-sort-page-delete-2026-08-19.md`.
+- Plan: `document/dev-impl-plan/fe/student/015-student-api-crud-search-sort-page-delete-2026-08-19.md`.
 - Approved by user on 2026-08-19.
 
 ## Actual scope completed

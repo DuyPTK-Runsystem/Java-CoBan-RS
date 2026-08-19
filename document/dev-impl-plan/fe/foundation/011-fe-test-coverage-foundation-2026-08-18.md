@@ -16,7 +16,7 @@
   - `npm run test`.
   - `npm run test:coverage`.
   - `npm run build`.
-- `document/dev-note/fe/010-frontend-validation-quality-gates-2026-08-18.md`
+- `document/dev-note/fe/foundation/010-frontend-validation-quality-gates-2026-08-18.md`
   ghi nhận `test` và `test:coverage` đang bị block vì chưa có test runner và script.
 - Test phải độc lập với backend đang chạy và không được chỉnh sửa thủ công report
   artifact để tạo kết quả giả.
@@ -85,7 +85,7 @@ khóa version khi chưa cài đặt và kiểm chứng.
 - Các file `*.spec.ts` cạnh component hoặc trong cấu trúc test rõ ràng, nhất quán.
 - Source component chỉ khi test phát hiện vấn đề testability nhỏ nằm đúng contract;
   mọi thay đổi behavior đáng kể phải dừng để xin phê duyệt.
-- `document/dev-note/fe/011-fe-test-coverage-foundation-2026-08-18.md` sau khi
+- `document/dev-note/fe/foundation/011-fe-test-coverage-foundation-2026-08-18.md` sau khi
   implementation hoàn tất.
 - `document/dev-note/fe/FE_DEV_NOTE_SUMMARY.md` và
   `document/dev-note/summary/DEV_NOTE_SUMMARY.md` sau implementation.

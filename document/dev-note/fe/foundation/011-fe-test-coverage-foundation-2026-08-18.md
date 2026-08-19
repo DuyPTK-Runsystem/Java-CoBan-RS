@@ -2,7 +2,7 @@
 
 ## 1. Related Developer Plan and approval
 
-- Plan: `document/dev-impl-plan/fe/011-fe-test-coverage-foundation-2026-08-18.md`.
+- Plan: `document/dev-impl-plan/fe/foundation/011-fe-test-coverage-foundation-2026-08-18.md`.
 - Plan documentation approved by user on 2026-08-18.
 - Implementation approved separately through the user message `impl` on 2026-08-18.
 
@@ -43,7 +43,7 @@
 
 ### Plan and status tracking
 
-- `document/dev-impl-plan/fe/011-fe-test-coverage-foundation-2026-08-18.md`.
+- `document/dev-impl-plan/fe/foundation/011-fe-test-coverage-foundation-2026-08-18.md`.
 - `document/dev-impl-plan/fe/FE_DEV_PLAN_SUMMARY.md`.
 - `document/dev-impl-plan/summary/DEV_PLAN_SUMMARY.md`.
 - `document/dev-note/fe/FE_DEV_NOTE_SUMMARY.md`.

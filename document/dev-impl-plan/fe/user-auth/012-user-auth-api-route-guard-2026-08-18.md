@@ -150,7 +150,7 @@ LoginForm/RegisterForm
 | `FE/src/views/StudentListView.vue` | Sửa nhỏ | Đọc current user cho layout và thực hiện stateless logout lifecycle. |
 | `FE/src/views/StudentFormView.vue` | Sửa nhỏ | Đọc current user cho layout và thực hiện stateless logout lifecycle. |
 | `FE/src/**/*.spec.ts` phù hợp | Tạo/sửa | Test auth session/API/view/guard với fetch và router mock deterministic. |
-| `document/dev-note/fe/012-user-auth-api-route-guard-2026-08-18.md` | Tạo sau implementation | Ghi nhận scope thực tế, validation và remaining risks. |
+| `document/dev-note/fe/user-auth/012-user-auth-api-route-guard-2026-08-18.md` | Tạo sau implementation | Ghi nhận scope thực tế, validation và remaining risks. |
 | Các Dev Plan/Dev Note summaries | Sửa sau implementation | Cập nhật status thực tế của plan/note 012. |
 
 ## 7. API, storage và integration contract
