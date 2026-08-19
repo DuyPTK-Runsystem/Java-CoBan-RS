@@ -41,4 +41,6 @@ Example:
 | 013 | FE | [Storybook PrimeVue Preview Runtime](../fe/013-storybook-primevue-preview-2026-08-19.md) | Approved | 2026-08-19 |
 | 014 | FE | [Auth Password Input Width](../fe/014-auth-password-input-width-2026-08-19.md) | Approved | 2026-08-19 |
 | 015 | FE | [Student API, CRUD, Search, Sort, Page và Delete](../fe/015-student-api-crud-search-sort-page-delete-2026-08-19.md) | Approved; awaiting user review | 2026-08-19 |
+| 016 | FE | [Student UI Date Format, Input Examples và Storybook](../fe/016-student-ui-date-format-input-examples-storybook-2026-08-19.md) | Approved; amendment 16.1 implemented | 2026-08-19 |
 | 015.1 | BE/Document | [StudentInfo Cardinality, Document và Student Detail API](../be/student/015.1-student-info-cardinality-document-get-api-2026-08-19.md) | Approved | 2026-08-19 |
+| 017 | BE | [Student Backend Input Validation](../be/student/017-student-input-validation-2026-08-19.md) | Approved | 2026-08-19 |
