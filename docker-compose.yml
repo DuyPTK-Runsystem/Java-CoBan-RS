@@ -1,0 +1,55 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: java_coban
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Copy docker/.env.example to docker/.env and set MYSQL_ROOT_PASSWORD.}
+    ports:
+      - "3307:3306"
+    volumes:
+      - java-coban-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  api:
+    build:
+      context: ./BE/BaiTap-RS
+      dockerfile: Dockerfile
+    image: ${API_IMAGE_NAME:-java-coban-api:local}
+    environment:
+      SERVER_PORT: "8081"
+      DATABASE_HOST: db
+      DATABASE_PORT: "3306"
+      DATABASE_NAME: java_coban
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/java_coban
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Copy docker/.env.example to docker/.env and set MYSQL_ROOT_PASSWORD.}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "false"
+    ports:
+      - "${API_HOST_PORT:-8081}:8081"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8081/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 45s
+
+  test-data:
+    image: postman/newman:6-alpine
+    profiles: ["tools"]
+    volumes:
+      - ./document/postman/Java-CoBan-Batch-Test-Data.postman_collection.json:/etc/newman/Java-CoBan-Batch-Test-Data.postman_collection.json:ro
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  java-coban-mysql-data:
