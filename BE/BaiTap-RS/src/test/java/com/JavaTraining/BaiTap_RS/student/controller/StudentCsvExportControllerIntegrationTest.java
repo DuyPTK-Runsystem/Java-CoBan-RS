@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 @AutoConfigureMockMvc
-@WithMockUser
+@WithMockUser(roles = "ADMIN")
 class StudentCsvExportControllerIntegrationTest {
 
     private static final String EXPORT_PATH = "/api/v1/students/export";

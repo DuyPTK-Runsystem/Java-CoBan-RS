@@ -66,9 +66,9 @@ Thiết lập một baseline triển khai an toàn cho schema và contract v2 tr
 | M1 | Dùng Flyway | Chỉ thêm dependency/plugin và migration script sau approval Plan 025. |
 | M2 | Hỗ trợ cả schema trống và database training legacy | Phải có test riêng cho baseline trống và fixture legacy. Không nhắm production trong plan này. |
 | M3 | Rename in-place `user` → `app_user` | Xác minh schema thực tế trước khi đổi `@Table`, repository hoặc security lookup. |
-| M4 | Giữ nguyên password hash cũ khi tương thích | Preflight phải xác minh tên cột thực tế và hash là BCrypt hợp lệ; chỉ rename/copy nguyên giá trị, không double-hash. Nếu không tương thích thì dừng migration legacy để xin quyết định reset password. |
+| M4 | Giữ tên cột `password` và giữ nguyên password hash cũ khi tương thích | Preflight phải xác minh hash là BCrypt hợp lệ; migration `user` → `app_user` không đổi tên hoặc double-hash cột `password`. Nếu không tương thích thì dừng migration legacy để xin quyết định reset password. Đây là compatibility decision khác với tên `password_hash` trong data model v2. |
 | M5 | Giữ `average_score` legacy đến khi hoàn thành luồng tính average score mới | Đánh dấu deprecated; không dùng làm nguồn điểm chính thức, không tạo transcript/backfill chính thức từ dữ liệu này. |
-| M6 | Seed `ADMIN`, `ACADEMIC_OFFICE`, `TEACHER`, `STUDENT`; authorization bằng `@PreAuthorize` | Bật method security và thống nhất `hasRole(...)` với authority `ROLE_<ROLE>`. Chỉ áp dụng endpoint có policy đã duyệt. |
+| M6 | Seed `ADMIN`, `ACADEMIC_OFFICE`, `TEACHER`, `STUDENT`; authorization bằng `@PreAuthorize` | Bật method security và thống nhất `hasRole(...)` với authority `ROLE_<ROLE>`. Hai tài khoản hiện có được gán `ADMIN`; các API hiện tại chỉ cho `ADMIN`, `ACADEMIC_OFFICE` hoặc `TEACHER`. |
 | M7 | Deferred cho phạm vi project học | Không thực hiện production cutover. Migration chỉ chạy trên local/test database; không tuyên bố có backup, rollback hay production readiness. |
 
 ## 6. Phương án triển khai sau approval
@@ -89,6 +89,19 @@ Thiết lập một baseline triển khai an toàn cho schema và contract v2 tr
 5. **Verification và freeze review**
    - Kiểm thử migration trên database trống và fixture legacy đại diện trước khi chạm environment dùng chung.
    - Đối chiếu schema thực tế, JPA mapping, constraint, API contract và documentation; ghi nhận mọi sai lệch trong Dev Note.
+
+## 6.1. Unit and integration test plan
+
+| Target | Cases | Fixture/assertion |
+|---|---|---|
+| Flyway clean migration | Schema trống chạy toàn bộ migration | Có `app_user`, `role`, `user_role`, bốn role seed và các constraint nền tảng. |
+| Flyway legacy migration | Schema legacy có `user`, `student`, `student_info` | `user` được rename thành `app_user`; id/username/password hash giữ nguyên; hai user legacy nhận `ADMIN`. |
+| Password compatibility | BCrypt hash legacy sau migration | `PasswordEncoder.matches(rawPassword, storedHash)` thành công; không có double-hash. |
+| Role authority mapping | `UserPrincipal` với role seed | Authorities là `ROLE_ADMIN`, `ROLE_ACADEMIC_OFFICE`, `ROLE_TEACHER` hoặc `ROLE_STUDENT`. |
+| Existing API authorization | Student API với role hợp lệ và không hợp lệ | Ba role được phép nhận status contract hiện có; `STUDENT` nhận `403`; anonymous vẫn `401`. |
+| Regression | Auth/User and Student tests hiện có | Không đổi `/api/v1` response shape hay JWT stateless behavior ngoài authorization đã chốt. |
+
+Tests dùng fixture cô lập; không đọc hoặc ghi database dùng chung. Chạy `./gradlew test`, `./gradlew jacocoTestReport`, Checkstyle, PMD và build; đọc JaCoCo report cho classes migration/security thay đổi, không đặt threshold mới.
 
 ## 7. Phạm vi dự kiến
 

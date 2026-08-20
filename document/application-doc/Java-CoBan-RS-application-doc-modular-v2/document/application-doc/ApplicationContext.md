@@ -58,6 +58,7 @@ Mục chưa chốt phải ghi rõ `TBD` hoặc `Needs confirmation`, không tự
 
 - [`modules/UserModule.md`](modules/UserModule.md): auth contract hiện tại và hướng mở rộng identity v2.
 - [`modules/StudentModule.md`](modules/StudentModule.md): CRUD student hiện tại và ranh giới với enrollment v2.
+- [`ContractMigrationScopeFreeze.md`](ContractMigrationScopeFreeze.md): compatibility contract, migration foundation và các scope freeze đã chốt cho Plan 025.
 
 ## 3. Phạm vi hệ thống
 
@@ -119,4 +120,3 @@ Backend là nguồn validation và authorization cuối cùng. Frontend chỉ ch
 - Chiến lược chuyển đổi dữ liệu từ schema ba bảng cũ sang schema v2.
 - Chi tiết các quy tắc xếp loại, xếp hạng, thi lại theo điều kiện và lên lớp.
 - Chính sách triển khai worker, retry và concurrency ở production.
-

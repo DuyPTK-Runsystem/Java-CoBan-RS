@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 @AutoConfigureMockMvc
-@WithMockUser
+@WithMockUser(roles = "ADMIN")
 @Transactional
 class StudentControllerIntegrationTest {
 
