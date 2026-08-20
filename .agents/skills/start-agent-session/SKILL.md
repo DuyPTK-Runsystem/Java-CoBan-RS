@@ -30,11 +30,30 @@ Thiết lập context và quy tắc làm việc chung trước khi xử lý task
 
 Chỉ đọc tài liệu phù hợp khi task cần; không tải toàn bộ tài liệu project vào context.
 
+## Chọn phiên bản tài liệu ứng dụng
+
+- Prompt phải nêu rõ phiên bản tài liệu ứng dụng áp dụng, ví dụ `v1` hoặc `v2`.
+- Nếu prompt chưa chỉ định phiên bản, dừng xử lý phần phụ thuộc tài liệu ứng dụng và hỏi người dùng chính xác version cần áp dụng. Không tự mặc định v1, v2 hoặc suy luận từ loại task.
+- Chỉ tiếp tục đọc tài liệu ứng dụng, lập Developer Plan hoặc triển khai sau khi người dùng xác nhận version.
+
+### Version v1
+
 - Quy tắc agent: đọc `.codex/AGENTS.md` và `.codex/AGENTS_DETAIL.md` khi cần xác định quy trình chung.
 - Context ứng dụng: đọc `document/application-doc/ApplicationContext.md` khi cần hiểu phạm vi hoặc kiến trúc toàn project.
 - Module user: đọc `document/application-doc/modules/UserModule.md` khi task liên quan đăng ký, đăng nhập, logout hoặc user validation.
 - Module student: đọc `document/application-doc/modules/StudentModule.md` khi task liên quan student list, search, sort, page, CRUD hoặc student code.
 - Database: đọc `document/application-doc/DataStructure.md` khi task liên quan schema, migration, JPA, relationship hoặc batch data.
+
+### Version v2
+
+- Context ứng dụng: đọc `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/ApplicationContext.md` khi cần hiểu phạm vi hoặc kiến trúc toàn project.
+- Requirement baseline: đọc `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/RequirementBaseline.md`, sau đó chỉ chọn module phù hợp.
+- Module user/auth: đọc `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/modules/UserModule.md` cho contract hiện tại và `00-CommonAndAuthModule.md` cùng thư mục cho baseline auth/role mở rộng.
+- Module student: đọc `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/modules/StudentModule.md` cho CRUD hiện tại; đọc thêm `01-AcademicStructureModule.md` hoặc `02-EnrollmentAndTeachingModule.md` khi task mở rộng sang khối, lớp hoặc xếp lớp.
+- Database: đọc `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/DataStructure.md`, sau đó chỉ đọc nhóm file `data-model/` phù hợp khi task liên quan schema, migration, JPA, relationship hoặc batch data.
+
+### Tài liệu dùng chung
+
 - Backend workflow: đọc `.codex/workflows/WORKFLOW-BACKEND.md` và các reference được dẫn tới khi task sửa backend.
 - Dev Note workflow: dùng skill `dev-note` khi task có thay đổi code, config, docs, workflow, skills, tests hoặc validation state.
 - Checkstyle/PMD: chỉ đọc khi validation backend cần dùng `BE/BaiTap-RS/config/checkstyle/checkstyle.xml` hoặc `BE/BaiTap-RS/config/pmd/ruleset.xml`.

@@ -41,3 +41,4 @@ NNN-short-topic-yyyy-mm-dd.md
 | 021 | FE | [Student CSV Download và Pagination Options](../fe/student/021-student-csv-download-pagination-options-go-to-page-2026-08-19.md) | Completed; Birthday/Address sort removed | 2026-08-19 |
 | 022 | FE | [FE Documentation Structure by Module](../fe/tooling/022-fe-doc-structure-by-module-2026-08-19.md) | Completed | 2026-08-19 |
 | 023 | Infrastructure | [Docker Image, Test Data Bootstrap và README](023-docker-image-readme-test-data-2026-08-19.md) | Partially completed; external validation pending | 2026-08-19 |
+| 024 | BE | [Modular v2 Document Paths in Skills](../be/workflow-skill/024-modular-v2-document-paths-2026-08-20.md) | Completed | 2026-08-20 |

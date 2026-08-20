@@ -17,6 +17,7 @@
 | 018 | batch | [Batch CSV Export](batch/018-batch-csv-export-2026-08-19.md) | Completed | 2026-08-19 |
 | 019 | workflow-skill | [Dev Trace Logging Skill](workflow-skill/019-dev-trace-logging-skill-2026-08-19.md) | Completed | 2026-08-19 |
 | 020 | backend | [Backend Per-Run Log File](020-backend-per-run-log-file-2026-08-19.md) | Completed | 2026-08-19 |
+| 024 | workflow-skill | [Modular v2 Document Paths in Skills](workflow-skill/024-modular-v2-document-paths-2026-08-20.md) | Completed | 2026-08-20 |
 
 ## Module folders
 
