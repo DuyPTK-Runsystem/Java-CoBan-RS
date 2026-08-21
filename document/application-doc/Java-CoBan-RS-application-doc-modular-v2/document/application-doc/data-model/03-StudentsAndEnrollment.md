@@ -87,4 +87,11 @@ Thay đổi lớp phải thực hiện trong một transaction:
 
 Không xóa lịch sử chuyển lớp.
 
+Trong Plan 026, `effective_at` là thời điểm hiệu lực nghiệp vụ của lần chuyển lớp,
+khác với `created_at` là thời điểm hệ thống ghi history. Vì transfer cập nhật
+`current_class_id` ngay trong transaction, `effective_at` không được ở tương lai
+theo múi giờ `Asia/Ho_Chi_Minh` và không được nhỏ hơn `effective_at` gần nhất của
+history cùng enrollment. Backdate hợp lệ được cho phép; scheduled transfer nằm
+ngoài phạm vi Plan 026.
+
 ---

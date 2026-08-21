@@ -75,6 +75,23 @@ Tất cả success/error response tiếp tục đi qua `RestResponse`. API Plan 
 - Với class lifecycle, capacity warning và delete guards, comment `BR-CLASS-002`–`BR-CLASS-011` đúng nhánh nghiệp vụ. Không chép nguyên baseline dài dòng hoặc gắn mã requirement không liên quan.
 - Test method đặt tên theo behavior và đặt comment traceability tại nhóm test khi tên không thể hiện đầy đủ rule.
 
+### 6.2. Làm rõ `effectiveAt` sau khi người dùng chọn hướng 1
+
+Đã chốt: `effectiveAt` là thời điểm **hiệu lực nghiệp vụ** của sự kiện chuyển lớp,
+không phải thời điểm hệ thống nhận request (`createdAt`) và không phải thời điểm
+cập nhật hồ sơ enrollment (`updatedAt`). Vì Plan 026 cập nhật `current_class_id`
+ngay trong transaction transfer, `effectiveAt` phải thỏa các điều kiện sau:
+
+1. Không được lớn hơn thời điểm xử lý request theo múi giờ nghiệp vụ `Asia/Ho_Chi_Minh`;
+2. Không được nhỏ hơn `effectiveAt` gần nhất của history cùng enrollment;
+3. Được lưu trong `class_transfer_history` và dùng để sắp xếp timeline chuyển lớp;
+4. Transfer không phải là thao tác lên hồ sơ `Student`; `Student.java` không thêm field
+   `effectiveAt`.
+
+`createdAt` tiếp tục phản ánh thời điểm ghi history. Cho phép backdate trong quá khứ
+nhưng không cho phép tạo sự kiện làm timeline lùi ngược. Cơ chế chuyển lớp có hiệu lực
+trong tương lai/scheduled transfer không thuộc Plan 026.
+
 ## 7. Decision gates cần user xác nhận trước implementation
 
 | Gate | Cần chốt | Đề xuất trong Plan 026 |
@@ -144,6 +161,7 @@ Baseline bắt buộc `NFR-AUDITABILITY-001` cho chuyển lớp; chỉ có `crea
 | Academic | Không tạo lớp sai academic year/grade, tên/mã class unique đúng scope, không sửa grade của lớp có enrollment. |
 | Enroll | Create thành công; duplicate student-year conflict; student/lớp/năm học không tồn tại hoặc inactive bị từ chối; bulk rollback toàn bộ khi một item sai. |
 | Transfer/audit | Lớp đích khác và cùng năm học thành công; history bất biến; transaction rollback khi insert history hoặc audit thất bại; audit before/after/actor/request ID đúng; lớp cũ/mới trả warning balance đúng ngưỡng. |
+| Transfer/effectiveAt | Từ chối `effectiveAt` ở tương lai; từ chối `effectiveAt` nhỏ hơn history gần nhất; chấp nhận thời điểm hiện tại/quá khứ hợp lệ và giữ thứ tự timeline. |
 | Authorization | Anonymous `401`; STUDENT `403`; TEACHER không mutation; ADMIN/ACADEMIC_OFFICE có mutation. |
 | Regression | Auth, Student CRUD/CSV và Flyway tests hiện có vẫn pass; contract `/api/v1/students/**` không đổi. |
 

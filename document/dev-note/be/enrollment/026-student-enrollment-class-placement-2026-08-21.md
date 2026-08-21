@@ -15,6 +15,7 @@
 - Giới hạn mutation cho `ADMIN`/`ACADEMIC_OFFICE`; `TEACHER` chỉ đọc các API enrollment/class được phép.
 - Giữ nguyên contract legacy `/api/v1/students/**`.
 - Refactor sau validation: tách academic controller/service theo `academic-year`, `grade-level`, `school-class`; tách enrollment lookup/query/capacity/audit khỏi mutation service để đạt PMD mà không dùng suppression.
+- Làm rõ hướng 1 cho `effectiveAt`: transfer áp dụng ngay, không nhận thời điểm tương lai và không cho timeline history lùi ngược.
 
 ## 3. Files thay đổi theo nhóm
 
@@ -26,6 +27,9 @@
 - `BE/BaiTap-RS/src/main/java/com/JavaTraining/BaiTap_RS/common/audit/`: audit entity/repository và request/security context reader.
 - `BE/BaiTap-RS/src/main/java/com/JavaTraining/BaiTap_RS/student/domain/entity/Student.java` và `StudentStatus.java`: map trạng thái student để chặn student không active.
 - `BE/BaiTap-RS/src/main/java/com/JavaTraining/BaiTap_RS/common/error/GlobalExceptionHandler.java`: map database uniqueness race thành HTTP 409.
+- `BE/BaiTap-RS/src/main/java/com/JavaTraining/BaiTap_RS/enrollment/domain/DTOs/requests/ReqTransferEnrollmentDTO.java`: chặn `effectiveAt` tương lai ở request boundary.
+- `BE/BaiTap-RS/src/main/java/com/JavaTraining/BaiTap_RS/enrollment/repository/ClassTransferHistoryRepository.java`: truy vấn history gần nhất theo `effectiveAt`.
+- `BE/BaiTap-RS/src/main/java/com/JavaTraining/BaiTap_RS/enrollment/service/EnrollmentService.java`: validate thời điểm hiệu lực trước khi mutate transfer.
 
 ### Tests
 
@@ -33,6 +37,7 @@
 - `BE/BaiTap-RS/src/test/java/com/JavaTraining/BaiTap_RS/academic/service/AcademicServiceTest.java`: active-year guard, class history delete guard và grade-change guard.
 - `BE/BaiTap-RS/src/test/java/com/JavaTraining/BaiTap_RS/enrollment/service/EnrollmentServiceTest.java`: create/history, duplicate và bulk duplicate.
 - `BE/BaiTap-RS/src/test/java/com/JavaTraining/BaiTap_RS/enrollment/service/EnrollmentTransferServiceTest.java`: transfer/audit.
+- `BE/BaiTap-RS/src/test/java/com/JavaTraining/BaiTap_RS/enrollment/service/EnrollmentEffectiveAtValidationTest.java`: future effective time và history ordering guards.
 - `BE/BaiTap-RS/src/test/java/com/JavaTraining/BaiTap_RS/enrollment/controller/EnrollmentAuthorizationIntegrationTest.java`: teacher read, teacher mutation, student và anonymous authorization.
 
 ### Application documentation
@@ -46,6 +51,8 @@
 - `audit_log` được ghi trong cùng transaction với transfer; lỗi khi ghi history/audit sẽ làm transaction rollback.
 - DTO được dùng ở HTTP boundary; entity chỉ dùng trong persistence/service.
 - Database unique `(student_id, academic_year_id)` là lớp bảo vệ cuối cho BR-ENROLL-001; service/global handler map conflict rõ ràng.
+- `effectiveAt` là business-effective time, khác `createdAt`/`updatedAt`; `Student.java` không chứa field này.
+- `effectiveAt` phải không lớn hơn thời điểm xử lý và không nhỏ hơn history gần nhất; backdate hợp lệ, scheduled transfer ngoài scope.
 
 ## 5. Validation thực tế
 
@@ -79,9 +86,23 @@ Số vòng `code → test → debug` trong lần hoàn tất validation: `3`.
 2. Vòng 2: PMD fail nhiều lỗi coupling/method count/assertions; refactor academic/enrollment service/controller và dọn test.
 3. Vòng 3: PMD còn lỗi lifecycle callback, helper test và method count; sửa callback package-private có comment, tách validator/test transfer; PMD pass.
 
+### 5.3. Validation sau khi làm rõ `effectiveAt` theo hướng 1
+
+| Lệnh/kiểm tra | Kết quả | Bằng chứng |
+|---|---|---|
+| `git diff --check` | PASS | Không có whitespace error. |
+| `./gradlew test` | PASS | `BUILD SUCCESSFUL`; 66 tests completed, JaCoCo finalize chạy. |
+| `./gradlew jacocoTestReport` | PASS | `validateEffectiveAt(...)` đạt 100% instruction/branch/line coverage trong report HTML. |
+| `./gradlew checkstyleMain checkstyleTest` | PASS | Main/test Checkstyle pass. |
+| `./gradlew pmdMain pmdTest` | PASS | Main/test PMD pass; không thêm suppression. |
+| `./gradlew build` | PASS | `BUILD SUCCESSFUL`. |
+
+Số vòng `code → test → debug` cho delta `effectiveAt`: `4` (thiếu import/helper test; xử lý PMD method/assert/coupling; chạy lại sau khi một tiến trình validation trước patch còn dùng test class cũ).
+
 ## 6. Sai lệch so với Developer Plan
 
 - Không có sai lệch chức năng đáng kể.
+- Bổ sung guard `effectiveAt` theo lựa chọn hướng 1 và cập nhật tài liệu Plan 026/data model; không thay đổi `Student.java`.
 - Plan mô tả migration “tiếp theo V3” nhưng danh sách file dự kiến đã xác nhận V4; implementation dùng `V4__create_academic_structure_enrollment_and_audit.sql` theo chuỗi migration thực tế.
 - Sau validation, cấu trúc code được tách nhỏ hơn dự kiến ban đầu để đáp ứng PMD mà không suppress rule hoặc chỉnh report/config.
 

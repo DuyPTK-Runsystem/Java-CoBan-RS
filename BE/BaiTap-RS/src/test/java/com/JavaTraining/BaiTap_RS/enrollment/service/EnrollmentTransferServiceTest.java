@@ -74,7 +74,7 @@ class EnrollmentTransferServiceTest {
                 50L,
                 new ReqTransferEnrollmentDTO(
                         21L,
-                        LocalDateTime.of(2026, 8, 21, 8, 0),
+                        LocalDateTime.now().minusMinutes(1),
                         "Cân bằng sĩ số"));
 
         requireTransferred(enrollment);
@@ -141,4 +141,5 @@ class EnrollmentTransferServiceTest {
                 Mockito.same(target),
                 Mockito.any(ClassTransferHistory.class));
     }
+
 }

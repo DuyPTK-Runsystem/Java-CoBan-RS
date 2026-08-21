@@ -32,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class EnrollmentService {
-
     private final StudentYearEnrollmentRepository enrollmentRepository;
     private final ClassTransferHistoryRepository historyRepository;
     private final EnrollmentLookupService lookupService;
@@ -99,6 +98,7 @@ public class EnrollmentService {
         if (enrollment.getStatus() != EnrollmentStatus.ACTIVE) {
             throw new AppException(HttpStatus.CONFLICT, "Chỉ enrollment ACTIVE mới được chuyển lớp");
         }
+        validateEffectiveAt(enrollmentId, request.effectiveAt());
         AcademicYear year = lookupService.findAcademicYear(enrollment.getAcademicYearId());
         SchoolClass sourceClass = lookupService.findSchoolClass(enrollment.getCurrentClassId());
         SchoolClass targetClass = validateTargetClass(request.targetClassId(), year);
@@ -120,6 +120,22 @@ public class EnrollmentService {
         return new ResEnrollmentMutationDTO(
                 List.of(response),
                 capacityService.capacityWarnings(List.of(sourceClass, targetClass)));
+    }
+
+    // BR-ENROLL-003/004: an applied transfer cannot be scheduled in the future or move history backward.
+    private void validateEffectiveAt(Long enrollmentId, LocalDateTime effectiveAt) {
+        LocalDateTime now = LocalDateTime.now();
+        if (effectiveAt.isAfter(now)) {
+            throw new AppException(HttpStatus.CONFLICT, "Ngày hiệu lực không được ở tương lai");
+        }
+        historyRepository.findTopByEnrollmentIdOrderByEffectiveAtDesc(enrollmentId)
+                .map(ClassTransferHistory::getEffectiveAt)
+                .filter(effectiveAt::isBefore)
+                .ifPresent(latestEffectiveAt -> {
+                    throw new AppException(
+                            HttpStatus.CONFLICT,
+                            "Ngày hiệu lực không được trước history gần nhất: " + latestEffectiveAt);
+                });
     }
 
     private StudentYearEnrollment persistEnrollment(
