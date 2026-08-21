@@ -17,6 +17,7 @@
 | 019 | [Shared Dev Trace Logging Skill](workflow-skill/019-dev-trace-logging-skill-2026-08-19.md) | Repository skill chuẩn hóa developer trace log cho Java/Spring | Approved | 2026-08-19 |
 | 020 | [Backend Per-Run Log File](020-backend-per-run-log-file-2026-08-19.md) | Cấu hình Logback tạo file log riêng cho mỗi lần chạy backend trong `build/logs` | Approved | 2026-08-19 |
 | 026 | [Student Enrollment & Class Placement](enrollment/026-student-enrollment-class-placement-2026-08-21.md) | Academic foundation tối thiểu, xếp/chuyển lớp, lịch sử phân lớp, cảnh báo sĩ số và authorization | Approved | 2026-08-21 |
+| 027 | [Academic Subject & Teacher Assignment](academic/027-academic-subject-teacher-assignment-2026-08-21.md) | Học kỳ, môn học, class-subject, teacher profile và phân công GVCN/GVBM dựa trên assignment | Draft; awaiting user approval | 2026-08-21 |
 
 ## Module folders
 
