@@ -9,7 +9,7 @@ description: Create, update, or review Spring Boot application service files wit
 
 1. Inspect neighboring services, repositories, exceptions, DTOs, auditing, and security context utilities.
 2. State invariants and authorization rules for each use case before implementing it.
-3. Inject repositories and collaborating services through the constructor; apply `@lombok-usage` and prefer `@RequiredArgsConstructor` with `final` dependencies when Lombok is available.
+3. Inject repositories and collaborating services with `@RequiredArgsConstructor` and `private final` dependencies; apply `@lombok-usage` and do not write a manual dependency constructor when Lombok is available.
 4. Mark write use cases `@Transactional`; mark query use cases `@Transactional(readOnly = true)` when appropriate.
 5. Load required entities or throw the project's typed not-found exception. Validate business constraints before mutation.
 6. Persist the aggregate and map it to a `Res...DTO` inside the transaction when lazy relationships are needed. Accept ordinary inputs as `Req<Action><Entity>DTO`.
