@@ -43,3 +43,4 @@ NNN-short-topic-yyyy-mm-dd.md
 | 023 | Infrastructure | [Docker Image, Test Data Bootstrap và README](023-docker-image-readme-test-data-2026-08-19.md) | Partially completed; external validation pending | 2026-08-19 |
 | 024 | BE | [Modular v2 Document Paths in Skills](../be/workflow-skill/024-modular-v2-document-paths-2026-08-20.md) | Completed | 2026-08-20 |
 | 025 | BE/Document | [Contract, Migration và Scope Freeze](../be/025-contract-migration-scope-freeze-2026-08-20.md) | Completed; Docker MySQL preflight not run | 2026-08-20 |
+| 026 | BE | [Student Enrollment & Class Placement](../be/enrollment/026-student-enrollment-class-placement-2026-08-21.md) | Completed | 2026-08-21 |

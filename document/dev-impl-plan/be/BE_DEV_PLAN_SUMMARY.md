@@ -16,12 +16,14 @@
 | 018 | [Batch CSV Export](018-batch-csv-export-2026-08-19.md) | Spring Batch Student/StudentInfo joined export, raw CSV `byte[]`, per-item skip và request trace | Approved | 2026-08-19 |
 | 019 | [Shared Dev Trace Logging Skill](workflow-skill/019-dev-trace-logging-skill-2026-08-19.md) | Repository skill chuẩn hóa developer trace log cho Java/Spring | Approved | 2026-08-19 |
 | 020 | [Backend Per-Run Log File](020-backend-per-run-log-file-2026-08-19.md) | Cấu hình Logback tạo file log riêng cho mỗi lần chạy backend trong `build/logs` | Approved | 2026-08-19 |
+| 026 | [Student Enrollment & Class Placement](enrollment/026-student-enrollment-class-placement-2026-08-21.md) | Academic foundation tối thiểu, xếp/chuyển lớp, lịch sử phân lớp, cảnh báo sĩ số và authorization | Approved | 2026-08-21 |
 
 ## Module folders
 
 - `user-auth/`: User registration, login/logout, account, and authentication-related backend plans.
 - `student/`: Student list, search, sorting, pagination, CRUD, and generated code backend plans.
 - `workflow-skill/`: Project workflow and skill changes.
+- `enrollment/`: Academic foundation tối thiểu, xếp lớp và lịch sử chuyển lớp.
 
 ## Current BE decisions
 

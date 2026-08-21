@@ -588,6 +588,865 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Academic",
+      "description": "Academic year, grade, and class metadata endpoints from `/api/v2`.",
+      "item": [
+        {
+          "name": "List Academic Years",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/academic-years",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "academic-years"
+              ]
+            },
+            "description": "List academic years. Requires ADMIN or ACADEMIC_OFFICE."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Academic Year",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/academic-years",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "academic-years"
+              ]
+            },
+            "description": "Create an academic year. Requires ADMIN or ACADEMIC_OFFICE.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"2026-2027\",\n  \"startDate\": \"2026-08-15\",\n  \"endDate\": \"2027-05-31\",\n  \"status\": \"ACTIVE\",\n  \"notes\": \"Demo academic year\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Academic Year",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/academic-years/{{academicYearId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "academic-years",
+                "{{academicYearId}}"
+              ]
+            },
+            "description": "Update an academic year. Requires ADMIN or ACADEMIC_OFFICE.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"2026-2027\",\n  \"startDate\": \"2026-08-15\",\n  \"endDate\": \"2027-05-31\",\n  \"status\": \"ACTIVE\",\n  \"notes\": \"Updated demo academic year\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Close Academic Year",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/academic-years/{{academicYearId}}/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "academic-years",
+                "{{academicYearId}}",
+                "close"
+              ]
+            },
+            "description": "Close an academic year. Requires ADMIN or ACADEMIC_OFFICE."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Academic Year",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/academic-years/{{academicYearId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "academic-years",
+                "{{academicYearId}}"
+              ]
+            },
+            "description": "Delete an academic year only when guarded delete rules allow it. Requires ADMIN or ACADEMIC_OFFICE."
+          },
+          "response": []
+        },
+        {
+          "name": "List Grade Levels",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/grades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "grades"
+              ]
+            },
+            "description": "List grade levels. Requires ADMIN or ACADEMIC_OFFICE."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Grade Level",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/grades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "grades"
+              ]
+            },
+            "description": "Create grade metadata. Requires ADMIN or ACADEMIC_OFFICE.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"G6\",\n  \"name\": \"Khối 6\",\n  \"gradeLevel\": 6,\n  \"displayOrder\": 1,\n  \"nextGradeId\": null,\n  \"active\": true,\n  \"description\": \"Demo grade level\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Grade Level",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/grades/{{gradeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "grades",
+                "{{gradeId}}"
+              ]
+            },
+            "description": "Update grade metadata. Requires ADMIN or ACADEMIC_OFFICE.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"G6\",\n  \"name\": \"Khối 6\",\n  \"gradeLevel\": 6,\n  \"displayOrder\": 1,\n  \"nextGradeId\": null,\n  \"active\": true,\n  \"description\": \"Updated demo grade level\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Grade Level",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/grades/{{gradeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "grades",
+                "{{gradeId}}"
+              ]
+            },
+            "description": "Delete a grade level only when guarded delete rules allow it. Requires ADMIN or ACADEMIC_OFFICE."
+          },
+          "response": []
+        },
+        {
+          "name": "List School Classes",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/classes?academicYearId={{academicYearId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "classes"
+              ],
+              "query": [
+                {
+                  "key": "academicYearId",
+                  "value": "{{academicYearId}}"
+                }
+              ]
+            },
+            "description": "List school classes. `academicYearId` is optional in code; TEACHER may read."
+          },
+          "response": []
+        },
+        {
+          "name": "Create School Class",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/classes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "classes"
+              ]
+            },
+            "description": "Create a school class. Requires ADMIN or ACADEMIC_OFFICE.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"gradeLevelId\": \"{{gradeId}}\",\n  \"classCode\": \"6A1\",\n  \"className\": \"Lớp 6A1\",\n  \"capacity\": 40,\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update School Class",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/classes/{{classId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "classes",
+                "{{classId}}"
+              ]
+            },
+            "description": "Update a school class. Requires ADMIN or ACADEMIC_OFFICE.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gradeLevelId\": \"{{gradeId}}\",\n  \"classCode\": \"6A1\",\n  \"className\": \"Lớp 6A1\",\n  \"capacity\": 40,\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Close School Class",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/classes/{{classId}}/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "classes",
+                "{{classId}}",
+                "close"
+              ]
+            },
+            "description": "Close a school class. Requires ADMIN or ACADEMIC_OFFICE."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete School Class",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/classes/{{classId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "classes",
+                "{{classId}}"
+              ]
+            },
+            "description": "Delete a school class only when guarded delete rules allow it. Requires ADMIN or ACADEMIC_OFFICE."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Enrollment",
+      "description": "Student class placement and transfer endpoints from `/api/v2`.",
+      "item": [
+        {
+          "name": "List Class Students",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/classes/{{classId}}/students",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "classes",
+                "{{classId}}",
+                "students"
+              ]
+            },
+            "description": "List active students in a class. ADMIN, ACADEMIC_OFFICE, and TEACHER may read."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Enrollment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/enrollments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "enrollments"
+              ]
+            },
+            "description": "Assign one student to a class. Requires ADMIN or ACADEMIC_OFFICE.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{studentId}}\",\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"classId\": \"{{classId}}\",\n  \"enrolledAt\": \"2026-08-21T08:00:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk Create Enrollment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/enrollments/bulk",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "enrollments",
+                "bulk"
+              ]
+            },
+            "description": "Assign multiple students to a class atomically. Requires ADMIN or ACADEMIC_OFFICE.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"classId\": \"{{classId}}\",\n  \"studentIds\": [\n    \"{{studentId}}\",\n    2\n  ],\n  \"enrolledAt\": \"2026-08-21T08:00:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Transfer Enrollment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/enrollments/{{enrollmentId}}/transfer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "enrollments",
+                "{{enrollmentId}}",
+                "transfer"
+              ]
+            },
+            "description": "Transfer an active enrollment to another class in the same academic year. Requires ADMIN or ACADEMIC_OFFICE.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetClassId\": \"{{targetClassId}}\",\n  \"effectiveAt\": \"2026-09-01T08:00:00\",\n  \"reason\": \"Family request\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Unassigned Students",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/enrollments/unassigned?academicYearId={{academicYearId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "enrollments",
+                "unassigned"
+              ],
+              "query": [
+                {
+                  "key": "academicYearId",
+                  "value": "{{academicYearId}}"
+                }
+              ]
+            },
+            "description": "List active students without an enrollment for the academic year. ADMIN, ACADEMIC_OFFICE, and TEACHER may read."
+          },
+          "response": []
+        },
+        {
+          "name": "List Student Enrollment History",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/students/{{studentId}}/enrollments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "students",
+                "{{studentId}}",
+                "enrollments"
+              ]
+            },
+            "description": "List enrollment and transfer history for a student. ADMIN, ACADEMIC_OFFICE, and TEACHER may read."
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "auth": {
@@ -613,6 +1472,31 @@
     },
     {
       "key": "studentId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "academicYearId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "gradeId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "classId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "targetClassId",
+      "value": "2",
+      "type": "string"
+    },
+    {
+      "key": "enrollmentId",
       "value": "1",
       "type": "string"
     }
