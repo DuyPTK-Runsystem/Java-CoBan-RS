@@ -3,8 +3,6 @@ package com.JavaTraining.BaiTap_RS.student.domain.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -35,10 +33,6 @@ public class Student {
 
     @Column(name = "student_code", nullable = false, length = 10, unique = true)
     private String studentCode;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
-    private StudentStatus status = StudentStatus.ACTIVE;
 
     @OneToOne(
             mappedBy = "student",

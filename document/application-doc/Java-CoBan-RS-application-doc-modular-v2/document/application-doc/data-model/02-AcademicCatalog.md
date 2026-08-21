@@ -11,7 +11,7 @@ PK  academic_year_id  BIGINT UNSIGNED
 UQ  code               VARCHAR(20) NOT NULL
     start_date         DATE NOT NULL
     end_date           DATE NOT NULL
-    status              DRAFT | ACTIVE | CLOSED
+    status              PLANNING | ACTIVE | FINISHED
     created_at          DATETIME NOT NULL
     updated_at          DATETIME NOT NULL
 ~~~
@@ -57,13 +57,6 @@ grade_level
 PK  grade_level_id  BIGINT UNSIGNED
 UQ  code             VARCHAR(10) NOT NULL
     name             VARCHAR(50) NOT NULL
-    grade_level      INT NOT NULL
-    display_order    INT NOT NULL
-    next_grade_id    BIGINT UNSIGNED NULL
-    active           BOOLEAN NOT NULL
-    description      VARCHAR(255) NULL
-    created_at       DATETIME NOT NULL
-    updated_at       DATETIME NOT NULL
 ~~~
 
 Ví dụ code: 6, 7, 8, 9.
@@ -79,7 +72,7 @@ FK  grade_level_id    BIGINT UNSIGNED NOT NULL
 UQ  class_code        VARCHAR(30) NOT NULL
     class_name        VARCHAR(100) NULL
     capacity          INT UNSIGNED NULL
-    status             PLANNED | ACTIVE | CLOSED
+    status             ACTIVE | INACTIVE | COMPLETED
     created_at         DATETIME NOT NULL
     updated_at         DATETIME NOT NULL
 UQ  academic_year_id + class_code
@@ -127,3 +120,4 @@ class_subject là đơn vị trung tâm để:
 - Kiểm tra quyền nhập điểm.
 
 ---
+

@@ -162,9 +162,5 @@ audit_log(entity_type, entity_id, occurred_at)
 
 Không tạo index trùng với index tự sinh từ UNIQUE constraint.
 
-Plan 026 ghi audit event `STUDENT_ENROLLMENT_TRANSFER` trong cùng transaction với
-`student_year_enrollment` và `class_transfer_history`. `before_data`/`after_data` chứa lớp
-nguồn/đích, trạng thái và transfer id; `actor_user_id`, `request_id` và `ip_address` giữ context
-thực hiện thao tác. Enrollment và transfer history không dùng cascade delete.
-
 ---
+
