@@ -15,7 +15,7 @@ description: Create, update, or review thin Spring Boot REST controller files in
 
 ## Required shape
 
-- Use `@RestController`, class-level `@RequestMapping`, and constructor injection; apply `@lombok-usage` and prefer `@RequiredArgsConstructor` with `final` dependencies when Lombok is available.
+- Use `@RestController`, class-level `@RequestMapping`, `@RequiredArgsConstructor`, and `private final` dependencies; apply `@lombok-usage` and do not write a manual dependency constructor when Lombok is available.
 - Use plural resource paths such as `/api/v1/exams`.
 - Use explicit parameter names where project conventions require them.
 - Default growing list endpoints to `Page<Res...DTO>` and `Pageable`; bound page size if the global resolver does not.
