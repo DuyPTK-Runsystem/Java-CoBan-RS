@@ -63,45 +63,6 @@ class FlywayMigrationTest {
         }
     }
 
-    @Test
-    void createsAcademicAndEnrollmentSchemaWithRequiredConstraints() throws Exception {
-        JdbcDataSource dataSource = dataSource("flyway-enrollment");
-        Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").load().migrate();
-
-        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
-            verifyEnrollmentSchema(statement);
-        }
-    }
-
-    private void verifyEnrollmentSchema(Statement statement) throws Exception {
-        checkEnrollmentTables(statement);
-        checkEnrollmentUniqueness(statement);
-    }
-
-    private void checkEnrollmentTables(Statement statement) throws Exception {
-        try (ResultSet resultSet = statement.executeQuery("""
-                SELECT COUNT(*)
-                FROM INFORMATION_SCHEMA.TABLES
-                WHERE TABLE_NAME IN (
-                    'grade_level', 'academic_year', 'school_class',
-                    'student_year_enrollment', 'class_transfer_history', 'audit_log')
-                """)) {
-            moveToFirstRow(resultSet, "enrollment table query should return a row");
-            Assertions.assertEquals(6, resultSet.getInt(1), "V4 should create all Plan 026 tables");
-        }
-    }
-
-    private void checkEnrollmentUniqueness(Statement statement) throws Exception {
-        try (ResultSet resultSet = statement.executeQuery("""
-                SELECT COUNT(*)
-                FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
-                WHERE CONSTRAINT_NAME = 'uk_enrollment_student_year'
-                """)) {
-            moveToFirstRow(resultSet, "enrollment constraint query should return a row");
-            Assertions.assertEquals(1, resultSet.getInt(1), "student-year uniqueness must be database enforced");
-        }
-    }
-
     private JdbcDataSource dataSource(String databaseName) {
         JdbcDataSource dataSource = new JdbcDataSource();
         dataSource.setUrl(
@@ -128,28 +89,6 @@ class FlywayMigrationTest {
                     INSERT INTO `user` (user_name, password, created_at)
                     VALUES ('admin01', '%s', CURRENT_TIMESTAMP)
                     """.formatted(bcryptHash));
-            statement.execute("""
-                    CREATE TABLE student (
-                        student_id BIGINT NOT NULL AUTO_INCREMENT,
-                        student_name VARCHAR(35) NOT NULL,
-                        student_code VARCHAR(10) NOT NULL,
-                        PRIMARY KEY (student_id),
-                        CONSTRAINT uk_student_student_code UNIQUE (student_code)
-                    )
-                    """);
-            statement.execute("""
-                    CREATE TABLE student_info (
-                        info_id BIGINT NOT NULL AUTO_INCREMENT,
-                        student_id BIGINT NOT NULL,
-                        address VARCHAR(255) NULL,
-                        average_score DOUBLE NULL,
-                        date_of_birth DATE NULL,
-                        PRIMARY KEY (info_id),
-                        CONSTRAINT uk_student_info_student UNIQUE (student_id),
-                        CONSTRAINT fk_student_info_student FOREIGN KEY (student_id)
-                            REFERENCES student (student_id)
-                    )
-                    """);
         }
     }
 

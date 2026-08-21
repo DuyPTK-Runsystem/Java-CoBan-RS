@@ -51,7 +51,7 @@ PK  enrollment_id       BIGINT UNSIGNED
 FK  student_id          BIGINT UNSIGNED NOT NULL
 FK  academic_year_id    BIGINT UNSIGNED NOT NULL
 FK  current_class_id    BIGINT UNSIGNED NOT NULL
-    status              ACTIVE | COMPLETED | WITHDRAWN
+    status              ACTIVE | COMPLETED | TRANSFERRED
     enrolled_at         DATETIME NOT NULL
     completed_at        DATETIME NULL
     created_at          DATETIME NOT NULL
@@ -60,8 +60,6 @@ UQ  student_id + academic_year_id
 ~~~
 
 Mỗi học sinh có tối đa một hồ sơ học tập trong một năm học. current_class_id là lớp hiện tại; lịch sử trước đó nằm trong class_transfer_history.
-
-Trong Plan 026, chuyển lớp nội bộ giữ `status = ACTIVE` và chỉ cập nhật `current_class_id`; `COMPLETED` dành cho kết năm và `WITHDRAWN` dành cho thôi học ở change request riêng.
 
 ### 6.4. class_transfer_history
 
@@ -88,3 +86,4 @@ Thay đổi lớp phải thực hiện trong một transaction:
 Không xóa lịch sử chuyển lớp.
 
 ---
+

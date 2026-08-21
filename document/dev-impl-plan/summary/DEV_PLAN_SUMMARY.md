@@ -51,4 +51,3 @@ Example:
 | 022 | FE | [FE Documentation Structure by Module](../fe/tooling/022-fe-doc-structure-by-module-2026-08-19.md) | Completed | 2026-08-19 |
 | 023 | Infrastructure | [Docker Image, Test Data Bootstrap và README](023-docker-image-readme-test-data-2026-08-19.md) | Partially implemented; external validation pending | 2026-08-19 |
 | 025 | BE/FE/Document | [Contract, Migration và Scope Freeze](025-contract-migration-scope-freeze-2026-08-20.md) | Approved | 2026-08-20 |
-| 026 | BE | [Student Enrollment & Class Placement](../be/enrollment/026-student-enrollment-class-placement-2026-08-21.md) | Approved | 2026-08-21 |
