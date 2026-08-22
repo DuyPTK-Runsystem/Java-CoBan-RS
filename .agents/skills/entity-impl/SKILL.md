@@ -1,6 +1,6 @@
 ---
 name: entity-impl
-description: Create, update, or review a Spring Data JPA entity and relational table mapping, including identifiers, columns, constraints, indexes, enums, relationships, auditing, and migrations. Use when implementing an Entity.java file, designing a database table, mapping SQL schema to JPA, or checking entity correctness for a DoAn1_BhpWebsite-style Spring Boot service.
+description: Create, update, or review a Spring Data JPA entity and relational table mapping, including identifiers, columns, constraints, indexes, enums, relationships, auditing, and migrations. Use when implementing an Entity.java file, designing a database table, mapping SQL schema to JPA, or checking entity correctness for a Spring Boot service.
 ---
 
 # Implement a JPA entity/table

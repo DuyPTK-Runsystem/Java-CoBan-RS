@@ -1,6 +1,6 @@
 ---
 name: controller-impl
-description: Create, update, or review thin Spring Boot REST controller files in the DoAn1_BhpWebsite style. Use when implementing endpoints, request mappings, validation, pagination, HTTP statuses, authorization annotations, or an EntityController.java template.
+description: Create, update, or review thin Spring Boot REST controller files. Use when implementing endpoints, request mappings, validation, pagination, HTTP statuses, authorization annotations, or an EntityController.java template.
 ---
 
 # Implement a REST controller
