@@ -51,38 +51,24 @@ Chỉ code sau khi Developer Plan đã được người dùng phê duyệt bằ
 Nếu plan sai hoặc thiếu: dừng phần bị ảnh hưởng, báo nguyên nhân/tác động,
 đề xuất plan mới và chờ người dùng phê duyệt bằng tin nhắn qua agent trước khi tiếp tục.
 ## 7. Bước 5 — Validation
-Trước khi hoàn tất:
-- đọc và tuân thủ `BE/BaiTap-RS/config/checkstyle/checkstyle.xml`;
-- chạy Checkstyle;
-- đọc và tuân thủ `BE/BaiTap-RS/config/pmd/ruleset.xml`;
-- chạy PMD;
-- chạy build;
-- chạy test liên quan.
-Sửa lỗi do thay đổi hiện tại gây ra rồi chạy lại validation.
-Lỗi cũ ngoài scope phải được phân biệt và báo cáo; không tự ý refactor.
-Chi tiết: `.codex/workflows/references/VALIDATION_AND_DEBUG.md`.
+Gọi skill `.agents/skills/backend-validation/SKILL.md` để thực hiện validation backend.
+Skill này là nguồn duy nhất định nghĩa thứ tự lệnh, trạng thái kết quả và giới hạn debug.
+Workflow chỉ tiếp nhận `Validation Result`, không lặp lại các lệnh hoặc quy tắc của skill.
 
-## 8. Bước 6 — Giới hạn debug
-Tối đa **10 vòng**: code → validation → phân tích → sửa → chạy lại.
-Theo dõi số vòng đã dùng.
-Sau 10 vòng chưa giải quyết được, dừng và báo:
-- lỗi còn lại và nguyên nhân đã xác định;
-- phương án đã thử;
-- thay đổi đã thực hiện;
-- phần chưa hoàn thành/thông tin còn thiếu;
-- bước tiếp theo đề xuất.
-Không tiếp tục trial-and-error ngẫu nhiên hoặc che giấu thất bại.
+Sau khi có `Validation Result`, tạo hoặc cập nhật Dev Note bằng
+`.agents/skills/dev-note/SKILL.md`, ghi đúng kết quả thực tế.
 
-## 9. Bước 7 — Báo cáo kết quả
+## 8. Bước 6 — Báo cáo kết quả
 Báo cáo cuối phải phản ánh đúng thực tế:
 - requirement đã thực hiện;
 - file thay đổi và mục đích;
-- Checkstyle / PMD / build / test;
+- `Validation Result` từ `backend-validation`;
+- Dev Note đã tạo hoặc cập nhật;
 - sai lệch so với Developer Plan nếu có;
 - lỗi, giới hạn hoặc bước tiếp theo nếu còn.
 Dùng `.codex/workflows/references/REPORT_TEMPLATES.md`.
 
-## 10. Thứ tự ưu tiên
+## 9. Thứ tự ưu tiên
 1. Yêu cầu trực tiếp của người dùng trong task hiện tại.
 2. Rule bắt buộc của project.
 3. Developer Plan đã được phê duyệt.
@@ -91,11 +77,11 @@ Dùng `.codex/workflows/references/REPORT_TEMPLATES.md`.
 6. Convention suy ra từ code hiện tại.
 Không dùng mức thấp hơn để vi phạm mức cao hơn.
 
-## 11. Completion checklist
+## 10. Completion checklist
 - [ ] Đã đọc rule, docs và code liên quan.
 - [ ] Developer Plan hợp lệ và đã được người dùng phê duyệt bằng tin nhắn qua agent.
 - [ ] Thay đổi đúng scope.
-- [ ] Checkstyle, PMD, build và test liên quan đã được chạy.
-- [ ] Debug không vượt quá 10 vòng.
+- [ ] `backend-validation` đã trả về `Validation Result`.
+- [ ] Dev Note đã ghi lại validation thực tế.
 - [ ] Lỗi còn lại được công khai rõ ràng.
 - [ ] Báo cáo cuối khớp với validation thực tế.
