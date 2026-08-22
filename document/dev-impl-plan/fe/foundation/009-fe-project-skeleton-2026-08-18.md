@@ -4,7 +4,7 @@
 
 - Khởi tạo project frontend trong `FE/` theo stack đã thống nhất: Vue 3, Vite, TypeScript, Vue Router, PrimeVue và Storybook.
 - Tạo skeleton có thể chạy được, có cấu trúc module rõ ràng để tiếp tục triển khai User và Student module.
-- Dựng các route/view/component khung bám theo bốn mẫu HTML trong `document/application-doc/html-sample/`:
+- Dựng các route/view/component khung bám theo bốn mẫu HTML trong `document/application-doc/v1/html-sample/`:
   - Login.
   - Register.
   - Student List.
@@ -13,14 +13,14 @@
 
 ## 2. Tài liệu và nguồn tham chiếu
 
-- `document/application-doc/ApplicationContext.md`.
-- `document/application-doc/modules/UserModule.md`.
-- `document/application-doc/modules/StudentModule.md`.
+- `document/application-doc/v1/ApplicationContext.md`.
+- `document/application-doc/v1/modules/UserModule.md`.
+- `document/application-doc/v1/modules/StudentModule.md`.
 - `FE/AGENTS.override.md`.
-- `document/application-doc/html-sample/login-screen/code.html` và `DESIGN.md`.
-- `document/application-doc/html-sample/register-screen/code.html` và `DESIGN.md`.
-- `document/application-doc/html-sample/student-list-screen/code.html` và `DESIGN.md`.
-- `document/application-doc/html-sample/add-or-update-a-student/code.html` và `DESIGN.md`.
+- `document/application-doc/v1/html-sample/login-screen/code.html` và `DESIGN.md`.
+- `document/application-doc/v1/html-sample/register-screen/code.html` và `DESIGN.md`.
+- `document/application-doc/v1/html-sample/student-list-screen/code.html` và `DESIGN.md`.
+- `document/application-doc/v1/html-sample/add-or-update-a-student/code.html` và `DESIGN.md`.
 
 ## 3. Phạm vi
 

@@ -8,7 +8,7 @@
 
 ## 2. Requirement liên quan
 
-- Module: `document/application-doc/modules/StudentModule.md`.
+- Module: `document/application-doc/v1/modules/StudentModule.md`.
 - Backend workflow: `.codex/workflows/WORKFLOW-BACKEND.md`.
 - Student backend plan đã approved: `document/dev-impl-plan/be/student/005-student-module-backend-2026-08-17.md`.
 - Dev Note hiện tại ghi nhận controller coverage còn thấp và có thể bổ sung MVC/controller tests sau.

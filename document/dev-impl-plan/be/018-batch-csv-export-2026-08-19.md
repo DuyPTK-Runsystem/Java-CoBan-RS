@@ -81,8 +81,8 @@ trigger đã duyệt + JobParameters
 | Repository/projection dưới `student/**` | Sửa hoặc tạo | Đọc inner join sáu cột theo chunk, không đổi CRUD. |
 | `BE/BaiTap-RS/src/test/java/com/JavaTraining/BaiTap_RS/batch/**` | Tạo | Job, mapping, skip và CSV bytes tests với H2/memory buffer. |
 | `BE/BaiTap-RS/src/test/java/com/JavaTraining/BaiTap_RS/student/controller/**` | Sửa hoặc tạo | Endpoint, headers, security và raw response integration test. |
-| `document/application-doc/DataStructure.md` | Sửa | Chốt layout CSV, cột và quyết định đã được xác nhận. |
-| `document/application-doc/ApplicationContext.md` | Sửa | Chốt batch API/memory/skip contract. |
+| `document/application-doc/v1/DataStructure.md` | Sửa | Chốt layout CSV, cột và quyết định đã được xác nhận. |
+| `document/application-doc/v1/ApplicationContext.md` | Sửa | Chốt batch API/memory/skip contract. |
 | `document/dev-note/be/batch/018-batch-csv-export-2026-08-19.md` | Tạo sau implementation | Ghi scope thực tế và evidence validation. |
 
 ## 7. API / database / integration

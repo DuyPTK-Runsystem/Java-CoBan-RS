@@ -346,7 +346,7 @@ phần bị ảnh hưởng nếu hai gate này thay đổi.
 - migration V5 và test schema/migration;
 - `document/dev-note/be/academic/027-academic-subject-teacher-assignment-2026-08-21.md`
   sau implementation.
-- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/change-request/CR-SEM-001-incomplete-score-data-notifications.md`
+- `document/application-doc/v2/change-request/CR-SEM-001-incomplete-score-data-notifications.md`
   là CR tài liệu; không triển khai email hoặc email configuration trong Plan 027.
 
 ### Chỉnh sửa có điều kiện

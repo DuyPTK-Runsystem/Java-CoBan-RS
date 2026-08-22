@@ -149,7 +149,7 @@ Baseline bắt buộc `NFR-AUDITABILITY-001` cho chuyển lớp; chỉ có `crea
 
 ### Cập nhật
 
-- `document/application-doc/.../data-model/02-AcademicCatalog.md`, `03-StudentsAndEnrollment.md` và `08-AuditAndConstraints.md` theo các decision đã chốt, gồm audit event transfer.
+- `document/application-doc/v1/.../data-model/02-AcademicCatalog.md`, `03-StudentsAndEnrollment.md` và `08-AuditAndConstraints.md` theo các decision đã chốt, gồm audit event transfer.
 - `document/dev-impl-plan/be/BE_DEV_PLAN_SUMMARY.md` và `document/dev-impl-plan/summary/DEV_PLAN_SUMMARY.md`.
 - Security/configuration chỉ khi cần bổ sung mapping quyền đã được chốt; các Student API legacy không thay đổi.
 

@@ -13,9 +13,9 @@
   - Không implement các entity `Role` và `Permission`.
   - `User` chỉ cần `id`, `username`, `password` và audit fields.
 - Tài liệu liên quan:
-  - `document/application-doc/ApplicationContext.md`
-  - `document/application-doc/modules/UserModule.md`
-  - `document/application-doc/DataStructure.md`
+  - `document/application-doc/v1/ApplicationContext.md`
+  - `document/application-doc/v1/modules/UserModule.md`
+  - `document/application-doc/v1/DataStructure.md`
   - `BE/BaiTap-RS/boilerplate/BOILERPLATE_0_SUMMARY.md`
   - `BE/BaiTap-RS/boilerplate/BOILERPLATE_1_ENTITIES.md`
   - `BE/BaiTap-RS/boilerplate/BOILERPLATE_2_DTOS.md`

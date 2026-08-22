@@ -9,10 +9,10 @@ Follow this file together with `.codex/AGENTS.md` and `.codex/AGENTS_DETAIL.md`.
 
 Before frontend work, read the relevant files:
 
-- `document/application-doc/ApplicationContext.md`
-- `document/application-doc/modules/UserModule.md`
-- `document/application-doc/modules/StudentModule.md`
-- `document/application-doc/DataStructure.md` when data constraints matter
+- `document/application-doc/v1/ApplicationContext.md`
+- `document/application-doc/v1/modules/UserModule.md`
+- `document/application-doc/v1/modules/StudentModule.md`
+- `document/application-doc/v1/DataStructure.md` when data constraints matter
 - the approved Developer Plan, if any
 
 Do not invent behavior for requirements marked `TBD`.

@@ -39,18 +39,18 @@ Chỉ đọc tài liệu phù hợp khi task cần; không tải toàn bộ tài
 ### Version v1
 
 - Quy tắc agent: đọc `.codex/AGENTS.md` và `.codex/AGENTS_DETAIL.md` khi cần xác định quy trình chung.
-- Context ứng dụng: đọc `document/application-doc/ApplicationContext.md` khi cần hiểu phạm vi hoặc kiến trúc toàn project.
-- Module user: đọc `document/application-doc/modules/UserModule.md` khi task liên quan đăng ký, đăng nhập, logout hoặc user validation.
-- Module student: đọc `document/application-doc/modules/StudentModule.md` khi task liên quan student list, search, sort, page, CRUD hoặc student code.
-- Database: đọc `document/application-doc/DataStructure.md` khi task liên quan schema, migration, JPA, relationship hoặc batch data.
+- Context ứng dụng: đọc `document/application-doc/v1/ApplicationContext.md` khi cần hiểu phạm vi hoặc kiến trúc toàn project.
+- Module user: đọc `document/application-doc/v1/modules/UserModule.md` khi task liên quan đăng ký, đăng nhập, logout hoặc user validation.
+- Module student: đọc `document/application-doc/v1/modules/StudentModule.md` khi task liên quan student list, search, sort, page, CRUD hoặc student code.
+- Database: đọc `document/application-doc/v1/DataStructure.md` khi task liên quan schema, migration, JPA, relationship hoặc batch data.
 
 ### Version v2
 
-- Context ứng dụng: đọc `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/ApplicationContext.md` khi cần hiểu phạm vi hoặc kiến trúc toàn project.
-- Requirement baseline: đọc `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/RequirementBaseline.md`, sau đó chỉ chọn module phù hợp.
-- Module user/auth: đọc `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/modules/UserModule.md` cho contract hiện tại và `00-CommonAndAuthModule.md` cùng thư mục cho baseline auth/role mở rộng.
-- Module student: đọc `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/modules/StudentModule.md` cho CRUD hiện tại; đọc thêm `01-AcademicStructureModule.md` hoặc `02-EnrollmentAndTeachingModule.md` khi task mở rộng sang khối, lớp hoặc xếp lớp.
-- Database: đọc `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/DataStructure.md`, sau đó chỉ đọc nhóm file `data-model/` phù hợp khi task liên quan schema, migration, JPA, relationship hoặc batch data.
+- Context ứng dụng: đọc `document/application-doc/v2/ApplicationContext.md` khi cần hiểu phạm vi hoặc kiến trúc toàn project.
+- Requirement baseline: đọc `document/application-doc/v2/RequirementBaseline.md`, sau đó chỉ chọn module phù hợp.
+- Module user/auth: đọc `document/application-doc/v2/modules/UserModule.md` cho contract hiện tại và `00-CommonAndAuthModule.md` cùng thư mục cho baseline auth/role mở rộng.
+- Module student: đọc `document/application-doc/v2/modules/StudentModule.md` cho CRUD hiện tại; đọc thêm `01-AcademicStructureModule.md` hoặc `02-EnrollmentAndTeachingModule.md` khi task mở rộng sang khối, lớp hoặc xếp lớp.
+- Database: đọc `document/application-doc/v2/DataStructure.md`, sau đó chỉ đọc nhóm file `data-model/` phù hợp khi task liên quan schema, migration, JPA, relationship hoặc batch data.
 
 ### Tài liệu dùng chung
 

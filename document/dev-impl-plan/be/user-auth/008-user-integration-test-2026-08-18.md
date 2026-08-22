@@ -9,7 +9,7 @@
 
 ## 2. Requirement liên quan
 
-- Module: `document/application-doc/modules/UserModule.md`.
+- Module: `document/application-doc/v1/modules/UserModule.md`.
 - Base User/Auth backend plan đã approved:
   - `document/dev-impl-plan/be/user-auth/001-base-boilerplate-user-auth-2026-08-17.md`
 - Quyết định backend hiện tại:

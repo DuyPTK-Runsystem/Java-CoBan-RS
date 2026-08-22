@@ -11,10 +11,10 @@
 
 ## 2. Requirement và nguồn tham chiếu
 
-- `document/application-doc/modules/StudentModule.md`: Student List có search theo
+- `document/application-doc/v1/modules/StudentModule.md`: Student List có search theo
   code/name/birthday với AND semantics; sort các business column; page size 10; Add,
   Edit và Delete confirmation.
-- `document/application-doc/ApplicationContext.md`: Student UI gọi REST API, giữ UI
+- `document/application-doc/v1/ApplicationContext.md`: Student UI gọi REST API, giữ UI
   state và hiển thị validation/API error; backend là authoritative.
 - `FE/AGENTS.override.md`: service typed trong `src/services`, không đặt raw HTTP
   call trong component; list dùng server-side sort/page và delete confirmation.

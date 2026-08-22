@@ -7,7 +7,7 @@
 
 ## Actual scope completed
 
-- Audited repository-managed skills for literal `document/application-doc/` references.
+- Audited repository-managed skills for literal `document/application-doc/v1/` references.
 - Preserved all v1 application-document routes in `start-agent-session`.
 - Added a v2 application-document section rooted at the modular v2 document package.
 - Added a mandatory version-selection gate: when the prompt does not identify v1 or v2, the agent stops work that depends on application documents and asks the user which version applies.
@@ -22,8 +22,8 @@
 
 ## Important decisions
 
-- v1 remains available at `document/application-doc/`.
-- v2 is available at `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/`.
+- v1 remains available at `document/application-doc/v1/`.
+- v2 is available at `document/application-doc/v2/`.
 - The agent must not choose either version by default; user confirmation is required when the prompt is ambiguous.
 - Existing general `document/` paths for Dev Notes, Developer Plans and Postman collections remain unchanged because they are not application-document references.
 

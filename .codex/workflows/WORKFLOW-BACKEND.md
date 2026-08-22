@@ -17,7 +17,7 @@ Tài liệu:
 ## 3. Bước 1 — Hiểu yêu cầu
 Trước khi hành động:
 - đọc rule áp dụng trong `.codex/AGENTS.md` và `AGENTS.override.md` nếu có;
-- đọc docs liên quan trong `document/application-doc/`;
+- đọc docs liên quan trong `document/application-doc/`; chọn rõ `v1/` hoặc `v2/` trước khi đọc sâu;
 - đọc implementation hiện tại và Developer Plan liên quan;
 - xác định requirement, kiến trúc, flow, module, dependency và rủi ro.
 Không chỉnh sửa mã nguồn ở bước này.

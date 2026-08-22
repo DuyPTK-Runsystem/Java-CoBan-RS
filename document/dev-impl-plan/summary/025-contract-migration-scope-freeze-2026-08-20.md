@@ -20,19 +20,19 @@ Thiết lập một baseline triển khai an toàn cho schema và contract v2 tr
 
 ### Application documentation v2
 
-- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/ApplicationContext.md`.
-- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/RequirementBaseline.md`.
-- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/modules/00-CommonAndAuthModule.md`.
-- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/modules/01-AcademicStructureModule.md`.
-- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/modules/02-EnrollmentAndTeachingModule.md`.
-- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/modules/04-AssessmentAndScoringModule.md`.
-- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/modules/05-ScoreChangeAndCalculationModule.md`.
-- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/modules/06-RetakeAndTranscriptModule.md`.
-- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/modules/07-AccessQualityAndAcceptanceModule.md`.
-- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/data-model/00-OverviewAndMigration.md`.
-- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/data-model/01-IdentityAndAccess.md`.
-- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/data-model/03-StudentsAndEnrollment.md`.
-- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/data-model/09-MigrationAndJPA.md`.
+- `document/application-doc/v2/ApplicationContext.md`.
+- `document/application-doc/v2/RequirementBaseline.md`.
+- `document/application-doc/v2/modules/00-CommonAndAuthModule.md`.
+- `document/application-doc/v2/modules/01-AcademicStructureModule.md`.
+- `document/application-doc/v2/modules/02-EnrollmentAndTeachingModule.md`.
+- `document/application-doc/v2/modules/04-AssessmentAndScoringModule.md`.
+- `document/application-doc/v2/modules/05-ScoreChangeAndCalculationModule.md`.
+- `document/application-doc/v2/modules/06-RetakeAndTranscriptModule.md`.
+- `document/application-doc/v2/modules/07-AccessQualityAndAcceptanceModule.md`.
+- `document/application-doc/v2/data-model/00-OverviewAndMigration.md`.
+- `document/application-doc/v2/data-model/01-IdentityAndAccess.md`.
+- `document/application-doc/v2/data-model/03-StudentsAndEnrollment.md`.
+- `document/application-doc/v2/data-model/09-MigrationAndJPA.md`.
 
 ### Current implementation and existing contracts
 
@@ -40,8 +40,8 @@ Thiết lập một baseline triển khai an toàn cho schema và contract v2 tr
 - `BE/BaiTap-RS/build.gradle.kts`.
 - User/Auth, Student and security packages under `BE/BaiTap-RS/src/main/java/com/JavaTraining/BaiTap_RS/`.
 - `document/dev-impl-plan/be/010-api-contract-and-tbd-resolution-2026-08-18.md`.
-- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/modules/UserModule.md`.
-- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/modules/StudentModule.md`.
+- `document/application-doc/v2/modules/UserModule.md`.
+- `document/application-doc/v2/modules/StudentModule.md`.
 
 ## 4. Contract và scope cần đóng băng
 
@@ -123,7 +123,7 @@ Tests dùng fixture cô lập; không đọc hoặc ghi database dùng chung. Ch
 
 ### Có thể tạo hoặc cập nhật sau approval
 
-- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/ContractMigrationScopeFreeze.md`.
+- `document/application-doc/v2/ContractMigrationScopeFreeze.md`.
 - Các `data-model/*.md` v2 liên quan, chỉ để ghi quyết định đã xác nhận hoặc CR.
 - `BE/BaiTap-RS/build.gradle.kts`, `BE/BaiTap-RS/src/main/resources/application.properties` và Flyway migration directory.
 - Entity/repository/security/test trực tiếp bị ảnh hưởng bởi migration foundation đã được duyệt.

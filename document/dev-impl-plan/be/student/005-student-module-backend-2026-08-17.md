@@ -10,9 +10,9 @@
 ## 2. Requirement liên quan
 
 - Tài liệu:
-  - `document/application-doc/ApplicationContext.md`
-  - `document/application-doc/modules/StudentModule.md`
-  - `document/application-doc/DataStructure.md`
+  - `document/application-doc/v1/ApplicationContext.md`
+  - `document/application-doc/v1/modules/StudentModule.md`
+  - `document/application-doc/v1/DataStructure.md`
   - `document/dev-impl-plan/be/BE_DEV_PLAN_SUMMARY.md`
 - Scope chức năng:
   - Student list.

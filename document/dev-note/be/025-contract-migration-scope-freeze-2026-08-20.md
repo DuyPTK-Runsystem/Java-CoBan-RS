@@ -21,7 +21,7 @@
 | Flyway setup | `BE/BaiTap-RS/build.gradle.kts`, `BE/BaiTap-RS/src/main/resources/application.properties`, `BE/BaiTap-RS/src/main/resources/db/migration/V1__create_legacy_schema.sql`, `V2__rename_user_to_app_user.sql`, `V3__create_roles_and_assign_legacy_administrators.sql` |
 | Security/domain | `BE/BaiTap-RS/src/main/java/com/JavaTraining/BaiTap_RS/config/SecurityConfiguration.java`, `security/UserPrincipal.java`, `student/controller/StudentController.java`, `user/domain/entity/User.java`, `user/domain/entity/Role.java` |
 | Tests | `config/FlywayMigrationTest.java`, `security/UserPrincipalRoleTest.java`, `student/controller/StudentAuthorizationIntegrationTest.java` and existing Student integration tests |
-| v2 documentation | `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/ApplicationContext.md`, `ContractMigrationScopeFreeze.md` |
+| v2 documentation | `document/application-doc/v2/ApplicationContext.md`, `ContractMigrationScopeFreeze.md` |
 | Tracking | Plan 025, this Dev Note, `document/dev-note/be/BE_DEV_NOTE_SUMMARY.md`, `document/dev-note/summary/DEV_NOTE_SUMMARY.md` |
 
 ## Important decisions

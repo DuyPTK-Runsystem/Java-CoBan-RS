@@ -24,7 +24,7 @@
     `123456 -> STU0123456`); quá 7 chữ số phải warning ngay dưới textbox;
   - Update Student disable textbox Student code;
   - bổ sung Storybook cho module Student.
-- `document/application-doc/modules/StudentModule.md`: Birthday dùng định dạng UI
+- `document/application-doc/v1/modules/StudentModule.md`: Birthday dùng định dạng UI
   `dd-mm-yyyy`, còn API vẫn dùng `yyyy-MM-dd`.
 - Plan 015 và mã nguồn hiện tại: `StudentForm`/`StudentSearchForm` dùng PrimeVue
   `DatePicker`; `StudentTable` đang render thô `dateOfBirth` API; view vẫn chịu trách
