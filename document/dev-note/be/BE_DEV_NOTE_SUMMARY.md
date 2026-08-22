@@ -20,6 +20,7 @@
 | 024 | workflow-skill | [Modular v2 Document Paths in Skills](workflow-skill/024-modular-v2-document-paths-2026-08-20.md) | Completed | 2026-08-20 |
 | 025 | contract-migration | [Contract, Migration và Scope Freeze](025-contract-migration-scope-freeze-2026-08-20.md) | Completed; Docker MySQL preflight not run | 2026-08-20 |
 | 026 | enrollment | [Student Enrollment & Class Placement](enrollment/026-student-enrollment-class-placement-2026-08-21.md) | Completed; effectiveAt direction 1 clarified | 2026-08-21 |
+| 027 | academic | [G3 Semester CR](academic/027-semester-g3-cr-2026-08-22.md) | Completed; CR awaiting approval | 2026-08-22 |
 
 ## Module folders
 

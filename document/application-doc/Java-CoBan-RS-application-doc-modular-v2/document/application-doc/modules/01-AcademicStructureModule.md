@@ -107,6 +107,9 @@ Dữ liệu mặc định:
   2. Đã qua 45 ngày kể từ ngày kết thúc học kỳ.
 - `BR-SEM-005`: Tác vụ tự động khóa phải chạy nền theo lịch.
 - `BR-SEM-006`: Khi tự động khóa, hệ thống tạo báo cáo dữ liệu điểm chưa hoàn chỉnh.
+- `BR-SEM-006` được mở rộng bởi `CR-SEM-001`. Các business rule phát sinh từ rule gốc
+  dùng mã `BR-SEM-006-01`, `BR-SEM-006-02`, ...; phần code email và email configuration
+  được để lại cho Implementation Note 27.1, không thuộc Plan 027.
 - `BR-SEM-007`: Dữ liệu chưa hoàn chỉnh không ngăn việc khóa theo hai điều kiện trên.
 - `BR-SEM-008`: Học kỳ đã khóa không cho giáo viên sửa điểm trực tiếp.
 - `BR-SEM-009`: Mở lại học kỳ phải lưu người thực hiện, thời gian và lý do.
@@ -166,4 +169,3 @@ Quy tắc:
 - `BR-CLASS-009`: Không đổi khối sau khi lớp đã phát sinh dữ liệu.
 - `BR-CLASS-010`: Không xóa lớp đã có học sinh, phân công, điểm danh hoặc điểm.
 - `BR-CLASS-011`: Lớp đã đóng chỉ được truy cập ở chế độ xem.
-

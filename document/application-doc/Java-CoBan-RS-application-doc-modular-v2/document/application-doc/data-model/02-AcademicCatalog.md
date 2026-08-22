@@ -34,7 +34,7 @@ FK  academic_year_id   BIGINT UNSIGNED NOT NULL
     code               HK1 | HK2
     start_date         DATE NOT NULL
     end_date           DATE NOT NULL
-    status              OPEN | LOCKED
+    status              DRAFT | ACTIVE | LOCKED | CLOSED
     locked_at           DATETIME NULL
     locked_by           BIGINT UNSIGNED NULL
     created_at          DATETIME NOT NULL
@@ -48,6 +48,18 @@ Học kỳ được khóa khi:
 2. Đã qua 45 ngày dương lịch kể từ ngày kết thúc học kỳ.
 
 Việc còn thiếu một số ô điểm không tự động ngăn khóa học kỳ. Các thiếu sót phải được ghi nhận trong báo cáo ngoại lệ.
+
+Lifecycle chuẩn của học kỳ:
+
+~~~text
+DRAFT -> ACTIVE -> LOCKED -> CLOSED
+~~~
+
+`DRAFT` là trạng thái cấu hình, `ACTIVE` là trạng thái đang vận hành,
+`LOCKED` ngăn giáo viên sửa điểm trực tiếp nhưng vẫn cho phép xem dữ liệu,
+và `CLOSED` là trạng thái chỉ đọc sau khi kết thúc học kỳ. Chi tiết nghiệp vụ
+cảnh báo dữ liệu điểm chưa hoàn chỉnh được ghi trong `CR-SEM-001`; email delivery
+và email configuration không thuộc implementation của Plan 027.
 
 ### 5.3. grade_level
 

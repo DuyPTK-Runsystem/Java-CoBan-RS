@@ -90,6 +90,28 @@ Kết quả phải bảo đảm:
   trong `role`/`user_role`.
 - Tự suy ra quyền giảng dạy từ `teacher_subject_specialty`; nếu cần quản lý specialty,
   phải chốt decision gate G4 trước.
+- Gửi email, cấu hình SMTP/email provider, email template, notification log, idempotency,
+  retry/delivery workflow và persistence notification; các phần này được ghi chú để quay lại
+  trong Implementation Note 27.1, không triển khai trong Plan 027. Plan 027 chỉ kiểm tra
+  completeness tại các checkpoint G3 và trả output `NEEDS_NOTIFICATION` hoặc `NO_NOTIFICATION`.
+
+### 4.3. Implementation Note 27.1
+
+Trong Plan 027, G3/`CR-SEM-001` chỉ implement kiểm tra completeness tại các checkpoint sau và
+trả output quyết định có cần gửi thông báo hay không:
+
+```text
+t-45d, t-30d, t-14d, t-7d, t-3d, t-1d,
+t,     t+1d,  t+3d,  t+7d,  t+14d
+```
+
+Các phần code tương lai ngoài Plan 027 sẽ được xử lý trong một plan/delta riêng, tối thiểu gồm:
+
+- scheduler đầy đủ và persistence/idempotency log cho từng `{semester, checkpoint}`;
+- email delivery, email configuration, template và retry/outbox policy;
+- test scheduler, notification retry, duplicate prevention và email failure.
+
+Plan 027 không gửi thông báo và không tạo persistence, idempotency, retry/delivery component.
 
 ## 5. Kiến trúc và luồng hiện tại
 
@@ -138,10 +160,31 @@ Các entity có `createdAt`/`updatedAt`; assignment có `validFrom`, `validTo`, 
   mới; không xóa record đã được tham chiếu.
 - `ClassSubject`: class thuộc academic year của semester; subject active; class/semester
   ở trạng thái cho phép; unique `(class_id, subject_id, semester_id)`.
-- `ClassSubject`: chỉ tạo khi subject được phép áp dụng cho grade của class theo mô hình
-  applicability được chốt ở G2; không để assignment tự bỏ qua kiểm tra này.
+- `ClassSubject`: chỉ tạo khi có một `subject_applicability` ACTIVE khớp với subject,
+  semester và target của class; không để assignment tự bỏ qua kiểm tra này.
 - Môn `SKILL` chỉ được cấu hình/tổng kết trong một học kỳ; rule này được validate ở catalog,
   không đợi tới score module.
+
+`subject_type` và `application_scope` là hai khái niệm độc lập:
+
+- `subject_type = ACADEMIC | SKILL` mô tả cách môn tham gia nghiệp vụ điểm;
+- `application_scope = GRADE | CLASS` mô tả target dùng khi cấu hình môn.
+
+Vì vậy code không được hardcode quan hệ `ACADEMIC -> GRADE` hoặc `SKILL -> CLASS`.
+Mỗi subject lưu scope của chính nó; dữ liệu seed/API có thể đặt mặc định hiện tại là
+`ACADEMIC/GRADE` và `SKILL/CLASS`, nhưng validator chỉ đọc `application_scope`.
+
+`subject_applicability` dùng một mô hình target chung:
+
+```text
+subject + semester + scope_type + grade_level_id(nullable) + class_id(nullable)
+```
+
+Với `scope_type=GRADE`, chỉ `grade_level_id` được phép có giá trị. Với `scope_type=CLASS`,
+chỉ `class_id` được phép có giá trị. Database dùng hai foreign key nullable và CHECK để
+giữ tính nhất quán; service kiểm tra `scope_type` khớp `subject.application_scope`.
+`class_subject` vẫn là offering thực tế của một lớp trong một học kỳ và là parent của
+`subject_teaching_assignment`.
 
 ### 6.3. Assignment transaction và concurrency
 
@@ -224,7 +267,10 @@ Các bảng chính:
 
 - `semester`: FK `academic_year_id`, code, dates, status, lock metadata và audit timestamps;
 - `teacher`: FK nullable unique tới `app_user`, `teacher_code` unique, name/status/timestamps;
-- `subject`: code/name/type/status/timestamps;
+- `subject`: code/name/type/application_scope/status/timestamps;
+- `subject_applicability`: FK `subject_id`, `semester_id`, `scope_type`, nullable FK
+  `grade_level_id`, nullable FK `class_id`, status/timestamps; CHECK chỉ cho phép đúng một
+  target FK theo scope type;
 - `class_subject`: FK `class_id`, `subject_id`, `semester_id`, status/timestamps, unique
   `(class_id, subject_id, semester_id)`;
 - `homeroom_assignment`: FK class/teacher/assigned_by, valid dates, status/timestamps;
@@ -236,25 +282,37 @@ Constraints/index bắt buộc:
 - FK phải dùng `BIGINT` nhất quán với V4 hiện tại và không cascade dữ liệu lịch sử.
 - Unique `semester(academic_year_id, code)`, `teacher(teacher_code)`, nullable unique
   `teacher(user_id)`, `subject(code)`, `class_subject(class_id, subject_id, semester_id)`.
+- Unique applicability theo target: `(subject_id, semester_id, scope_type, grade_level_id,
+  class_id)`; migration phải xử lý NULL/unique theo MySQL và H2 compatibility.
 - Index `homeroom_assignment(class_id, status)`, `homeroom_assignment(teacher_id, status)`,
   `subject_teaching_assignment(class_subject_id, status)`,
-  `subject_teaching_assignment(teacher_id, status)`.
+  `subject_teaching_assignment(teacher_id, status)`,
+  `subject_applicability(subject_id, semester_id, scope_type, status)`,
+  `subject_applicability(grade_level_id, semester_id, status)`,
+  `subject_applicability(class_id, semester_id, status)`.
 - Check status/date ở database trong giới hạn MySQL/H2 compatibility; quy tắc active duy nhất
   và không chồng lấn vẫn do service transaction + lock parent bảo đảm.
 - Không dùng unique `(class_subject_id, status)` vì sẽ làm mất khả năng lưu lịch sử nhiều
   assignment `ENDED`.
 
-Nếu G2 được chốt theo phương án mapping riêng, migration thêm bảng
-`subject_grade_level(subject_id, grade_level_id, ...)` với unique `(subject_id, grade_level_id)`;
-không tự thêm bảng này nếu chưa được user xác nhận.
+Phương án G2 hiện tại đề xuất migration thêm `subject_applicability` thay vì một bảng
+riêng chỉ cho grade. Bảng này cho phép cùng một validator xử lý cả:
+
+```text
+ACADEMIC hiện tại: subject + grade + semester
+SKILL hiện tại:    subject + class + semester
+```
+
+và vẫn mở rộng được scope mới bằng dữ liệu/configuration, không phải thêm nhánh theo từng
+loại môn trong service. Phương án này vẫn cần user xác nhận trước khi implementation.
 
 ## 9. Decision gates cần user xác nhận
 
 | Gate | Nội dung chưa nhất quán | Đề xuất để review |
 |---|---|---|
 | G1 | `SubjectType` trong module là `ACADEMIC/SKILL`, còn data model là `NORMAL/SKILL`. | **Đã chốt theo user:** dùng canonical value `ACADEMIC/SKILL`; migration, entity và DTO phải dùng đúng hai giá trị này. |
-| G2 | FR-SUBJECT-003 yêu cầu môn áp dụng theo khối/học kỳ, nhưng schema hiện có chỉ biểu diễn `class_subject` theo lớp. | Khuyến nghị thêm `subject_grade_level` để kiểm tra một môn áp dụng cho nhiều lớp cùng khối; `class_subject` vẫn là offering thực tế. |
-| G3 | Semester schema ghi `OPEN/LOCKED`, module requirement ghi `DRAFT/ACTIVE/LOCKED/CLOSED`. | Khuyến nghị dùng lifecycle requirement của module; cần chốt enum và scope reopen/close. |
+| G2 | FR-SUBJECT-003 yêu cầu hai kiểu target: môn học theo khối/học kỳ và môn học theo lớp/học kỳ. | **Đã chốt theo user ngày 2026-08-22:** tách `subject_type` khỏi `application_scope`, dùng `subject_applicability` với `scope_type=GRADE/CLASS`; validator đọc scope từ subject/data, không hardcode `ACADEMIC` hay `SKILL`. |
+| G3 | Semester schema ghi `OPEN/LOCKED`, module requirement ghi `DRAFT/ACTIVE/LOCKED/CLOSED`. | **Đã chốt theo user ngày 2026-08-22:** dùng lifecycle `DRAFT -> ACTIVE -> LOCKED -> CLOSED`; mở rộng `BR-SEM-006` được ghi trong `CR-SEM-001`, còn email/config email để Implementation Note 27.1. |
 | G4 | Teacher có “danh sách môn chuyên môn” trong requirement nhưng chưa có bảng mapping trong data model. | Hoặc thêm `teacher_subject_specialty`, hoặc ghi nhận specialty là scope sau; trong mọi phương án specialty không cấp quyền assignment. |
 | G5 | `FR-TEACHER-005` cho phép ngừng công tác nhưng assignment đang active sẽ xử lý thế nào. | Khuyến nghị không tự ENDED assignment trong cùng request; từ chối assignment mới và yêu cầu workflow replace/end explicit, giữ lịch sử. |
 | G6 | Baseline nói “kết thúc hoặc hủy assignment” nhưng schema chỉ có `ACTIVE/ENDED`. | Khuyến nghị dùng `ENDED` cho kết thúc/hủy và bắt buộc `validTo`; thêm `reason` chỉ khi user yêu cầu contract riêng. |
@@ -280,6 +338,8 @@ Nếu user chưa chốt G2-G4, chỉ được chuẩn bị code/package hoặc t
 - migration V5 và test schema/migration;
 - `document/dev-note/be/academic/027-academic-subject-teacher-assignment-2026-08-21.md`
   sau implementation.
+- `document/application-doc/Java-CoBan-RS-application-doc-modular-v2/document/application-doc/change-request/CR-SEM-001-incomplete-score-data-notifications.md`
+  là CR tài liệu; không triển khai email hoặc email configuration trong Plan 027.
 
 ### Chỉnh sửa có điều kiện
 
@@ -287,6 +347,8 @@ Nếu user chưa chốt G2-G4, chỉ được chuẩn bị code/package hoặc t
 - `EnrollmentLookupService` chỉ chỉnh nếu cần query môn theo enrollment của học sinh.
 - security chỉ chỉnh khi cần map teacher account hiện hành; không đổi JWT contract.
 - application data-model docs chỉ cập nhật sau khi các gate/schema decision được user chốt.
+- CR-SEM-001 chỉ được code qua Implementation Note 27.1 sau khi CR và các open decisions
+  của CR được phê duyệt riêng.
 
 ## 11. Unit test và validation plan
 
