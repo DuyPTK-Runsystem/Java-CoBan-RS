@@ -12,16 +12,17 @@ Thực hiện unit test theo plan đã được phê duyệt sau khi code backen
 1. Đọc Developer Plan và `unit-test-plan` tương ứng.
 2. Kiểm tra diff production code để bảo đảm test bao phủ behavior mới và regression risk.
 3. Viết unit test cho case thành công, lỗi, boundary và interaction đã được plan xác định.
-4. Chạy test từ `BE/BaiTap-RS`:
+4. Chạy Gradle task `test` từ `BE/BaiTap-RS` bằng wrapper phù hợp với môi trường.
 
 ```text
-./gradlew.bat test
+test
 ```
 
-5. Kiểm tra task JaCoCo khả dụng bằng `./gradlew.bat tasks --all`, sau đó chạy:
+5. Kiểm tra task JaCoCo khả dụng bằng Gradle task `tasks --all`, sau đó chạy
+task `jacocoTestReport`:
 
 ```text
-./gradlew.bat jacocoTestReport
+jacocoTestReport
 ```
 
 6. Đọc report coverage, tối thiểu kiểm tra class/method vừa thay đổi và ghi nhận instruction, branch hoặc line coverage nếu report cung cấp.
