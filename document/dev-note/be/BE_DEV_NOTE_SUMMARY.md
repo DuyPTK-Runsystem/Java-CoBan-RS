@@ -23,6 +23,7 @@
 | 027.1 | academic | [Plan 027 Decision Update](academic/027.1-plan-027-decision-update-2026-08-22.md) | Documentation decision update; implementation pending | 2026-08-22 |
 | 027 | academic | [G3 Semester CR](academic/027-semester-g3-cr-2026-08-22.md) | Completed; CR awaiting approval | 2026-08-22 |
 | 027 | academic | [Academic Subject & Teacher Assignment Implementation](academic/027-academic-subject-teacher-assignment-implementation-2026-08-22.md) | Completed; 27.1 not implemented | 2026-08-22 |
+| 028 | attendance | [Attendance Session Foundation](attendance/028-attendance-session-foundation-2026-08-22.md) | Completed | 2026-08-22 |
 
 ## Module folders
 
@@ -31,3 +32,4 @@
 - `refactor/`: Backend refactor implementation notes that span modules.
 - `workflow-skill/`: Backend/project workflow and skill implementation notes.
 - `batch/`: Spring Batch and CSV export planning/implementation notes.
+- `attendance/`: Attendance session foundation, exception attendance and GVCN-scope notes.

@@ -47,3 +47,4 @@ NNN-short-topic-yyyy-mm-dd.md
 | 027.1 | BE | [Plan 027 Decision Update](../be/academic/027.1-plan-027-decision-update-2026-08-22.md) | Documentation decision update; implementation pending | 2026-08-22 |
 | 027 | BE | [G3 Semester CR](../be/academic/027-semester-g3-cr-2026-08-22.md) | Completed; CR awaiting approval | 2026-08-22 |
 | 027 | BE | [Academic Subject & Teacher Assignment Implementation](../be/academic/027-academic-subject-teacher-assignment-implementation-2026-08-22.md) | Completed; 27.1 not implemented | 2026-08-22 |
+| 028 | BE | [Attendance Session Foundation](../be/attendance/028-attendance-session-foundation-2026-08-22.md) | Completed | 2026-08-22 |
