@@ -44,7 +44,7 @@
 - Mã giáo viên, họ tên.
 - Ngày sinh, giới tính.
 - Điện thoại, email.
-- Tổ chuyên môn và danh sách môn chuyên môn.
+- Tổ chuyên môn.
 - Ngày vào trường.
 - Trạng thái: `ACTIVE`, `ON_LEAVE`, `INACTIVE`.
 - Tài khoản được liên kết.
@@ -55,7 +55,7 @@
 - `FR-TEACHER-001`: Tạo và cập nhật hồ sơ giáo viên.
 - `FR-TEACHER-002`: Tìm kiếm, lọc và phân trang giáo viên.
 - `FR-TEACHER-003`: Liên kết giáo viên với tài khoản.
-- `FR-TEACHER-004`: Quản lý môn chuyên môn.
+- `FR-TEACHER-004`: Quản lý tổ chuyên môn.
 - `FR-TEACHER-005`: Ngừng hoặc kích hoạt công tác.
 - `FR-TEACHER-006`: Xem lịch sử phân công.
 
@@ -66,7 +66,7 @@
 - `BR-TEACHER-003`: Giáo viên ngừng công tác không được nhận phân công mới.
 - `BR-TEACHER-004`: Ngừng công tác không làm mất lịch sử.
 - `BR-TEACHER-005`: Không xóa giáo viên đã phát sinh phân công, điểm danh hoặc nhập điểm.
-- `BR-TEACHER-006`: Môn chuyên môn không tự động cấp quyền giảng dạy; quyền được xác định từ phân công.
+- `BR-TEACHER-006`: Tổ chuyên môn không tự động cấp quyền giảng dạy; quyền được xác định từ phân công.
 
 ## 10. Phân công giáo viên — Teaching Assignment
 
@@ -123,4 +123,3 @@ Lịch học xác định những ngày và buổi được xem là buổi học
 - `BR-CALENDAR-002`: Một buổi phải được đánh dấu có học trước khi được dùng trong báo cáo chuyên cần.
 - `BR-CALENDAR-003`: Ngày nghỉ, ngày lễ và buổi không có lịch học không được tính là học sinh có mặt.
 - `BR-CALENDAR-004`: Lịch học phải thuộc năm học và nằm trong khoảng thời gian học kỳ phù hợp.
-

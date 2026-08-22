@@ -2,13 +2,13 @@
   "info": {
     "_postman_id": "8b68a9e1-6b69-4f2e-92f4-f78d4ddff3f1",
     "name": "Java CoBan API",
-    "description": "Postman collection for the Java-CoBan backend API.",
+    "description": "# Full API Flow Checklist\n\nUse this checklist when running the Java CoBan API collection. Run **Auth / Login** first and confirm `{{accessToken}}` is populated.\n\n## 0. Auth\n- [ ] Register a user when the environment has no login account yet.\n- [ ] Login and store `data.access_token` into `{{accessToken}}`.\n- [ ] Read current account with the bearer token.\n- [ ] Logout after the run when needed.\n\n## 1. Student\n- [ ] Generate an available student code.\n- [ ] Create student. The request pre-script calls `POST /api/v1/students/code` and injects `{{studentCode}}` before posting.\n- [ ] Fetch students with paging/filter/sort.\n- [ ] Get student detail by `{{studentId}}`.\n- [ ] Update student profile fields.\n- [ ] Export student CSV.\n- [ ] Delete student when the test data is disposable.\n\n## 2. Academic Foundation\n- [ ] Create/list/update academic year.\n- [ ] Create/list/update grade level.\n- [ ] Create/list/update school class under the academic year and grade.\n- [ ] Close/delete academic resources only after dependent enrollment, assignment, and class-subject data is no longer needed.\n\n## 3. Semester, Subject, Class Subject\n- [ ] Create/list/update semester.\n- [ ] Activate, lock, reopen semester, then evaluate completeness decision.\n- [ ] Create/list/update subject.\n- [ ] Create subject applicability for GRADE and CLASS scopes.\n- [ ] Create/list/update class-subject mapping.\n\n## 4. Enrollment\n- [ ] List unassigned students for an academic year.\n- [ ] Create a single enrollment.\n- [ ] List active class students.\n- [ ] Read student enrollment history.\n- [ ] Bulk create enrollments for multiple students.\n- [ ] Transfer an enrollment to another class.\n\n## 5. Teacher\n- [ ] Create teacher.\n- [ ] List teachers.\n- [ ] Get teacher detail by `{{teacherId}}`.\n- [ ] Update teacher.\n- [ ] Delete teacher when no assignment depends on it.\n\n## 6. Assignment\n- [ ] List homeroom assignments by class.\n- [ ] Create, replace, and end homeroom assignment.\n- [ ] List subject teaching assignments by teacher.\n- [ ] Create, replace, and end subject teaching assignment.\n\n## 7. Negative/Validation Smoke Checks\n- [ ] Try duplicate codes where unique constraints exist: student, academic year, grade, class, subject.\n- [ ] Try invalid IDs and missing required fields.\n- [ ] Try forbidden role/access scenarios when multiple tokens are available.\n",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
       "name": "Auth",
-      "description": "Authentication endpoints from `/api/v1/auth`.",
+      "description": "Authentication flow: register if needed, login to populate `{{accessToken}}`, verify account, then logout.",
       "item": [
         {
           "name": "Register",
@@ -344,7 +344,7 @@
     },
     {
       "name": "Student",
-      "description": "Student management endpoints from `/api/v1/students`.",
+      "description": "Student CRUD and CSV export flow. Run **Create Student** directly after login; it generates and uses an available code automatically.",
       "item": [
         {
           "name": "Fetch Students",
@@ -419,6 +419,42 @@
           "response": []
         },
         {
+          "name": "Get Student",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/students/{{studentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "students",
+                "{{studentId}}"
+              ]
+            },
+            "description": "Get one student by `{{studentId}}`."
+          },
+          "response": []
+        },
+        {
           "name": "Generate Student Code",
           "request": {
             "auth": {
@@ -452,7 +488,23 @@
             },
             "description": "Generate a student code using STU plus seven digits."
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const payload = pm.response.json();",
+                  "const generatedCode = payload && payload.data ? payload.data.studentCode : payload.studentCode;",
+                  "pm.test('Generated student code is returned', function () {",
+                  "  pm.expect(generatedCode).to.match(/^STU\\d{7}$/);",
+                  "});",
+                  "pm.collectionVariables.set('studentCode', generatedCode);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Create Student",
@@ -489,10 +541,10 @@
                 "students"
               ]
             },
-            "description": "Create a student and related student info in one transaction.",
+            "description": "Create a student. The pre-request script first calls Generate Student Code and stores the available value into `{{studentCode}}`.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"studentCode\": \"STU1234567\",\n  \"studentName\": \"Nguyen Van A\",\n  \"dateOfBirth\": \"2012-04-22\",\n  \"address\": \"Ho Chi Minh City\",\n  \"averageScore\": 8.5\n}",
+              "raw": "{\n  \"studentCode\": \"{{studentCode}}\",\n  \"studentName\": \"Nguyen Van A\",\n  \"dateOfBirth\": \"2012-04-22\",\n  \"address\": \"Ho Chi Minh City\",\n  \"averageScore\": 8.5\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -500,7 +552,54 @@
               }
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const baseUrl = pm.variables.replaceIn('{{baseUrl}}');",
+                  "const accessToken = pm.variables.replaceIn('{{accessToken}}');",
+                  "pm.sendRequest({",
+                  "  url: `${baseUrl}/api/v1/students/code`,",
+                  "  method: 'POST',",
+                  "  header: {",
+                  "    Accept: 'application/json',",
+                  "    Authorization: `Bearer ${accessToken}`",
+                  "  }",
+                  "}, function (err, res) {",
+                  "  if (err) {",
+                  "    throw new Error(`Could not generate student code: ${err.message || err}`);",
+                  "  }",
+                  "  const payload = res.json();",
+                  "  const generatedCode = payload && payload.data ? payload.data.studentCode : payload.studentCode;",
+                  "  if (!generatedCode) {",
+                  "    throw new Error('Generate Student Code response did not include studentCode');",
+                  "  }",
+                  "  pm.collectionVariables.set('studentCode', generatedCode);",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const payload = pm.response.json();",
+                  "const createdStudent = payload && payload.data ? payload.data : payload;",
+                  "pm.test('Student is created', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "  pm.expect(createdStudent.studentCode).to.eql(pm.collectionVariables.get('studentCode'));",
+                  "});",
+                  "if (createdStudent && createdStudent.id) {",
+                  "  pm.collectionVariables.set('studentId', createdStudent.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update Student",
@@ -552,6 +651,42 @@
           "response": []
         },
         {
+          "name": "Export Students CSV",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "text/csv"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/students/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "students",
+                "export"
+              ]
+            },
+            "description": "Export students as CSV. The response is `text/csv`."
+          },
+          "response": []
+        },
+        {
           "name": "Delete Student",
           "request": {
             "auth": {
@@ -591,7 +726,7 @@
     },
     {
       "name": "Academic",
-      "description": "Academic year, grade, and class metadata endpoints from `/api/v2`.",
+      "description": "Academic setup and subject/class-semester mapping flow. Create foundation data before enrollment and assignment flows.",
       "item": [
         {
           "name": "List Academic Years",
@@ -1176,12 +1311,640 @@
             "description": "Delete a school class only when guarded delete rules allow it. Requires ADMIN or ACADEMIC_OFFICE."
           },
           "response": []
+        },
+        {
+          "name": "Semesters",
+          "item": [
+            {
+              "name": "List Semesters",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/semesters?academicYearId={{academicYearId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "semesters"
+                  ],
+                  "query": [
+                    {
+                      "key": "academicYearId",
+                      "value": "{{academicYearId}}"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Semester",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/semesters",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "semesters"
+                  ],
+                  "query": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"academicYearId\": 1,\n  \"code\": \"HK1\",\n  \"name\": \"Học kỳ 1\",\n  \"displayOrder\": 1,\n  \"startDate\": \"2026-08-15\",\n  \"endDate\": \"2026-12-31\",\n  \"automaticLockAt\": \"2027-02-14T00:00:00\",\n  \"status\": \"DRAFT\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Semester",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/semesters/{{semesterId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "semesters",
+                    "{{semesterId}}"
+                  ],
+                  "query": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"HK1\",\n  \"name\": \"Học kỳ 1\",\n  \"displayOrder\": 1,\n  \"startDate\": \"2026-08-15\",\n  \"endDate\": \"2026-12-31\",\n  \"automaticLockAt\": \"2027-02-14T00:00:00\",\n  \"status\": \"ACTIVE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Activate Semester",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/semesters/{{semesterId}}/activate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "semesters",
+                    "{{semesterId}}",
+                    "activate"
+                  ],
+                  "query": []
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Lock Semester",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/semesters/{{semesterId}}/lock",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "semesters",
+                    "{{semesterId}}",
+                    "lock"
+                  ],
+                  "query": []
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Reopen Semester",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/semesters/{{semesterId}}/reopen",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "semesters",
+                    "{{semesterId}}",
+                    "reopen"
+                  ],
+                  "query": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Mở lại để điều chỉnh dữ liệu\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Evaluate Semester Completeness Decision",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/semesters/{{semesterId}}/completeness-decision?checkpointDate=2027-02-09",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "semesters",
+                    "{{semesterId}}",
+                    "completeness-decision"
+                  ],
+                  "query": [
+                    {
+                      "key": "checkpointDate",
+                      "value": "2027-02-09"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Subjects",
+          "item": [
+            {
+              "name": "List Subjects",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/subjects?status=ACTIVE",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "subjects"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "ACTIVE"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Subject",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/subjects",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "subjects"
+                  ],
+                  "query": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"MATH\",\n  \"name\": \"Toán\",\n  \"subjectType\": \"ACADEMIC\",\n  \"applicationScope\": \"GRADE\",\n  \"status\": \"ACTIVE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Subject",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/subjects/{{subjectId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "subjects",
+                    "{{subjectId}}"
+                  ],
+                  "query": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"MATH\",\n  \"name\": \"Toán\",\n  \"subjectType\": \"ACADEMIC\",\n  \"applicationScope\": \"GRADE\",\n  \"status\": \"ACTIVE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Subject Applicability - Grade",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/subjects/{{subjectId}}/applicabilities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "subjects",
+                    "{{subjectId}}",
+                    "applicabilities"
+                  ],
+                  "query": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"semesterId\": 1,\n  \"scopeType\": \"GRADE\",\n  \"gradeLevelId\": 1,\n  \"classId\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Subject Applicability - Class",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/subjects/{{subjectId}}/applicabilities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "subjects",
+                    "{{subjectId}}",
+                    "applicabilities"
+                  ],
+                  "query": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"semesterId\": 1,\n  \"scopeType\": \"CLASS\",\n  \"gradeLevelId\": null,\n  \"classId\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Class Subjects",
+          "item": [
+            {
+              "name": "List Class Subjects",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/classes/{{classId}}/subjects?semesterId={{semesterId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "classes",
+                    "{{classId}}",
+                    "subjects"
+                  ],
+                  "query": [
+                    {
+                      "key": "semesterId",
+                      "value": "{{semesterId}}"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Class Subject",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/class-subjects",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "class-subjects"
+                  ],
+                  "query": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"classId\": 1,\n  \"subjectId\": 1,\n  \"semesterId\": 1,\n  \"status\": \"ACTIVE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Class Subject",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/class-subjects/{{classSubjectId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "class-subjects",
+                    "{{classSubjectId}}"
+                  ],
+                  "query": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"COMPLETED\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
         }
       ]
     },
     {
       "name": "Enrollment",
-      "description": "Student class placement and transfer endpoints from `/api/v2`.",
+      "description": "Student placement flow: unassigned students, create/bulk enrollment, class roster, history, and transfer.",
       "item": [
         {
           "name": "List Class Students",
@@ -1447,6 +2210,554 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Teacher",
+      "item": [
+        {
+          "name": "List Teachers",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/teachers?status=ACTIVE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "teachers"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Teacher",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/teachers/{{teacherId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "teachers",
+                "{{teacherId}}"
+              ],
+              "query": []
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Teacher",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/teachers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "teachers"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": null,\n  \"teacherCode\": \"T001\",\n  \"teacherName\": \"Nguyen Van A\",\n  \"dateOfBirth\": \"1990-01-15\",\n  \"gender\": \"MALE\",\n  \"phone\": \"0900000000\",\n  \"email\": \"teacher@example.com\",\n  \"department\": \"Tổ Toán\",\n  \"joinDate\": \"2020-08-01\",\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Teacher",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/teachers/{{teacherId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "teachers",
+                "{{teacherId}}"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": null,\n  \"teacherCode\": \"T001\",\n  \"teacherName\": \"Nguyen Van A\",\n  \"dateOfBirth\": \"1990-01-15\",\n  \"gender\": \"MALE\",\n  \"phone\": \"0900000000\",\n  \"email\": \"teacher@example.com\",\n  \"department\": \"Tổ Toán\",\n  \"joinDate\": \"2020-08-01\",\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Teacher",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/teachers/{{teacherId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v2",
+                "teachers",
+                "{{teacherId}}"
+              ],
+              "query": []
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Teacher CRUD flow used before homeroom and subject-teaching assignment flows."
+    },
+    {
+      "name": "Assignment",
+      "item": [
+        {
+          "name": "Homeroom Assignments",
+          "item": [
+            {
+              "name": "List Homeroom Assignments By Class",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/assignments/classes/{{classId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "assignments",
+                    "classes",
+                    "{{classId}}"
+                  ],
+                  "query": []
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Homeroom Assignment",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/classes/{{classId}}/homeroom-assignments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "classes",
+                    "{{classId}}",
+                    "homeroom-assignments"
+                  ],
+                  "query": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"teacherId\": 1,\n  \"validFrom\": \"2026-08-15\",\n  \"validTo\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Replace Homeroom Assignment",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/homeroom-assignments/{{homeroomAssignmentId}}/replace",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "homeroom-assignments",
+                    "{{homeroomAssignmentId}}",
+                    "replace"
+                  ],
+                  "query": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"teacherId\": 2,\n  \"validFrom\": \"2026-10-01\",\n  \"validTo\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "End Homeroom Assignment",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/homeroom-assignments/{{homeroomAssignmentId}}/end",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "homeroom-assignments",
+                    "{{homeroomAssignmentId}}",
+                    "end"
+                  ],
+                  "query": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"validTo\": \"2026-09-30\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Subject Teaching Assignments",
+          "item": [
+            {
+              "name": "List Subject Teaching Assignments By Teacher",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/assignments/teachers/{{teacherId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "assignments",
+                    "teachers",
+                    "{{teacherId}}"
+                  ],
+                  "query": []
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Subject Teaching Assignment",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/class-subjects/{{classSubjectId}}/teaching-assignments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "class-subjects",
+                    "{{classSubjectId}}",
+                    "teaching-assignments"
+                  ],
+                  "query": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"teacherId\": 1,\n  \"validFrom\": \"2026-08-15\",\n  \"validTo\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Replace Subject Teaching Assignment",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/subject-teaching-assignments/{{subjectTeachingAssignmentId}}/replace",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "subject-teaching-assignments",
+                    "{{subjectTeachingAssignmentId}}",
+                    "replace"
+                  ],
+                  "query": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"teacherId\": 2,\n  \"validFrom\": \"2026-10-01\",\n  \"validTo\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "End Subject Teaching Assignment",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v2/subject-teaching-assignments/{{subjectTeachingAssignmentId}}/end",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v2",
+                    "subject-teaching-assignments",
+                    "{{subjectTeachingAssignmentId}}",
+                    "end"
+                  ],
+                  "query": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"validTo\": \"2026-09-30\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ],
+      "description": "Teacher assignment flow for homeroom and subject teaching assignments."
     }
   ],
   "auth": {
@@ -1498,6 +2809,35 @@
     {
       "key": "enrollmentId",
       "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "semesterId",
+      "value": "1"
+    },
+    {
+      "key": "subjectId",
+      "value": "1"
+    },
+    {
+      "key": "classSubjectId",
+      "value": "1"
+    },
+    {
+      "key": "teacherId",
+      "value": "1"
+    },
+    {
+      "key": "homeroomAssignmentId",
+      "value": "1"
+    },
+    {
+      "key": "subjectTeachingAssignmentId",
+      "value": "1"
+    },
+    {
+      "key": "studentCode",
+      "value": "",
       "type": "string"
     }
   ]

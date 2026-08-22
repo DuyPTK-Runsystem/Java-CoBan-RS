@@ -86,12 +86,18 @@ PK  teacher_id       BIGINT UNSIGNED
 UQ/FK user_id        BIGINT UNSIGNED NULL
 UQ  teacher_code     VARCHAR(50) NOT NULL
     teacher_name     VARCHAR(150) NOT NULL
-    status            ACTIVE | INACTIVE
+    date_of_birth    DATE NULL
+    gender           VARCHAR(20) NULL
+    phone            VARCHAR(30) NULL
+    email            VARCHAR(150) NULL
+    join_date        DATE NULL
+    status            ACTIVE | ON_LEAVE | INACTIVE
     created_at       DATETIME NOT NULL
     updated_at       DATETIME NOT NULL
 ~~~
 
 user_id có thể NULL nếu hồ sơ giáo viên được tạo trước tài khoản đăng nhập. Khi được gán tài khoản, một tài khoản chỉ được liên kết với tối đa một hồ sơ giáo viên.
+Hồ sơ giáo viên không lưu danh sách môn chuyên môn; quyền giảng dạy được xác định từ
+`subject_teaching_assignment`.
 
 ---
-

@@ -34,7 +34,8 @@ Kết quả phải bảo đảm:
 
 - `FR-SEM-001`–`FR-SEM-008`: tạo, cập nhật, kích hoạt, khóa/mở khóa và xem học kỳ.
 - `FR-TEACHER-001`–`FR-TEACHER-006`: hồ sơ giáo viên, tài khoản liên kết, trạng thái và
-  lịch sử phân công. Phần môn chuyên môn phụ thuộc decision gate G4.
+  lịch sử phân công; hồ sơ gồm identity/contact fields và không quản lý danh sách môn
+  chuyên môn.
 - `FR-ASSIGN-001`–`FR-ASSIGN-007`: phân công GVCN/GVBM, thay đổi, truy vấn theo giáo viên/lớp,
   kết thúc và kiểm tra trùng.
 - `FR-SUBJECT-001`–`FR-SUBJECT-005`: CRUD môn, loại môn, phạm vi áp dụng và danh sách môn.
@@ -43,8 +44,9 @@ Kết quả phải bảo đảm:
 
 - `BR-CLASS-001`: GVCN không phải là field cố định của `school_class`.
 - `BR-SEM-001`–`BR-SEM-003`: học kỳ thuộc đúng năm học và nằm trong thời gian năm học.
-- `BR-TEACHER-001`–`BR-TEACHER-006`: giáo viên active, mã duy nhất, không mất lịch sử và
-  môn chuyên môn không tự cấp quyền.
+- `BR-TEACHER-001`–`BR-TEACHER-006`: teacher code duy nhất, identity/contact fields,
+  lifecycle `ACTIVE | ON_LEAVE | INACTIVE`, không mất lịch sử và quyền giảng dạy được
+  xác định từ assignment.
 - `BR-ASSIGN-001`: một lớp chỉ có một GVCN `ACTIVE` tại một thời điểm.
 - `BR-ASSIGN-002`: một `{subject, class, semester}` chỉ có một GVBM `ACTIVE`.
 - `BR-ASSIGN-003`: quyền nhập điểm tương lai dựa trên assignment active tương ứng.
@@ -62,7 +64,8 @@ Kết quả phải bảo đảm:
 ### 4.1. In-scope
 
 - Thêm `semester` vào academic foundation hiện có.
-- Tạo/cập nhật/list/đổi trạng thái hồ sơ `teacher`, liên kết tùy chọn với `app_user`.
+- Tạo/cập nhật/list/đổi trạng thái hồ sơ `teacher`, liên kết tùy chọn với `app_user`,
+  gồm ngày sinh, giới tính, điện thoại, email và ngày vào trường.
 - Tạo/cập nhật/list/đổi trạng thái `subject`.
 - Cấu hình `class_subject` cho một lớp, môn và học kỳ; validate lớp, khối, môn và học kỳ
   tương thích.
@@ -88,8 +91,8 @@ Kết quả phải bảo đảm:
 - Xóa cứng teacher, subject, class-subject hoặc assignment đã có lịch sử.
 - Dùng role `GVCN`/`GVBM`; đây là vai trò nghiệp vụ từ hai bảng assignment, không phải role
   trong `role`/`user_role`.
-- Tự suy ra quyền giảng dạy từ `teacher_subject_specialty`; nếu cần quản lý specialty,
-  phải chốt decision gate G4 trước.
+- Không tạo hoặc quản lý `teacher_subject_specialty`; danh sách môn chuyên môn của giáo viên
+  bị loại khỏi Plan 027. Quyền giảng dạy chỉ dựa trên assignment.
 - Gửi email, cấu hình SMTP/email provider, email template, notification log, idempotency,
   retry/delivery workflow và persistence notification; các phần này được ghi chú để quay lại
   trong Implementation Note 27.1, không triển khai trong Plan 027. Plan 027 chỉ kiểm tra
@@ -101,8 +104,8 @@ Trong Plan 027, G3/`CR-SEM-001` chỉ implement kiểm tra completeness tại c�
 trả output quyết định có cần gửi thông báo hay không:
 
 ```text
-t-45d, t-30d, t-14d, t-7d, t-3d, t-1d,
-t,     t+1d,  t+3d,  t+7d,  t+14d
+  t-20d, t-10d, t-5d, t-3d, t-2d, t-1d,
+  t,     t+1d,  t+3d,  t+5d,  t+7d,  t+14d
 ```
 
 Các phần code tương lai ngoài Plan 027 sẽ được xử lý trong một plan/delta riêng, tối thiểu gồm:
@@ -149,8 +152,9 @@ Tạo các entity/enums sau, sử dụng `@Enumerated(EnumType.STRING)`, `Long`,
 - `teacher`: `Teacher`, `TeacherStatus`.
 - `assignment`: `HomeroomAssignment`, `SubjectTeachingAssignment`, `AssignmentStatus`.
 
-Các entity có `createdAt`/`updatedAt`; assignment có `validFrom`, `validTo`, `status` và
-`assignedBy`. `school_class` không thêm `homeroomTeacherId` hoặc field tương đương.
+Các entity có `createdAt`/`updatedAt`; `Teacher` có `dateOfBirth`, `gender`, `phone`, `email`,
+`joinDate`, `status=ACTIVE|ON_LEAVE|INACTIVE`; assignment có `validFrom`, `validTo`,
+`status` và `assignedBy`. `school_class` không thêm `homeroomTeacherId` hoặc field tương đương.
 
 ### 6.2. Catalog validation
 
@@ -158,6 +162,8 @@ Các entity có `createdAt`/`updatedAt`; assignment có `validFrom`, `validTo`, 
   năm học; không cho chồng lấn học kỳ trong cùng năm học.
 - `Subject`: code duy nhất; tên bắt buộc; chỉ cho trạng thái inactive khi không tạo dữ liệu
   mới; không xóa record đã được tham chiếu.
+- Việc môn có tham gia tính điểm trung bình học kỳ/năm hay không được suy ra từ
+  `subject_type`; không tạo field/config boolean `counts_in_average` trong Plan 027.
 - `ClassSubject`: class thuộc academic year của semester; subject active; class/semester
   ở trạng thái cho phép; unique `(class_id, subject_id, semester_id)`.
 - `ClassSubject`: chỉ tạo khi có một `subject_applicability` ACTIVE khớp với subject,
@@ -266,7 +272,8 @@ Tạo migration kế tiếp sau V4 hiện có:
 Các bảng chính:
 
 - `semester`: FK `academic_year_id`, code, dates, status, lock metadata và audit timestamps;
-- `teacher`: FK nullable unique tới `app_user`, `teacher_code` unique, name/status/timestamps;
+- `teacher`: FK nullable unique tới `app_user`, `teacher_code` unique, name, date of birth,
+  gender, phone, email, join date, `ACTIVE|ON_LEAVE|INACTIVE` status và timestamps;
 - `subject`: code/name/type/application_scope/status/timestamps;
 - `subject_applicability`: FK `subject_id`, `semester_id`, `scope_type`, nullable FK
   `grade_level_id`, nullable FK `class_id`, status/timestamps; CHECK chỉ cho phép đúng một
@@ -313,12 +320,13 @@ loại môn trong service. Phương án này vẫn cần user xác nhận trư�
 | G1 | `SubjectType` trong module là `ACADEMIC/SKILL`, còn data model là `NORMAL/SKILL`. | **Đã chốt theo user:** dùng canonical value `ACADEMIC/SKILL`; migration, entity và DTO phải dùng đúng hai giá trị này. |
 | G2 | FR-SUBJECT-003 yêu cầu hai kiểu target: môn học theo khối/học kỳ và môn học theo lớp/học kỳ. | **Đã chốt theo user ngày 2026-08-22:** tách `subject_type` khỏi `application_scope`, dùng `subject_applicability` với `scope_type=GRADE/CLASS`; validator đọc scope từ subject/data, không hardcode `ACADEMIC` hay `SKILL`. |
 | G3 | Semester schema ghi `OPEN/LOCKED`, module requirement ghi `DRAFT/ACTIVE/LOCKED/CLOSED`. | **Đã chốt theo user ngày 2026-08-22:** dùng lifecycle `DRAFT -> ACTIVE -> LOCKED -> CLOSED`; mở rộng `BR-SEM-006` được ghi trong `CR-SEM-001`, còn email/config email để Implementation Note 27.1. |
-| G4 | Teacher có “danh sách môn chuyên môn” trong requirement nhưng chưa có bảng mapping trong data model. | Hoặc thêm `teacher_subject_specialty`, hoặc ghi nhận specialty là scope sau; trong mọi phương án specialty không cấp quyền assignment. |
+| G4 | Teacher requirement cũ có “danh sách môn chuyên môn”. | **Đã chốt theo user:** bỏ danh sách môn chuyên môn và không tạo `teacher_subject_specialty`; giữ teacher identity/contact fields và status `ACTIVE|ON_LEAVE|INACTIVE`; quyền giảng dạy chỉ từ assignment. |
 | G5 | `FR-TEACHER-005` cho phép ngừng công tác nhưng assignment đang active sẽ xử lý thế nào. | Khuyến nghị không tự ENDED assignment trong cùng request; từ chối assignment mới và yêu cầu workflow replace/end explicit, giữ lịch sử. |
 | G6 | Baseline nói “kết thúc hoặc hủy assignment” nhưng schema chỉ có `ACTIVE/ENDED`. | Khuyến nghị dùng `ENDED` cho kết thúc/hủy và bắt buộc `validTo`; thêm `reason` chỉ khi user yêu cầu contract riêng. |
 
-Nếu user chưa chốt G2-G4, chỉ được chuẩn bị code/package hoặc test plan không phụ thuộc enum/schema
-đó; không tạo migration hay API contract chính thức.
+G1-G4 đã được user chốt. G5-G6 vẫn là các decision kỹ thuật cần xác nhận trước khi hoàn thiện
+assignment replacement/cancel contract; không tạo migration hoặc API contract chính thức cho
+phần bị ảnh hưởng nếu hai gate này thay đổi.
 
 ## 10. Phạm vi mã nguồn dự kiến sau approval
 

@@ -44,4 +44,6 @@ NNN-short-topic-yyyy-mm-dd.md
 | 024 | BE | [Modular v2 Document Paths in Skills](../be/workflow-skill/024-modular-v2-document-paths-2026-08-20.md) | Completed | 2026-08-20 |
 | 025 | BE/Document | [Contract, Migration và Scope Freeze](../be/025-contract-migration-scope-freeze-2026-08-20.md) | Completed; Docker MySQL preflight not run | 2026-08-20 |
 | 026 | BE | [Student Enrollment & Class Placement](../be/enrollment/026-student-enrollment-class-placement-2026-08-21.md) | Completed | 2026-08-21 |
+| 027.1 | BE | [Plan 027 Decision Update](../be/academic/027.1-plan-027-decision-update-2026-08-22.md) | Documentation decision update; implementation pending | 2026-08-22 |
 | 027 | BE | [G3 Semester CR](../be/academic/027-semester-g3-cr-2026-08-22.md) | Completed; CR awaiting approval | 2026-08-22 |
+| 027 | BE | [Academic Subject & Teacher Assignment Implementation](../be/academic/027-academic-subject-teacher-assignment-implementation-2026-08-22.md) | Completed; 27.1 not implemented | 2026-08-22 |

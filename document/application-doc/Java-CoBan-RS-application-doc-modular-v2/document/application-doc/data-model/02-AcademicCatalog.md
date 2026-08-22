@@ -107,13 +107,16 @@ subject
 PK  subject_id    BIGINT UNSIGNED
 UQ  code          VARCHAR(30) NOT NULL
     name          VARCHAR(150) NOT NULL
-    subject_type  NORMAL | SKILL
+    subject_type  ACADEMIC | SKILL
     status        ACTIVE | INACTIVE
     created_at    DATETIME NOT NULL
     updated_at    DATETIME NOT NULL
 ~~~
 
-Môn NORMAL được tham gia tính Đtbmh, Đtbhk, ĐtbmhCN và Đtbcn theo requirement. Môn SKILL có điểm môn kỹ năng riêng và không tham gia công thức điểm trung bình quy định cho môn thông thường.
+Môn `ACADEMIC` được tham gia tính Đtbmh, Đtbhk, ĐtbmhCN và Đtbcn theo requirement. Môn
+`SKILL` có điểm môn kỹ năng riêng và không tham gia công thức điểm trung bình quy định cho
+môn thông thường. Việc tham gia tính điểm được suy ra từ `subject_type`, không lưu thêm cờ
+`counts_in_average` độc lập.
 
 ### 5.6. class_subject
 

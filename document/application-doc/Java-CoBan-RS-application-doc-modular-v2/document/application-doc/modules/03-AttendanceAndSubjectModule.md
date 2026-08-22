@@ -65,7 +65,7 @@ Không có dữ liệu ngoại lệ + buổi học hợp lệ = PRESENT
 - Khối áp dụng.
 - Học kỳ được giảng dạy.
 - Trạng thái hoạt động.
-- Có tính vào điểm trung bình hay không.
+- Việc tham gia tính điểm trung bình học kỳ/năm học được suy ra từ `subject_type`.
 
 ### 13.2. Functional requirements
 
@@ -81,4 +81,5 @@ Không có dữ liệu ngoại lệ + buổi học hợp lệ = PRESENT
 - `BR-SUBJECT-002`: Môn kỹ năng là optional và chỉ tổng kết trong một học kỳ duy nhất.
 - `BR-SUBJECT-003`: Môn kỹ năng không được tính vào `Đtbhk`, `Đtbcn`, xếp hạng hoặc xếp loại.
 - `BR-SUBJECT-004`: Chỉ được phân công môn đã được cấu hình cho khối của lớp.
-
+- `BR-SUBJECT-005`: Việc tính điểm trung bình học kỳ/năm học được suy ra từ `subject_type`,
+  không lưu một cờ tính điểm độc lập trên `subject`.
