@@ -12,13 +12,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 class FlywayMigrationTest {
 
+    private static final String MIGRATION_LOCATION = "classpath:db/migration";
+
     private static final String RAW_PASSWORD = "secret1";
 
     @Test
     void migratesAnEmptySchemaToTheRoleEnabledBaseline() throws Exception {
         JdbcDataSource dataSource = dataSource("flyway-clean");
 
-        Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").load().migrate();
+        Flyway.configure().dataSource(dataSource).locations(MIGRATION_LOCATION).load().migrate();
 
         try (Connection connection = dataSource.getConnection();
                 Statement statement = connection.createStatement();
@@ -36,7 +38,7 @@ class FlywayMigrationTest {
 
         Flyway.configure()
                 .dataSource(dataSource)
-                .locations("classpath:db/migration")
+                .locations(MIGRATION_LOCATION)
                 .baselineOnMigrate(true)
                 .baselineVersion("1")
                 .load()
@@ -66,10 +68,40 @@ class FlywayMigrationTest {
     @Test
     void createsAcademicAndEnrollmentSchemaWithRequiredConstraints() throws Exception {
         JdbcDataSource dataSource = dataSource("flyway-enrollment");
-        Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").load().migrate();
+        Flyway.configure().dataSource(dataSource).locations(MIGRATION_LOCATION).load().migrate();
 
         try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
             verifyEnrollmentSchema(statement);
+        }
+    }
+
+    @Test
+    void createsNullableUniqueStudentUserLink() throws Exception {
+        JdbcDataSource dataSource = dataSource("flyway-student-user-link");
+        Flyway.configure().dataSource(dataSource).locations(MIGRATION_LOCATION).load().migrate();
+
+        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
+            boolean nullable;
+            int constraintCount;
+            try (ResultSet resultSet = statement.executeQuery("""
+                    SELECT IS_NULLABLE
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'student' AND COLUMN_NAME = 'user_id'
+                    """)) {
+                moveToFirstRow(resultSet, "student user_id column should exist");
+                nullable = "YES".equals(resultSet.getString(1));
+            }
+            try (ResultSet resultSet = statement.executeQuery("""
+                    SELECT COUNT(*)
+                    FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+                    WHERE TABLE_NAME = 'student'
+                      AND CONSTRAINT_NAME IN ('uk_student_user', 'fk_student_user')
+                    """)) {
+                moveToFirstRow(resultSet, "student user link constraint query should return a row");
+                constraintCount = resultSet.getInt(1);
+            }
+            Assertions.assertTrue(nullable && constraintCount == 2,
+                    "student user link must be nullable with unique and foreign key constraints");
         }
     }
 

@@ -12,11 +12,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CalendarSessionRepository extends JpaRepository<CalendarSession, Long> {
 
-    List<CalendarSession> findAllByCalendarDayIdOrderBySessionPeriodAsc(Long calendarDayId);
-
     Optional<CalendarSession> findByCalendarDayIdAndSessionPeriod(
             Long calendarDayId,
             CalendarSessionPeriod sessionPeriod);
+
+    List<CalendarSession> findAllByCalendarDayIdOrderBySessionPeriodAsc(Long calendarDayId);
 
     boolean existsByCalendarDayIdAndSessionPeriodAndSessionStatus(
             Long calendarDayId,

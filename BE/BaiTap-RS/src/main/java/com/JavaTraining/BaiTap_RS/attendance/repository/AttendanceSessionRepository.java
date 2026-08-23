@@ -1,6 +1,7 @@
 package com.JavaTraining.BaiTap_RS.attendance.repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import com.JavaTraining.BaiTap_RS.attendance.domain.entity.AttendanceSession;
@@ -15,4 +16,6 @@ public interface AttendanceSessionRepository extends JpaRepository<AttendanceSes
             Long classId,
             LocalDate attendanceDate,
             AttendanceSessionPeriod sessionPeriod);
+
+    List<AttendanceSession> findAllByClassIdAndAttendanceDateBetween(Long classId, LocalDate from, LocalDate to);
 }

@@ -22,7 +22,10 @@ import lombok.Setter;
 @Entity
 @Table(
         name = "student",
-        uniqueConstraints = @UniqueConstraint(name = "uk_student_student_code", columnNames = "student_code"))
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_student_student_code", columnNames = "student_code"),
+                @UniqueConstraint(name = "uk_student_user", columnNames = "user_id")
+        })
 public class Student {
 
     @Id
@@ -35,6 +38,9 @@ public class Student {
 
     @Column(name = "student_code", nullable = false, length = 10, unique = true)
     private String studentCode;
+
+    @Column(name = "user_id")
+    private Long userId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)

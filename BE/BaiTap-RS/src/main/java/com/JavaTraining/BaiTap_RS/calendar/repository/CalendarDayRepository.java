@@ -17,4 +17,6 @@ public interface CalendarDayRepository extends JpaRepository<CalendarDay, Long> 
             Long semesterId,
             LocalDate from,
             LocalDate to);
+
+    List<CalendarDay> findAllByCalendarDateBetweenOrderByCalendarDateAsc(LocalDate from, LocalDate to);
 }
