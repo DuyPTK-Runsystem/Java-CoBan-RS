@@ -9,7 +9,9 @@ import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SemesterRepository;
 import com.JavaTraining.BaiTap_RS.assignment.domain.entity.AssignmentStatus;
 import com.JavaTraining.BaiTap_RS.assignment.repository.HomeroomAssignmentRepository;
+import com.JavaTraining.BaiTap_RS.attendance.domain.entity.AttendanceSessionPeriod;
 import com.JavaTraining.BaiTap_RS.attendance.repository.AttendanceEnrollmentRepository;
+import com.JavaTraining.BaiTap_RS.calendar.service.CalendarValidityService;
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.EnrollmentStatus;
@@ -27,18 +29,21 @@ public class AttendanceGuard {
     private final TeacherRepository teacherRepository;
     private final HomeroomAssignmentRepository homeroomAssignmentRepository;
     private final AttendanceEnrollmentRepository enrollmentRepository;
+    private final CalendarValidityService calendarValidityService;
 
     public AttendanceGuard(
             SchoolClassRepository schoolClassRepository,
             SemesterRepository semesterRepository,
             TeacherRepository teacherRepository,
             HomeroomAssignmentRepository homeroomAssignmentRepository,
-            AttendanceEnrollmentRepository enrollmentRepository) {
+            AttendanceEnrollmentRepository enrollmentRepository,
+            CalendarValidityService calendarValidityService) {
         this.schoolClassRepository = schoolClassRepository;
         this.semesterRepository = semesterRepository;
         this.teacherRepository = teacherRepository;
         this.homeroomAssignmentRepository = homeroomAssignmentRepository;
         this.enrollmentRepository = enrollmentRepository;
+        this.calendarValidityService = calendarValidityService;
     }
 
     public SchoolClass findSchoolClass(Long classId) {
@@ -54,13 +59,15 @@ public class AttendanceGuard {
     public void validateClassSemesterAndDate(
             SchoolClass schoolClass,
             Semester semester,
-            LocalDate attendanceDate) {
+            LocalDate attendanceDate,
+            AttendanceSessionPeriod sessionPeriod) {
         if (!schoolClass.getAcademicYearId().equals(semester.getAcademicYearId())) {
             throw conflict("Lớp và học kỳ phải thuộc cùng năm học");
         }
         if (attendanceDate.isBefore(semester.getStartDate()) || attendanceDate.isAfter(semester.getEndDate())) {
             throw conflict("Ngày điểm danh phải nằm trong thời gian học kỳ");
         }
+        calendarValidityService.assertScheduled(semester.getId(), attendanceDate, sessionPeriod);
     }
 
     public void assertCurrentUserHomeroom(Long classId, LocalDate effectiveDate) {

@@ -19,6 +19,7 @@
 | 026 | [Student Enrollment & Class Placement](enrollment/026-student-enrollment-class-placement-2026-08-21.md) | Academic foundation tối thiểu, xếp/chuyển lớp, lịch sử phân lớp, cảnh báo sĩ số và authorization | Approved | 2026-08-21 |
 | 027 | [Academic Subject & Teacher Assignment](academic/027-academic-subject-teacher-assignment-2026-08-21.md) | Học kỳ, môn học, class-subject, teacher profile và phân công GVCN/GVBM dựa trên assignment | Draft; awaiting user approval | 2026-08-21 |
 | 028 | [Attendance Session Foundation](attendance/028-attendance-session-foundation-2026-08-22.md) | Session điểm danh theo buổi, default `PRESENT`, ngoại lệ điểm danh và quyền GVCN | Approved | 2026-08-22 |
+| 030 | [Attendance Calendar Validity Foundation](attendance/030-attendance-calendar-validity-foundation-2026-08-23.md) | Calendar ngày học, trạng thái buổi học và validity guard cho attendance | Approved | 2026-08-23 |
 
 ## Module folders
 

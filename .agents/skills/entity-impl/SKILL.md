@@ -21,7 +21,7 @@ description: Create, update, or review a Spring Data JPA entity and relational t
 - Use `@Enumerated(EnumType.STRING)` with sufficient length.
 - Use `BigDecimal` with explicit precision/scale for scores and money; never `double` for exact values.
 - Keep collections lazy and exclude bidirectional relationships from generated `toString`, `equals`, and `hashCode`.
-- Avoid Lombok `@Data` on entities; prefer `@Getter`, `@Setter`, `@NoArgsConstructor`, and controlled identity equality.
+- Avoid Lombok `@Data` on entities; prefer `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsConstructor`, and controlled identity equality.
 - Do not serialize entities as API responses.
 - Add indexes from demonstrated query/filter/join patterns, not every column.
 - Use database-enforced unique constraints for true uniqueness; service checks alone race.

@@ -25,6 +25,7 @@
 | 027 | academic | [Academic Subject & Teacher Assignment Implementation](academic/027-academic-subject-teacher-assignment-implementation-2026-08-22.md) | Completed; 27.1 not implemented | 2026-08-22 |
 | 028 | attendance | [Attendance Session Foundation](attendance/028-attendance-session-foundation-2026-08-22.md) | Completed | 2026-08-22 |
 | 029 | workflow-skill | [Backend Validation Single Owner](workflow-skill/029-backend-validation-single-owner-2026-08-22.md) | Completed | 2026-08-22 |
+| 030 | attendance | [Attendance Calendar Validity Foundation](attendance/030-attendance-calendar-validity-foundation-2026-08-23.md) | Completed | 2026-08-23 |
 
 ## Module folders
 

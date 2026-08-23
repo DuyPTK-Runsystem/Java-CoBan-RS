@@ -47,7 +47,8 @@ public class AttendanceService {
     public ResAttendanceSessionDTO createOrGetSession(ReqCreateAttendanceSessionDTO request) {
         SchoolClass schoolClass = guard.findSchoolClass(request.classId());
         Semester semester = guard.findSemester(request.semesterId());
-        guard.validateClassSemesterAndDate(schoolClass, semester, request.attendanceDate());
+        guard.validateClassSemesterAndDate(
+                schoolClass, semester, request.attendanceDate(), request.sessionPeriod());
         guard.assertCurrentUserHomeroom(schoolClass.getId(), request.attendanceDate());
         AttendanceSession session = sessionRepository.findByClassIdAndAttendanceDateAndSessionPeriod(
                         request.classId(),

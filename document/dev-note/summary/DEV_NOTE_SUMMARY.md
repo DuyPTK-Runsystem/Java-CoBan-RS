@@ -49,3 +49,4 @@ NNN-short-topic-yyyy-mm-dd.md
 | 027 | BE | [Academic Subject & Teacher Assignment Implementation](../be/academic/027-academic-subject-teacher-assignment-implementation-2026-08-22.md) | Completed; 27.1 not implemented | 2026-08-22 |
 | 028 | BE | [Attendance Session Foundation](../be/attendance/028-attendance-session-foundation-2026-08-22.md) | Completed | 2026-08-22 |
 | 029 | BE | [Backend Validation Single Owner](../be/workflow-skill/029-backend-validation-single-owner-2026-08-22.md) | Completed | 2026-08-22 |
+| 030 | BE | [Attendance Calendar Validity Foundation](../be/attendance/030-attendance-calendar-validity-foundation-2026-08-23.md) | Completed | 2026-08-23 |

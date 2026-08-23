@@ -54,3 +54,4 @@ Example:
 |   026 | BE             | [Student Enrollment & Class Placement](../be/enrollment/026-student-enrollment-class-placement-2026-08-21.md)                          | Approved                                           | 2026-08-21 |
 |   027 | BE             | [Academic Subject & Teacher Assignment](../be/academic/027-academic-subject-teacher-assignment-2026-08-21.md)                          | Apprioved                                          | 2026-08-21 |
 |   028 | BE             | [Attendance Session Foundation](../be/attendance/028-attendance-session-foundation-2026-08-22.md)                                      | Approved                                           | 2026-08-22 |
+|   030 | BE             | [Attendance Calendar Validity Foundation](../be/attendance/030-attendance-calendar-validity-foundation-2026-08-23.md)                | Approved                                           | 2026-08-23 |

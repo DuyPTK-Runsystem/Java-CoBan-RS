@@ -4,18 +4,14 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClass;
-import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClassStatus;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Semester;
-import com.JavaTraining.BaiTap_RS.academic.domain.entity.SemesterStatus;
 import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SemesterRepository;
-import com.JavaTraining.BaiTap_RS.assignment.domain.entity.AssignmentStatus;
 import com.JavaTraining.BaiTap_RS.assignment.repository.HomeroomAssignmentRepository;
 import com.JavaTraining.BaiTap_RS.attendance.repository.AttendanceEnrollmentRepository;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
 import com.JavaTraining.BaiTap_RS.security.UserPrincipal;
 import com.JavaTraining.BaiTap_RS.teacher.domain.entity.Teacher;
-import com.JavaTraining.BaiTap_RS.teacher.domain.entity.TeacherStatus;
 import com.JavaTraining.BaiTap_RS.teacher.repository.TeacherRepository;
 import com.JavaTraining.BaiTap_RS.user.domain.entity.User;
 import org.junit.jupiter.api.AfterEach;
@@ -49,6 +45,9 @@ class AttendanceGuardTest {
     @Mock
     private AttendanceEnrollmentRepository enrollmentRepository;
 
+    @Mock
+    private com.JavaTraining.BaiTap_RS.calendar.service.CalendarValidityService calendarValidityService;
+
     private AttendanceGuard guard;
 
     @BeforeEach
@@ -58,7 +57,8 @@ class AttendanceGuardTest {
                 semesterRepository,
                 teacherRepository,
                 homeroomAssignmentRepository,
-                enrollmentRepository);
+                enrollmentRepository,
+                calendarValidityService);
     }
 
     @AfterEach
@@ -69,7 +69,9 @@ class AttendanceGuardTest {
     @Test
     void validateClassSemesterAndDateRejectsDateOutsideSemester() {
         AppException exception = captureAppException(() -> guard
-                .validateClassSemesterAndDate(schoolClass(), semester(), LocalDate.of(2027, 1, 1)));
+                .validateClassSemesterAndDate(
+                        schoolClass(), semester(), LocalDate.of(2027, 1, 1),
+                        com.JavaTraining.BaiTap_RS.attendance.domain.entity.AttendanceSessionPeriod.MORNING));
 
         Assertions.assertEquals(HttpStatus.CONFLICT, exception.getStatus(), "invalid date should be conflict");
     }
@@ -81,7 +83,7 @@ class AttendanceGuardTest {
         Mockito.when(homeroomAssignmentRepository.existsActiveHomeroomAt(
                 20L,
                 30L,
-                AssignmentStatus.ACTIVE,
+                com.JavaTraining.BaiTap_RS.assignment.domain.entity.AssignmentStatus.ACTIVE,
                 LocalDate.of(2026, 9, 5))).thenReturn(false);
 
         AppException exception = captureAppException(() -> guard
@@ -114,7 +116,7 @@ class AttendanceGuardTest {
                 "6A",
                 "6A",
                 40,
-                SchoolClassStatus.ACTIVE);
+                 com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClassStatus.ACTIVE);
         ReflectionTestUtils.setField(schoolClass, "id", 20L);
         return schoolClass;
     }
@@ -128,7 +130,7 @@ class AttendanceGuardTest {
                 LocalDate.of(2026, 9, 1),
                 LocalDate.of(2026, 12, 31),
                 null,
-                SemesterStatus.ACTIVE);
+                 com.JavaTraining.BaiTap_RS.academic.domain.entity.SemesterStatus.ACTIVE);
         ReflectionTestUtils.setField(semester, "id", 70L);
         return semester;
     }
@@ -144,7 +146,7 @@ class AttendanceGuardTest {
                 null,
                 null,
                 null,
-                TeacherStatus.ACTIVE);
+                 com.JavaTraining.BaiTap_RS.teacher.domain.entity.TeacherStatus.ACTIVE);
         ReflectionTestUtils.setField(teacher, "id", 30L);
         return teacher;
     }
