@@ -27,6 +27,7 @@
 |   029 | workflow-skill     | [Backend Validation Single Owner](workflow-skill/029-backend-validation-single-owner-2026-08-22.md)                                   | Completed                                             | 2026-08-22 |
 |   030 | attendance         | [Attendance Calendar Validity Foundation](attendance/030-attendance-calendar-validity-foundation-2026-08-23.md)                       | Completed                                             | 2026-08-23 |
 |   031 | attendance         | [Student Attendance History Read-Only](attendance/031-student-attendance-history-read-only-2026-08-24.md)                             | Completed                                             | 2026-08-24 |
+|   032 | cross-area         | [Postman Collection Restructure and Runner Flow](032-postman-collection-restructure-and-runner-flow-2026-08-24.md)                    | Completed                                             | 2026-08-24 |
 
 ## Module folders
 
