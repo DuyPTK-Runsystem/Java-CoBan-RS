@@ -22,10 +22,13 @@ class ScorebookFlywayMigrationTest {
                 ResultSet resultSet = statement.executeQuery("""
                         SELECT COUNT(*)
                         FROM INFORMATION_SCHEMA.TABLES
-                        WHERE TABLE_NAME IN ('scorebook', 'assessment_column', 'skill_weight_config')
+                        WHERE TABLE_NAME IN (
+                            'scorebook', 'assessment_column', 'skill_weight_config',
+                            'student_score', 'student_annual_transcript',
+                            'student_term_transcript', 'calculation_task')
                         """)) {
             moveToFirstRow(resultSet, "scorebook table query should return a row");
-            Assertions.assertEquals(3, resultSet.getInt(1), "V10 should create all scorebook foundation tables");
+            Assertions.assertEquals(7, resultSet.getInt(1), "V10, V11, V12 should create all scorebook tables");
         }
     }
 
@@ -42,13 +45,17 @@ class ScorebookFlywayMigrationTest {
                             'uk_scorebook_class_subject',
                             'uk_assessment_column_position',
                             'uk_skill_weight_scorebook',
-                            'ck_skill_weight_total')
+                            'ck_skill_weight_total',
+                            'uk_student_score_column_student',
+                            'uk_annual_transcript_student_year',
+                            'uk_term_transcript_annual_semester',
+                            'uk_calculation_task_idempotency')
                         """)) {
             moveToFirstRow(resultSet, "scorebook constraint query should return a row");
             Assertions.assertEquals(
-                    4,
+                    8,
                     resultSet.getInt(1),
-                    "V10 should enforce scorebook uniqueness and weight constraints");
+                    "V10, V11, V12 should enforce scorebook uniqueness and weight constraints");
         }
     }
 
