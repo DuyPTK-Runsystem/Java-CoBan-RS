@@ -33,6 +33,7 @@
 |   033 | attendance         | [Class Attendance Summary](attendance/033-class-attendance-summary-2026-08-24.md)                                                     | Completed                                              | 2026-08-24 |
 |   034 | cross-area         | [Teacher/User and Attendance Postman Test Data](034-teacher-user-attendance-postman-test-data-2026-08-24.md)                          | Completed; backend test not run due Gradle environment | 2026-08-24 |
 |   035 | attendance         | [Academic Office Attendance Adjustment](attendance/035-academic-office-attendance-adjustment-2026-08-24.md)                           | Completed                                              | 2026-08-24 |
+|   036 | scorebook          | [Scorebook Foundation](scorebook/036-scorebook-foundation-2026-08-24.md)                                                            | Completed; validation PASS                             | 2026-08-24 |
 
 ## Module folders
 
@@ -42,3 +43,4 @@
 - `workflow-skill/`: Backend/project workflow and skill implementation notes.
 - `batch/`: Spring Batch and CSV export planning/implementation notes.
 - `attendance/`: Attendance session foundation, exception attendance and GVCN-scope notes.
+- `scorebook/`: Scorebook lifecycle, assessment-column configuration and skill-weight foundation notes.

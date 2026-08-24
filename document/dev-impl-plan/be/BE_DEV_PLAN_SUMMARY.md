@@ -24,6 +24,7 @@
 |   033 | [Class Attendance Summary](attendance/033-class-attendance-summary-2026-08-24.md)                                                | API read-only tổng hợp chuyên cần theo lớp, thời gian và từng học sinh cho GVCN                                                  | Approved | 2026-08-24 |
 |   034 | [Assign TEACHER Role When Creating Teacher](teacher/034-teacher-user-teacher-role-assignment-2026-08-24.md)                      | Gán role TEACHER cho app-user tương ứng khi tạo giáo viên trong cùng transaction                                                 | Approved | 2026-08-24 |
 |   035 | [Academic Office Attendance Adjustment](attendance/035-academic-office-attendance-adjustment-2026-08-24.md)                      | API giáo vụ điều chỉnh ngoại lệ điểm danh toàn quyền, tách biệt với GVCN, có audit log                                           | Approved | 2026-08-24 |
+|   036 | [Scorebook Foundation](scorebook/036-scorebook-foundation-2026-08-24.md)                                                         | Foundation sổ điểm, cột đánh giá, trọng số môn kỹ năng, lifecycle và authorization theo assignment                             | Approved | 2026-08-24 |
 
 ## Module folders
 
@@ -32,6 +33,7 @@
 - `workflow-skill/`: Project workflow and skill changes.
 - `enrollment/`: Academic foundation tối thiểu, xếp lớp và lịch sử chuyển lớp.
 - `attendance/`: Attendance session foundation, exception-based attendance records and GVCN scope.
+- `scorebook/`: Scorebook lifecycle, assessment-column configuration and skill-weight foundation.
 
 ## Current BE decisions
 

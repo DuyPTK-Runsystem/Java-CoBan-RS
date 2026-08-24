@@ -59,3 +59,4 @@ Example:
 |   033 | BE             | [Class Attendance Summary](../be/attendance/033-class-attendance-summary-2026-08-24.md)                                                | Approved                                           | 2026-08-24 |
 |   034 | BE             | [Teacher User Role Assignment](../be/teacher/034-teacher-user-teacher-role-assignment-2026-08-24.md)                                   | Approved                                           | 2026-08-24 |
 |   035 | BE             | [Academic Office Attendance Adjustment](../be/attendance/035-academic-office-attendance-adjustment-2026-08-24.md)                      | Approved                                           | 2026-08-24 |
+|   036 | BE             | [Scorebook Foundation](../be/scorebook/036-scorebook-foundation-2026-08-24.md)                                                        | Approved                                           | 2026-08-24 |
