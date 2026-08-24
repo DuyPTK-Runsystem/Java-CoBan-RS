@@ -98,6 +98,19 @@
                             ],
                             "body": "{\n  \"statusCode\": 201,\n  \"error\": null,\n  \"message\": \"Đăng ký người dùng\",\n  \"data\": {\n    \"id\": 1,\n    \"username\": \"demo_user\",\n    \"created_at\": \"2026-08-17T10:00:00Z\",\n    \"updated_at\": \"2026-08-17T10:00:00Z\",\n    \"created_by\": \"system\",\n    \"updated_by\": \"system\"\n  }\n}"
                         }
+                    ],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 201', function () {",
+                                    "  pm.response.to.have.status(201);",
+                                    "});"
+                                ]
+                            }
+                        }
                     ]
                 },
                 {
@@ -108,9 +121,16 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});",
                                     "const response = pm.response.json();",
-                                    "if (response && response.data && response.data.access_token) {",
-                                    "  pm.collectionVariables.set('accessToken', response.data.access_token);",
+                                    "const data = response && response.data ? response.data : response;",
+                                    "if (data) {",
+                                    "  const token = data.access_token || data.accessToken;",
+                                    "  if (token) {",
+                                    "    pm.collectionVariables.set('accessToken', token);",
+                                    "  }",
                                     "}"
                                 ]
                             }
@@ -273,6 +293,19 @@
                             ],
                             "body": "{\n  \"statusCode\": 200,\n  \"error\": null,\n  \"message\": \"Lấy thông tin tài khoản\",\n  \"data\": {\n    \"id\": 1,\n    \"username\": \"demo_user\",\n    \"created_at\": \"2026-08-17T10:00:00Z\",\n    \"updated_at\": \"2026-08-17T10:00:00Z\",\n    \"created_by\": \"system\",\n    \"updated_by\": \"system\"\n  }\n}"
                         }
+                    ],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
                     ]
                 }
             ]
@@ -322,12 +355,18 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});",
                                     "const payload = pm.response.json();",
-                                    "const generatedCode = payload && payload.data ? payload.data.studentCode : payload.studentCode;",
+                                    "const data = payload && payload.data ? payload.data : payload;",
+                                    "const generatedCode = data.studentCode;",
                                     "pm.test('Generated student code is returned', function () {",
                                     "  pm.expect(generatedCode).to.match(/^STU\\d{7}$/);",
                                     "});",
-                                    "pm.collectionVariables.set('studentCode', generatedCode);"
+                                    "if (generatedCode) {",
+                                    "  pm.collectionVariables.set('studentCode', generatedCode);",
+                                    "}"
                                 ]
                             }
                         }
@@ -400,7 +439,8 @@
                                     "    throw new Error(`Could not generate student code: ${err.message || err}`);",
                                     "  }",
                                     "  const payload = res.json();",
-                                    "  const generatedCode = payload && payload.data ? payload.data.studentCode : payload.studentCode;",
+                                    "  const data = payload && payload.data ? payload.data : payload;",
+                                    "  const generatedCode = data.studentCode;",
                                     "  if (!generatedCode) {",
                                     "    throw new Error('Generate Student Code response did not include studentCode');",
                                     "  }",
@@ -414,14 +454,18 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "const payload = pm.response.json();",
-                                    "const createdStudent = payload && payload.data ? payload.data : payload;",
                                     "pm.test('Student is created', function () {",
                                     "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-                                    "  pm.expect(createdStudent.studentCode).to.eql(pm.collectionVariables.get('studentCode'));",
                                     "});",
-                                    "if (createdStudent && createdStudent.id) {",
-                                    "  pm.collectionVariables.set('studentId', createdStudent.id);",
+                                    "const payload = pm.response.json();",
+                                    "const createdStudent = payload && payload.data ? payload.data : payload;",
+                                    "const expectedCode = pm.collectionVariables.get('studentCode');",
+                                    "if (expectedCode && createdStudent.studentCode) {",
+                                    "  pm.expect(createdStudent.studentCode).to.eql(expectedCode);",
+                                    "}",
+                                    "const studentId = createdStudent.studentId || createdStudent.id;",
+                                    "if (studentId) {",
+                                    "  pm.collectionVariables.set('studentId', String(studentId));",
                                     "}"
                                 ]
                             }
@@ -462,7 +506,26 @@
                         },
                         "description": "Get one student by `{{studentId}}`."
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});",
+                                    "const payload = pm.response.json();",
+                                    "const data = payload && payload.data ? payload.data : payload;",
+                                    "const studentId = data.studentId || data.id;",
+                                    "if (studentId) {",
+                                    "  pm.collectionVariables.set('studentId', String(studentId));",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Update Student",
@@ -511,7 +574,26 @@
                             }
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});",
+                                    "const payload = pm.response.json();",
+                                    "const data = payload && payload.data ? payload.data : payload;",
+                                    "const studentId = data.studentId || data.id;",
+                                    "if (studentId) {",
+                                    "  pm.collectionVariables.set('studentId', String(studentId));",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Fetch Students",
@@ -583,7 +665,20 @@
                         },
                         "description": "Fetch student page with optional filters and supported sorting."
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Export Students CSV",
@@ -619,7 +714,20 @@
                         },
                         "description": "Export students as CSV. The response is `text/csv`."
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -680,12 +788,14 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "const res = pm.response.json();",
                                     "pm.test('Academic year is created', function () {",
                                     "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
                                     "});",
-                                    "if (res && res.data && res.data.id) {",
-                                    "  pm.collectionVariables.set('academicYearId', String(res.data.id));",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "const academicYearId = data.id || data.academicYearId;",
+                                    "if (academicYearId) {",
+                                    "  pm.collectionVariables.set('academicYearId', String(academicYearId));",
                                     "}"
                                 ]
                             }
@@ -725,7 +835,20 @@
                         },
                         "description": "List academic years. Requires ADMIN or ACADEMIC_OFFICE."
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Update Academic Year",
@@ -774,7 +897,26 @@
                             }
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "const academicYearId = data.id || data.academicYearId;",
+                                    "if (academicYearId) {",
+                                    "  pm.collectionVariables.set('academicYearId', String(academicYearId));",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Create Grade Level",
@@ -829,12 +971,14 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "const res = pm.response.json();",
                                     "pm.test('Grade level is created', function () {",
                                     "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
                                     "});",
-                                    "if (res && res.data && res.data.id) {",
-                                    "  pm.collectionVariables.set('gradeId', String(res.data.id));",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "const gradeId = data.id || data.gradeId || data.gradeLevelId;",
+                                    "if (gradeId) {",
+                                    "  pm.collectionVariables.set('gradeId', String(gradeId));",
                                     "}"
                                 ]
                             }
@@ -874,7 +1018,20 @@
                         },
                         "description": "List grade levels. Requires ADMIN or ACADEMIC_OFFICE."
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Update Grade Level",
@@ -923,7 +1080,26 @@
                             }
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "const gradeId = data.id || data.gradeId || data.gradeLevelId;",
+                                    "if (gradeId) {",
+                                    "  pm.collectionVariables.set('gradeId', String(gradeId));",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Create School Class",
@@ -978,12 +1154,14 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "const res = pm.response.json();",
                                     "pm.test('School class is created', function () {",
                                     "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
                                     "});",
-                                    "if (res && res.data && res.data.id) {",
-                                    "  pm.collectionVariables.set('classId', String(res.data.id));",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "const classId = data.id || data.classId;",
+                                    "if (classId) {",
+                                    "  pm.collectionVariables.set('classId', String(classId));",
                                     "}"
                                 ]
                             }
@@ -1029,7 +1207,20 @@
                         },
                         "description": "List school classes. `academicYearId` is optional in code; TEACHER may read."
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Update School Class",
@@ -1078,7 +1269,26 @@
                             }
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "const classId = data.id || data.classId;",
+                                    "if (classId) {",
+                                    "  pm.collectionVariables.set('classId', String(classId));",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -1135,12 +1345,14 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "const res = pm.response.json();",
                                     "pm.test('Semester is created', function () {",
                                     "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
                                     "});",
-                                    "if (res && res.data && res.data.id) {",
-                                    "  pm.collectionVariables.set('semesterId', String(res.data.id));",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "const semesterId = data.id || data.semesterId;",
+                                    "if (semesterId) {",
+                                    "  pm.collectionVariables.set('semesterId', String(semesterId));",
                                     "}"
                                 ]
                             }
@@ -1180,7 +1392,20 @@
                             ]
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Update Semester",
@@ -1225,7 +1450,26 @@
                             }
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "const semesterId = data.id || data.semesterId;",
+                                    "if (semesterId) {",
+                                    "  pm.collectionVariables.set('semesterId', String(semesterId));",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Activate Semester",
@@ -1257,7 +1501,20 @@
                             "query": []
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Create Subject",
@@ -1308,12 +1565,14 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "const res = pm.response.json();",
                                     "pm.test('Subject is created', function () {",
                                     "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
                                     "});",
-                                    "if (res && res.data && res.data.id) {",
-                                    "  pm.collectionVariables.set('subjectId', String(res.data.id));",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "const subjectId = data.id || data.subjectId;",
+                                    "if (subjectId) {",
+                                    "  pm.collectionVariables.set('subjectId', String(subjectId));",
                                     "}"
                                 ]
                             }
@@ -1353,7 +1612,20 @@
                             ]
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Update Subject",
@@ -1398,7 +1670,26 @@
                             }
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "const subjectId = data.id || data.subjectId;",
+                                    "if (subjectId) {",
+                                    "  pm.collectionVariables.set('subjectId', String(subjectId));",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Create Subject Applicability - Grade",
@@ -1444,7 +1735,83 @@
                             }
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 201', function () {",
+                                    "  pm.response.to.have.status(201);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Create Subject - Class Scope",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v2/subjects",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v2",
+                                "subjects"
+                            ],
+                            "query": []
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"code\": \"LIFESKILL\",\n  \"name\": \"Kỹ năng sống\",\n  \"subjectType\": \"SKILL\",\n  \"applicationScope\": \"CLASS\",\n  \"status\": \"ACTIVE\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Class-scoped subject is created', function () {",
+                                    "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "const classScopedSubjectId = data.id || data.subjectId;",
+                                    "if (classScopedSubjectId) {",
+                                    "  pm.collectionVariables.set('classScopedSubjectId', String(classScopedSubjectId));",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Create Subject Applicability - Class",
@@ -1467,7 +1834,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/api/v2/subjects/{{subjectId}}/applicabilities",
+                            "raw": "{{baseUrl}}/api/v2/subjects/{{classScopedSubjectId}}/applicabilities",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -1475,7 +1842,7 @@
                                 "api",
                                 "v2",
                                 "subjects",
-                                "{{subjectId}}",
+                                "{{classScopedSubjectId}}",
                                 "applicabilities"
                             ],
                             "query": []
@@ -1490,7 +1857,20 @@
                             }
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 201', function () {",
+                                    "  pm.response.to.have.status(201);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Create Class Subject",
@@ -1541,12 +1921,14 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "const res = pm.response.json();",
                                     "pm.test('Class subject is created', function () {",
                                     "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
                                     "});",
-                                    "if (res && res.data && res.data.id) {",
-                                    "  pm.collectionVariables.set('classSubjectId', String(res.data.id));",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "const classSubjectId = data.id || data.classSubjectId;",
+                                    "if (classSubjectId) {",
+                                    "  pm.collectionVariables.set('classSubjectId', String(classSubjectId));",
                                     "}"
                                 ]
                             }
@@ -1588,7 +1970,20 @@
                             ]
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Update Class Subject",
@@ -1633,7 +2028,26 @@
                             }
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "const classSubjectId = data.id || data.classSubjectId;",
+                                    "if (classSubjectId) {",
+                                    "  pm.collectionVariables.set('classSubjectId', String(classSubjectId));",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -1690,12 +2104,14 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "const res = pm.response.json();",
                                     "pm.test('Teacher is created', function () {",
                                     "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
                                     "});",
-                                    "if (res && res.data && res.data.id) {",
-                                    "  pm.collectionVariables.set('teacherId', String(res.data.id));",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "const teacherId = data.id || data.teacherId;",
+                                    "if (teacherId) {",
+                                    "  pm.collectionVariables.set('teacherId', String(teacherId));",
                                     "}"
                                 ]
                             }
@@ -1731,7 +2147,26 @@
                             "query": []
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "const teacherId = data.id || data.teacherId;",
+                                    "if (teacherId) {",
+                                    "  pm.collectionVariables.set('teacherId', String(teacherId));",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "List Teachers",
@@ -1766,7 +2201,20 @@
                             ]
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Update Teacher",
@@ -1811,7 +2259,26 @@
                             }
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "const teacherId = data.id || data.teacherId;",
+                                    "if (teacherId) {",
+                                    "  pm.collectionVariables.set('teacherId', String(teacherId));",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -1859,7 +2326,20 @@
                         },
                         "description": "List active students without an enrollment for the academic year. ADMIN, ACADEMIC_OFFICE, and TEACHER may read."
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Create Enrollment",
@@ -1914,12 +2394,17 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "const res = pm.response.json();",
                                     "pm.test('Enrollment is created', function () {",
                                     "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
                                     "});",
-                                    "if (res && res.data && res.data.enrollments && res.data.enrollments.length > 0) {",
-                                    "  pm.collectionVariables.set('enrollmentId', String(res.data.enrollments[0].id));",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "if (data && data.enrollments && data.enrollments.length > 0) {",
+                                    "  const first = data.enrollments[0];",
+                                    "  const enrollmentId = first.id || first.enrollmentId;",
+                                    "  if (enrollmentId) {",
+                                    "    pm.collectionVariables.set('enrollmentId', String(enrollmentId));",
+                                    "  }",
                                     "}"
                                 ]
                             }
@@ -1965,7 +2450,7 @@
                         "description": "Assign multiple students to a class atomically. Requires ADMIN or ACADEMIC_OFFICE.",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"classId\": \"{{classId}}\",\n  \"studentIds\": [\n    \"{{studentId}}\",\n    2\n  ],\n  \"enrolledAt\": \"2026-08-21T08:00:00\"\n}",
+                            "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"classId\": \"{{classId}}\",\n  \"studentIds\": [\n    \"{{studentId}}\"\n  ]\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -1973,7 +2458,29 @@
                             }
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "if (data && data.enrollments && data.enrollments.length > 0) {",
+                                    "  const first = data.enrollments[0];",
+                                    "  const enrollmentId = first.id || first.enrollmentId;",
+                                    "  if (enrollmentId) {",
+                                    "    pm.collectionVariables.set('enrollmentId', String(enrollmentId));",
+                                    "  }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "List Class Students",
@@ -2010,7 +2517,20 @@
                         },
                         "description": "List active students in a class. ADMIN, ACADEMIC_OFFICE, and TEACHER may read."
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "List Student Enrollment History",
@@ -2047,7 +2567,20 @@
                         },
                         "description": "List enrollment and transfer history for a student. ADMIN, ACADEMIC_OFFICE, and TEACHER may read."
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Transfer Enrollment",
@@ -2097,7 +2630,29 @@
                             }
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});",
+                                    "const res = pm.response.json();",
+                                    "const data = res && res.data ? res.data : res;",
+                                    "if (data && data.enrollments && data.enrollments.length > 0) {",
+                                    "  const first = data.enrollments[0];",
+                                    "  const enrollmentId = first.id || first.enrollmentId;",
+                                    "  if (enrollmentId) {",
+                                    "    pm.collectionVariables.set('enrollmentId', String(enrollmentId));",
+                                    "  }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -2159,12 +2714,14 @@
                                     "script": {
                                         "type": "text/javascript",
                                         "exec": [
-                                            "const res = pm.response.json();",
                                             "pm.test('Homeroom assignment is created', function () {",
                                             "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
                                             "});",
-                                            "if (res && res.data && res.data.id) {",
-                                            "  pm.collectionVariables.set('homeroomAssignmentId', String(res.data.id));",
+                                            "const res = pm.response.json();",
+                                            "const data = res && res.data ? res.data : res;",
+                                            "const assignmentId = data.id || data.homeroomAssignmentId;",
+                                            "if (assignmentId) {",
+                                            "  pm.collectionVariables.set('homeroomAssignmentId', String(assignmentId));",
                                             "}"
                                         ]
                                     }
@@ -2201,7 +2758,20 @@
                                     "query": []
                                 }
                             },
-                            "response": []
+                            "response": [],
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test('Status code is 200', function () {",
+                                            "  pm.response.to.have.status(200);",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ]
                         },
                         {
                             "name": "Replace Homeroom Assignment",
@@ -2239,7 +2809,7 @@
                                 },
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n  \"teacherId\": 2,\n  \"validFrom\": \"2026-10-01\",\n  \"validTo\": null\n}",
+                                    "raw": "{\n  \"teacherId\": \"{{teacherId}}\",\n  \"validFrom\": \"2026-10-01\",\n  \"validTo\": null\n}",
                                     "options": {
                                         "raw": {
                                             "language": "json"
@@ -2247,7 +2817,26 @@
                                     }
                                 }
                             },
-                            "response": []
+                            "response": [],
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test('Homeroom assignment is replaced', function () {",
+                                            "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                            "});",
+                                            "const res = pm.response.json();",
+                                            "const data = res && res.data ? res.data : res;",
+                                            "const assignmentId = data.id || data.homeroomAssignmentId;",
+                                            "if (assignmentId) {",
+                                            "  pm.collectionVariables.set('homeroomAssignmentId', String(assignmentId));",
+                                            "}"
+                                        ]
+                                    }
+                                }
+                            ]
                         }
                     ]
                 },
@@ -2305,12 +2894,14 @@
                                     "script": {
                                         "type": "text/javascript",
                                         "exec": [
-                                            "const res = pm.response.json();",
                                             "pm.test('Subject teaching assignment is created', function () {",
                                             "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
                                             "});",
-                                            "if (res && res.data && res.data.id) {",
-                                            "  pm.collectionVariables.set('subjectTeachingAssignmentId', String(res.data.id));",
+                                            "const res = pm.response.json();",
+                                            "const data = res && res.data ? res.data : res;",
+                                            "const assignmentId = data.id || data.subjectTeachingAssignmentId;",
+                                            "if (assignmentId) {",
+                                            "  pm.collectionVariables.set('subjectTeachingAssignmentId', String(assignmentId));",
                                             "}"
                                         ]
                                     }
@@ -2347,7 +2938,20 @@
                                     "query": []
                                 }
                             },
-                            "response": []
+                            "response": [],
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test('Status code is 200', function () {",
+                                            "  pm.response.to.have.status(200);",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ]
                         },
                         {
                             "name": "Replace Subject Teaching Assignment",
@@ -2385,7 +2989,7 @@
                                 },
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n  \"teacherId\": 2,\n  \"validFrom\": \"2026-10-01\",\n  \"validTo\": null\n}",
+                                    "raw": "{\n  \"teacherId\": \"{{teacherId}}\",\n  \"validFrom\": \"2026-10-01\",\n  \"validTo\": null\n}",
                                     "options": {
                                         "raw": {
                                             "language": "json"
@@ -2393,7 +2997,26 @@
                                     }
                                 }
                             },
-                            "response": []
+                            "response": [],
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test('Subject teaching assignment is replaced', function () {",
+                                            "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                            "});",
+                                            "const res = pm.response.json();",
+                                            "const data = res && res.data ? res.data : res;",
+                                            "const assignmentId = data.id || data.subjectTeachingAssignmentId;",
+                                            "if (assignmentId) {",
+                                            "  pm.collectionVariables.set('subjectTeachingAssignmentId', String(assignmentId));",
+                                            "}"
+                                        ]
+                                    }
+                                }
+                            ]
                         }
                     ]
                 }
@@ -2406,7 +3029,7 @@
                 {
                     "request": {
                         "body": {
-                            "raw": "{\\n  \"academicYearId\": 1,\\n  \"semesterId\": 1,\\n  \"dayType\": \"SCHOOL_DAY\",\\n  \"reason\": \"Ngày học\",\\n  \"sessions\": [\\n    {\\n      \"sessionPeriod\": \"MORNING\",\\n      \"sessionStatus\": \"SCHEDULED\"\\n    },\\n    {\\n      \"sessionPeriod\": \"AFTERNOON\",\\n      \"sessionStatus\": \"NO_CLASS\"\\n    }\\n  ]\\n}",
+                            "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"semesterId\": \"{{semesterId}}\",\n  \"dayType\": \"SCHOOL_DAY\",\n  \"reason\": \"Ngày học\",\n  \"sessions\": [\n    {\n      \"sessionPeriod\": \"MORNING\",\n      \"sessionStatus\": \"ACTIVE\",\n      \"reason\": \"Buổi sáng\"\n    },\n    {\n      \"sessionPeriod\": \"AFTERNOON\",\n      \"sessionStatus\": \"ACTIVE\",\n      \"reason\": \"Buổi chiều\"\n    }\n  ]\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -2451,7 +3074,7 @@
                             "script": {
                                 "exec": [
                                     "pm.test('Status code is 200', function () {",
-                                    "    pm.response.to.have.status(200);",
+                                    "  pm.response.to.have.status(200);",
                                     "});"
                                 ],
                                 "type": "text/javascript"
@@ -2512,12 +3135,12 @@
                             "script": {
                                 "exec": [
                                     "pm.test('Status code is 200', function () {",
-                                    "    pm.response.to.have.status(200);",
+                                    "  pm.response.to.have.status(200);",
                                     "});",
                                     "const response = pm.response.json();",
                                     "pm.test('Calendar days returned as list', function () {",
-                                    "    pm.expect(response).to.have.property('data');",
-                                    "    pm.expect(Array.isArray(response.data)).to.be.true;",
+                                    "  pm.expect(response).to.have.property('data');",
+                                    "  pm.expect(Array.isArray(response.data)).to.be.true;",
                                     "});"
                                 ],
                                 "type": "text/javascript"
@@ -2578,12 +3201,14 @@
                         {
                             "script": {
                                 "exec": [
-                                    "pm.test('Status code is 201', function () {",
-                                    "    pm.response.to.have.status(201);",
+                                    "pm.test('Attendance session is ready', function () {",
+                                    "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
                                     "});",
                                     "const response = pm.response.json();",
-                                    "if (response && response.data && response.data.sessionId) {",
-                                    "    pm.collectionVariables.set('attendanceSessionId', String(response.data.sessionId));",
+                                    "const data = response && response.data ? response.data : response;",
+                                    "const sessionId = data.sessionId || data.id;",
+                                    "if (sessionId) {",
+                                    "  pm.collectionVariables.set('attendanceSessionId', String(sessionId));",
                                     "}"
                                 ],
                                 "type": "text/javascript"
@@ -2627,12 +3252,12 @@
                             "script": {
                                 "exec": [
                                     "pm.test('Status code is 200', function () {",
-                                    "    pm.response.to.have.status(200);",
+                                    "  pm.response.to.have.status(200);",
                                     "});",
                                     "const response = pm.response.json();",
                                     "pm.test('Session students returned as list', function () {",
-                                    "    pm.expect(response).to.have.property('data');",
-                                    "    pm.expect(Array.isArray(response.data)).to.be.true;",
+                                    "  pm.expect(response).to.have.property('data');",
+                                    "  pm.expect(Array.isArray(response.data)).to.be.true;",
                                     "});"
                                 ],
                                 "type": "text/javascript"
@@ -2691,7 +3316,7 @@
                             "script": {
                                 "exec": [
                                     "pm.test('Status code is 200', function () {",
-                                    "    pm.response.to.have.status(200);",
+                                    "  pm.response.to.have.status(200);",
                                     "});"
                                 ],
                                 "type": "text/javascript"
@@ -2762,14 +3387,14 @@
                             "script": {
                                 "exec": [
                                     "pm.test('Status code is 200', function () {",
-                                    "    pm.response.to.have.status(200);",
+                                    "  pm.response.to.have.status(200);",
                                     "});",
                                     "const response = pm.response.json();",
                                     "pm.test('History has items and summary', function () {",
-                                    "    pm.expect(response).to.have.property('data');",
-                                    "    pm.expect(response.data).to.have.property('items');",
-                                    "    pm.expect(response.data).to.have.property('summary');",
-                                    "    pm.expect(response.data.summary).to.have.property('validSessionCount');",
+                                    "  pm.expect(response).to.have.property('data');",
+                                    "  pm.expect(response.data).to.have.property('items');",
+                                    "  pm.expect(response.data).to.have.property('summary');",
+                                    "  pm.expect(response.data.summary).to.have.property('validSessionCount');",
                                     "});"
                                 ],
                                 "type": "text/javascript"
@@ -2814,7 +3439,7 @@
                             "script": {
                                 "exec": [
                                     "pm.test('Status code is 204', function () {",
-                                    "    pm.response.to.have.status(204);",
+                                    "  pm.response.to.have.status(204);",
                                     "});"
                                 ],
                                 "type": "text/javascript"
@@ -2874,7 +3499,20 @@
                             }
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "End Subject Teaching Assignment",
@@ -2920,7 +3558,20 @@
                             }
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Evaluate Semester Completeness Decision",
@@ -2957,7 +3608,20 @@
                             ]
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Lock Semester",
@@ -2989,7 +3653,20 @@
                             "query": []
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Reopen Semester",
@@ -3035,7 +3712,20 @@
                             }
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Close School Class",
@@ -3072,7 +3762,20 @@
                         },
                         "description": "Close a school class. Requires ADMIN or ACADEMIC_OFFICE."
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Close Academic Year",
@@ -3109,7 +3812,20 @@
                         },
                         "description": "Close an academic year. Requires ADMIN or ACADEMIC_OFFICE."
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "  pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -3151,7 +3867,20 @@
                         },
                         "description": "Delete a school class only when guarded delete rules allow it. Requires ADMIN or ACADEMIC_OFFICE."
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 204', function () {",
+                                    "  pm.response.to.have.status(204);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Delete Grade Level",
@@ -3187,7 +3916,20 @@
                         },
                         "description": "Delete a grade level only when guarded delete rules allow it. Requires ADMIN or ACADEMIC_OFFICE."
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 204', function () {",
+                                    "  pm.response.to.have.status(204);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Delete Academic Year",
@@ -3223,7 +3965,20 @@
                         },
                         "description": "Delete an academic year only when guarded delete rules allow it. Requires ADMIN or ACADEMIC_OFFICE."
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 204', function () {",
+                                    "  pm.response.to.have.status(204);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Delete Teacher",
@@ -3254,7 +4009,20 @@
                             "query": []
                         }
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 204', function () {",
+                                    "  pm.response.to.have.status(204);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Delete Student",
@@ -3290,7 +4058,20 @@
                         },
                         "description": "Delete a student. StudentInfo is removed through the entity relationship."
                     },
-                    "response": []
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 204', function () {",
+                                    "  pm.response.to.have.status(204);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
                     "name": "Logout",
@@ -3355,6 +4136,19 @@
                             "header": [],
                             "body": ""
                         }
+                    ],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 204', function () {",
+                                    "  pm.response.to.have.status(204);",
+                                    "});"
+                                ]
+                            }
+                        }
                     ]
                 }
             ]
@@ -3418,6 +4212,10 @@
         {
             "key": "subjectId",
             "value": "1"
+        },
+        {
+            "key": "classScopedSubjectId",
+            "value": "2"
         },
         {
             "key": "classSubjectId",

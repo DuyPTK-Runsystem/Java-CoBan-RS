@@ -1,0 +1,240 @@
+{
+  "info": {
+    "name": "Java CoBan - 5 Teacher User Test Data",
+    "description": "Creates five fresh users and five linked teacher profiles. Backend creation also assigns the TEACHER role to each linked app-user. Set operatorUsername and operatorPassword to an existing ADMIN or ACADEMIC_OFFICE account before running.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('runSuffix')) {",
+          "  const suffix = String(Date.now()).slice(-10);",
+          "  pm.collectionVariables.set('runSuffix', suffix);",
+          "  for (let i = 1; i <= 5; i++) {",
+          "    pm.collectionVariables.set(`user${i}Username`, `t${i}_${suffix}`);",
+          "  }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8081" },
+    { "key": "operatorUsername", "value": "" },
+    { "key": "operatorPassword", "value": "" },
+    { "key": "attendanceTeacherUsername", "value": "" },
+    { "key": "attendanceTeacherPassword", "value": "" },
+    { "key": "attendanceStudentUsername", "value": "" },
+    { "key": "attendanceStudentPassword", "value": "" },
+    { "key": "attendanceAcademicYearId", "value": "" },
+    { "key": "attendanceSemesterId", "value": "" },
+    { "key": "attendanceClassId", "value": "" },
+    { "key": "attendanceDate", "value": "2026-09-01" },
+    { "key": "attendanceSessionPeriod", "value": "MORNING" },
+    { "key": "attendanceStudentId", "value": "" },
+    { "key": "attendanceSessionId", "value": "" },
+    { "key": "attendanceTeacherToken", "value": "" },
+    { "key": "attendanceStudentToken", "value": "" },
+    { "key": "testPassword", "value": "Test1234" },
+    { "key": "runSuffix", "value": "" },
+    { "key": "accessToken", "value": "" },
+    { "key": "user1Id", "value": "" },
+    { "key": "user2Id", "value": "" },
+    { "key": "user3Id", "value": "" },
+    { "key": "user4Id", "value": "" },
+    { "key": "user5Id", "value": "" },
+    { "key": "teacher1Id", "value": "" },
+    { "key": "teacher2Id", "value": "" },
+    { "key": "teacher3Id", "value": "" },
+    { "key": "teacher4Id", "value": "" },
+    { "key": "teacher5Id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01. Authenticate Operator",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{operatorUsername}}\",\n  \"password\": \"{{operatorPassword}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/api/v1/auth/login"
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('Operator login succeeds', () => pm.response.to.have.status(200));",
+          "const payload = pm.response.json();",
+          "const data = payload.data || payload;",
+          "pm.collectionVariables.set('accessToken', data.access_token || data.accessToken);"
+        ]}
+      }]
+    },
+    {
+      "name": "02. Register 5 Users",
+      "item": [
+        {
+          "name": "Register User 1",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{user1Username}}\",\n  \"password\": \"{{testPassword}}\",\n  \"confirmPassword\": \"{{testPassword}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/v1/auth/register"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('User 1 registered', () => pm.response.to.have.status(201));", "const d = (pm.response.json().data || pm.response.json()); pm.collectionVariables.set('user1Id', String(d.id || d.userId));"] } }]
+        },
+        {
+          "name": "Register User 2",
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{user2Username}}\",\n  \"password\": \"{{testPassword}}\",\n  \"confirmPassword\": \"{{testPassword}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/v1/auth/register"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('User 2 registered', () => pm.response.to.have.status(201));", "const d = (pm.response.json().data || pm.response.json()); pm.collectionVariables.set('user2Id', String(d.id || d.userId));"] } }]
+        },
+        {
+          "name": "Register User 3",
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{user3Username}}\",\n  \"password\": \"{{testPassword}}\",\n  \"confirmPassword\": \"{{testPassword}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/v1/auth/register"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('User 3 registered', () => pm.response.to.have.status(201));", "const d = (pm.response.json().data || pm.response.json()); pm.collectionVariables.set('user3Id', String(d.id || d.userId));"] } }]
+        },
+        {
+          "name": "Register User 4",
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{user4Username}}\",\n  \"password\": \"{{testPassword}}\",\n  \"confirmPassword\": \"{{testPassword}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/v1/auth/register"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('User 4 registered', () => pm.response.to.have.status(201));", "const d = (pm.response.json().data || pm.response.json()); pm.collectionVariables.set('user4Id', String(d.id || d.userId));"] } }]
+        },
+        {
+          "name": "Register User 5",
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{user5Username}}\",\n  \"password\": \"{{testPassword}}\",\n  \"confirmPassword\": \"{{testPassword}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/v1/auth/register"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('User 5 registered', () => pm.response.to.have.status(201));", "const d = (pm.response.json().data || pm.response.json()); pm.collectionVariables.set('user5Id', String(d.id || d.userId));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "03. Create 5 Linked Teachers",
+      "item": [
+        {
+          "name": "Create Teacher 1",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\n  \"userId\": {{user1Id}},\n  \"teacherCode\": \"T-{{runSuffix}}-01\",\n  \"teacherName\": \"Test Teacher 1\",\n  \"dateOfBirth\": \"1990-01-15\",\n  \"gender\": \"MALE\",\n  \"phone\": \"0900000001\",\n  \"email\": \"teacher1.{{runSuffix}}@example.com\",\n  \"department\": \"Tổ Toán\",\n  \"joinDate\": \"2020-08-01\",\n  \"status\": \"ACTIVE\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/v2/teachers" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Teacher 1 created', () => pm.response.to.have.status(201));", "const d = (pm.response.json().data || pm.response.json());", "pm.test('Teacher 1 is linked to User 1', () => pm.expect(String(d.userId)).to.eql(pm.collectionVariables.get('user1Id')));", "pm.collectionVariables.set('teacher1Id', String(d.id || d.teacherId));"] } }]
+        },
+        {
+          "name": "Create Teacher 2",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\n  \"userId\": {{user2Id}},\n  \"teacherCode\": \"T-{{runSuffix}}-02\",\n  \"teacherName\": \"Test Teacher 2\",\n  \"dateOfBirth\": \"1991-02-16\",\n  \"gender\": \"FEMALE\",\n  \"phone\": \"0900000002\",\n  \"email\": \"teacher2.{{runSuffix}}@example.com\",\n  \"department\": \"Tổ Văn\",\n  \"joinDate\": \"2020-08-01\",\n  \"status\": \"ACTIVE\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/v2/teachers" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Teacher 2 created', () => pm.response.to.have.status(201));", "const d = (pm.response.json().data || pm.response.json()); pm.test('Teacher 2 is linked to User 2', () => pm.expect(String(d.userId)).to.eql(pm.collectionVariables.get('user2Id'))); pm.collectionVariables.set('teacher2Id', String(d.id || d.teacherId));"] } }]
+        },
+        {
+          "name": "Create Teacher 3",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\n  \"userId\": {{user3Id}},\n  \"teacherCode\": \"T-{{runSuffix}}-03\",\n  \"teacherName\": \"Test Teacher 3\",\n  \"dateOfBirth\": \"1992-03-17\",\n  \"gender\": \"MALE\",\n  \"phone\": \"0900000003\",\n  \"email\": \"teacher3.{{runSuffix}}@example.com\",\n  \"department\": \"Tổ Anh\",\n  \"joinDate\": \"2020-08-01\",\n  \"status\": \"ACTIVE\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/v2/teachers" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Teacher 3 created', () => pm.response.to.have.status(201));", "const d = (pm.response.json().data || pm.response.json()); pm.test('Teacher 3 is linked to User 3', () => pm.expect(String(d.userId)).to.eql(pm.collectionVariables.get('user3Id'))); pm.collectionVariables.set('teacher3Id', String(d.id || d.teacherId));"] } }]
+        },
+        {
+          "name": "Create Teacher 4",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\n  \"userId\": {{user4Id}},\n  \"teacherCode\": \"T-{{runSuffix}}-04\",\n  \"teacherName\": \"Test Teacher 4\",\n  \"dateOfBirth\": \"1993-04-18\",\n  \"gender\": \"FEMALE\",\n  \"phone\": \"0900000004\",\n  \"email\": \"teacher4.{{runSuffix}}@example.com\",\n  \"department\": \"Tổ Lý\",\n  \"joinDate\": \"2020-08-01\",\n  \"status\": \"ACTIVE\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/v2/teachers" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Teacher 4 created', () => pm.response.to.have.status(201));", "const d = (pm.response.json().data || pm.response.json()); pm.test('Teacher 4 is linked to User 4', () => pm.expect(String(d.userId)).to.eql(pm.collectionVariables.get('user4Id'))); pm.collectionVariables.set('teacher4Id', String(d.id || d.teacherId));"] } }]
+        },
+        {
+          "name": "Create Teacher 5",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\n  \"userId\": {{user5Id}},\n  \"teacherCode\": \"T-{{runSuffix}}-05\",\n  \"teacherName\": \"Test Teacher 5\",\n  \"dateOfBirth\": \"1994-05-19\",\n  \"gender\": \"MALE\",\n  \"phone\": \"0900000005\",\n  \"email\": \"teacher5.{{runSuffix}}@example.com\",\n  \"department\": \"Tổ Hóa\",\n  \"joinDate\": \"2020-08-01\",\n  \"status\": \"ACTIVE\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/v2/teachers" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Teacher 5 created', () => pm.response.to.have.status(201));", "const d = (pm.response.json().data || pm.response.json()); pm.test('Teacher 5 is linked to User 5', () => pm.expect(String(d.userId)).to.eql(pm.collectionVariables.get('user5Id'))); pm.collectionVariables.set('teacher5Id', String(d.id || d.teacherId));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "04. Verify Linked Teachers",
+      "item": [
+        {
+          "name": "List Created Teachers",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/v2/teachers?status=ACTIVE" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Teacher list succeeds', () => pm.response.to.have.status(200));", "const payload = pm.response.json();", "const data = payload.data || payload;", "pm.test('At least five active teachers exist', () => pm.expect(data.length).to.be.at.least(5));"] } }]
+        },
+        {
+          "name": "Get Teacher 1 and Verify User Link",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/v2/teachers/{{teacher1Id}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Teacher 1 lookup succeeds', () => pm.response.to.have.status(200));", "const d = (pm.response.json().data || pm.response.json()); pm.expect(String(d.userId)).to.eql(pm.collectionVariables.get('user1Id'));" ] } }]
+        }
+      ]
+    },
+    {
+      "name": "05. Attendance - Module 09",
+      "description": "Attendance flow from the legacy Postman module 09. Configure existing TEACHER/STUDENT credentials and academic IDs before running.",
+      "item": [
+        {
+          "name": "Login Attendance Teacher",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{attendanceTeacherUsername}}\",\n  \"password\": \"{{attendanceTeacherPassword}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Attendance teacher login succeeds', () => pm.response.to.have.status(200));", "const d = (pm.response.json().data || pm.response.json());", "pm.collectionVariables.set('attendanceTeacherToken', d.access_token || d.accessToken);"] } }]
+        },
+        {
+          "name": "Create Or Get Attendance Session",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{attendanceTeacherToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"classId\": {{attendanceClassId}},\n  \"semesterId\": {{attendanceSemesterId}},\n  \"attendanceDate\": \"{{attendanceDate}}\",\n  \"sessionPeriod\": \"{{attendanceSessionPeriod}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/v2/attendance-sessions"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Attendance session is created or returned', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));", "const d = (pm.response.json().data || pm.response.json());", "pm.collectionVariables.set('attendanceSessionId', String(d.sessionId || d.id));"] } }]
+        },
+        {
+          "name": "List Session Students",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{attendanceTeacherToken}}" }], "url": "{{baseUrl}}/api/v2/attendance-sessions/{{attendanceSessionId}}/students" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Session students request succeeds', () => pm.response.to.have.status(200));", "const payload = pm.response.json();", "const students = payload.data || payload;", "pm.test('Session students are returned as a list', () => pm.expect(Array.isArray(students)).to.be.true);", "if (!pm.collectionVariables.get('attendanceStudentId') && students.length) { pm.collectionVariables.set('attendanceStudentId', String(students[0].studentId || students[0].id)); }"] } }]
+        },
+        {
+          "name": "Upsert Attendance Exception",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{attendanceTeacherToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"EXCUSED\",\n  \"note\": \"Nghỉ ốm có phép - test module 09\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/v2/attendance-sessions/{{attendanceSessionId}}/exceptions/{{attendanceStudentId}}"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Attendance exception upsert succeeds', () => pm.response.to.have.status(200));", "const d = (pm.response.json().data || pm.response.json());", "pm.expect(d.status).to.eql('EXCUSED');"] } }]
+        },
+        {
+          "name": "Login Attendance Student",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{attendanceStudentUsername}}\",\n  \"password\": \"{{attendanceStudentPassword}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Attendance student login succeeds', () => pm.response.to.have.status(200));", "const d = (pm.response.json().data || pm.response.json());", "pm.collectionVariables.set('attendanceStudentToken', d.access_token || d.accessToken);"] } }]
+        },
+        {
+          "name": "Student Attendance History",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{attendanceStudentToken}}" }],
+            "url": "{{baseUrl}}/api/v2/attendance/students/me/history?academicYearId={{attendanceAcademicYearId}}&semesterId={{attendanceSemesterId}}&from={{attendanceDate}}&to={{attendanceDate}}&page=0&size=10"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Student attendance history succeeds', () => pm.response.to.have.status(200));", "const d = (pm.response.json().data || pm.response.json());", "pm.expect(d).to.have.property('items');", "pm.expect(d).to.have.property('summary');"] } }]
+        },
+        {
+          "name": "Delete Attendance Exception",
+          "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{attendanceTeacherToken}}" }], "url": "{{baseUrl}}/api/v2/attendance-sessions/{{attendanceSessionId}}/exceptions/{{attendanceStudentId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Attendance exception deletion succeeds', () => pm.response.to.have.status(204));"] } }]
+        }
+      ]
+    }
+  ]
+}
