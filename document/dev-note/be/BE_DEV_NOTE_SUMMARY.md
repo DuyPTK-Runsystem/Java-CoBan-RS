@@ -32,6 +32,7 @@
 |   033 | backend            | [Jackson JavaTimeModule Audit Serialization Fix](033-jackson-jsr310-audit-serialization-2026-08-24.md)                                | Completed                                              | 2026-08-24 |
 |   033 | attendance         | [Class Attendance Summary](attendance/033-class-attendance-summary-2026-08-24.md)                                                     | Completed                                              | 2026-08-24 |
 |   034 | cross-area         | [Teacher/User and Attendance Postman Test Data](034-teacher-user-attendance-postman-test-data-2026-08-24.md)                          | Completed; backend test not run due Gradle environment | 2026-08-24 |
+|   035 | attendance         | [Academic Office Attendance Adjustment](attendance/035-academic-office-attendance-adjustment-2026-08-24.md)                           | Completed                                              | 2026-08-24 |
 
 ## Module folders
 
