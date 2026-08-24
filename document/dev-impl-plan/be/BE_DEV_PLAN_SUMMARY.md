@@ -25,6 +25,7 @@
 |   034 | [Assign TEACHER Role When Creating Teacher](teacher/034-teacher-user-teacher-role-assignment-2026-08-24.md)                      | Gán role TEACHER cho app-user tương ứng khi tạo giáo viên trong cùng transaction                                                 | Approved | 2026-08-24 |
 |   035 | [Academic Office Attendance Adjustment](attendance/035-academic-office-attendance-adjustment-2026-08-24.md)                      | API giáo vụ điều chỉnh ngoại lệ điểm danh toàn quyền, tách biệt với GVCN, có audit log                                           | Approved | 2026-08-24 |
 |   036 | [Scorebook Foundation](scorebook/036-scorebook-foundation-2026-08-24.md)                                                         | Foundation sổ điểm, cột đánh giá, trọng số môn kỹ năng, lifecycle và authorization theo assignment                             | Approved | 2026-08-24 |
+|   037 | [Student Score Entry](scorebook/037-student-score-entry-2026-08-24.md)                                                            | Nhập điểm từng học sinh/hàng loạt, score grid, optimistic locking, audit và calculation task state                          | Approved | 2026-08-24 |
 
 ## Module folders
 
