@@ -58,3 +58,4 @@ Example:
 |   031 | BE             | [Student Attendance History, Read-Only](../be/attendance/031-student-attendance-history-read-only-2026-08-23.md)                       | Approved                                           | 2026-08-23 |
 |   033 | BE             | [Class Attendance Summary](../be/attendance/033-class-attendance-summary-2026-08-24.md)                                                | Draft - awaiting user approval                     | 2026-08-24 |
 |   033 | BE             | [Class Attendance Summary](../be/attendance/033-class-attendance-summary-2026-08-24.md)                                                | Approved                                           | 2026-08-24 |
+|   035 | BE             | [Academic Office Attendance Adjustment](../be/attendance/035-academic-office-attendance-adjustment-2026-08-24.md)                      | Draft - awaiting user approval                     | 2026-08-24 |
