@@ -14,6 +14,9 @@ import com.JavaTraining.BaiTap_RS.teacher.domain.DTOs.response.ResTeacherDTO;
 import com.JavaTraining.BaiTap_RS.teacher.domain.entity.Teacher;
 import com.JavaTraining.BaiTap_RS.teacher.domain.entity.TeacherStatus;
 import com.JavaTraining.BaiTap_RS.teacher.repository.TeacherRepository;
+import com.JavaTraining.BaiTap_RS.user.domain.entity.Role;
+import com.JavaTraining.BaiTap_RS.user.domain.entity.User;
+import com.JavaTraining.BaiTap_RS.user.repository.RoleRepository;
 import com.JavaTraining.BaiTap_RS.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,7 @@ public class TeacherService {
 
     private final TeacherRepository teacherRepository;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final HomeroomAssignmentRepository homeroomAssignmentRepository;
     private final SubjectTeachingAssignmentRepository subjectTeachingAssignmentRepository;
     private final AcademicCatalogAuditService auditService;
@@ -31,11 +35,13 @@ public class TeacherService {
     public TeacherService(
             TeacherRepository teacherRepository,
             UserRepository userRepository,
+            RoleRepository roleRepository,
             HomeroomAssignmentRepository homeroomAssignmentRepository,
             SubjectTeachingAssignmentRepository subjectTeachingAssignmentRepository,
             AcademicCatalogAuditService auditService) {
         this.teacherRepository = teacherRepository;
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.homeroomAssignmentRepository = homeroomAssignmentRepository;
         this.subjectTeachingAssignmentRepository = subjectTeachingAssignmentRepository;
         this.auditService = auditService;
@@ -60,8 +66,9 @@ public class TeacherService {
         if (teacherRepository.existsByTeacherCode(request.teacherCode())) {
             throw conflict("Mã giáo viên đã tồn tại");
         }
+        User linkedUser = assignTeacherRole(request.userId());
         Teacher teacher = new Teacher(
-                request.userId(),
+                linkedUser == null ? null : linkedUser.getId(),
                 request.teacherCode(),
                 request.teacherName(),
                 request.dateOfBirth(),
@@ -74,6 +81,22 @@ public class TeacherService {
         Teacher saved = teacherRepository.save(teacher);
         auditService.writeAudit("TEACHER_CREATED", "teacher", saved.getId(), null, teacherData(saved));
         return toResponse(saved);
+    }
+
+    private User assignTeacherRole(Long userId) {
+        if (userId == null) {
+            return null;
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy tài khoản"));
+        Role teacherRole = roleRepository.findByCode("TEACHER")
+                .orElseThrow(() -> new AppException(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Không tìm thấy role TEACHER trong hệ thống"));
+        if (user.getRoles().stream().noneMatch(role -> "TEACHER".equals(role.getCode()))) {
+            user.addRole(teacherRole);
+        }
+        return user;
     }
 
     @Transactional
