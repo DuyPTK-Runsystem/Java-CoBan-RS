@@ -61,29 +61,38 @@ public class AttendanceGuard {
             Semester semester,
             LocalDate attendanceDate,
             AttendanceSessionPeriod sessionPeriod) {
-        if (!schoolClass.getAcademicYearId().equals(semester.getAcademicYearId())) {
-            throw conflict("Lớp và học kỳ phải thuộc cùng năm học");
-        }
+        validateClassAndSemester(schoolClass, semester);
         if (attendanceDate.isBefore(semester.getStartDate()) || attendanceDate.isAfter(semester.getEndDate())) {
-            throw conflict("Ngày điểm danh phải nằm trong thời gian học kỳ");
+            throw new AppException(HttpStatus.CONFLICT, "Ngày điểm danh phải nằm trong thời gian học kỳ");
         }
         calendarValidityService.assertScheduled(semester.getId(), attendanceDate, sessionPeriod);
     }
 
+    public void validateClassAndSemester(SchoolClass schoolClass, Semester semester) {
+        if (!schoolClass.getAcademicYearId().equals(semester.getAcademicYearId())) {
+            throw new AppException(HttpStatus.CONFLICT, "Lớp và học kỳ phải thuộc cùng năm học");
+        }
+    }
+
     public void assertCurrentUserHomeroom(Long classId, LocalDate effectiveDate) {
+        validateCurrentUserHomeroomInRange(classId, effectiveDate, effectiveDate);
+    }
+
+    public void validateCurrentUserHomeroomInRange(Long classId, LocalDate from, LocalDate to) {
         Long currentUserId = AuditContext.currentUserId();
         if (currentUserId == null) {
-            throw forbidden();
+            throw new AppException(HttpStatus.FORBIDDEN, "GVCN chỉ được thao tác lớp được phân công");
         }
         Teacher teacher = teacherRepository.findByUserId(currentUserId)
-                .orElseThrow(this::forbidden);
-        boolean assigned = homeroomAssignmentRepository.existsActiveHomeroomAt(
+                .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "GVCN chỉ được thao tác lớp được phân công"));
+        boolean assigned = homeroomAssignmentRepository.existsActiveHomeroomBetween(
                 classId,
                 teacher.getId(),
                 AssignmentStatus.ACTIVE,
-                effectiveDate);
+                from,
+                to);
         if (!assigned) {
-            throw forbidden();
+            throw new AppException(HttpStatus.FORBIDDEN, "GVCN chỉ được thao tác lớp được phân công");
         }
     }
 
@@ -103,19 +112,11 @@ public class AttendanceGuard {
                 effectiveDate.atStartOfDay(),
                 effectiveDate.atTime(23, 59, 59));
         if (!enrolled) {
-            throw conflict("Học sinh không thuộc lớp tại ngày điểm danh");
+            throw new AppException(HttpStatus.CONFLICT, "Học sinh không thuộc lớp tại ngày điểm danh");
         }
     }
 
     public AppException notFound(String message) {
         return new AppException(HttpStatus.NOT_FOUND, message);
-    }
-
-    public AppException conflict(String message) {
-        return new AppException(HttpStatus.CONFLICT, message);
-    }
-
-    private AppException forbidden() {
-        return new AppException(HttpStatus.FORBIDDEN, "GVCN chỉ được thao tác lớp được phân công");
     }
 }

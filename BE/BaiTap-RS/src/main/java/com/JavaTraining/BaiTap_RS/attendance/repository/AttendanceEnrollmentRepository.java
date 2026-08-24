@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 public interface AttendanceEnrollmentRepository extends JpaRepository<StudentYearEnrollment, Long> {
 
     @Query("""
-            select s
+            select distinct s
             from StudentYearEnrollment e, Student s
             where e.studentId = s.id
               and e.currentClassId = :classId
@@ -23,7 +23,7 @@ public interface AttendanceEnrollmentRepository extends JpaRepository<StudentYea
               and e.enrolledAt <= :effectiveAtEnd
               and (e.completedAt is null or e.completedAt >= :effectiveAtStart)
               and s.status = com.JavaTraining.BaiTap_RS.student.domain.entity.StudentStatus.ACTIVE
-            order by s.studentCode
+            order by s.studentCode asc, s.id asc
             """)
     List<Student> findActiveStudentsInClassAt(
             @Param("classId") Long classId,
@@ -42,6 +42,23 @@ public interface AttendanceEnrollmentRepository extends JpaRepository<StudentYea
             """)
     boolean existsActiveStudentInClassAt(
             @Param("studentId") Long studentId,
+            @Param("classId") Long classId,
+            @Param("status") EnrollmentStatus status,
+            @Param("effectiveAtStart") LocalDateTime effectiveAtStart,
+            @Param("effectiveAtEnd") LocalDateTime effectiveAtEnd);
+
+    @Query("""
+            select e
+            from StudentYearEnrollment e, Student s
+            where e.studentId = s.id
+              and e.currentClassId = :classId
+              and e.status = :status
+              and e.enrolledAt <= :effectiveAtEnd
+              and (e.completedAt is null or e.completedAt >= :effectiveAtStart)
+              and s.status = com.JavaTraining.BaiTap_RS.student.domain.entity.StudentStatus.ACTIVE
+            order by s.studentCode asc, s.id asc
+            """)
+    List<StudentYearEnrollment> findActiveEnrollmentsInClassAt(
             @Param("classId") Long classId,
             @Param("status") EnrollmentStatus status,
             @Param("effectiveAtStart") LocalDateTime effectiveAtStart,

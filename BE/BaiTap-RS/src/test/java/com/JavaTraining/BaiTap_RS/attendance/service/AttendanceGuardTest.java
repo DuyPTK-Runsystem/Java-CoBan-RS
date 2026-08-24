@@ -9,6 +9,7 @@ import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SemesterRepository;
 import com.JavaTraining.BaiTap_RS.assignment.repository.HomeroomAssignmentRepository;
 import com.JavaTraining.BaiTap_RS.attendance.repository.AttendanceEnrollmentRepository;
+import com.JavaTraining.BaiTap_RS.calendar.service.CalendarValidityService;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
 import com.JavaTraining.BaiTap_RS.security.UserPrincipal;
 import com.JavaTraining.BaiTap_RS.teacher.domain.entity.Teacher;
@@ -46,7 +47,7 @@ class AttendanceGuardTest {
     private AttendanceEnrollmentRepository enrollmentRepository;
 
     @Mock
-    private com.JavaTraining.BaiTap_RS.calendar.service.CalendarValidityService calendarValidityService;
+    private CalendarValidityService calendarValidityService;
 
     private AttendanceGuard guard;
 
@@ -80,10 +81,11 @@ class AttendanceGuardTest {
     void assertCurrentUserHomeroomRejectsTeacherWithoutAssignment() {
         authenticate(100L);
         Mockito.when(teacherRepository.findByUserId(100L)).thenReturn(Optional.of(teacher()));
-        Mockito.when(homeroomAssignmentRepository.existsActiveHomeroomAt(
+        Mockito.when(homeroomAssignmentRepository.existsActiveHomeroomBetween(
                 20L,
                 30L,
                 com.JavaTraining.BaiTap_RS.assignment.domain.entity.AssignmentStatus.ACTIVE,
+                LocalDate.of(2026, 9, 5),
                 LocalDate.of(2026, 9, 5))).thenReturn(false);
 
         AppException exception = captureAppException(() -> guard
@@ -116,7 +118,7 @@ class AttendanceGuardTest {
                 "6A",
                 "6A",
                 40,
-                 com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClassStatus.ACTIVE);
+                com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClassStatus.ACTIVE);
         ReflectionTestUtils.setField(schoolClass, "id", 20L);
         return schoolClass;
     }
@@ -130,7 +132,7 @@ class AttendanceGuardTest {
                 LocalDate.of(2026, 9, 1),
                 LocalDate.of(2026, 12, 31),
                 null,
-                 com.JavaTraining.BaiTap_RS.academic.domain.entity.SemesterStatus.ACTIVE);
+                com.JavaTraining.BaiTap_RS.academic.domain.entity.SemesterStatus.ACTIVE);
         ReflectionTestUtils.setField(semester, "id", 70L);
         return semester;
     }
@@ -146,7 +148,7 @@ class AttendanceGuardTest {
                 null,
                 null,
                 null,
-                 com.JavaTraining.BaiTap_RS.teacher.domain.entity.TeacherStatus.ACTIVE);
+                com.JavaTraining.BaiTap_RS.teacher.domain.entity.TeacherStatus.ACTIVE);
         ReflectionTestUtils.setField(teacher, "id", 30L);
         return teacher;
     }

@@ -52,4 +52,20 @@ public interface HomeroomAssignmentRepository extends JpaRepository<HomeroomAssi
             @Param("teacherId") Long teacherId,
             @Param("status") AssignmentStatus status,
             @Param("effectiveDate") LocalDate effectiveDate);
+
+    @Query("""
+            select count(assignment.id) > 0
+            from HomeroomAssignment assignment
+            where assignment.classId = :classId
+              and assignment.teacherId = :teacherId
+              and assignment.status = :status
+              and assignment.validFrom <= :to
+              and (assignment.validTo is null or assignment.validTo >= :from)
+            """)
+    boolean existsActiveHomeroomBetween(
+            @Param("classId") Long classId,
+            @Param("teacherId") Long teacherId,
+            @Param("status") AssignmentStatus status,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to);
 }

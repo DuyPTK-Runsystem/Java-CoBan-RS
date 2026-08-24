@@ -1,5 +1,6 @@
 package com.JavaTraining.BaiTap_RS.calendar.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,14 +13,16 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CalendarSessionRepository extends JpaRepository<CalendarSession, Long> {
 
-    Optional<CalendarSession> findByCalendarDayIdAndSessionPeriod(
-            Long calendarDayId,
-            CalendarSessionPeriod sessionPeriod);
+        Optional<CalendarSession> findByCalendarDayIdAndSessionPeriod(
+                        Long calendarDayId,
+                        CalendarSessionPeriod sessionPeriod);
 
-    List<CalendarSession> findAllByCalendarDayIdOrderBySessionPeriodAsc(Long calendarDayId);
+        List<CalendarSession> findAllByCalendarDayIdOrderBySessionPeriodAsc(Long calendarDayId);
 
-    boolean existsByCalendarDayIdAndSessionPeriodAndSessionStatus(
-            Long calendarDayId,
-            CalendarSessionPeriod sessionPeriod,
-            CalendarSessionStatus sessionStatus);
+        List<CalendarSession> findAllByCalendarDayIdIn(Collection<Long> calendarDayIds);
+
+        boolean existsByCalendarDayIdAndSessionPeriodAndSessionStatus(
+                        Long calendarDayId,
+                        CalendarSessionPeriod sessionPeriod,
+                        CalendarSessionStatus sessionStatus);
 }
