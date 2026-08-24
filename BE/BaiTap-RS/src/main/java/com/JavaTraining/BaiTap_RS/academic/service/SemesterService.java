@@ -63,6 +63,7 @@ public class SemesterService {
                 request.academicYearId(), request.endDate(), request.startDate())) {
             throw new AppException(HttpStatus.CONFLICT, "Thời gian học kỳ bị chồng lấn");
         }
+        SemesterStatus status = request.status() != null ? request.status() : SemesterStatus.DRAFT;
         Semester semester = new Semester(
                 request.academicYearId(),
                 request.code(),
@@ -71,7 +72,7 @@ public class SemesterService {
                 request.startDate(),
                 request.endDate(),
                 request.automaticLockAt(),
-                request.status());
+                status);
         return semesterMapper.toResponse(semesterRepository.save(semester));
     }
 
@@ -97,7 +98,9 @@ public class SemesterService {
         semester.setStartDate(request.startDate());
         semester.setEndDate(request.endDate());
         semester.setAutomaticLockAt(request.automaticLockAt());
-        semester.setStatus(request.status());
+        if (request.status() != null) {
+            semester.setStatus(request.status());
+        }
         return semesterMapper.toResponse(semester);
     }
 

@@ -17,5 +17,5 @@ public record ReqCreateSemesterDTO(
         @NotNull LocalDate startDate,
         @NotNull LocalDate endDate,
         LocalDateTime automaticLockAt,
-        @NotNull SemesterStatus status) {
+        SemesterStatus status) {
 }
