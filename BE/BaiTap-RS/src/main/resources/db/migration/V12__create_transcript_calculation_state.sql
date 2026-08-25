@@ -1,12 +1,12 @@
 -- Migration V12: Create transcript calculation state tables
 
 CREATE TABLE student_annual_transcript (
-    annual_transcript_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    student_id BIGINT UNSIGNED NOT NULL,
-    academic_year_id BIGINT UNSIGNED NOT NULL,
+    annual_transcript_id BIGINT NOT NULL AUTO_INCREMENT,
+    student_id BIGINT NOT NULL,
+    academic_year_id BIGINT NOT NULL,
     calculation_status VARCHAR(20) NOT NULL DEFAULT 'IN_PROGRESS',
-    source_version BIGINT UNSIGNED NOT NULL DEFAULT 0,
-    calculated_version BIGINT UNSIGNED NULL,
+    source_version BIGINT NOT NULL DEFAULT 0,
+    calculated_version BIGINT NULL,
     calculated_at TIMESTAMP NULL,
     last_error VARCHAR(2000) NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -19,13 +19,13 @@ CREATE TABLE student_annual_transcript (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE student_term_transcript (
-    term_transcript_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    annual_transcript_id BIGINT UNSIGNED NOT NULL,
-    semester_id BIGINT UNSIGNED NOT NULL,
-    student_id BIGINT UNSIGNED NOT NULL,
+    term_transcript_id BIGINT NOT NULL AUTO_INCREMENT,
+    annual_transcript_id BIGINT NOT NULL,
+    semester_id BIGINT NOT NULL,
+    student_id BIGINT NOT NULL,
     calculation_status VARCHAR(20) NOT NULL DEFAULT 'IN_PROGRESS',
-    source_version BIGINT UNSIGNED NOT NULL DEFAULT 0,
-    calculated_version BIGINT UNSIGNED NULL,
+    source_version BIGINT NOT NULL DEFAULT 0,
+    calculated_version BIGINT NULL,
     calculated_at TIMESTAMP NULL,
     last_error VARCHAR(2000) NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -39,11 +39,11 @@ CREATE TABLE student_term_transcript (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE calculation_task (
-    task_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    student_id BIGINT UNSIGNED NOT NULL,
-    academic_year_id BIGINT UNSIGNED NOT NULL,
+    task_id BIGINT NOT NULL AUTO_INCREMENT,
+    student_id BIGINT NOT NULL,
+    academic_year_id BIGINT NOT NULL,
     task_type VARCHAR(30) NOT NULL,
-    requested_version BIGINT UNSIGNED NOT NULL,
+    requested_version BIGINT NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     attempt_count INT UNSIGNED NOT NULL DEFAULT 0,
     max_attempts INT UNSIGNED NOT NULL DEFAULT 3,

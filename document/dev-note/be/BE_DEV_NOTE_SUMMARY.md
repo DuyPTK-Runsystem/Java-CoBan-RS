@@ -35,6 +35,7 @@
 |   035 | attendance         | [Academic Office Attendance Adjustment](attendance/035-academic-office-attendance-adjustment-2026-08-24.md)                           | Completed                                              | 2026-08-24 |
 |   036 | scorebook          | [Scorebook Foundation](scorebook/036-scorebook-foundation-2026-08-24.md)                                                              | Completed; validation PASS                             | 2026-08-24 |
 |   037 | scorebook          | [Student Score Entry](scorebook/037-student-score-entry-2026-08-24.md)                                                                | Completed; validation PASS                             | 2026-08-24 |
+|   038 | scorebook          | [Score Change Request](scorebook/038-score-change-request-2026-08-25.md)                                                              | Implemented; validation PASS; e2e persistence test pending | 2026-08-25 |
 
 ## Module folders
 

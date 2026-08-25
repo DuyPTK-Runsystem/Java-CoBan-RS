@@ -1,17 +1,17 @@
 -- Migration V11: Create student_score table
 
 CREATE TABLE student_score (
-    score_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    assessment_column_id BIGINT UNSIGNED NOT NULL,
-    student_id BIGINT UNSIGNED NOT NULL,
+    score_id BIGINT NOT NULL AUTO_INCREMENT,
+    assessment_column_id BIGINT NOT NULL,
+    student_id BIGINT NOT NULL,
     score_status VARCHAR(20) NOT NULL,
     score_value DECIMAL(3,1) NULL,
     note VARCHAR(500) NULL,
-    entered_by BIGINT UNSIGNED NOT NULL,
+    entered_by BIGINT NOT NULL,
     entered_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_by BIGINT UNSIGNED NULL,
+    updated_by BIGINT NULL,
     updated_at TIMESTAMP NULL,
-    version BIGINT UNSIGNED NOT NULL DEFAULT 1,
+    version BIGINT NOT NULL DEFAULT 1,
     PRIMARY KEY (score_id),
     CONSTRAINT uk_student_score_column_student UNIQUE (assessment_column_id, student_id),
     CONSTRAINT ck_student_score_status CHECK (score_status IN ('SCORED', 'ABSENT', 'EXEMPTED', 'CANCELLED')),
