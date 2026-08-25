@@ -17,6 +17,7 @@ import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.StudentYearEnrollment
 import com.JavaTraining.BaiTap_RS.enrollment.repository.ClassTransferHistoryRepository;
 import com.JavaTraining.BaiTap_RS.enrollment.repository.StudentYearEnrollmentRepository;
 import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
+import com.JavaTraining.BaiTap_RS.student.service.StudentLookupService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({
+        "PMD.TooManyMethods",
+        "PMD.UnitTestContainsTooManyAsserts",
+        "PMD.AvoidDuplicateLiterals"
+})
 class EnrollmentServiceTest {
 
     @Mock
@@ -39,6 +45,9 @@ class EnrollmentServiceTest {
 
     @Mock
     private EnrollmentLookupService lookupService;
+
+    @Mock
+    private StudentLookupService studentLookupService;
 
     @Mock
     private EnrollmentCapacityService capacityService;
@@ -54,6 +63,7 @@ class EnrollmentServiceTest {
                 enrollmentRepository,
                 historyRepository,
                 lookupService,
+                studentLookupService,
                 capacityService,
                 auditService);
     }
@@ -65,7 +75,7 @@ class EnrollmentServiceTest {
         Student student = student(40L);
         Mockito.when(lookupService.findAcademicYear(10L)).thenReturn(year);
         Mockito.when(lookupService.findSchoolClass(20L)).thenReturn(schoolClass);
-        Mockito.when(lookupService.findStudent(40L)).thenReturn(student);
+        Mockito.when(studentLookupService.resolveStudent(40L, null)).thenReturn(student);
         Mockito.when(enrollmentRepository.existsByStudentIdAndAcademicYearId(40L, 10L)).thenReturn(false);
         Mockito.when(enrollmentRepository.save(Mockito.any(StudentYearEnrollment.class)))
                 .thenAnswer(invocation -> {
@@ -78,7 +88,7 @@ class EnrollmentServiceTest {
         Mockito.when(capacityService.capacityWarnings(List.of(schoolClass))).thenReturn(List.of());
 
         ResEnrollmentMutationDTO result = enrollmentService.createEnrollment(
-                new ReqCreateEnrollmentDTO(40L, 10L, 20L, LocalDateTime.of(2026, 8, 21, 8, 0)));
+                new ReqCreateEnrollmentDTO(40L, null, 10L, 20L, LocalDateTime.of(2026, 8, 21, 8, 0)));
 
         requireCreatedEnrollment(result);
         requireInitialHistory();
@@ -91,14 +101,40 @@ class EnrollmentServiceTest {
         Student student = student(40L);
         Mockito.when(lookupService.findAcademicYear(10L)).thenReturn(year);
         Mockito.when(lookupService.findSchoolClass(20L)).thenReturn(schoolClass);
-        Mockito.when(lookupService.findStudent(40L)).thenReturn(student);
+        Mockito.when(studentLookupService.resolveStudent(40L, null)).thenReturn(student);
         Mockito.when(enrollmentRepository.existsByStudentIdAndAcademicYearId(40L, 10L)).thenReturn(true);
 
         AppException exception = Assertions.assertThrows(
                 AppException.class,
-                () -> enrollmentService.createEnrollment(new ReqCreateEnrollmentDTO(40L, 10L, 20L, null)));
+                () -> enrollmentService.createEnrollment(new ReqCreateEnrollmentDTO(40L, null, 10L, 20L, null)));
 
         requireConflictAndNoEnrollmentSave(exception);
+    }
+
+    @Test
+    void createEnrollmentAcceptsStudentCode() {
+        AcademicYear year = year(10L);
+        SchoolClass schoolClass = schoolClass(20L, 10L, 30L, "6A");
+        Student student = student(40L);
+        Mockito.when(lookupService.findAcademicYear(10L)).thenReturn(year);
+        Mockito.when(lookupService.findSchoolClass(20L)).thenReturn(schoolClass);
+        Mockito.when(studentLookupService.resolveStudent(null, "STU0000001")).thenReturn(student);
+        Mockito.when(enrollmentRepository.existsByStudentIdAndAcademicYearId(40L, 10L)).thenReturn(false);
+        Mockito.when(enrollmentRepository.save(Mockito.any(StudentYearEnrollment.class)))
+                .thenAnswer(invocation -> {
+                    StudentYearEnrollment enrollment = invocation.getArgument(0);
+                    enrollment.setId(50L);
+                    return enrollment;
+                });
+        Mockito.when(historyRepository.save(Mockito.any(ClassTransferHistory.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        Mockito.when(capacityService.capacityWarnings(List.of(schoolClass))).thenReturn(List.of());
+
+        ResEnrollmentMutationDTO result = enrollmentService.createEnrollment(
+                new ReqCreateEnrollmentDTO(null, "STU0000001", 10L, 20L, null));
+
+        Assertions.assertEquals("STU0000001", result.enrollments().get(0).studentCode(),
+                "student code should be returned");
     }
 
     @Test
@@ -111,9 +147,37 @@ class EnrollmentServiceTest {
         AppException exception = Assertions.assertThrows(
                 AppException.class,
                 () -> enrollmentService.createBulkEnrollment(
-                        new ReqBulkCreateEnrollmentDTO(10L, 20L, List.of(40L, 40L), null)));
+                        new ReqBulkCreateEnrollmentDTO(10L, 20L, List.of(40L, 40L), null, null)));
 
         requireConflictAndNoEnrollmentSave(exception);
+    }
+
+    @Test
+    void bulkEnrollmentAcceptsStudentCodes() {
+        AcademicYear year = year(10L);
+        SchoolClass schoolClass = schoolClass(20L, 10L, 30L, "6A");
+        Student firstStudent = student(40L);
+        Student secondStudent = student(41L, "STU0000002");
+        Mockito.when(lookupService.findAcademicYear(10L)).thenReturn(year);
+        Mockito.when(lookupService.findSchoolClass(20L)).thenReturn(schoolClass);
+        Mockito.when(studentLookupService.resolveStudents(null, List.of("STU0000001", "STU0000002")))
+                .thenReturn(List.of(firstStudent, secondStudent));
+        Mockito.when(enrollmentRepository.save(Mockito.any(StudentYearEnrollment.class)))
+                .thenAnswer(invocation -> {
+                    StudentYearEnrollment enrollment = invocation.getArgument(0);
+                    enrollment.setId(enrollment.getStudentId() + 10L);
+                    return enrollment;
+                });
+        Mockito.when(historyRepository.save(Mockito.any(ClassTransferHistory.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        Mockito.when(capacityService.capacityWarnings(List.of(schoolClass))).thenReturn(List.of());
+
+        ResEnrollmentMutationDTO result = enrollmentService.createBulkEnrollment(
+                new ReqBulkCreateEnrollmentDTO(10L, 20L, null, List.of("STU0000001", "STU0000002"), null));
+
+        Assertions.assertEquals(2, result.enrollments().size(), "two enrollments should be created");
+        Assertions.assertEquals("STU0000002", result.enrollments().get(1).studentCode(),
+                "second student code should be returned");
     }
 
     private AcademicYear year(Long id) {
@@ -140,7 +204,12 @@ class EnrollmentServiceTest {
     }
 
     private Student student(Long id) {
+        return student(id, "STU0000001");
+    }
+
+    private Student student(Long id, String code) {
         Student student = new Student("Nguyễn Văn A", "STU0000001");
+        student.setStudentCode(code);
         ReflectionTestUtils.setField(student, "id", id);
         return student;
     }

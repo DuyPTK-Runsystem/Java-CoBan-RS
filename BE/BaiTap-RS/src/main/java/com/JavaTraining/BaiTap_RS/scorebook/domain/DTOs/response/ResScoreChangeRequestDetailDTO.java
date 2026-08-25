@@ -11,6 +11,8 @@ public record ResScoreChangeRequestDetailDTO(
         Long requestId,
         Long assessmentColumnId,
         Long studentId,
+        String studentCode,
+        String studentName,
         Long studentScoreId,
         ScoreSnapshotStatus beforeStatus,
         BigDecimal beforeValue,

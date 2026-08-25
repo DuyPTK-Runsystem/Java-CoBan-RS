@@ -24,8 +24,10 @@ import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentScore;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.AssessmentColumnRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.ScorebookRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.StudentScoreRepository;
+import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
 import com.JavaTraining.BaiTap_RS.student.domain.entity.StudentStatus;
 import com.JavaTraining.BaiTap_RS.student.repository.StudentRepository;
+import com.JavaTraining.BaiTap_RS.student.service.StudentLookupService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +44,8 @@ import org.springframework.http.HttpStatus;
                 "PMD.TooManyMethods",
                 "PMD.UnitTestContainsTooManyAsserts",
                 "PMD.ExcessiveImports",
-                "PMD.CouplingBetweenObjects"
+                "PMD.CouplingBetweenObjects",
+                "PMD.AvoidDuplicateLiterals"
 })
 class ScoreEntryServiceTest {
 
@@ -80,6 +83,8 @@ class ScoreEntryServiceTest {
         private ScorebookAuditService auditService;
         @Mock
         private EnrollmentRosterRepository rosterRepository;
+        @Mock
+        private StudentLookupService studentLookupService;
 
         private ScoreEntryService scoreEntryService;
         private ScoreGridService scoreGridService;
@@ -121,7 +126,8 @@ class ScoreEntryServiceTest {
                                 scorebookGuard,
                                 transcriptService,
                                 taskService,
-                                scoreWriter);
+                                scoreWriter,
+                                studentLookupService);
 
                 scoreGridService = new ScoreGridService(
                                 context,
@@ -192,6 +198,27 @@ class ScoreEntryServiceTest {
                 ResStudentScoreDTO result = scoreEntryService.upsertSingleScore(COLUMN_ID, STUDENT_ID, request);
 
                 Assertions.assertEquals(BigDecimal.ZERO, result.scoreValue(), "score 0.0 should be valid");
+        }
+
+        @Test
+        void createScoreByStudentCodeSuccess() {
+                mockValidContext();
+                Student student = ScoreEntryTestFixtures.student(STUDENT_ID, "HS001", StudentStatus.ACTIVE);
+                Mockito.when(studentLookupService.resolveStudent(null, "HS001")).thenReturn(student);
+                Mockito.when(scoreRepository.findByAssessmentColumnIdAndStudentId(COLUMN_ID, STUDENT_ID))
+                                .thenReturn(Optional.empty());
+                Mockito.when(scoreRepository.save(Mockito.any(StudentScore.class)))
+                                .thenAnswer(invocation -> invocation.getArgument(0));
+                Mockito.when(transcriptService.touchTranscripts(STUDENT_ID, ACADEMIC_YEAR_ID, SEMESTER_ID))
+                                .thenReturn(1L);
+
+                ReqUpsertStudentScoreDTO request = new ReqUpsertStudentScoreDTO(
+                                ScoreStatus.SCORED, VAL_8_0, "Nhập theo mã", null);
+
+                ResStudentScoreDTO result = scoreEntryService.upsertSingleScoreByCode(COLUMN_ID, "HS001", request);
+
+                Assertions.assertEquals("HS001", result.studentCode(), "student code should be returned");
+                Assertions.assertEquals("Học sinh 200", result.studentName(), "student name should be returned");
         }
 
         @Test
@@ -327,15 +354,39 @@ class ScoreEntryServiceTest {
         @Test
         void bulkUpsertRejectsDuplicateStudents() {
                 mockValidContext();
+                Student student = ScoreEntryTestFixtures.student(STUDENT_ID, "HS001", StudentStatus.ACTIVE);
+                Mockito.when(studentLookupService.resolveStudent(STUDENT_ID, null)).thenReturn(student);
                 ReqBulkUpsertStudentScoreDTO request = new ReqBulkUpsertStudentScoreDTO(List.of(
-                                new ReqBulkScoreItemDTO(STUDENT_ID, ScoreStatus.SCORED, VAL_8_0, null, null),
-                                new ReqBulkScoreItemDTO(STUDENT_ID, ScoreStatus.SCORED, new BigDecimal("9.0"), null,
+                                new ReqBulkScoreItemDTO(STUDENT_ID, null, ScoreStatus.SCORED, VAL_8_0, null, null),
+                                new ReqBulkScoreItemDTO(STUDENT_ID, null, ScoreStatus.SCORED, new BigDecimal("9.0"),
+                                                null,
                                                 null)));
 
                 AppException ex = Assertions.assertThrows(AppException.class,
                                 () -> scoreEntryService.bulkUpsertScores(COLUMN_ID, request));
                 Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus(),
                                 "duplicate student in bulk should be 400");
+        }
+
+        @Test
+        void bulkUpsertAcceptsStudentCode() {
+                mockValidContext();
+                Student student = ScoreEntryTestFixtures.student(STUDENT_ID, "HS001", StudentStatus.ACTIVE);
+                Mockito.when(studentLookupService.resolveStudent(null, "HS001")).thenReturn(student);
+                Mockito.when(scoreRepository.findByAssessmentColumnIdAndStudentId(COLUMN_ID, STUDENT_ID))
+                                .thenReturn(Optional.empty());
+                Mockito.when(scoreRepository.save(Mockito.any(StudentScore.class)))
+                                .thenAnswer(invocation -> invocation.getArgument(0));
+                Mockito.when(transcriptService.touchTranscripts(STUDENT_ID, ACADEMIC_YEAR_ID, SEMESTER_ID))
+                                .thenReturn(1L);
+
+                ReqBulkUpsertStudentScoreDTO request = new ReqBulkUpsertStudentScoreDTO(List.of(
+                                new ReqBulkScoreItemDTO(null, "HS001", ScoreStatus.SCORED, VAL_8_0, null, null)));
+
+                List<ResStudentScoreDTO> result = scoreEntryService.bulkUpsertScores(COLUMN_ID, request);
+
+                Assertions.assertEquals(1, result.size(), "one score should be upserted");
+                Assertions.assertEquals("HS001", result.get(0).studentCode(), "student code should be returned");
         }
 
         @Test

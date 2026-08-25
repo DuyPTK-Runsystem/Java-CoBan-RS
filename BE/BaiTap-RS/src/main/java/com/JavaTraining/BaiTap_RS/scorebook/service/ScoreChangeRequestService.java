@@ -2,8 +2,11 @@ package com.JavaTraining.BaiTap_RS.scorebook.service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.ClassSubject;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Semester;
@@ -22,6 +25,8 @@ import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.Scorebook;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentScore;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.ScoreChangeRequestRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.StudentScoreRepository;
+import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
+import com.JavaTraining.BaiTap_RS.student.service.StudentLookupService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -57,6 +62,7 @@ public class ScoreChangeRequestService {
     private final TranscriptStateService transcriptService;
     private final CalculationTaskService taskService;
     private final ScorebookAuditService auditService;
+    private final StudentLookupService studentLookupService;
 
     public ScoreChangeRequestService(
             ScoreChangeRequestRepository requestRepository,
@@ -67,7 +73,8 @@ public class ScoreChangeRequestService {
             ScorebookGuard scorebookGuard,
             TranscriptStateService transcriptService,
             CalculationTaskService taskService,
-            ScorebookAuditService auditService) {
+            ScorebookAuditService auditService,
+            StudentLookupService studentLookupService) {
         this.requestRepository = requestRepository;
         this.scoreRepository = scoreRepository;
         this.context = context;
@@ -77,6 +84,7 @@ public class ScoreChangeRequestService {
         this.transcriptService = transcriptService;
         this.taskService = taskService;
         this.auditService = auditService;
+        this.studentLookupService = studentLookupService;
     }
 
     @Transactional
@@ -89,16 +97,17 @@ public class ScoreChangeRequestService {
 
         ClassSubject classSubject = context.findActiveClassSubject(scorebook.getClassSubjectId());
         Semester semester = context.findSemester(classSubject.getSemesterId());
-        context.validateStudentAndEnrollment(input.studentId(), semester, classSubject.getClassId());
+        Student student = studentLookupService.resolveStudent(input.studentId(), input.studentCode());
+        context.validateStudentAndEnrollment(student.getId(), semester, classSubject.getClassId());
         validator.validateProposedScore(input.proposedStatus(), input.proposedValue());
-        validator.validatePendingConflict(input.assessmentColumnId(), input.studentId());
+        validator.validatePendingConflict(input.assessmentColumnId(), student.getId());
 
-        Optional<StudentScore> current = context.findScore(input.assessmentColumnId(), input.studentId());
+        Optional<StudentScore> current = context.findScore(input.assessmentColumnId(), student.getId());
         validator.validateDifferentFromCurrent(current, input.proposedStatus(), input.proposedValue());
 
         ScoreChangeRequest request = new ScoreChangeRequest(
                 input.assessmentColumnId(),
-                input.studentId(),
+                student.getId(),
                 current.map(StudentScore::getId).orElse(null),
                 current.map(score -> snapshotStatus(score.getScoreStatus())).orElse(ScoreSnapshotStatus.UNSCORED),
                 current.map(StudentScore::getScoreValue).orElse(null),
@@ -109,24 +118,28 @@ public class ScoreChangeRequestService {
                 now());
         ScoreChangeRequest saved = requestRepository.save(request);
         auditService.writeAudit(CREATE_ACTION, ENTITY_TYPE, saved.getId(), null, mapper.toAuditData(saved));
-        return mapper.toDetail(saved);
+        return mapper.toDetail(saved, student);
     }
 
     @Transactional(readOnly = true)
     public Page<ResScoreChangeRequestDTO> findRequests(ReqFilterScoreChangeRequestDTO filter) {
+        applyStudentCodeFilter(filter);
         if (!isOfficeRole()) {
             filter.setRequestedBy(currentActor());
         }
         Pageable pageable = pageRequest(filter);
-        return requestRepository.findAll(ScoreChangeRequestSpecifications.from(filter), pageable)
-                .map(mapper::toResponse);
+        Page<ScoreChangeRequest> page = requestRepository.findAll(
+                ScoreChangeRequestSpecifications.from(filter), pageable);
+        Map<Long, Student> studentsById = loadStudentsById(page.getContent());
+        return page.map(request -> mapper.toResponse(request, studentsById.get(request.getStudentId())));
     }
 
     @Transactional(readOnly = true)
     public ResScoreChangeRequestDetailDTO getRequest(Long requestId) {
         ScoreChangeRequest request = findRequest(requestId);
         assertCanRead(request);
-        return mapper.toDetail(request);
+        Student student = studentLookupService.resolveStudent(request.getStudentId(), null);
+        return mapper.toDetail(request, student);
     }
 
     @Transactional
@@ -136,6 +149,7 @@ public class ScoreChangeRequestService {
         ScoreChangeRequest request = findRequestForUpdate(requestId);
         validator.validatePending(request);
         validator.validateNotSelfReview(request, reviewerId);
+        Student student = studentLookupService.resolveStudent(request.getStudentId(), null);
 
         AssessmentColumn column = context.findColumn(request.getAssessmentColumnId());
         Scorebook scorebook = context.findScorebook(column.getScorebookId());
@@ -155,7 +169,7 @@ public class ScoreChangeRequestService {
                 request.getStudentId(), semester.getAcademicYearId(), semester.getId());
         taskService.ensureRecalcTask(request.getStudentId(), semester.getAcademicYearId(), sourceVersion);
         auditService.writeAudit(APPROVE_ACTION, ENTITY_TYPE, saved.getId(), before, mapper.toAuditData(saved));
-        return mapper.toDetail(saved);
+        return mapper.toDetail(saved, student);
     }
 
     @Transactional
@@ -166,12 +180,13 @@ public class ScoreChangeRequestService {
         ScoreChangeRequest request = findRequestForUpdate(requestId);
         validator.validatePending(request);
         validator.validateNotSelfReview(request, reviewerId);
+        Student student = studentLookupService.resolveStudent(request.getStudentId(), null);
 
         Map<String, Object> before = mapper.toAuditData(request);
         request.reject(reviewerId, now(), input.rejectionReason().trim());
         ScoreChangeRequest saved = requestRepository.save(request);
         auditService.writeAudit(REJECT_ACTION, ENTITY_TYPE, saved.getId(), before, mapper.toAuditData(saved));
-        return mapper.toDetail(saved);
+        return mapper.toDetail(saved, student);
     }
 
     @Transactional
@@ -179,6 +194,7 @@ public class ScoreChangeRequestService {
         Long actorId = currentActor();
         ScoreChangeRequest request = findRequestForUpdate(requestId);
         validator.validatePending(request);
+        Student student = studentLookupService.resolveStudent(request.getStudentId(), null);
         if (!actorId.equals(request.getRequestedBy()) && !hasRole(ROLE_ADMIN)) {
             throw new AppException(HttpStatus.FORBIDDEN, "Chỉ người tạo hoặc Admin được hủy yêu cầu");
         }
@@ -186,7 +202,28 @@ public class ScoreChangeRequestService {
         request.cancel();
         ScoreChangeRequest saved = requestRepository.save(request);
         auditService.writeAudit(CANCEL_ACTION, ENTITY_TYPE, saved.getId(), before, mapper.toAuditData(saved));
-        return mapper.toDetail(saved);
+        return mapper.toDetail(saved, student);
+    }
+
+    private void applyStudentCodeFilter(ReqFilterScoreChangeRequestDTO filter) {
+        if (filter.getStudentCode() == null || filter.getStudentCode().isBlank()) {
+            return;
+        }
+        Student student = studentLookupService.resolveStudent(filter.getStudentId(), filter.getStudentCode());
+        filter.setStudentId(student.getId());
+    }
+
+    private Map<Long, Student> loadStudentsById(List<ScoreChangeRequest> requests) {
+        List<Long> studentIds = requests.stream()
+                .map(ScoreChangeRequest::getStudentId)
+                .distinct()
+                .toList();
+        if (studentIds.isEmpty()) {
+            return Map.of();
+        }
+        return studentLookupService.resolveStudents(studentIds, List.of())
+                .stream()
+                .collect(Collectors.toMap(Student::getId, Function.identity()));
     }
 
     private StudentScore applyScore(

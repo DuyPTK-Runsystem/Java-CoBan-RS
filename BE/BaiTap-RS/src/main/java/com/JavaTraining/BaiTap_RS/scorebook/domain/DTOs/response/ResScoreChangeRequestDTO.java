@@ -10,6 +10,8 @@ public record ResScoreChangeRequestDTO(
         Long requestId,
         Long assessmentColumnId,
         Long studentId,
+        String studentCode,
+        String studentName,
         ScoreStatus proposedStatus,
         BigDecimal proposedValue,
         Long requestedBy,

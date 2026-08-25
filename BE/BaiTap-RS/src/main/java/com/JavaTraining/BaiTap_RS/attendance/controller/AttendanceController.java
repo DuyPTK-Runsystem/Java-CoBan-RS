@@ -26,12 +26,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Validated
-@RequestMapping("/api/v2/attendance-sessions")
+@RequestMapping({"/api/v2/attendance-sessions", "/api/v2/attendance/sessions"})
 public class AttendanceController {
 
     private static final String TEACHER_ROLE = "hasRole('TEACHER')";
     private static final String SESSION_ID = "sessionId";
     private static final String STUDENT_ID = "studentId";
+    private static final String STUDENT_CODE = "studentCode";
 
     private final AttendanceService attendanceService;
 
@@ -66,6 +67,16 @@ public class AttendanceController {
         return attendanceService.upsertException(sessionId, studentId, request);
     }
 
+    @PutMapping("/{sessionId}/exceptions/by-code/{studentCode}")
+    @ApiMessage("Tạo hoặc cập nhật ngoại lệ điểm danh theo mã học sinh")
+    @PreAuthorize(TEACHER_ROLE)
+    public ResAttendanceExceptionDTO upsertExceptionByCode(
+            @PathVariable(SESSION_ID) @Positive Long sessionId,
+            @PathVariable(STUDENT_CODE) String studentCode,
+            @Valid @RequestBody ReqUpsertAttendanceExceptionDTO request) {
+        return attendanceService.upsertExceptionByCode(sessionId, studentCode, request);
+    }
+
     @DeleteMapping("/{sessionId}/exceptions/{studentId}")
     @ApiMessage("Xóa ngoại lệ điểm danh")
     @PreAuthorize(TEACHER_ROLE)
@@ -73,6 +84,16 @@ public class AttendanceController {
             @PathVariable(SESSION_ID) @Positive Long sessionId,
             @PathVariable(STUDENT_ID) @Positive Long studentId) {
         attendanceService.deleteException(sessionId, studentId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{sessionId}/exceptions/by-code/{studentCode}")
+    @ApiMessage("Xóa ngoại lệ điểm danh theo mã học sinh")
+    @PreAuthorize(TEACHER_ROLE)
+    public ResponseEntity<Void> deleteExceptionByCode(
+            @PathVariable(SESSION_ID) @Positive Long sessionId,
+            @PathVariable(STUDENT_CODE) String studentCode) {
+        attendanceService.deleteExceptionByCode(sessionId, studentCode);
         return ResponseEntity.noContent().build();
     }
 }

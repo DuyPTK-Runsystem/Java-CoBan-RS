@@ -14,6 +14,7 @@ public class ReqFilterScoreChangeRequestDTO {
     private Long scorebookId;
     private Long columnId;
     private Long studentId;
+    private String studentCode;
     private Long requestedBy;
     private int page;
     private int size = 10;

@@ -15,6 +15,7 @@ import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.StudentYearEnrollment
 import com.JavaTraining.BaiTap_RS.enrollment.repository.ClassTransferHistoryRepository;
 import com.JavaTraining.BaiTap_RS.enrollment.repository.StudentYearEnrollmentRepository;
 import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
+import com.JavaTraining.BaiTap_RS.student.service.StudentLookupService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,9 @@ class EnrollmentTransferServiceTest {
     private EnrollmentLookupService lookupService;
 
     @Mock
+    private StudentLookupService studentLookupService;
+
+    @Mock
     private EnrollmentCapacityService capacityService;
 
     @Mock
@@ -50,6 +54,7 @@ class EnrollmentTransferServiceTest {
                 enrollmentRepository,
                 historyRepository,
                 lookupService,
+                studentLookupService,
                 capacityService,
                 auditService);
     }

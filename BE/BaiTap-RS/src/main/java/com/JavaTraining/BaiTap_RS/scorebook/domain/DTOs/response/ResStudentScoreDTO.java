@@ -9,6 +9,8 @@ public record ResStudentScoreDTO(
                 Long scoreId,
                 Long assessmentColumnId,
                 Long studentId,
+                String studentCode,
+                String studentName,
                 ScoreStatus scoreStatus,
                 BigDecimal scoreValue,
                 String note,

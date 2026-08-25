@@ -9,6 +9,7 @@ import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClass;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Semester;
 import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.requests.ReqCreateAttendanceSessionDTO;
 import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.requests.ReqUpsertAttendanceExceptionDTO;
+import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.response.ResAttendanceExceptionDTO;
 import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.response.ResAttendanceSessionDTO;
 import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.response.ResAttendanceStudentDTO;
 import com.JavaTraining.BaiTap_RS.attendance.domain.entity.AttendanceExceptionStatus;
@@ -18,6 +19,7 @@ import com.JavaTraining.BaiTap_RS.attendance.domain.entity.AttendanceSessionPeri
 import com.JavaTraining.BaiTap_RS.attendance.repository.AttendanceRecordRepository;
 import com.JavaTraining.BaiTap_RS.attendance.repository.AttendanceSessionRepository;
 import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
+import com.JavaTraining.BaiTap_RS.student.service.StudentLookupService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({
+        "PMD.UnitTestContainsTooManyAsserts",
+        "PMD.AvoidDuplicateLiterals"
+})
 class AttendanceServiceTest {
 
     private static final String ATTENDANCE_RECORD_ID = "attendanceRecordId";
@@ -43,6 +49,8 @@ class AttendanceServiceTest {
 
     @Mock
     private AttendanceAuditService auditService;
+    @Mock
+    private StudentLookupService studentLookupService;
 
     private AttendanceService attendanceService;
 
@@ -53,7 +61,8 @@ class AttendanceServiceTest {
                 recordRepository,
                 guard,
                 auditService,
-                new AttendanceMapper());
+                new AttendanceMapper(),
+                studentLookupService);
     }
 
     @Test
@@ -101,18 +110,41 @@ class AttendanceServiceTest {
     void upsertExceptionUpdatesExistingRecordAndWritesAudit() {
         AttendanceSession session = attendanceSession();
         AttendanceRecord existing = attendanceRecord(91L, 2L, AttendanceExceptionStatus.ABSENT);
+        Student student = student(2L, "STU0000002", "Nguyen B");
         Map<String, Object> beforeData = Map.of(ATTENDANCE_RECORD_ID, 91L);
         Mockito.when(sessionRepository.findById(80L)).thenReturn(Optional.of(session));
+        Mockito.when(studentLookupService.resolveStudent(2L, null)).thenReturn(student);
         Mockito.when(recordRepository.findBySessionIdAndStudentId(80L, 2L)).thenReturn(Optional.of(existing));
         Mockito.when(auditService.recordData(session, existing)).thenReturn(beforeData);
 
-        attendanceService.upsertException(
+        ResAttendanceExceptionDTO response = attendanceService.upsertException(
                 80L,
                 2L,
                 new ReqUpsertAttendanceExceptionDTO(AttendanceExceptionStatus.EARLY_LEAVE, "Xin về sớm"));
 
+        Assertions.assertEquals("STU0000002", response.studentCode(), "studentCode should be returned");
+        Assertions.assertEquals("Nguyen B", response.studentName(), "studentName should be returned");
         Mockito.verify(auditService)
                 .writeRecordAudit("ATTENDANCE_EXCEPTION_UPDATED", session, beforeData, existing);
+    }
+
+    @Test
+    void upsertExceptionByCodeResolvesStudentAndReturnsMetadata() {
+        AttendanceSession session = attendanceSession();
+        AttendanceRecord existing = attendanceRecord(91L, 2L, AttendanceExceptionStatus.ABSENT);
+        Student student = student(2L, "STU0000002", "Nguyen B");
+        Mockito.when(studentLookupService.resolveStudent(null, "STU0000002")).thenReturn(student);
+        Mockito.when(studentLookupService.resolveStudent(2L, null)).thenReturn(student);
+        Mockito.when(sessionRepository.findById(80L)).thenReturn(Optional.of(session));
+        Mockito.when(recordRepository.findBySessionIdAndStudentId(80L, 2L)).thenReturn(Optional.of(existing));
+
+        ResAttendanceExceptionDTO response = attendanceService.upsertExceptionByCode(
+                80L,
+                "STU0000002",
+                new ReqUpsertAttendanceExceptionDTO(AttendanceExceptionStatus.EXCUSED, "Có phép"));
+
+        Assertions.assertEquals("STU0000002", response.studentCode(), "student code should be returned");
+        Mockito.verify(guard).assertStudentInClass(2L, 20L, LocalDate.of(2026, 9, 5));
     }
 
     @Test

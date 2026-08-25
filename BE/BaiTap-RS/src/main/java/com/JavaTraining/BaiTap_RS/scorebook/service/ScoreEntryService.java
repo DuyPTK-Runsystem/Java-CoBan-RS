@@ -9,6 +9,7 @@ import java.util.Set;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.ClassSubject;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Semester;
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
+import com.JavaTraining.BaiTap_RS.common.error.AppException;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqBulkScoreItemDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqBulkUpsertStudentScoreDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqUpsertStudentScoreDTO;
@@ -16,6 +17,9 @@ import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResStudentScore
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.AssessmentColumn;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.Scorebook;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentScore;
+import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
+import com.JavaTraining.BaiTap_RS.student.service.StudentLookupService;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Service chính điều phối các thao tác nhập và sửa điểm học sinh (Single & Bulk).
  */
 @Service
+@SuppressWarnings("PMD.CouplingBetweenObjects")
 public class ScoreEntryService {
 
     private final ScoreEntryContext entryContext;
@@ -31,6 +36,7 @@ public class ScoreEntryService {
     private final TranscriptStateService transcriptService;
     private final CalculationTaskService taskService;
     private final ScoreEntryWriter scoreWriter;
+    private final StudentLookupService studentLookupService;
 
     public ScoreEntryService(
             ScoreEntryContext entryContext,
@@ -38,13 +44,15 @@ public class ScoreEntryService {
             ScorebookGuard guard,
             TranscriptStateService transcriptService,
             CalculationTaskService taskService,
-            ScoreEntryWriter scoreWriter) {
+            ScoreEntryWriter scoreWriter,
+            StudentLookupService studentLookupService) {
         this.entryContext = entryContext;
         this.validator = validator;
         this.guard = guard;
         this.transcriptService = transcriptService;
         this.taskService = taskService;
         this.scoreWriter = scoreWriter;
+        this.studentLookupService = studentLookupService;
     }
 
     @Transactional
@@ -58,27 +66,27 @@ public class ScoreEntryService {
         ClassSubject classSubject = entryContext.findClassSubject(scorebook.getClassSubjectId());
         Semester semester = entryContext.findSemesterForScoring(classSubject.getSemesterId());
 
-        entryContext.findActiveStudent(studentId);
-        entryContext.validateEnrollment(studentId, semester, classSubject.getClassId());
+        Student student = entryContext.findActiveStudent(studentId);
+        entryContext.validateEnrollment(student.getId(), semester, classSubject.getClassId());
         validator.validateScoreValue(request.scoreStatus(), request.scoreValue());
 
         Long actorId = AuditContext.currentUserId();
-        Optional<StudentScore> existing = scoreWriter.findExisting(columnId, studentId);
+        Optional<StudentScore> existing = scoreWriter.findExisting(columnId, student.getId());
 
         ResStudentScoreDTO result;
         if (existing.isPresent()) {
-            result = scoreWriter.updateExisting(existing.get(), request, semester, actorId);
+            result = scoreWriter.updateExisting(existing.get(), student, request, semester, actorId);
         } else {
             validator.validateCreateVersion(request.expectedVersion());
             result = scoreWriter.createNew(
-                    columnId, studentId, request.scoreStatus(),
+                    columnId, student, request.scoreStatus(),
                     request.scoreValue(), request.note(), actorId);
         }
 
         Long academicYearId = semester.getAcademicYearId();
         long newVersion = transcriptService.touchTranscripts(
-                studentId, academicYearId, classSubject.getSemesterId());
-        taskService.ensureRecalcTask(studentId, academicYearId, newVersion);
+                student.getId(), academicYearId, classSubject.getSemesterId());
+        taskService.ensureRecalcTask(student.getId(), academicYearId, newVersion);
 
         return result;
     }
@@ -94,16 +102,16 @@ public class ScoreEntryService {
         ClassSubject classSubject = entryContext.findClassSubject(scorebook.getClassSubjectId());
         Semester semester = entryContext.findSemesterForScoring(classSubject.getSemesterId());
 
-        validator.validateNoDuplicateStudents(request.items());
-
         Long actorId = AuditContext.currentUserId();
         Long academicYearId = semester.getAcademicYearId();
         List<ResStudentScoreDTO> results = new ArrayList<>();
         Set<Long> affectedStudentIds = new HashSet<>();
+        List<ResolvedBulkScoreItem> resolvedItems = resolveBulkItems(request.items());
+        validateNoDuplicateResolvedStudents(resolvedItems);
 
-        for (ReqBulkScoreItemDTO item : request.items()) {
+        for (ResolvedBulkScoreItem resolvedItem : resolvedItems) {
             ResStudentScoreDTO res = processBulkItem(
-                    item, columnId, classSubject, semester, actorId, affectedStudentIds);
+                    resolvedItem, columnId, classSubject, semester, actorId, affectedStudentIds);
             results.add(res);
         }
 
@@ -117,30 +125,60 @@ public class ScoreEntryService {
     }
 
     private ResStudentScoreDTO processBulkItem(
-            ReqBulkScoreItemDTO item,
+            ResolvedBulkScoreItem resolvedItem,
             Long columnId,
             ClassSubject classSubject,
             Semester semester,
             Long actorId,
             Set<Long> affectedStudentIds) {
 
-        entryContext.findActiveStudent(item.studentId());
-        entryContext.validateEnrollment(item.studentId(), semester, classSubject.getClassId());
+        ReqBulkScoreItemDTO item = resolvedItem.item();
+        Student student = resolvedItem.student();
+        entryContext.findActiveStudent(student.getId());
+        entryContext.validateEnrollment(student.getId(), semester, classSubject.getClassId());
         validator.validateScoreValue(item.scoreStatus(), item.scoreValue());
 
-        Optional<StudentScore> existing = scoreWriter.findExisting(columnId, item.studentId());
+        Optional<StudentScore> existing = scoreWriter.findExisting(columnId, student.getId());
 
         ResStudentScoreDTO result;
         if (existing.isPresent()) {
-            result = scoreWriter.updateExisting(existing.get(), item, semester, actorId);
+            result = scoreWriter.updateExisting(existing.get(), student, item, semester, actorId);
         } else {
             validator.validateCreateVersion(item.expectedVersion());
             result = scoreWriter.createNew(
-                    columnId, item.studentId(), item.scoreStatus(),
+                    columnId, student, item.scoreStatus(),
                     item.scoreValue(), item.note(), actorId);
         }
 
-        affectedStudentIds.add(item.studentId());
+        affectedStudentIds.add(student.getId());
         return result;
+    }
+
+    @Transactional
+    public ResStudentScoreDTO upsertSingleScoreByCode(
+            Long columnId, String studentCode, ReqUpsertStudentScoreDTO request) {
+        Student student = studentLookupService.resolveStudent(null, studentCode);
+        return upsertSingleScore(columnId, student.getId(), request);
+    }
+
+    private List<ResolvedBulkScoreItem> resolveBulkItems(List<ReqBulkScoreItemDTO> items) {
+        return items.stream()
+                .map(item -> new ResolvedBulkScoreItem(
+                        item,
+                        studentLookupService.resolveStudent(item.studentId(), item.studentCode())))
+                .toList();
+    }
+
+    private void validateNoDuplicateResolvedStudents(List<ResolvedBulkScoreItem> resolvedItems) {
+        Set<Long> seen = new HashSet<>();
+        for (ResolvedBulkScoreItem resolvedItem : resolvedItems) {
+            Long studentId = resolvedItem.student().getId();
+            if (!seen.add(studentId)) {
+                throw new AppException(HttpStatus.BAD_REQUEST, "Trùng lặp học sinh trong danh sách: " + studentId);
+            }
+        }
+    }
+
+    private record ResolvedBulkScoreItem(ReqBulkScoreItemDTO item, Student student) {
     }
 }

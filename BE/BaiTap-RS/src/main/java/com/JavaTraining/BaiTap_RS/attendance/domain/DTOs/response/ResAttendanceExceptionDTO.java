@@ -8,6 +8,8 @@ public record ResAttendanceExceptionDTO(
         Long attendanceRecordId,
         Long sessionId,
         Long studentId,
+        String studentCode,
+        String studentName,
         AttendanceExceptionStatus status,
         String note,
         Long recordedBy,

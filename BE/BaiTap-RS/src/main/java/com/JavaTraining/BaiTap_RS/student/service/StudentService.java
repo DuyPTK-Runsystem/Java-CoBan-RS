@@ -59,6 +59,11 @@ public class StudentService {
         return toStudentDTO(findStudent(studentId));
     }
 
+    @Transactional(readOnly = true)
+    public ResStudentDTO getStudentByCode(String studentCode) {
+        return toStudentDTO(findStudentByCode(studentCode));
+    }
+
     @Transactional
     public ResStudentDTO createStudent(ReqCreateStudentDTO request) {
         if (studentRepository.existsByStudentCode(request.getStudentCode())) {
@@ -132,6 +137,11 @@ public class StudentService {
 
     private Student findStudent(Long studentId) {
         return studentRepository.findById(studentId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy sinh viên"));
+    }
+
+    private Student findStudentByCode(String studentCode) {
+        return studentRepository.findByStudentCode(studentCode)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy sinh viên"));
     }
 

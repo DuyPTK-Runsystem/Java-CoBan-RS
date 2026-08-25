@@ -22,7 +22,8 @@ import lombok.Setter;
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @Entity
 @SuppressWarnings("PMD.TooManyFields")
-@Table(name = "semester_completeness_notification", uniqueConstraints = @UniqueConstraint(name = "uk_sem_notif_chk_recip", columnNames = {
+@Table(name = "semester_completeness_notification", uniqueConstraints = @UniqueConstraint(
+        name = "uk_sem_notif_chk_recip", columnNames = {
         "semester_id", "checkpoint_code", "recipient_email", "notification_channel" }))
 public class SemesterCompletenessNotification {
 

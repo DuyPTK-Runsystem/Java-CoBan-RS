@@ -12,6 +12,7 @@ import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResStudentScore
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.ScoreStatus;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentScore;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.StudentScoreRepository;
+import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,7 +47,13 @@ public class ScoreEntryWriter {
     }
 
     public ResStudentScoreDTO createNew(
-            Long columnId, Long studentId, ScoreStatus status, BigDecimal value, String note, Long actorId) {
+            Long columnId,
+            Student student,
+            ScoreStatus status,
+            BigDecimal value,
+            String note,
+            Long actorId) {
+        Long studentId = student.getId();
         StudentScore score = new StudentScore(columnId, studentId, status, value, note, actorId);
         score = scoreRepository.save(score);
 
@@ -54,13 +61,13 @@ public class ScoreEntryWriter {
                 "STUDENT_SCORE_CREATED", ENTITY_TYPE, score.getId(),
                 null, auditMapper.toSnapshot(score));
 
-        return responseMapper.toResponse(score);
+        return responseMapper.toResponse(score, student);
     }
 
     public ResStudentScoreDTO updateExisting(
-            StudentScore score, ReqUpsertStudentScoreDTO request, Semester semester, Long actorId) {
+            StudentScore score, Student student, ReqUpsertStudentScoreDTO request, Semester semester, Long actorId) {
         if (isSingleUnchanged(score, request)) {
-            return responseMapper.toResponse(score);
+            return responseMapper.toResponse(score, student);
         }
 
         validator.validateVersion(score, request.expectedVersion());
@@ -73,13 +80,13 @@ public class ScoreEntryWriter {
                 "STUDENT_SCORE_UPDATED", ENTITY_TYPE, score.getId(),
                 before, auditMapper.toSnapshot(score));
 
-        return responseMapper.toResponse(score);
+        return responseMapper.toResponse(score, student);
     }
 
     public ResStudentScoreDTO updateExisting(
-            StudentScore score, ReqBulkScoreItemDTO item, Semester semester, Long actorId) {
+            StudentScore score, Student student, ReqBulkScoreItemDTO item, Semester semester, Long actorId) {
         if (isItemUnchanged(score, item)) {
-            return responseMapper.toResponse(score);
+            return responseMapper.toResponse(score, student);
         }
 
         validator.validateVersion(score, item.expectedVersion());
@@ -92,7 +99,7 @@ public class ScoreEntryWriter {
                 "STUDENT_SCORE_UPDATED", ENTITY_TYPE, score.getId(),
                 before, auditMapper.toSnapshot(score));
 
-        return responseMapper.toResponse(score);
+        return responseMapper.toResponse(score, student);
     }
 
     public ResStudentScoreDTO toResponse(StudentScore score) {

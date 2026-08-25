@@ -13,6 +13,7 @@ import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.StudentYearEnrollment
 import com.JavaTraining.BaiTap_RS.enrollment.repository.ClassTransferHistoryRepository;
 import com.JavaTraining.BaiTap_RS.enrollment.repository.StudentYearEnrollmentRepository;
 import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
+import com.JavaTraining.BaiTap_RS.student.service.StudentLookupService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,14 +23,17 @@ public class EnrollmentQueryService {
     private final StudentYearEnrollmentRepository enrollmentRepository;
     private final ClassTransferHistoryRepository historyRepository;
     private final EnrollmentLookupService lookupService;
+    private final StudentLookupService studentLookupService;
 
     public EnrollmentQueryService(
             StudentYearEnrollmentRepository enrollmentRepository,
             ClassTransferHistoryRepository historyRepository,
-            EnrollmentLookupService lookupService) {
+            EnrollmentLookupService lookupService,
+            StudentLookupService studentLookupService) {
         this.enrollmentRepository = enrollmentRepository;
         this.historyRepository = historyRepository;
         this.lookupService = lookupService;
+        this.studentLookupService = studentLookupService;
     }
 
     // FR-ENROLL-004: only active students without any year enrollment are candidates.
@@ -59,6 +63,15 @@ public class EnrollmentQueryService {
     public List<ResStudentEnrollmentHistoryDTO> listStudentHistory(Long studentId) {
         Student student = lookupService.findStudent(studentId);
         return enrollmentRepository.findByStudentIdOrderByEnrolledAtAsc(studentId)
+                .stream()
+                .map(enrollment -> toStudentHistoryResponse(enrollment, student))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ResStudentEnrollmentHistoryDTO> listStudentHistoryByCode(String studentCode) {
+        Student student = studentLookupService.resolveStudent(null, studentCode);
+        return enrollmentRepository.findByStudentIdOrderByEnrolledAtAsc(student.getId())
                 .stream()
                 .map(enrollment -> toStudentHistoryResponse(enrollment, student))
                 .toList();

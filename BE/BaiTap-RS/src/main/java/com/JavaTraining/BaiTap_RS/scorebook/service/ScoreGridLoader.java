@@ -101,7 +101,7 @@ public class ScoreGridLoader {
                 for (Long colId : columnIds) {
                         String key = colId + ":" + studentId;
                         StudentScore score = scoreMap.get(key);
-                        scoresByColumn.put(colId, score != null ? responseMapper.toResponse(score) : null);
+                        scoresByColumn.put(colId, score != null ? responseMapper.toResponse(score, student) : null);
                 }
 
                 return new ResScoreGridStudentRowDTO(

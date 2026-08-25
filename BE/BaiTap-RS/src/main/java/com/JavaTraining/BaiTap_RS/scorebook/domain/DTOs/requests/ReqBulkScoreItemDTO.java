@@ -3,14 +3,16 @@ package com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests;
 import java.math.BigDecimal;
 
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.ScoreStatus;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public record ReqBulkScoreItemDTO(
-        @NotNull(message = "ID học sinh không được để trống")
         @Positive(message = "ID học sinh phải là số dương")
         Long studentId,
+
+        String studentCode,
 
         @NotNull(message = "Trạng thái điểm không được để trống")
         ScoreStatus scoreStatus,
@@ -22,4 +24,9 @@ public record ReqBulkScoreItemDTO(
 
         Long expectedVersion
 ) {
+
+    @AssertTrue(message = "Phải cung cấp studentId hoặc studentCode")
+    public boolean isStudentIdentifierProvided() {
+        return studentId != null || (studentCode != null && !studentCode.isBlank());
+    }
 }

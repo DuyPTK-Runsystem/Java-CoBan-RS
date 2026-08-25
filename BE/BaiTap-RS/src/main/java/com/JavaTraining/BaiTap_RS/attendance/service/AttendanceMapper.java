@@ -24,11 +24,13 @@ public class AttendanceMapper {
                 session.getCreatedAt());
     }
 
-    public ResAttendanceExceptionDTO toExceptionResponse(AttendanceRecord record) {
+    public ResAttendanceExceptionDTO toExceptionResponse(AttendanceRecord record, Student student) {
         return new ResAttendanceExceptionDTO(
                 record.getId(),
                 record.getSessionId(),
                 record.getStudentId(),
+                student.getStudentCode(),
+                student.getStudentName(),
                 record.getStatus(),
                 record.getNote(),
                 record.getRecordedBy(),

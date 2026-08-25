@@ -26,12 +26,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Validated
-@RequestMapping("/api/v2/office/attendance-sessions")
+@RequestMapping({"/api/v2/office/attendance-sessions", "/api/v2/academic-office/attendance/sessions"})
 public class AcademicOfficeAttendanceController {
 
     private static final String OFFICE_ROLES = "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')";
     private static final String SESSION_ID = "sessionId";
     private static final String STUDENT_ID = "studentId";
+    private static final String STUDENT_CODE = "studentCode";
 
     private final AcademicOfficeAttendanceService attendanceService;
 
@@ -66,6 +67,16 @@ public class AcademicOfficeAttendanceController {
         return attendanceService.upsertException(sessionId, studentId, request);
     }
 
+    @PutMapping("/{sessionId}/exceptions/by-code/{studentCode}")
+    @ApiMessage("Giáo vụ tạo hoặc cập nhật ngoại lệ điểm danh theo mã học sinh")
+    @PreAuthorize(OFFICE_ROLES)
+    public ResAttendanceExceptionDTO upsertExceptionByCode(
+            @PathVariable(SESSION_ID) @Positive Long sessionId,
+            @PathVariable(STUDENT_CODE) String studentCode,
+            @Valid @RequestBody ReqUpsertAttendanceExceptionDTO request) {
+        return attendanceService.upsertExceptionByCode(sessionId, studentCode, request);
+    }
+
     @DeleteMapping("/{sessionId}/exceptions/{studentId}")
     @ApiMessage("Giáo vụ xóa ngoại lệ điểm danh")
     @PreAuthorize(OFFICE_ROLES)
@@ -73,6 +84,16 @@ public class AcademicOfficeAttendanceController {
             @PathVariable(SESSION_ID) @Positive Long sessionId,
             @PathVariable(STUDENT_ID) @Positive Long studentId) {
         attendanceService.deleteException(sessionId, studentId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{sessionId}/exceptions/by-code/{studentCode}")
+    @ApiMessage("Giáo vụ xóa ngoại lệ điểm danh theo mã học sinh")
+    @PreAuthorize(OFFICE_ROLES)
+    public ResponseEntity<Void> deleteExceptionByCode(
+            @PathVariable(SESSION_ID) @Positive Long sessionId,
+            @PathVariable(STUDENT_CODE) String studentCode) {
+        attendanceService.deleteExceptionByCode(sessionId, studentCode);
         return ResponseEntity.noContent().build();
     }
 }

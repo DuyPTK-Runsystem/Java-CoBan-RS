@@ -18,6 +18,7 @@ import com.JavaTraining.BaiTap_RS.attendance.repository.AttendanceRecordReposito
 import com.JavaTraining.BaiTap_RS.attendance.repository.AttendanceSessionRepository;
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
+import com.JavaTraining.BaiTap_RS.student.service.StudentLookupService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,18 +30,21 @@ public class AttendanceService {
     private final AttendanceGuard guard;
     private final AttendanceAuditService auditService;
     private final AttendanceMapper mapper;
+    private final StudentLookupService studentLookupService;
 
     public AttendanceService(
             AttendanceSessionRepository sessionRepository,
             AttendanceRecordRepository recordRepository,
             AttendanceGuard guard,
             AttendanceAuditService auditService,
-            AttendanceMapper mapper) {
+            AttendanceMapper mapper,
+            StudentLookupService studentLookupService) {
         this.sessionRepository = sessionRepository;
         this.recordRepository = recordRepository;
         this.guard = guard;
         this.auditService = auditService;
         this.mapper = mapper;
+        this.studentLookupService = studentLookupService;
     }
 
     @Transactional
@@ -81,11 +85,21 @@ public class AttendanceService {
             ReqUpsertAttendanceExceptionDTO request) {
         AttendanceSession session = findSession(sessionId);
         guard.assertCurrentUserHomeroom(session.getClassId(), session.getAttendanceDate());
-        guard.assertStudentInClass(studentId, session.getClassId(), session.getAttendanceDate());
-        AttendanceRecord record = recordRepository.findBySessionIdAndStudentId(sessionId, studentId)
+        Student student = studentLookupService.resolveStudent(studentId, null);
+        guard.assertStudentInClass(student.getId(), session.getClassId(), session.getAttendanceDate());
+        AttendanceRecord record = recordRepository.findBySessionIdAndStudentId(sessionId, student.getId())
                 .map(existing -> updateRecord(session, existing, request))
-                .orElseGet(() -> createRecord(session, studentId, request));
-        return mapper.toExceptionResponse(record);
+                .orElseGet(() -> createRecord(session, student.getId(), request));
+        return mapper.toExceptionResponse(record, student);
+    }
+
+    @Transactional
+    public ResAttendanceExceptionDTO upsertExceptionByCode(
+            Long sessionId,
+            String studentCode,
+            ReqUpsertAttendanceExceptionDTO request) {
+        Student student = studentLookupService.resolveStudent(null, studentCode);
+        return upsertException(sessionId, student.getId(), request);
     }
 
     @Transactional
@@ -97,6 +111,12 @@ public class AttendanceService {
         Map<String, Object> beforeData = auditService.recordData(session, record);
         recordRepository.delete(record);
         auditService.writeRecordAudit("ATTENDANCE_EXCEPTION_DELETED", session, beforeData, null);
+    }
+
+    @Transactional
+    public void deleteExceptionByCode(Long sessionId, String studentCode) {
+        Student student = studentLookupService.resolveStudent(null, studentCode);
+        deleteException(sessionId, student.getId());
     }
 
     private AttendanceSession findSession(Long sessionId) {

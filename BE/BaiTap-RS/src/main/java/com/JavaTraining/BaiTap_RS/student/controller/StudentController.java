@@ -53,6 +53,12 @@ public class StudentController {
         return studentService.getStudent(studentId);
     }
 
+    @GetMapping("/code/{studentCode}")
+    @ApiMessage("Lấy thông tin sinh viên theo mã")
+    public ResStudentDTO getStudentByCode(@PathVariable("studentCode") String studentCode) {
+        return studentService.getStudentByCode(studentCode);
+    }
+
     @PostMapping
     @ApiMessage("Tạo sinh viên")
     public ResponseEntity<ResStudentDTO> createStudent(@Valid @RequestBody ReqCreateStudentDTO request) {

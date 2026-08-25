@@ -32,6 +32,7 @@ public class ScoreEntryController {
     private static final String SCOREBOOK_ID = "scorebookId";
     private static final String COLUMN_ID = "columnId";
     private static final String STUDENT_ID = "studentId";
+    private static final String STUDENT_CODE = "studentCode";
 
     private final ScoreEntryService scoreEntryService;
     private final ScoreGridService scoreGridService;
@@ -61,6 +62,16 @@ public class ScoreEntryController {
             @PathVariable(STUDENT_ID) @Positive Long studentId,
             @Valid @RequestBody ReqUpsertStudentScoreDTO request) {
         return scoreEntryService.upsertSingleScore(columnId, studentId, request);
+    }
+
+    @PutMapping("/assessment-columns/{columnId}/students/by-code/{studentCode}/score")
+    @ApiMessage("Nhập/cập nhật điểm học sinh theo mã")
+    @PreAuthorize(SCOREBOOK_ROLES)
+    public ResStudentScoreDTO upsertScoreByCode(
+            @PathVariable(COLUMN_ID) @Positive Long columnId,
+            @PathVariable(STUDENT_CODE) String studentCode,
+            @Valid @RequestBody ReqUpsertStudentScoreDTO request) {
+        return scoreEntryService.upsertSingleScoreByCode(columnId, studentCode, request);
     }
 
     @PostMapping("/assessment-columns/{columnId}/scores/bulk")

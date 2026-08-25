@@ -1,7 +1,7 @@
 package com.JavaTraining.BaiTap_RS.enrollment.service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,15 +26,18 @@ import com.JavaTraining.BaiTap_RS.enrollment.repository.ClassTransferHistoryRepo
 import com.JavaTraining.BaiTap_RS.enrollment.repository.StudentYearEnrollmentRepository;
 import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
 import com.JavaTraining.BaiTap_RS.student.domain.entity.StudentStatus;
+import com.JavaTraining.BaiTap_RS.student.service.StudentLookupService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.CouplingBetweenObjects")
 public class EnrollmentService {
     private final StudentYearEnrollmentRepository enrollmentRepository;
     private final ClassTransferHistoryRepository historyRepository;
     private final EnrollmentLookupService lookupService;
+    private final StudentLookupService studentLookupService;
     private final EnrollmentCapacityService capacityService;
     private final EnrollmentAuditService auditService;
 
@@ -42,11 +45,13 @@ public class EnrollmentService {
             StudentYearEnrollmentRepository enrollmentRepository,
             ClassTransferHistoryRepository historyRepository,
             EnrollmentLookupService lookupService,
+            StudentLookupService studentLookupService,
             EnrollmentCapacityService capacityService,
             EnrollmentAuditService auditService) {
         this.enrollmentRepository = enrollmentRepository;
         this.historyRepository = historyRepository;
         this.lookupService = lookupService;
+        this.studentLookupService = studentLookupService;
         this.capacityService = capacityService;
         this.auditService = auditService;
     }
@@ -56,7 +61,7 @@ public class EnrollmentService {
     public ResEnrollmentMutationDTO createEnrollment(ReqCreateEnrollmentDTO request) {
         AcademicYear year = lookupService.findAcademicYear(request.academicYearId());
         SchoolClass schoolClass = validateTargetClass(request.classId(), year);
-        Student student = lookupService.findStudent(request.studentId());
+        Student student = studentLookupService.resolveStudent(request.studentId(), request.studentCode());
         validateNewEnrollment(student, year);
         LocalDateTime enrolledAt = defaultTime(request.enrolledAt());
         StudentYearEnrollment enrollment = persistEnrollment(student, year, schoolClass, enrolledAt);
@@ -71,19 +76,22 @@ public class EnrollmentService {
     public ResEnrollmentMutationDTO createBulkEnrollment(ReqBulkCreateEnrollmentDTO request) {
         AcademicYear year = lookupService.findAcademicYear(request.academicYearId());
         SchoolClass schoolClass = validateTargetClass(request.classId(), year);
-        Set<Long> uniqueStudentIds = new HashSet<>(request.studentIds());
-        if (uniqueStudentIds.size() != request.studentIds().size()) {
+        List<Student> students = studentLookupService.resolveStudents(request.studentIds(), request.studentCodes());
+        Set<Long> uniqueStudentIds = students.stream()
+                .map(Student::getId)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        int inputCount = sizeOf(request.studentIds()) + sizeOf(request.studentCodes());
+        if (uniqueStudentIds.size() != inputCount) {
             throw new AppException(HttpStatus.CONFLICT, "Danh sách học sinh bị trùng");
         }
-        List<Student> students = lookupService.findStudents(uniqueStudentIds);
         students.forEach(student -> validateNewEnrollment(student, year));
         Map<Long, Student> studentsById = students.stream()
                 .collect(Collectors.toMap(Student::getId, Function.identity()));
         LocalDateTime enrolledAt = defaultTime(request.enrolledAt());
-        List<ResEnrollmentDTO> responses = request.studentIds()
+        List<ResEnrollmentDTO> responses = students
                 .stream()
-                .map(studentId -> {
-                    Student student = studentsById.get(studentId);
+                .map(resolvedStudent -> {
+                    Student student = studentsById.get(resolvedStudent.getId());
                     StudentYearEnrollment enrollment = persistEnrollment(student, year, schoolClass, enrolledAt);
                     return toEnrollmentResponse(enrollment, student, schoolClass);
                 })
@@ -202,5 +210,9 @@ public class EnrollmentService {
 
     private LocalDateTime defaultTime(LocalDateTime value) {
         return value == null ? LocalDateTime.now() : value;
+    }
+
+    private int sizeOf(List<?> values) {
+        return values == null ? 0 : values.size();
     }
 }

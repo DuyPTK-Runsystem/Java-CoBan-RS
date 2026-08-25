@@ -38,6 +38,8 @@ import com.JavaTraining.BaiTap_RS.scorebook.repository.AssessmentColumnRepositor
 import com.JavaTraining.BaiTap_RS.scorebook.repository.ScoreChangeRequestRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.ScorebookRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.StudentScoreRepository;
+import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
+import com.JavaTraining.BaiTap_RS.student.repository.StudentRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -56,7 +58,8 @@ import org.springframework.transaction.annotation.Transactional;
         "PMD.CognitiveComplexity",
         "PMD.CyclomaticComplexity",
         "PMD.NPathComplexity",
-        "PMD.AvoidDuplicateLiterals"
+        "PMD.AvoidDuplicateLiterals",
+        "PMD.TooManyMethods"
 })
 public class SemesterCompletenessService {
 
@@ -69,6 +72,7 @@ public class SemesterCompletenessService {
     private final AssessmentColumnRepository assessmentColumnRepository;
     private final StudentScoreRepository studentScoreRepository;
     private final StudentYearEnrollmentRepository studentYearEnrollmentRepository;
+    private final StudentRepository studentRepository;
     private final ScoreChangeRequestRepository scoreChangeRequestRepository;
     private final SemesterLockReportRepository reportRepository;
     private final SemesterNotificationDispatchService notificationDispatchService;
@@ -82,6 +86,7 @@ public class SemesterCompletenessService {
             AssessmentColumnRepository assessmentColumnRepository,
             StudentScoreRepository studentScoreRepository,
             StudentYearEnrollmentRepository studentYearEnrollmentRepository,
+            StudentRepository studentRepository,
             ScoreChangeRequestRepository scoreChangeRequestRepository,
             SemesterLockReportRepository reportRepository,
             SemesterNotificationDispatchService notificationDispatchService,
@@ -93,6 +98,7 @@ public class SemesterCompletenessService {
         this.assessmentColumnRepository = assessmentColumnRepository;
         this.studentScoreRepository = studentScoreRepository;
         this.studentYearEnrollmentRepository = studentYearEnrollmentRepository;
+        this.studentRepository = studentRepository;
         this.scoreChangeRequestRepository = scoreChangeRequestRepository;
         this.reportRepository = reportRepository;
         this.notificationDispatchService = notificationDispatchService;
@@ -159,6 +165,7 @@ public class SemesterCompletenessService {
                 List<StudentYearEnrollment> enrollments = studentYearEnrollmentRepository
                         .findByCurrentClassIdAndStatusOrderByStudentIdAsc(
                                 classSubject.getClassId(), EnrollmentStatus.ACTIVE);
+                Map<Long, Student> studentsById = loadStudentsById(enrollments);
 
                 List<Long> columnIds = columns.stream().map(AssessmentColumn::getId).toList();
                 List<StudentScore> scores = columnIds.isEmpty()
@@ -170,11 +177,12 @@ public class SemesterCompletenessService {
 
                 for (StudentYearEnrollment enrollment : enrollments) {
                     Long studentId = enrollment.getStudentId();
+                    String studentLabel = studentLabel(studentId, studentsById);
                     List<StudentScore> studentScores = scoresByStudent.getOrDefault(studentId, Collections.emptyList());
 
                     if (studentScores.isEmpty() && !columns.isEmpty()) {
                         studentWithoutScoreDataCount++;
-                        details.add("Học sinh " + studentId + " chưa có dữ liệu điểm trong ClassSubject "
+                        details.add("Học sinh " + studentLabel + " chưa có dữ liệu điểm trong ClassSubject "
                                 + classSubject.getId());
                     } else {
                         Set<Long> scoredColumnIds = studentScores.stream()
@@ -185,7 +193,7 @@ public class SemesterCompletenessService {
                         for (AssessmentColumn col : columns) {
                             if (col.isRequired() && !scoredColumnIds.contains(col.getId())) {
                                 unenteredScoreCount++;
-                                details.add("Học sinh " + studentId + " chưa nhập điểm cột " + col.getId()
+                                details.add("Học sinh " + studentLabel + " chưa nhập điểm cột " + col.getId()
                                         + " trong ClassSubject " + classSubject.getId());
                             }
                         }
@@ -273,6 +281,7 @@ public class SemesterCompletenessService {
                 List<StudentYearEnrollment> enrollments = studentYearEnrollmentRepository
                         .findByCurrentClassIdAndStatusOrderByStudentIdAsc(
                                 classSubject.getClassId(), EnrollmentStatus.ACTIVE);
+                Map<Long, Student> studentsById = loadStudentsById(enrollments);
 
                 List<Long> columnIds = columns.stream().map(AssessmentColumn::getId).toList();
                 List<StudentScore> scores = columnIds.isEmpty()
@@ -284,10 +293,12 @@ public class SemesterCompletenessService {
 
                 for (StudentYearEnrollment enrollment : enrollments) {
                     Long studentId = enrollment.getStudentId();
+                    String studentLabel = studentLabel(studentId, studentsById);
                     List<StudentScore> studentScores = scoresByStudent.getOrDefault(studentId, Collections.emptyList());
 
                     if (studentScores.isEmpty() && !columns.isEmpty()) {
-                        issues.add(String.format("Học sinh ID %d chưa có dữ liệu điểm môn %s", studentId, subjectName));
+                        issues.add(String.format(
+                                "Học sinh %s chưa có dữ liệu điểm môn %s", studentLabel, subjectName));
                     } else {
                         Set<Long> scoredColumnIds = studentScores.stream()
                                 .filter(s -> s.getScoreStatus() != null)
@@ -296,8 +307,8 @@ public class SemesterCompletenessService {
 
                         for (AssessmentColumn col : columns) {
                             if (col.isRequired() && !scoredColumnIds.contains(col.getId())) {
-                                issues.add(String.format("Học sinh ID %d chưa nhập điểm cột %s môn %s",
-                                        studentId, col.getColumnName(), subjectName));
+                                issues.add(String.format("Học sinh %s chưa nhập điểm cột %s môn %s",
+                                        studentLabel, col.getColumnName(), subjectName));
                             }
                         }
                     }
@@ -479,5 +490,26 @@ public class SemesterCompletenessService {
             return new SemesterCompletenessSummaryDTO(
                     false, 0, 0, 0, 0, 0, 0, 0, List.of("Không thể đọc summary payload: " + exception.getMessage()));
         }
+    }
+
+    private Map<Long, Student> loadStudentsById(List<StudentYearEnrollment> enrollments) {
+        List<Long> studentIds = enrollments.stream()
+                .map(StudentYearEnrollment::getStudentId)
+                .distinct()
+                .toList();
+        if (studentIds.isEmpty()) {
+            return Map.of();
+        }
+        return studentRepository.findAllById(studentIds)
+                .stream()
+                .collect(Collectors.toMap(Student::getId, student -> student));
+    }
+
+    private String studentLabel(Long studentId, Map<Long, Student> studentsById) {
+        Student student = studentsById.get(studentId);
+        if (student == null) {
+            return "ID " + studentId + " (Không tìm thấy hồ sơ)";
+        }
+        return student.getStudentCode() + " (" + student.getStudentName() + ")";
     }
 }

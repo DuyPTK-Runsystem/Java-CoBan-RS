@@ -87,4 +87,11 @@ public class EnrollmentController {
             @PathVariable("studentId") @Positive Long studentId) {
         return enrollmentQueryService.listStudentHistory(studentId);
     }
+
+    @GetMapping("/students/by-code/{studentCode}/enrollments")
+    @ApiMessage("Lấy lịch sử lớp của học sinh theo mã")
+    public List<ResStudentEnrollmentHistoryDTO> listStudentHistoryByCode(
+            @PathVariable("studentCode") String studentCode) {
+        return enrollmentQueryService.listStudentHistoryByCode(studentCode);
+    }
 }

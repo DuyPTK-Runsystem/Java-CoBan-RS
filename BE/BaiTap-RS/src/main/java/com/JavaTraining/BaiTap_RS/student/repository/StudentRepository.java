@@ -14,6 +14,10 @@ public interface StudentRepository extends JpaRepository<Student, Long>, JpaSpec
 
     boolean existsByStudentCode(String studentCode);
 
+    Optional<Student> findByStudentCode(String studentCode);
+
+    List<Student> findAllByStudentCodeIn(Collection<String> studentCodes);
+
     Optional<Student> findByUserId(Long userId);
 
     @Query("select student.studentCode from Student student where student.studentCode in :studentCodes")

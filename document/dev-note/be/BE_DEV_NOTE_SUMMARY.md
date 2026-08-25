@@ -39,6 +39,7 @@
 |   039 | academic           | [Semester Lock Lifecycle, Service & Batch](academic/039-semester-lock-2026-08-25.md)                                                  | Completed; validation PASS                                 | 2026-08-25 |
 |   040 | academic           | [Semester Completeness Notification (CR-SEM-001)](academic/040-semester-completeness-notification-cr-sem-001-2026-08-25.md)           | Completed; validation PASS                                 | 2026-08-25 |
 |   041 | scorebook          | [Transcript Result Schema Foundation](scorebook/041-transcript-result-schema-foundation-2026-08-25.md)                                  | Completed; validation PASS                                 | 2026-08-25 |
+| 042.1 | student            | [Student Code Input Resolution & Display Across All Modules](student/042.1-student-code-input-resolution-and-display-2026-08-25.md) | Completed; validation PASS                                 | 2026-08-25 |
 
 ## Module folders
 

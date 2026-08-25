@@ -38,6 +38,8 @@ import com.JavaTraining.BaiTap_RS.scorebook.repository.AssessmentColumnRepositor
 import com.JavaTraining.BaiTap_RS.scorebook.repository.ScoreChangeRequestRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.ScorebookRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.StudentScoreRepository;
+import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
+import com.JavaTraining.BaiTap_RS.student.repository.StudentRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,6 +82,9 @@ class SemesterCompletenessServiceTest {
         private StudentYearEnrollmentRepository studentYearEnrollmentRepository;
 
         @Mock
+        private StudentRepository studentRepository;
+
+        @Mock
         private ScoreChangeRequestRepository scoreChangeRequestRepository;
 
         @Mock
@@ -101,10 +106,13 @@ class SemesterCompletenessServiceTest {
                                 assessmentColumnRepository,
                                 studentScoreRepository,
                                 studentYearEnrollmentRepository,
+                                studentRepository,
                                 scoreChangeRequestRepository,
                                 reportRepository,
                                 notificationDispatchService,
                                 objectMapper);
+                Mockito.lenient().when(studentRepository.findAllById(Mockito.any()))
+                                .thenReturn(List.of());
         }
 
         @Test
@@ -181,6 +189,42 @@ class SemesterCompletenessServiceTest {
                                 "unpublished scorebook count should be 1");
                 Assertions.assertEquals(1, summary.pendingScoreChangeRequestCount(),
                                 "pending score change requests should be 1");
+        }
+
+        @Test
+        void evaluateCompletenessUsesStudentCodeAndNameInMissingScoreDetails() {
+                ClassSubject cs = classSubject(1L, 10L, 20L, 1L);
+                Mockito.when(classSubjectRepository.findAllBySemesterIdAndStatus(1L, ClassSubjectStatus.ACTIVE))
+                                .thenReturn(List.of(cs));
+
+                Scorebook scorebook = scorebook(100L, 1L, ScorebookStatus.PUBLISHED);
+                Mockito.when(scorebookRepository.findByClassSubjectId(1L)).thenReturn(Optional.of(scorebook));
+
+                AssessmentColumn ktdk = column(11L, 100L, AssessmentType.KTDK, 1, true);
+                AssessmentColumn ktck = column(12L, 100L, AssessmentType.KTCK, 1, true);
+                Mockito.when(assessmentColumnRepository.findAllByScorebookIdOrderByAssessmentTypeAscColumnNoAsc(100L))
+                                .thenReturn(List.of(ktdk, ktck));
+
+                Mockito.when(subjectRepository.findById(20L))
+                                .thenReturn(Optional.of(subject(20L, SubjectType.ACADEMIC)));
+                StudentYearEnrollment enrollment = enrollment(501L, 10L);
+                Mockito.when(studentYearEnrollmentRepository.findByCurrentClassIdAndStatusOrderByStudentIdAsc(
+                                10L, EnrollmentStatus.ACTIVE))
+                                .thenReturn(List.of(enrollment));
+                Mockito.when(studentRepository.findAllById(List.of(501L)))
+                                .thenReturn(List.of(student(501L, "STU0000501", "Nguyen A")));
+                Mockito.when(studentScoreRepository.findAllByAssessmentColumnIdIn(List.of(11L, 12L)))
+                                .thenReturn(List.of());
+                Mockito.when(scoreChangeRequestRepository.countByAssessmentColumnIdInAndStatus(
+                                List.of(11L, 12L), ScoreChangeRequestStatus.PENDING))
+                                .thenReturn(0L);
+
+                SemesterCompletenessSummaryDTO summary = completenessService.evaluateCompleteness(1L);
+
+                Assertions.assertTrue(
+                                summary.details().stream()
+                                                .anyMatch(detail -> detail.contains("STU0000501 (Nguyen A)")),
+                                "missing score detail should contain student code and name");
         }
 
         @Test
@@ -317,5 +361,11 @@ class SemesterCompletenessServiceTest {
                 StudentScore s = new StudentScore(columnId, studentId, status, val, null, 1L);
                 ReflectionTestUtils.setField(s, "id", studentId + 2000L);
                 return s;
+        }
+
+        private Student student(Long id, String code, String name) {
+                Student student = new Student(name, code);
+                ReflectionTestUtils.setField(student, "id", id);
+                return student;
         }
 }

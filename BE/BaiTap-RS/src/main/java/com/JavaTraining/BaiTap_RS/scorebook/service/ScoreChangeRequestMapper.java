@@ -6,16 +6,23 @@ import java.util.Map;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResScoreChangeRequestDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResScoreChangeRequestDetailDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.ScoreChangeRequest;
+import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ScoreChangeRequestMapper {
 
     public ResScoreChangeRequestDTO toResponse(ScoreChangeRequest request) {
+        return toResponse(request, null);
+    }
+
+    public ResScoreChangeRequestDTO toResponse(ScoreChangeRequest request, Student student) {
         return new ResScoreChangeRequestDTO(
                 request.getId(),
                 request.getAssessmentColumnId(),
                 request.getStudentId(),
+                student == null ? null : student.getStudentCode(),
+                student == null ? null : student.getStudentName(),
                 request.getProposedStatus(),
                 request.getProposedValue(),
                 request.getRequestedBy(),
@@ -26,10 +33,16 @@ public class ScoreChangeRequestMapper {
     }
 
     public ResScoreChangeRequestDetailDTO toDetail(ScoreChangeRequest request) {
+        return toDetail(request, null);
+    }
+
+    public ResScoreChangeRequestDetailDTO toDetail(ScoreChangeRequest request, Student student) {
         return new ResScoreChangeRequestDetailDTO(
                 request.getId(),
                 request.getAssessmentColumnId(),
                 request.getStudentId(),
+                student == null ? null : student.getStudentCode(),
+                student == null ? null : student.getStudentName(),
                 request.getStudentScoreId(),
                 request.getBeforeStatus(),
                 request.getBeforeValue(),
