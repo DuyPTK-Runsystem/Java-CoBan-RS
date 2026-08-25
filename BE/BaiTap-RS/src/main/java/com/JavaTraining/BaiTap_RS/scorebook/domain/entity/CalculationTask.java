@@ -1,6 +1,7 @@
 package com.JavaTraining.BaiTap_RS.scorebook.domain.entity;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,7 +25,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@SuppressWarnings("PMD.TooManyFields")
+@SuppressWarnings({ "PMD.TooManyFields", "PMD.NullAssignment" })
 public class CalculationTask {
 
     @Id
@@ -99,6 +100,47 @@ public class CalculationTask {
     public void updateRequestedVersion(Long newVersion) {
         this.requestedVersion = newVersion;
         this.status = CalculationTaskStatus.PENDING;
+        this.attemptCount = 0;
+        this.availableAt = LocalDateTime.now();
+        this.lastError = null;
+        this.lockedAt = null;
+        this.workerId = null;
+        this.startedAt = null;
+        this.completedAt = null;
+    }
+
+    public void claim(String worker, LocalDateTime now) {
+        this.status = CalculationTaskStatus.RUNNING;
+        this.workerId = worker;
+        this.lockedAt = now;
+        this.startedAt = now;
+        this.attemptCount++;
+        this.lastError = null;
+    }
+
+    public void markSucceeded(LocalDateTime completedAt) {
+        this.status = CalculationTaskStatus.SUCCEEDED;
+        this.completedAt = completedAt;
+        this.lockedAt = null;
+    }
+
+    public void scheduleRetry(String error, LocalDateTime now) {
+        this.status = CalculationTaskStatus.PENDING;
+        this.lastError = error;
+        this.availableAt = now.plus(backoffSeconds(), ChronoUnit.SECONDS);
+        this.lockedAt = null;
+        this.workerId = null;
+    }
+
+    public void markFailed(String error, LocalDateTime completedAt) {
+        this.status = CalculationTaskStatus.FAILED;
+        this.lastError = error;
+        this.completedAt = completedAt;
+        this.lockedAt = null;
+    }
+
+    private long backoffSeconds() {
+        return 5L * (1L << Math.min(Math.max(attemptCount - 1, 0), 6));
     }
 
     @PrePersist

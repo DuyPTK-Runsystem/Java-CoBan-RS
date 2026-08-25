@@ -33,6 +33,8 @@ public interface SemesterRepository extends JpaRepository<Semester, Long> {
 
     List<Semester> findAllByAcademicYearIdOrderByDisplayOrderAsc(Long academicYearId);
 
+    List<Semester> findAllByAcademicYearIdOrderByEndDateAscDisplayOrderAscIdAsc(Long academicYearId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT s FROM Semester s WHERE s.id = :id")
     Optional<Semester> findByIdForUpdate(@Param("id") Long id);
