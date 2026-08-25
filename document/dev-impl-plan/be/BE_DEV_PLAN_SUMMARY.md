@@ -29,6 +29,7 @@
 |   038 | [Score Change Request](scorebook/038-score-change-request-2026-08-25.md)                                                         | Yêu cầu sửa điểm, snapshot before_*, phê duyệt tự động áp dụng, từ chối, hủy, audit và calculation task                          | Approved | 2026-08-25 |
 |   039 | [Semester Lock Lifecycle, Service & Batch](academic/039-semester-lock-2026-08-25.md)                                             | Semester lock lifecycle, audit, reopening window, completeness service, 11 checkpoints và auto-lock batch                        | Approved | 2026-08-25 |
 |   040 | [Semester Completeness Notification (CR-SEM-001)](academic/040-semester-completeness-notification-cr-sem-001-2026-08-25.md)      | Phê duyệt CR-SEM-001, V15 migration, notification dispatcher, recipient resolver, template service, retry và endpoints           | Approved | 2026-08-25 |
+|   041 | [Transcript Result Schema Foundation](scorebook/041-transcript-result-schema-foundation-2026-08-25.md)                           | V16 migration, student_subject_term_result, student_subject_annual_result, transcript result fields, entity & repo               | Approved | 2026-08-25 |
 
 ## Module folders
 

@@ -1,5 +1,6 @@
 package com.JavaTraining.BaiTap_RS.scorebook.domain.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -48,6 +49,19 @@ public class StudentAnnualTranscript {
 
     @Column(name = "calculated_version")
     private Long calculatedVersion;
+
+    @Column(name = "regular_dtbcn", precision = 3, scale = 1)
+    private BigDecimal regularDtbcn;
+
+    @Column(name = "final_dtbcn", precision = 3, scale = 1)
+    private BigDecimal finalDtbcn;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "result_source", length = 20)
+    private CalculationResultSource resultSource;
+
+    @Column(name = "last_calculation_task_id")
+    private Long lastCalculationTaskId;
 
     @Column(name = "calculated_at")
     private LocalDateTime calculatedAt;

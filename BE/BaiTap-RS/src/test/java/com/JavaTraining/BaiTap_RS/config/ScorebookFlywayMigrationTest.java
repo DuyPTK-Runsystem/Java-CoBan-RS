@@ -9,6 +9,7 @@ import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
 class ScorebookFlywayMigrationTest {
 
     private static final String MIGRATION_LOCATION = "classpath:db/migration";
@@ -25,10 +26,11 @@ class ScorebookFlywayMigrationTest {
                         WHERE TABLE_NAME IN (
                             'scorebook', 'assessment_column', 'skill_weight_config',
                             'student_score', 'student_annual_transcript',
-                            'student_term_transcript', 'calculation_task')
+                            'student_term_transcript', 'calculation_task',
+                            'student_subject_term_result', 'student_subject_annual_result')
                         """)) {
             moveToFirstRow(resultSet, "scorebook table query should return a row");
-            Assertions.assertEquals(7, resultSet.getInt(1), "V10, V11, V12 should create all scorebook tables");
+            Assertions.assertEquals(9, resultSet.getInt(1), "V10, V11, V12 and V16 should create all scorebook tables");
         }
     }
 
@@ -49,13 +51,73 @@ class ScorebookFlywayMigrationTest {
                             'uk_student_score_column_student',
                             'uk_annual_transcript_student_year',
                             'uk_term_transcript_annual_semester',
-                            'uk_calculation_task_idempotency')
+                            'uk_calculation_task_idempotency',
+                            'uk_subject_term_result',
+                            'uk_subject_annual_result')
                         """)) {
             moveToFirstRow(resultSet, "scorebook constraint query should return a row");
             Assertions.assertEquals(
-                    8,
+                    10,
                     resultSet.getInt(1),
-                    "V10, V11, V12 should enforce scorebook uniqueness and weight constraints");
+                    "V10, V11, V12 and V16 should enforce scorebook uniqueness constraints");
+        }
+    }
+
+    @Test
+    void createsTranscriptResultColumnsIndexesAndForeignKeys() throws Exception {
+        JdbcDataSource dataSource = dataSource("flyway-transcript-result-schema");
+        migrate(dataSource);
+
+        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery("""
+                        SELECT COUNT(*)
+                        FROM INFORMATION_SCHEMA.COLUMNS
+                        WHERE (TABLE_NAME = 'student_annual_transcript'
+                                AND COLUMN_NAME IN ('regular_dtbcn', 'final_dtbcn', 'result_source',
+                                        'last_calculation_task_id'))
+                           OR (TABLE_NAME = 'student_term_transcript' AND COLUMN_NAME = 'dtbhk')
+                        """)) {
+            moveToFirstRow(resultSet, "transcript result column query should return a row");
+            Assertions.assertEquals(5, resultSet.getInt(1), "V16 should add all transcript result columns");
+        }
+
+        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery("""
+                        SELECT COUNT(*)
+                        FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+                        WHERE CONSTRAINT_NAME IN (
+                            'ck_annual_transcript_result_source',
+                            'ck_annual_transcript_regular_dtbcn',
+                            'ck_annual_transcript_final_dtbcn',
+                            'ck_term_transcript_dtbhk',
+                            'fk_annual_transcript_calc_task',
+                            'fk_subject_term_result_transcript',
+                            'fk_subject_term_result_class_subject',
+                            'fk_subject_term_result_subject',
+                            'fk_subject_annual_result_transcript',
+                            'fk_subject_annual_result_subject',
+                            'fk_subject_annual_result_hk1',
+                            'fk_subject_annual_result_hk2')
+                        """)) {
+            moveToFirstRow(resultSet, "transcript result constraint query should return a row");
+            Assertions.assertEquals(
+                    12,
+                    resultSet.getInt(1),
+                    "V16 should create all result constraints and foreign keys");
+        }
+
+        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery("""
+                        SELECT COUNT(*)
+                        FROM INFORMATION_SCHEMA.INDEXES
+                        WHERE INDEX_NAME IN (
+                            'idx_subject_term_result_transcript',
+                            'idx_subject_term_result_class_subject',
+                            'idx_subject_annual_result_transcript',
+                            'idx_subject_annual_result_subject')
+                        """)) {
+            moveToFirstRow(resultSet, "transcript result index query should return a row");
+            Assertions.assertEquals(4, resultSet.getInt(1), "V16 should create all result lookup indexes");
         }
     }
 

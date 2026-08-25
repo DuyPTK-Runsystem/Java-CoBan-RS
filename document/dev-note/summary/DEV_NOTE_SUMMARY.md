@@ -62,4 +62,4 @@ NNN-short-topic-yyyy-mm-dd.md
 |   038 | BE             | [Score Change Request](../be/scorebook/038-score-change-request-2026-08-25.md)                                                              | Implemented; validation PASS; e2e persistence test pending | 2026-08-25 |
 |   039 | BE             | [Semester Lock Lifecycle, Service & Batch](../be/academic/039-semester-lock-2026-08-25.md)                                                  | Completed; validation PASS                                 | 2026-08-25 |
 |   040 | BE             | [Semester Completeness Notification (CR-SEM-001)](../be/academic/040-semester-completeness-notification-cr-sem-001-2026-08-25.md)           | Completed; validation PASS                                 | 2026-08-25 |
-
+|   041 | BE             | [Transcript Result Schema Foundation](../be/scorebook/041-transcript-result-schema-foundation-2026-08-25.md)                                  | Completed; validation PASS                                 | 2026-08-25 |

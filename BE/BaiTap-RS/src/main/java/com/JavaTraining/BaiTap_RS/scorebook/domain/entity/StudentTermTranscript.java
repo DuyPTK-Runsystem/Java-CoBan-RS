@@ -1,5 +1,6 @@
 package com.JavaTraining.BaiTap_RS.scorebook.domain.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -51,6 +52,9 @@ public class StudentTermTranscript {
 
     @Column(name = "calculated_version")
     private Long calculatedVersion;
+
+    @Column(name = "dtbhk", precision = 3, scale = 1)
+    private BigDecimal dtbhk;
 
     @Column(name = "calculated_at")
     private LocalDateTime calculatedAt;
