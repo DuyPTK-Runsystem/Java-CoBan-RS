@@ -6,16 +6,22 @@ import java.util.List;
 import java.util.Optional;
 
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResSemesterCompletenessReportDTO;
+import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResSemesterNotificationDTO;
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.SemesterCompletenessSummaryDTO;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.ApplicationScope;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.ClassSubject;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.ClassSubjectStatus;
+import com.JavaTraining.BaiTap_RS.academic.domain.entity.NotificationChannel;
+import com.JavaTraining.BaiTap_RS.academic.domain.entity.NotificationStatus;
+import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClass;
+import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClassStatus;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SemesterLockReport;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SemesterLockReportStatus;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Subject;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectStatus;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectType;
 import com.JavaTraining.BaiTap_RS.academic.repository.ClassSubjectRepository;
+import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SemesterLockReportRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectRepository;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.EnrollmentStatus;
@@ -45,8 +51,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({
                 "PMD.UnitTestContainsTooManyAsserts",
+                "PMD.TooManyMethods",
+                "PMD.ExcessiveImports",
                 "PMD.CouplingBetweenObjects",
-                "PMD.ExcessiveImports"
+                "PMD.AvoidDuplicateLiterals"
 })
 class SemesterCompletenessServiceTest {
 
@@ -55,6 +63,9 @@ class SemesterCompletenessServiceTest {
 
         @Mock
         private SubjectRepository subjectRepository;
+
+        @Mock
+        private SchoolClassRepository schoolClassRepository;
 
         @Mock
         private ScorebookRepository scorebookRepository;
@@ -74,6 +85,9 @@ class SemesterCompletenessServiceTest {
         @Mock
         private SemesterLockReportRepository reportRepository;
 
+        @Mock
+        private SemesterNotificationDispatchService notificationDispatchService;
+
         private SemesterCompletenessService completenessService;
         private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -82,12 +96,14 @@ class SemesterCompletenessServiceTest {
                 completenessService = new SemesterCompletenessService(
                                 classSubjectRepository,
                                 subjectRepository,
+                                schoolClassRepository,
                                 scorebookRepository,
                                 assessmentColumnRepository,
                                 studentScoreRepository,
                                 studentYearEnrollmentRepository,
                                 scoreChangeRequestRepository,
                                 reportRepository,
+                                notificationDispatchService,
                                 objectMapper);
         }
 
@@ -168,25 +184,43 @@ class SemesterCompletenessServiceTest {
         }
 
         @Test
-        void evaluateAndSaveReportPersistsAndIsIdempotent() {
-                Mockito.when(reportRepository.findByRunIdAndSemesterIdAndCheckpointCode(10L, 1L, "t"))
+        void evaluateAndSaveReportPersistsAndDispatchesWhenIncomplete() {
+                Mockito.when(reportRepository.findByRunIdAndSemesterIdAndCheckpointCode(10L, 1L, "t-7d"))
                                 .thenReturn(Optional.empty());
-                Mockito.when(classSubjectRepository.findAllBySemesterIdAndStatus(1L, ClassSubjectStatus.ACTIVE))
-                                .thenReturn(List.of());
-                Mockito.when(reportRepository.save(Mockito.any(SemesterLockReport.class)))
-                                .thenAnswer(inv -> inv.getArgument(0));
 
-                SemesterLockReport report = completenessService.evaluateAndSaveReport(10L, 1L, "t", "CORR-1");
+                ClassSubject cs = classSubject(1L, 10L, 20L, 1L);
+                Mockito.when(classSubjectRepository.findAllBySemesterIdAndStatus(1L, ClassSubjectStatus.ACTIVE))
+                                .thenReturn(List.of(cs));
+
+                Scorebook scorebook = scorebook(100L, 1L, ScorebookStatus.OPEN);
+                Mockito.when(scorebookRepository.findByClassSubjectId(1L)).thenReturn(Optional.of(scorebook));
+
+                SchoolClass sc = new SchoolClass(1L, 1L, "10A1", "Lớp 10A1", 40, SchoolClassStatus.ACTIVE);
+                Mockito.when(schoolClassRepository.findById(10L)).thenReturn(Optional.of(sc));
+
+                Subject subj = subject(20L, SubjectType.ACADEMIC);
+                Mockito.when(subjectRepository.findById(20L)).thenReturn(Optional.of(subj));
+
+                Mockito.when(reportRepository.save(Mockito.any(SemesterLockReport.class)))
+                                .thenAnswer(inv -> {
+                                        SemesterLockReport r = inv.getArgument(0);
+                                        ReflectionTestUtils.setField(r, "id", 999L);
+                                        return r;
+                                });
+
+                SemesterLockReport report = completenessService.evaluateAndSaveReport(10L, 1L, "t-7d", "CORR-1");
 
                 Assertions.assertNotNull(report, "saved report should not be null");
-                Assertions.assertEquals("t", report.getCheckpointCode(), "checkpointCode should match");
-                Assertions.assertEquals(SemesterLockReportStatus.COMPLETE, report.getReportStatus(),
-                                "status should be COMPLETE");
+                Assertions.assertEquals("t-7d", report.getCheckpointCode(), "checkpointCode should match");
+                Assertions.assertEquals(SemesterLockReportStatus.INCOMPLETE, report.getReportStatus(),
+                                "report status should be INCOMPLETE");
 
-                Mockito.when(reportRepository.findByRunIdAndSemesterIdAndCheckpointCode(10L, 1L, "t"))
-                                .thenReturn(Optional.of(report));
-                SemesterLockReport secondCall = completenessService.evaluateAndSaveReport(10L, 1L, "t", "CORR-1");
-                Assertions.assertSame(report, secondCall, "second call should return existing report");
+                Mockito.verify(notificationDispatchService).dispatchNotifications(
+                                Mockito.eq(1L),
+                                Mockito.eq("t-7d"),
+                                Mockito.eq(999L),
+                                Mockito.any(),
+                                Mockito.any());
         }
 
         @Test
@@ -214,6 +248,23 @@ class SemesterCompletenessServiceTest {
                 Assertions.assertEquals(77L, res.reportId(), "reportId should match");
                 Assertions.assertEquals("t", res.checkpointCode(), "checkpointCode should match");
                 Assertions.assertTrue(res.summary().complete(), "summary should be complete");
+        }
+
+        @Test
+        void notificationDelegationMethodsWork() {
+                ResSemesterNotificationDTO dto = new ResSemesterNotificationDTO(
+                                1L, 1L, 10L, "t", "admin@school.edu.vn", "ADMIN", null,
+                                NotificationChannel.EMAIL, NotificationStatus.SENT, "Subj", "Body",
+                                1, LocalDateTime.now(), null, LocalDateTime.now(), LocalDateTime.now());
+
+                Mockito.when(notificationDispatchService.getNotificationsForSemester(1L)).thenReturn(List.of(dto));
+                Mockito.when(notificationDispatchService.retryFailedNotifications(1L)).thenReturn(List.of(dto));
+
+                List<ResSemesterNotificationDTO> list = completenessService.getNotificationsForSemester(1L);
+                Assertions.assertEquals(1, list.size(), "list size should match");
+
+                List<ResSemesterNotificationDTO> retried = completenessService.retryFailedNotifications(1L);
+                Assertions.assertEquals(1, retried.size(), "retried size should match");
         }
 
         private ClassSubject classSubject(Long id, Long classId, Long subjectId, Long semesterId) {

@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
                 "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 @AutoConfigureMockMvc
+@SuppressWarnings({ "PMD.AvoidDuplicateLiterals", "PMD.UnitTestContainsTooManyAsserts" })
 class SemesterLockAuthorizationIntegrationTest {
 
         @Autowired
@@ -77,5 +78,39 @@ class SemesterLockAuthorizationIntegrationTest {
                 // Since no report exists and semester 1 is absent, it returns 200 with preview
                 // evaluation
                 Assertions.assertEquals(200, status, "office should pass authorization");
+        }
+
+        @Test
+        @WithMockUser(roles = "TEACHER")
+        void teacherForbiddenForNotificationEndpoints() throws Exception {
+                int getStatus = mockMvc.perform(MockMvcRequestBuilders.get("/api/v2/semesters/1/notifications"))
+                                .andReturn()
+                                .getResponse()
+                                .getStatus();
+                Assertions.assertEquals(403, getStatus, "teacher should not list notifications");
+
+                int dispatchStatus = mockMvc.perform(
+                                MockMvcRequestBuilders.post("/api/v2/semesters/1/notifications/dispatch"))
+                                .andReturn()
+                                .getResponse()
+                                .getStatus();
+                Assertions.assertEquals(403, dispatchStatus, "teacher should not dispatch notifications");
+
+                int retryStatus = mockMvc.perform(
+                                MockMvcRequestBuilders.post("/api/v2/semesters/1/notifications/retry-failed"))
+                                .andReturn()
+                                .getResponse()
+                                .getStatus();
+                Assertions.assertEquals(403, retryStatus, "teacher should not retry failed notifications");
+        }
+
+        @Test
+        @WithMockUser(roles = "ACADEMIC_OFFICE")
+        void academicOfficePassesAuthorizationOnNotifications() throws Exception {
+                int status = mockMvc.perform(MockMvcRequestBuilders.get("/api/v2/semesters/1/notifications"))
+                                .andReturn()
+                                .getResponse()
+                                .getStatus();
+                Assertions.assertEquals(200, status, "office should list notifications");
         }
 }

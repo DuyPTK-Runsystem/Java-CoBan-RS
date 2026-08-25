@@ -9,6 +9,7 @@ import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.requests.ReqUpdateSemeste
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResSemesterCompletenessDecisionDTO;
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResSemesterCompletenessReportDTO;
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResSemesterDTO;
+import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResSemesterNotificationDTO;
 import com.JavaTraining.BaiTap_RS.academic.service.SemesterCompletenessService;
 import com.JavaTraining.BaiTap_RS.academic.service.SemesterService;
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
@@ -107,8 +108,32 @@ public class SemesterController {
     @PreAuthorize(OFFICE_ROLES)
     public ResSemesterCompletenessDecisionDTO evaluateCompletenessCheckpoint(
             @PathVariable(SEMESTER_ID) @Positive Long semesterId,
-            @RequestParam("checkpointDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                    LocalDate checkpointDate) {
+            @RequestParam("checkpointDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkpointDate) {
         return semesterService.evaluateCompletenessCheckpoint(semesterId, checkpointDate);
+    }
+
+    @GetMapping("/{semesterId}/notifications")
+    @ApiMessage("Xem danh sách thông báo nhắc điểm của học kỳ")
+    @PreAuthorize(OFFICE_ROLES)
+    public List<ResSemesterNotificationDTO> listNotifications(
+            @PathVariable(SEMESTER_ID) @Positive Long semesterId) {
+        return completenessService.getNotificationsForSemester(semesterId);
+    }
+
+    @PostMapping("/{semesterId}/notifications/dispatch")
+    @ApiMessage("Kích hoạt gửi thông báo nhắc điểm học kỳ")
+    @PreAuthorize(OFFICE_ROLES)
+    public List<ResSemesterNotificationDTO> dispatchNotifications(
+            @PathVariable(SEMESTER_ID) @Positive Long semesterId,
+            @RequestParam(name = "checkpointCode", required = false) String checkpointCode) {
+        return completenessService.dispatchCheckpointNotifications(semesterId, checkpointCode);
+    }
+
+    @PostMapping("/{semesterId}/notifications/retry-failed")
+    @ApiMessage("Thử gửi lại các thông báo nhắc điểm bị lỗi")
+    @PreAuthorize(OFFICE_ROLES)
+    public List<ResSemesterNotificationDTO> retryFailedNotifications(
+            @PathVariable(SEMESTER_ID) @Positive Long semesterId) {
+        return completenessService.retryFailedNotifications(semesterId);
     }
 }

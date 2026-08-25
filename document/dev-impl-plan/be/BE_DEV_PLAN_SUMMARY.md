@@ -27,6 +27,8 @@
 |   036 | [Scorebook Foundation](scorebook/036-scorebook-foundation-2026-08-24.md)                                                         | Foundation sổ điểm, cột đánh giá, trọng số môn kỹ năng, lifecycle và authorization theo assignment                               | Approved | 2026-08-24 |
 |   037 | [Student Score Entry](scorebook/037-student-score-entry-2026-08-24.md)                                                           | Nhập điểm từng học sinh/hàng loạt, score grid, optimistic locking, audit và calculation task state                               | Approved | 2026-08-24 |
 |   038 | [Score Change Request](scorebook/038-score-change-request-2026-08-25.md)                                                         | Yêu cầu sửa điểm, snapshot before_*, phê duyệt tự động áp dụng, từ chối, hủy, audit và calculation task                          | Approved | 2026-08-25 |
+|   039 | [Semester Lock Lifecycle, Service & Batch](academic/039-semester-lock-2026-08-25.md)                                             | Semester lock lifecycle, audit, reopening window, completeness service, 11 checkpoints và auto-lock batch                        | Approved | 2026-08-25 |
+|   040 | [Semester Completeness Notification (CR-SEM-001)](academic/040-semester-completeness-notification-cr-sem-001-2026-08-25.md)      | Phê duyệt CR-SEM-001, V15 migration, notification dispatcher, recipient resolver, template service, retry và endpoints           | Approved | 2026-08-25 |
 
 ## Module folders
 
@@ -36,6 +38,7 @@
 - `enrollment/`: Academic foundation tối thiểu, xếp lớp và lịch sử chuyển lớp.
 - `attendance/`: Attendance session foundation, exception-based attendance records and GVCN scope.
 - `scorebook/`: Scorebook lifecycle, assessment-column configuration and skill-weight foundation.
+- `academic/`: Academic structure, semester lifecycle, lock batch, completeness evaluation and notifications.
 
 ## Current BE decisions
 

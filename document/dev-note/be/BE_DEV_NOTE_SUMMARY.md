@@ -37,6 +37,7 @@
 |   037 | scorebook          | [Student Score Entry](scorebook/037-student-score-entry-2026-08-24.md)                                                                | Completed; validation PASS                                 | 2026-08-24 |
 |   038 | scorebook          | [Score Change Request](scorebook/038-score-change-request-2026-08-25.md)                                                              | Implemented; validation PASS; e2e persistence test pending | 2026-08-25 |
 |   039 | academic           | [Semester Lock Lifecycle, Service & Batch](academic/039-semester-lock-2026-08-25.md)                                                  | Completed; validation PASS                                 | 2026-08-25 |
+|   040 | academic           | [Semester Completeness Notification (CR-SEM-001)](academic/040-semester-completeness-notification-cr-sem-001-2026-08-25.md)           | Completed; validation PASS                                 | 2026-08-25 |
 
 ## Module folders
 
@@ -47,3 +48,4 @@
 - `batch/`: Spring Batch and CSV export planning/implementation notes.
 - `attendance/`: Attendance session foundation, exception attendance and GVCN-scope notes.
 - `scorebook/`: Scorebook lifecycle, assessment-column configuration and skill-weight foundation notes.
+- `academic/`: Academic structure, semester lifecycle, lock batch, completeness evaluation and notifications.

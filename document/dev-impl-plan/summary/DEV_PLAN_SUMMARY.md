@@ -62,3 +62,6 @@ Example:
 |   036 | BE             | [Scorebook Foundation](../be/scorebook/036-scorebook-foundation-2026-08-24.md)                                                         | Approved                                           | 2026-08-24 |
 |   037 | BE             | [Student Score Entry](../be/scorebook/037-student-score-entry-2026-08-24.md)                                                           | Approved                                           | 2026-08-24 |
 |   038 | BE             | [Score Change Request](../be/scorebook/038-score-change-request-2026-08-25.md)                                                         | Approved                                           | 2026-08-25 |
+|   039 | BE             | [Semester Lock Lifecycle, Service & Batch](../be/academic/039-semester-lock-2026-08-25.md)                                             | Approved                                           | 2026-08-25 |
+|   040 | BE             | [Semester Completeness Notification (CR-SEM-001)](../be/academic/040-semester-completeness-notification-cr-sem-001-2026-08-25.md)      | Approved                                           | 2026-08-25 |
+

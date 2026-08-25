@@ -9,15 +9,19 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ClassSubjectIncompleteDetail;
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResSemesterCompletenessReportDTO;
+import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResSemesterNotificationDTO;
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.SemesterCompletenessSummaryDTO;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.ClassSubject;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.ClassSubjectStatus;
+import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClass;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SemesterLockReport;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SemesterLockReportStatus;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Subject;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectType;
 import com.JavaTraining.BaiTap_RS.academic.repository.ClassSubjectRepository;
+import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SemesterLockReportRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectRepository;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.EnrollmentStatus;
@@ -43,6 +47,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @SuppressWarnings({
+        "PMD.GodClass",
+        "PMD.ExcessiveParameterList",
+        "PMD.AvoidInstantiatingObjectsInLoops",
         "PMD.ExcessiveImports",
         "PMD.AvoidCatchingGenericException",
         "PMD.CouplingBetweenObjects",
@@ -57,32 +64,38 @@ public class SemesterCompletenessService {
 
     private final ClassSubjectRepository classSubjectRepository;
     private final SubjectRepository subjectRepository;
+    private final SchoolClassRepository schoolClassRepository;
     private final ScorebookRepository scorebookRepository;
     private final AssessmentColumnRepository assessmentColumnRepository;
     private final StudentScoreRepository studentScoreRepository;
     private final StudentYearEnrollmentRepository studentYearEnrollmentRepository;
     private final ScoreChangeRequestRepository scoreChangeRequestRepository;
     private final SemesterLockReportRepository reportRepository;
+    private final SemesterNotificationDispatchService notificationDispatchService;
     private final ObjectMapper objectMapper;
 
     public SemesterCompletenessService(
             ClassSubjectRepository classSubjectRepository,
             SubjectRepository subjectRepository,
+            SchoolClassRepository schoolClassRepository,
             ScorebookRepository scorebookRepository,
             AssessmentColumnRepository assessmentColumnRepository,
             StudentScoreRepository studentScoreRepository,
             StudentYearEnrollmentRepository studentYearEnrollmentRepository,
             ScoreChangeRequestRepository scoreChangeRequestRepository,
             SemesterLockReportRepository reportRepository,
+            SemesterNotificationDispatchService notificationDispatchService,
             ObjectMapper objectMapper) {
         this.classSubjectRepository = classSubjectRepository;
         this.subjectRepository = subjectRepository;
+        this.schoolClassRepository = schoolClassRepository;
         this.scorebookRepository = scorebookRepository;
         this.assessmentColumnRepository = assessmentColumnRepository;
         this.studentScoreRepository = studentScoreRepository;
         this.studentYearEnrollmentRepository = studentYearEnrollmentRepository;
         this.scoreChangeRequestRepository = scoreChangeRequestRepository;
         this.reportRepository = reportRepository;
+        this.notificationDispatchService = notificationDispatchService;
         this.objectMapper = objectMapper;
     }
 
@@ -211,6 +224,110 @@ public class SemesterCompletenessService {
     }
 
     @Transactional(readOnly = true)
+    public List<ClassSubjectIncompleteDetail> evaluateIncompleteClassSubjectDetails(Long semesterId) {
+        List<ClassSubject> classSubjects = classSubjectRepository.findAllBySemesterIdAndStatus(
+                semesterId, ClassSubjectStatus.ACTIVE);
+        List<ClassSubjectIncompleteDetail> result = new ArrayList<>();
+
+        for (ClassSubject classSubject : classSubjects) {
+            List<String> issues = new ArrayList<>();
+            String className = schoolClassRepository.findById(classSubject.getClassId())
+                    .map(SchoolClass::getClassName)
+                    .orElse("Lớp " + classSubject.getClassId());
+            String subjectName = subjectRepository.findById(classSubject.getSubjectId())
+                    .map(Subject::getName)
+                    .orElse("Môn " + classSubject.getSubjectId());
+
+            Optional<Scorebook> scorebookOpt = scorebookRepository.findByClassSubjectId(classSubject.getId());
+            if (scorebookOpt.isEmpty() || scorebookOpt.get().getStatus() != ScorebookStatus.PUBLISHED) {
+                issues.add(String.format("Sổ điểm môn %s lớp %s chưa được công bố", subjectName, className));
+            }
+
+            if (scorebookOpt.isPresent()) {
+                Scorebook scorebook = scorebookOpt.get();
+                List<AssessmentColumn> columns = assessmentColumnRepository
+                        .findAllByScorebookIdOrderByAssessmentTypeAscColumnNoAsc(scorebook.getId())
+                        .stream()
+                        .filter(col -> col.getStatus() == AssessmentColumnStatus.ACTIVE)
+                        .toList();
+
+                long ktdkCount = columns.stream()
+                        .filter(col -> col.getAssessmentType() == AssessmentType.KTDK)
+                        .count();
+                if (ktdkCount == 0) {
+                    issues.add(String.format("Môn %s lớp %s chưa có cấu hình cột KTĐK", subjectName, className));
+                }
+
+                long ktckCount = columns.stream()
+                        .filter(col -> col.getAssessmentType() == AssessmentType.KTCK)
+                        .count();
+                if (ktckCount != 1) {
+                    issues.add(String.format("Môn %s lớp %s không có đúng một cột KTCK", subjectName, className));
+                }
+
+                Subject subject = subjectRepository.findById(classSubject.getSubjectId()).orElse(null);
+                if (subject != null && subject.getSubjectType() == SubjectType.SKILL && columns.size() != 3) {
+                    issues.add(String.format("Môn kỹ năng %s lớp %s thiếu đủ ba cột đánh giá", subjectName, className));
+                }
+
+                List<StudentYearEnrollment> enrollments = studentYearEnrollmentRepository
+                        .findByCurrentClassIdAndStatusOrderByStudentIdAsc(
+                                classSubject.getClassId(), EnrollmentStatus.ACTIVE);
+
+                List<Long> columnIds = columns.stream().map(AssessmentColumn::getId).toList();
+                List<StudentScore> scores = columnIds.isEmpty()
+                        ? Collections.emptyList()
+                        : studentScoreRepository.findAllByAssessmentColumnIdIn(columnIds);
+
+                Map<Long, List<StudentScore>> scoresByStudent = scores.stream()
+                        .collect(Collectors.groupingBy(StudentScore::getStudentId));
+
+                for (StudentYearEnrollment enrollment : enrollments) {
+                    Long studentId = enrollment.getStudentId();
+                    List<StudentScore> studentScores = scoresByStudent.getOrDefault(studentId, Collections.emptyList());
+
+                    if (studentScores.isEmpty() && !columns.isEmpty()) {
+                        issues.add(String.format("Học sinh ID %d chưa có dữ liệu điểm môn %s", studentId, subjectName));
+                    } else {
+                        Set<Long> scoredColumnIds = studentScores.stream()
+                                .filter(s -> s.getScoreStatus() != null)
+                                .map(StudentScore::getAssessmentColumnId)
+                                .collect(Collectors.toSet());
+
+                        for (AssessmentColumn col : columns) {
+                            if (col.isRequired() && !scoredColumnIds.contains(col.getId())) {
+                                issues.add(String.format("Học sinh ID %d chưa nhập điểm cột %s môn %s",
+                                        studentId, col.getColumnName(), subjectName));
+                            }
+                        }
+                    }
+                }
+
+                if (!columnIds.isEmpty()) {
+                    long pendingReqs = scoreChangeRequestRepository
+                            .countByAssessmentColumnIdInAndStatus(columnIds, ScoreChangeRequestStatus.PENDING);
+                    if (pendingReqs > 0) {
+                        issues.add(String.format("Có %d yêu cầu sửa điểm đang PENDING môn %s lớp %s",
+                                pendingReqs, subjectName, className));
+                    }
+                }
+            }
+
+            if (!issues.isEmpty()) {
+                result.add(new ClassSubjectIncompleteDetail(
+                        classSubject.getId(),
+                        classSubject.getClassId(),
+                        classSubject.getSubjectId(),
+                        className,
+                        subjectName,
+                        issues));
+            }
+        }
+
+        return result;
+    }
+
+    @Transactional(readOnly = true)
     public ResSemesterCompletenessReportDTO evaluateCompletenessPreview(Long semesterId, String checkpointCode) {
         SemesterCompletenessSummaryDTO summary = evaluateCompleteness(semesterId);
         SemesterLockReportStatus reportStatus = summary.complete()
@@ -259,7 +376,27 @@ public class SemesterCompletenessService {
                     payload,
                     null,
                     correlationId);
-            return reportRepository.save(report);
+            SemesterLockReport savedReport = reportRepository.save(report);
+
+            if (reportStatus == SemesterLockReportStatus.INCOMPLETE && notificationDispatchService != null) {
+                try {
+                    List<ClassSubjectIncompleteDetail> incompleteDetails = evaluateIncompleteClassSubjectDetails(
+                            semesterId);
+                    notificationDispatchService.dispatchNotifications(
+                            semesterId,
+                            checkpointCode,
+                            savedReport.getId(),
+                            summary,
+                            incompleteDetails);
+                } catch (Exception notifException) {
+                    if (LOGGER.isErrorEnabled()) {
+                        LOGGER.error("Lỗi khi dispatch completeness notification cho semester {}: {}",
+                                semesterId, notifException.getMessage());
+                    }
+                }
+            }
+
+            return savedReport;
         } catch (Exception exception) {
             if (LOGGER.isErrorEnabled()) {
                 LOGGER.error("Lỗi khi đánh giá completeness cho semester {}: {}", semesterId, exception.getMessage());
@@ -276,6 +413,37 @@ public class SemesterCompletenessService {
                     correlationId);
             return reportRepository.save(failedReport);
         }
+    }
+
+    @Transactional
+    public List<ResSemesterNotificationDTO> dispatchCheckpointNotifications(Long semesterId, String checkpointCode) {
+        SemesterCompletenessSummaryDTO summary = evaluateCompleteness(semesterId);
+        List<ClassSubjectIncompleteDetail> incompleteDetails = evaluateIncompleteClassSubjectDetails(semesterId);
+        if (notificationDispatchService != null) {
+            return notificationDispatchService.dispatchNotifications(
+                    semesterId,
+                    checkpointCode != null ? checkpointCode : "manual",
+                    null,
+                    summary,
+                    incompleteDetails);
+        }
+        return Collections.emptyList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ResSemesterNotificationDTO> getNotificationsForSemester(Long semesterId) {
+        if (notificationDispatchService != null) {
+            return notificationDispatchService.getNotificationsForSemester(semesterId);
+        }
+        return Collections.emptyList();
+    }
+
+    @Transactional
+    public List<ResSemesterNotificationDTO> retryFailedNotifications(Long semesterId) {
+        if (notificationDispatchService != null) {
+            return notificationDispatchService.retryFailedNotifications(semesterId);
+        }
+        return Collections.emptyList();
     }
 
     @Transactional(readOnly = true)

@@ -2,12 +2,12 @@
 
 ## 1. Metadata
 
-- Status: `Draft - awaiting approval`
+- Status: `Approved` (2026-08-25)
 - Application-document version: `v2`
 - Related module: Academic Structure / Semester
 - Related requirements: `FR-SEM-005`, `FR-SEM-006`, `FR-SEM-007`, `FR-SEM-008`,
   `BR-SEM-004`, `BR-SEM-005`, `BR-SEM-006`, `BR-SEM-007`, `BR-SEM-008`, `BR-SEM-009`
-- Related Developer Plan: `document/dev-impl-plan/be/academic/027-academic-subject-teacher-assignment-2026-08-21.md`
+- Related Developer Plan: `document/dev-impl-plan/be/academic/040-semester-completeness-notification-cr-sem-001-2026-08-25.md` (and historical Plan 027)
 - Scope owner: Academic Structure and future Assessment/Scoring notification flow
 
 ## 2. Reason for change

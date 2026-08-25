@@ -8,26 +8,26 @@ Khối là metadata dùng chung, độc lập với năm học. Lớp học tham
 
 ### 4.2. Dữ liệu
 
-| Trường | Bắt buộc | Mô tả |
-|---|---:|---|
-| `gradeId` | Có | Khóa chính |
-| `gradeCode` | Có | Mã duy nhất, ví dụ `GRADE_6` |
-| `gradeName` | Có | Tên hiển thị, ví dụ `Khối 6` |
-| `gradeLevel` | Có | Giá trị 6, 7, 8 hoặc 9 |
-| `displayOrder` | Có | Thứ tự hiển thị |
-| `nextGradeId` | Không | Khối tiếp theo |
-| `active` | Có | Có được sử dụng cho dữ liệu mới không |
-| `description` | Không | Mô tả bổ sung |
-| Audit metadata | Có | Người và thời gian tạo/cập nhật |
+| Trường         | Bắt buộc | Mô tả                                 |
+| -------------- | -------: | ------------------------------------- |
+| `gradeId`      |       Có | Khóa chính                            |
+| `gradeCode`    |       Có | Mã duy nhất, ví dụ `GRADE_6`          |
+| `gradeName`    |       Có | Tên hiển thị, ví dụ `Khối 6`          |
+| `gradeLevel`   |       Có | Giá trị 6, 7, 8 hoặc 9                |
+| `displayOrder` |       Có | Thứ tự hiển thị                       |
+| `nextGradeId`  |    Không | Khối tiếp theo                        |
+| `active`       |       Có | Có được sử dụng cho dữ liệu mới không |
+| `description`  |    Không | Mô tả bổ sung                         |
+| Audit metadata |       Có | Người và thời gian tạo/cập nhật       |
 
 Dữ liệu mặc định:
 
-| Khối | Khối tiếp theo |
-|---|---|
-| Khối 6 | Khối 7 |
-| Khối 7 | Khối 8 |
-| Khối 8 | Khối 9 |
-| Khối 9 | Không có |
+| Khối   | Khối tiếp theo |
+| ------ | -------------- |
+| Khối 6 | Khối 7         |
+| Khối 7 | Khối 8         |
+| Khối 8 | Khối 9         |
+| Khối 9 | Không có       |
 
 ### 4.3. Functional requirements
 
@@ -107,9 +107,9 @@ Dữ liệu mặc định:
   2. Đã qua 45 ngày kể từ ngày kết thúc học kỳ.
 - `BR-SEM-005`: Tác vụ tự động khóa phải chạy nền theo lịch.
 - `BR-SEM-006`: Khi tự động khóa, hệ thống tạo báo cáo dữ liệu điểm chưa hoàn chỉnh.
-- `BR-SEM-006` được mở rộng bởi `CR-SEM-001`. Các business rule phát sinh từ rule gốc
-  dùng mã `BR-SEM-006-01`, `BR-SEM-006-02`, ...; phần code email và email configuration
-  được để lại cho Implementation Note 27.1, không thuộc Plan 027.
+- `BR-SEM-006` được mở rộng bởi `CR-SEM-001` (đã phê duyệt). Các business rule phát sinh từ rule gốc
+  dùng mã `BR-SEM-006-01` đến `BR-SEM-006-08`, quy định việc đánh giá 11 mốc checkpoint, tạo báo cáo
+  và gửi thông báo (email/in-app) cho Giáo vụ, GVBM, GVCN (triển khai trong Plan 040).
 - `BR-SEM-007`: Dữ liệu chưa hoàn chỉnh không ngăn việc khóa theo hai điều kiện trên.
 - `BR-SEM-008`: Học kỳ đã khóa không cho giáo viên sửa điểm trực tiếp.
 - `BR-SEM-009`: Mở lại học kỳ phải lưu người thực hiện, thời gian và lý do.
