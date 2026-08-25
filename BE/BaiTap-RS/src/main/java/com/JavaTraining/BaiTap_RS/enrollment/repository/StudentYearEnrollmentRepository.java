@@ -14,46 +14,50 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StudentYearEnrollmentRepository extends JpaRepository<StudentYearEnrollment, Long> {
 
-    boolean existsByStudentIdAndAcademicYearId(Long studentId, Long academicYearId);
+        boolean existsByStudentIdAndAcademicYearId(Long studentId, Long academicYearId);
 
-    boolean existsByCurrentClassId(Long classId);
+        boolean existsByCurrentClassId(Long classId);
 
-    boolean existsByAcademicYearId(Long academicYearId);
+        boolean existsByAcademicYearId(Long academicYearId);
 
-    Optional<StudentYearEnrollment> findByStudentIdAndAcademicYearId(Long studentId, Long academicYearId);
+        Optional<StudentYearEnrollment> findByStudentIdAndAcademicYearId(Long studentId, Long academicYearId);
 
-    List<StudentYearEnrollment> findByCurrentClassIdAndStatusOrderByStudentIdAsc(
-            Long classId,
-            EnrollmentStatus status);
+        List<StudentYearEnrollment> findByCurrentClassIdAndStatusOrderByStudentIdAsc(
+                        Long classId,
+                        EnrollmentStatus status);
 
-    List<StudentYearEnrollment> findByStudentIdOrderByEnrolledAtAsc(Long studentId);
+        List<StudentYearEnrollment> findByAcademicYearIdAndStatusOrderByStudentIdAsc(
+                        Long academicYearId,
+                        EnrollmentStatus status);
 
-    @Query("""
-            select count(e.id)
-            from StudentYearEnrollment e, SchoolClass c
-            where e.currentClassId = c.id
-              and e.academicYearId = :academicYearId
-              and c.gradeLevelId = :gradeLevelId
-              and e.status = :status
-            """)
-    long countByAcademicYearAndGradeAndStatus(
-            @Param("academicYearId") Long academicYearId,
-            @Param("gradeLevelId") Long gradeLevelId,
-            @Param("status") EnrollmentStatus status);
+        List<StudentYearEnrollment> findByStudentIdOrderByEnrolledAtAsc(Long studentId);
 
-    long countByCurrentClassIdAndStatus(Long classId, EnrollmentStatus status);
+        @Query("""
+                        select count(e.id)
+                        from StudentYearEnrollment e, SchoolClass c
+                        where e.currentClassId = c.id
+                          and e.academicYearId = :academicYearId
+                          and c.gradeLevelId = :gradeLevelId
+                          and e.status = :status
+                        """)
+        long countByAcademicYearAndGradeAndStatus(
+                        @Param("academicYearId") Long academicYearId,
+                        @Param("gradeLevelId") Long gradeLevelId,
+                        @Param("status") EnrollmentStatus status);
 
-    @Query("""
-            select s
-            from Student s
-            where s.status = com.JavaTraining.BaiTap_RS.student.domain.entity.StudentStatus.ACTIVE
-              and not exists (
-                  select e.id
-                  from StudentYearEnrollment e
-                  where e.studentId = s.id
-                    and e.academicYearId = :academicYearId
-              )
-            order by s.studentCode
-            """)
-    List<Student> findUnassignedStudents(@Param("academicYearId") Long academicYearId);
+        long countByCurrentClassIdAndStatus(Long classId, EnrollmentStatus status);
+
+        @Query("""
+                        select s
+                        from Student s
+                        where s.status = com.JavaTraining.BaiTap_RS.student.domain.entity.StudentStatus.ACTIVE
+                          and not exists (
+                              select e.id
+                              from StudentYearEnrollment e
+                              where e.studentId = s.id
+                                and e.academicYearId = :academicYearId
+                          )
+                        order by s.studentCode
+                        """)
+        List<Student> findUnassignedStudents(@Param("academicYearId") Long academicYearId);
 }

@@ -1,5 +1,6 @@
 package com.JavaTraining.BaiTap_RS.scorebook.repository;
 
+import java.util.Collection;
 import java.util.Optional;
 
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.ScoreChangeRequest;
@@ -20,6 +21,8 @@ public interface ScoreChangeRequestRepository
 
     boolean existsByAssessmentColumnIdAndStudentIdAndStatus(
             Long assessmentColumnId, Long studentId, ScoreChangeRequestStatus status);
+
+    long countByAssessmentColumnIdInAndStatus(Collection<Long> columnIds, ScoreChangeRequestStatus status);
 
     Page<ScoreChangeRequest> findByRequestedBy(Long requestedBy, Pageable pageable);
 

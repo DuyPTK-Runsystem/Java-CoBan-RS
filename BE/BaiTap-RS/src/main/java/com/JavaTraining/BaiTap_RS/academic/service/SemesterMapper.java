@@ -23,7 +23,8 @@ public class SemesterMapper {
                 semester.getStatus(),
                 semester.getLockedAt(),
                 semester.getLockedBy(),
-                semester.getLockReason());
+                semester.getLockReason(),
+                semester.getReopenUntil());
     }
 
     public Map<String, Object> toAuditData(Semester semester) {
@@ -35,6 +36,7 @@ public class SemesterMapper {
         data.put("lockedAt", semester.getLockedAt());
         data.put("lockedBy", semester.getLockedBy());
         data.put("lockReason", semester.getLockReason());
+        data.put("reopenUntil", semester.getReopenUntil());
         return data;
     }
 }

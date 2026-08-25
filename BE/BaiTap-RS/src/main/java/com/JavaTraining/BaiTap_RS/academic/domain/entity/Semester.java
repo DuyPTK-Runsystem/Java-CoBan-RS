@@ -22,11 +22,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @Entity
-@Table(
-        name = "semester",
-        uniqueConstraints = @UniqueConstraint(
-                name = "uk_semester_year_code",
-                columnNames = {"academic_year_id", "code"}))
+@Table(name = "semester", uniqueConstraints = @UniqueConstraint(name = "uk_semester_year_code", columnNames = {
+        "academic_year_id", "code" }))
 public class Semester {
 
     @Id
@@ -67,6 +64,9 @@ public class Semester {
 
     @Column(name = "lock_reason", length = 500)
     private String lockReason;
+
+    @Column(name = "reopen_until")
+    private LocalDateTime reopenUntil;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

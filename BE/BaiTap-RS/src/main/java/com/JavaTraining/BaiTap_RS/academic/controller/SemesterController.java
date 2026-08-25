@@ -7,7 +7,9 @@ import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.requests.ReqCreateSemeste
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.requests.ReqReopenSemesterDTO;
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.requests.ReqUpdateSemesterDTO;
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResSemesterCompletenessDecisionDTO;
+import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResSemesterCompletenessReportDTO;
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResSemesterDTO;
+import com.JavaTraining.BaiTap_RS.academic.service.SemesterCompletenessService;
 import com.JavaTraining.BaiTap_RS.academic.service.SemesterService;
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
 import jakarta.validation.Valid;
@@ -35,9 +37,13 @@ public class SemesterController {
     private static final String SEMESTER_ID = "semesterId";
 
     private final SemesterService semesterService;
+    private final SemesterCompletenessService completenessService;
 
-    public SemesterController(SemesterService semesterService) {
+    public SemesterController(
+            SemesterService semesterService,
+            SemesterCompletenessService completenessService) {
         this.semesterService = semesterService;
+        this.completenessService = completenessService;
     }
 
     @GetMapping
@@ -85,6 +91,15 @@ public class SemesterController {
             @PathVariable(SEMESTER_ID) @Positive Long semesterId,
             @Valid @RequestBody ReqReopenSemesterDTO request) {
         return semesterService.reopenSemester(semesterId, request);
+    }
+
+    @GetMapping("/{semesterId}/completeness-report")
+    @ApiMessage("Xem báo cáo mức độ hoàn thành nhập điểm")
+    @PreAuthorize(OFFICE_ROLES)
+    public ResSemesterCompletenessReportDTO getCompletenessReport(
+            @PathVariable(SEMESTER_ID) @Positive Long semesterId,
+            @RequestParam(name = "checkpointCode", required = false) String checkpointCode) {
+        return completenessService.getLatestReport(semesterId, checkpointCode);
     }
 
     @GetMapping("/{semesterId}/completeness-decision")

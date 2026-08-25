@@ -17,5 +17,6 @@ public record ResSemesterDTO(
         SemesterStatus status,
         LocalDateTime lockedAt,
         Long lockedBy,
-        String lockReason) {
+        String lockReason,
+        LocalDateTime reopenUntil) {
 }

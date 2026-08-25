@@ -2,10 +2,12 @@ package com.JavaTraining.BaiTap_RS.academic.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.requests.ReqCreateClassSubjectDTO;
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResSemesterCompletenessDecisionDTO;
+import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.SemesterCompletenessSummaryDTO;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.ApplicationScope;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.ClassSubjectStatus;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClass;
@@ -32,6 +34,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.ExcessiveImports")
 class Plan027AcademicServiceTest {
 
     @Mock
@@ -53,7 +56,10 @@ class Plan027AcademicServiceTest {
     private AcademicYearRepository academicYearRepository;
 
     @Mock
-    private AcademicCatalogAuditService auditService;
+    private SemesterLockService semesterLockService;
+
+    @Mock
+    private SemesterCompletenessService completenessService;
 
     @Test
     void createClassSubjectRejectsMissingApplicability() {
@@ -88,14 +94,18 @@ class Plan027AcademicServiceTest {
                 semesterRepository,
                 academicYearRepository,
                 new SemesterMapper(),
-                auditService);
+                semesterLockService,
+                completenessService);
         Semester semester = semester();
         semester.setAutomaticLockAt(LocalDateTime.of(2027, 2, 14, 0, 0));
         Mockito.when(semesterRepository.findById(80L)).thenReturn(Optional.of(semester));
+        Mockito.when(completenessService.evaluateCompleteness(80L))
+                .thenReturn(new SemesterCompletenessSummaryDTO(
+                        false, 1, 0, 0, 0, 0, 0, 0, List.of("Thiếu cột")));
 
         ResSemesterCompletenessDecisionDTO checkpoint = service.evaluateCompletenessCheckpoint(
                 80L,
-                LocalDate.of(2027, 2, 9));
+                LocalDate.of(2027, 2, 7));
 
         Assertions.assertEquals("NEEDS_NOTIFICATION", checkpoint.decision(), "listed checkpoint should notify");
     }
@@ -106,7 +116,8 @@ class Plan027AcademicServiceTest {
                 semesterRepository,
                 academicYearRepository,
                 new SemesterMapper(),
-                auditService);
+                semesterLockService,
+                completenessService);
         Semester semester = semester();
         semester.setAutomaticLockAt(LocalDateTime.of(2027, 2, 14, 0, 0));
         Mockito.when(semesterRepository.findById(80L)).thenReturn(Optional.of(semester));

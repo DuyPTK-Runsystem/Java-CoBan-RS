@@ -1,9 +1,8 @@
 package com.JavaTraining.BaiTap_RS.academic.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.requests.ReqCreateSemesterDTO;
@@ -11,7 +10,9 @@ import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.requests.ReqReopenSemeste
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.requests.ReqUpdateSemesterDTO;
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResSemesterCompletenessDecisionDTO;
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResSemesterDTO;
+import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.SemesterCompletenessSummaryDTO;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.AcademicYear;
+import com.JavaTraining.BaiTap_RS.academic.domain.entity.LockSource;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Semester;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SemesterStatus;
 import com.JavaTraining.BaiTap_RS.academic.repository.AcademicYearRepository;
@@ -23,25 +24,29 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.TooManyMethods")
 public class SemesterService {
 
     private static final Set<Integer> NOTIFICATION_OFFSETS = Set.of(
-            -20, -10, -5, -3, -2, -1, 0, 1, 3, 5, 7, 14);
+            -45, -30, -14, -7, -3, -1, 0, 1, 3, 7, 14);
 
     private final SemesterRepository semesterRepository;
     private final AcademicYearRepository academicYearRepository;
     private final SemesterMapper semesterMapper;
-    private final AcademicCatalogAuditService auditService;
+    private final SemesterLockService semesterLockService;
+    private final SemesterCompletenessService completenessService;
 
     public SemesterService(
             SemesterRepository semesterRepository,
             AcademicYearRepository academicYearRepository,
             SemesterMapper semesterMapper,
-            AcademicCatalogAuditService auditService) {
+            SemesterLockService semesterLockService,
+            SemesterCompletenessService completenessService) {
         this.semesterRepository = semesterRepository;
         this.academicYearRepository = academicYearRepository;
         this.semesterMapper = semesterMapper;
-        this.auditService = auditService;
+        this.semesterLockService = semesterLockService;
+        this.completenessService = completenessService;
     }
 
     @Transactional(readOnly = true)
@@ -116,39 +121,21 @@ public class SemesterService {
 
     @Transactional
     public ResSemesterDTO lockSemester(Long id) {
-        Semester semester = findSemester(id);
-        if (semester.getStatus() != SemesterStatus.ACTIVE) {
-            throw new AppException(HttpStatus.CONFLICT, "Chỉ học kỳ ACTIVE mới được khóa");
-        }
-        Map<String, Object> beforeData = semesterMapper.toAuditData(semester);
-        semester.setStatus(SemesterStatus.LOCKED);
-        semester.setLockedAt(LocalDateTime.now());
-        semester.setLockedBy(AuditContext.currentUserId());
-        auditService.writeAudit(
-                "SEMESTER_LOCKED",
-                "semester",
-                semester.getId(),
-                beforeData,
-                semesterMapper.toAuditData(semester));
-        return semesterMapper.toResponse(semester);
+        return semesterLockService.lockSemester(
+                id,
+                LockSource.MANUAL,
+                AuditContext.currentUserId(),
+                null,
+                AuditContext.requestId());
     }
 
     @Transactional
     public ResSemesterDTO reopenSemester(Long id, ReqReopenSemesterDTO request) {
-        Semester semester = findSemester(id);
-        if (semester.getStatus() != SemesterStatus.LOCKED) {
-            throw new AppException(HttpStatus.CONFLICT, "Chỉ học kỳ LOCKED mới được mở lại");
-        }
-        Map<String, Object> beforeData = semesterMapper.toAuditData(semester);
-        semester.setStatus(SemesterStatus.ACTIVE);
-        semester.setLockReason(request.reason());
-        auditService.writeAudit(
-                "SEMESTER_REOPENED",
-                "semester",
-                semester.getId(),
-                beforeData,
-                semesterMapper.toAuditData(semester));
-        return semesterMapper.toResponse(semester);
+        return semesterLockService.reopenSemester(
+                id,
+                request,
+                AuditContext.currentUserId(),
+                AuditContext.requestId());
     }
 
     @Transactional(readOnly = true)
@@ -156,19 +143,39 @@ public class SemesterService {
             Long semesterId,
             LocalDate checkpointDate) {
         Semester semester = findSemester(semesterId);
-        if (semester.getAutomaticLockAt() == null) {
+        LocalDate lockDate = calculateEffectiveLockDate(semester);
+
+        int offset = (int) ChronoUnit.DAYS.between(lockDate, checkpointDate);
+        String checkpointCode;
+        if (offset == 0) {
+            checkpointCode = "t";
+        } else if (offset > 0) {
+            checkpointCode = "t+" + offset + "d";
+        } else {
+            checkpointCode = "t" + offset + "d";
+        }
+
+        if (!NOTIFICATION_OFFSETS.contains(offset)) {
             return new ResSemesterCompletenessDecisionDTO(
                     semesterId,
                     checkpointDate,
-                    "NO_AUTOMATIC_LOCK",
+                    checkpointCode,
                     "NO_NOTIFICATION");
         }
-        int offset = (int) java.time.temporal.ChronoUnit.DAYS.between(
-                semester.getAutomaticLockAt().toLocalDate(),
-                checkpointDate);
-        String decision = NOTIFICATION_OFFSETS.contains(offset) ? "NEEDS_NOTIFICATION" : "NO_NOTIFICATION";
-        String checkpointCode = offset > 0 ? "t+" + offset + "d" : "t" + (offset == 0 ? "" : offset + "d");
+
+        SemesterCompletenessSummaryDTO summary = completenessService.evaluateCompleteness(semesterId);
+        String decision = summary.complete() ? "NO_NOTIFICATION" : "NEEDS_NOTIFICATION";
         return new ResSemesterCompletenessDecisionDTO(semesterId, checkpointDate, checkpointCode, decision);
+    }
+
+    public LocalDate calculateEffectiveLockDate(Semester semester) {
+        if (semester.getReopenUntil() != null) {
+            return semester.getReopenUntil().toLocalDate();
+        }
+        if (semester.getAutomaticLockAt() != null) {
+            return semester.getAutomaticLockAt().toLocalDate();
+        }
+        return semester.getEndDate().plusDays(45);
     }
 
     private Semester findSemester(Long id) {
@@ -189,5 +196,4 @@ public class SemesterService {
             throw new AppException(HttpStatus.CONFLICT, "Học kỳ phải nằm trong thời gian năm học");
         }
     }
-
 }
