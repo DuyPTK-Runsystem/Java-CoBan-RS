@@ -43,6 +43,7 @@
 |   042 | scorebook          | [Subject Calculation Engine & Worker Lifecycle](scorebook/042-subject-calculation-engine-and-worker-lifecycle-2026-08-25.md)          | Completed; validation PASS                                 | 2026-08-25 |
 |   043 | student            | [Create Student With Student Account](student/043-student-create-with-account-2026-08-26.md)                                          | Completed; validation PASS                                 | 2026-08-26 |
 |   044 | scorebook          | [Term and Annual Transcript Aggregation](scorebook/044-transcript-aggregation-2026-08-26.md)                                          | Completed; validation PASS                                 | 2026-08-26 |
+|   045 | scorebook          | [Retake Foundation and Calculation Integration](scorebook/045-retake-foundation-and-calculation-integration-2026-08-26.md)            | Completed; validation PASS                                 | 2026-08-26 |
 
 ## Module folders
 

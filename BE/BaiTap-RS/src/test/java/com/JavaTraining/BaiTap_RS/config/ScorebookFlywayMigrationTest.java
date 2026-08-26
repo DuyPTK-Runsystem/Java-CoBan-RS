@@ -19,7 +19,8 @@ class ScorebookFlywayMigrationTest {
         JdbcDataSource dataSource = dataSource("flyway-scorebook-tables");
         migrate(dataSource);
 
-        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement();
+        try (Connection connection = dataSource.getConnection();
+                Statement statement = connection.createStatement();
                 ResultSet resultSet = statement.executeQuery("""
                         SELECT COUNT(*)
                         FROM INFORMATION_SCHEMA.TABLES
@@ -39,7 +40,8 @@ class ScorebookFlywayMigrationTest {
         JdbcDataSource dataSource = dataSource("flyway-scorebook-constraints");
         migrate(dataSource);
 
-        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement();
+        try (Connection connection = dataSource.getConnection();
+                Statement statement = connection.createStatement();
                 ResultSet resultSet = statement.executeQuery("""
                         SELECT COUNT(*)
                         FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
@@ -68,7 +70,8 @@ class ScorebookFlywayMigrationTest {
         JdbcDataSource dataSource = dataSource("flyway-transcript-result-schema");
         migrate(dataSource);
 
-        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement();
+        try (Connection connection = dataSource.getConnection();
+                Statement statement = connection.createStatement();
                 ResultSet resultSet = statement.executeQuery("""
                         SELECT COUNT(*)
                         FROM INFORMATION_SCHEMA.COLUMNS
@@ -81,7 +84,8 @@ class ScorebookFlywayMigrationTest {
             Assertions.assertEquals(5, resultSet.getInt(1), "V16 should add all transcript result columns");
         }
 
-        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement();
+        try (Connection connection = dataSource.getConnection();
+                Statement statement = connection.createStatement();
                 ResultSet resultSet = statement.executeQuery("""
                         SELECT COUNT(*)
                         FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
@@ -106,7 +110,8 @@ class ScorebookFlywayMigrationTest {
                     "V16 should create all result constraints and foreign keys");
         }
 
-        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement();
+        try (Connection connection = dataSource.getConnection();
+                Statement statement = connection.createStatement();
                 ResultSet resultSet = statement.executeQuery("""
                         SELECT COUNT(*)
                         FROM INFORMATION_SCHEMA.INDEXES
@@ -118,6 +123,56 @@ class ScorebookFlywayMigrationTest {
                         """)) {
             moveToFirstRow(resultSet, "transcript result index query should return a row");
             Assertions.assertEquals(4, resultSet.getInt(1), "V16 should create all result lookup indexes");
+        }
+    }
+
+    @Test
+    void createsRetakeExamTableConstraintsAndIndexes() throws Exception {
+        JdbcDataSource dataSource = dataSource("flyway-retake-exam-schema");
+        migrate(dataSource);
+
+        try (Connection connection = dataSource.getConnection();
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery("""
+                        SELECT COUNT(*)
+                        FROM INFORMATION_SCHEMA.TABLES
+                        WHERE TABLE_NAME = 'retake_exam'
+                        """)) {
+            moveToFirstRow(resultSet, "retake_exam table query should return a row");
+            Assertions.assertEquals(1, resultSet.getInt(1), "V17 should create retake_exam table");
+        }
+
+        try (Connection connection = dataSource.getConnection();
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery("""
+                        SELECT COUNT(*)
+                        FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+                        WHERE CONSTRAINT_NAME IN (
+                            'uk_retake_student_year_subject',
+                            'ck_retake_exam_status',
+                            'ck_retake_pre_score',
+                            'ck_retake_score',
+                            'fk_retake_exam_student',
+                            'fk_retake_exam_academic_year',
+                            'fk_retake_exam_subject',
+                            'fk_subject_annual_result_retake')
+                        """)) {
+            moveToFirstRow(resultSet, "retake_exam constraint query should return a row");
+            Assertions.assertEquals(8, resultSet.getInt(1),
+                    "V17 should create all retake constraints and foreign keys");
+        }
+
+        try (Connection connection = dataSource.getConnection();
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery("""
+                        SELECT COUNT(*)
+                        FROM INFORMATION_SCHEMA.INDEXES
+                        WHERE INDEX_NAME IN (
+                            'idx_retake_exam_student_year',
+                            'idx_retake_exam_status')
+                        """)) {
+            moveToFirstRow(resultSet, "retake_exam index query should return a row");
+            Assertions.assertEquals(2, resultSet.getInt(1), "V17 should create retake indexes");
         }
     }
 

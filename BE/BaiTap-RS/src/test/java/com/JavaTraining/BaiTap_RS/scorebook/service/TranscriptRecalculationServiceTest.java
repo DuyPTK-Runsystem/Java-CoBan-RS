@@ -25,6 +25,8 @@ import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.AssessmentColumnStatus
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.AssessmentType;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.CalculationResultSource;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.CalculationStatus;
+import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.RetakeExam;
+import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.RetakeExamStatus;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.ScoreStatus;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.Scorebook;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.ScorebookStatus;
@@ -35,6 +37,7 @@ import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentSubjectAnnualRe
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentSubjectTermResult;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentTermTranscript;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.AssessmentColumnRepository;
+import com.JavaTraining.BaiTap_RS.scorebook.repository.RetakeExamRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.ScorebookRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.SkillWeightConfigRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.StudentAnnualTranscriptRepository;
@@ -94,6 +97,8 @@ class TranscriptRecalculationServiceTest {
         private StudentSubjectTermResultRepository termResultRepository;
         @Mock
         private StudentSubjectAnnualResultRepository annualResultRepository;
+        @Mock
+        private RetakeExamRepository retakeExamRepository;
 
         private TranscriptRecalculationService recalculationService;
 
@@ -112,7 +117,8 @@ class TranscriptRecalculationServiceTest {
                                 annualTranscriptRepository,
                                 termTranscriptRepository,
                                 termResultRepository,
-                                annualResultRepository);
+                                annualResultRepository,
+                                retakeExamRepository);
         }
 
         @Test
@@ -217,6 +223,56 @@ class TranscriptRecalculationServiceTest {
                                 RuntimeException.class,
                                 () -> recalculationService.recalculate(STUDENT_ID, ACADEMIC_YEAR_ID, 1L, 1L));
                 Mockito.verifyNoInteractions(annualTranscriptRepository, termTranscriptRepository);
+        }
+
+        @Test
+        void replacesOfficialScoreAndRecalculatesFinalDtbcnWhenRetakeIsScored() {
+                StudentAnnualTranscript annual = stubCalculationContext(3L);
+                RetakeExam retake = new RetakeExam(
+                                STUDENT_ID, ACADEMIC_YEAR_ID, SUBJECT_ID,
+                                new BigDecimal("7.7"), RetakeExamStatus.SCORED);
+                ReflectionTestUtils.setField(retake, "id", 999L);
+                retake.setRetakeScore(new BigDecimal("8.5"));
+
+                Mockito.when(retakeExamRepository.findAllByStudentIdAndAcademicYearId(STUDENT_ID, ACADEMIC_YEAR_ID))
+                                .thenReturn(List.of(retake));
+
+                recalculationService.recalculate(STUDENT_ID, ACADEMIC_YEAR_ID, 3L, 900L);
+
+                Assertions.assertEquals(new BigDecimal("7.7"), annual.getRegularDtbcn());
+                Assertions.assertEquals(new BigDecimal("8.5"), annual.getFinalDtbcn());
+                Assertions.assertEquals(CalculationResultSource.RETAKE, annual.getResultSource());
+
+                StudentSubjectAnnualResult annualResult = savedAnnualResult();
+                Assertions.assertEquals(new BigDecimal("7.7"), annualResult.getRegularDtbmhCn());
+                Assertions.assertEquals(new BigDecimal("8.5"), annualResult.getOfficialDtbmhCn());
+                Assertions.assertEquals(999L, annualResult.getRetakeId());
+                Assertions.assertEquals(CalculationResultSource.RETAKE, annualResult.getCalculationSource());
+        }
+
+        @Test
+        void ignoresCancelledOrPlannedRetakeExams() {
+                StudentAnnualTranscript annual = stubCalculationContext(3L);
+                RetakeExam cancelledRetake = new RetakeExam(
+                                STUDENT_ID, ACADEMIC_YEAR_ID, SUBJECT_ID,
+                                new BigDecimal("7.7"), RetakeExamStatus.CANCELLED);
+                ReflectionTestUtils.setField(cancelledRetake, "id", 998L);
+                cancelledRetake.setRetakeScore(new BigDecimal("9.0"));
+
+                Mockito.when(retakeExamRepository.findAllByStudentIdAndAcademicYearId(STUDENT_ID, ACADEMIC_YEAR_ID))
+                                .thenReturn(List.of(cancelledRetake));
+
+                recalculationService.recalculate(STUDENT_ID, ACADEMIC_YEAR_ID, 3L, 900L);
+
+                Assertions.assertEquals(new BigDecimal("7.7"), annual.getRegularDtbcn());
+                Assertions.assertEquals(new BigDecimal("7.7"), annual.getFinalDtbcn());
+                Assertions.assertEquals(CalculationResultSource.REGULAR, annual.getResultSource());
+
+                StudentSubjectAnnualResult annualResult = savedAnnualResult();
+                Assertions.assertEquals(new BigDecimal("7.7"), annualResult.getRegularDtbmhCn());
+                Assertions.assertEquals(new BigDecimal("7.7"), annualResult.getOfficialDtbmhCn());
+                Assertions.assertNull(annualResult.getRetakeId());
+                Assertions.assertEquals(CalculationResultSource.REGULAR, annualResult.getCalculationSource());
         }
 
         private StudentAnnualTranscript stubCalculationContext(long sourceVersion) {

@@ -69,3 +69,4 @@ Example:
 | 042.1 | BE             | [Student Code Input Resolution & Display Across All Modules](../be/student/042.1-student-code-input-resolution-and-display-2026-08-25.md) | Approved                                           | 2026-08-25 |
 |   043 | BE             | [Create Student With Student Account](../be/student/043-student-create-with-account-2026-08-26.md)                                        | Approved                                           | 2026-08-26 |
 |   044 | BE             | [Term and Annual Transcript Aggregation](../be/scorebook/044-transcript-aggregation-2026-08-26.md)                                        | Approved                                           | 2026-08-26 |
+|   045 | BE             | [Retake Foundation and Calculation Integration](../be/scorebook/045-retake-foundation-and-calculation-integration-2026-08-26.md)          | Approved                                           | 2026-08-26 |

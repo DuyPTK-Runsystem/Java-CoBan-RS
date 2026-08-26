@@ -34,6 +34,7 @@
 | 042.1 | [Student Code Input Resolution & Display Across All Modules](student/042.1-student-code-input-resolution-and-display-2026-08-25.md) | Cho phép nhập studentCode bên cạnh studentId, chuẩn hóa StudentLookupService, hiển thị thông tin học sinh thân thiện và API code lookup | Approved | 2026-08-25 |
 |   043 | [Create Student With Student Account](student/043-student-create-with-account-2026-08-26.md)                                        | API v3 tạo Student kèm User, username/password mặc định và role STUDENT                                                                 | Approved | 2026-08-26 |
 |   044 | [Term and Annual Transcript Aggregation](scorebook/044-transcript-aggregation-2026-08-26.md)                                        | Tổng hợp Đtbmh/Đtbhk theo học kỳ và ĐtbmhCN/Đtbcn cả năm, loại trừ môn kỹ năng và bảo vệ version                                        | Approved | 2026-08-26 |
+|   045 | [Retake Foundation and Calculation Integration](scorebook/045-retake-foundation-and-calculation-integration-2026-08-26.md)          | Retake record, nhập/sửa điểm, authorization/audit, task-worker recalculation và nguồn REGULAR/RETAKE                                    | Approved | 2026-08-26 |
 
 ## Module folders
 

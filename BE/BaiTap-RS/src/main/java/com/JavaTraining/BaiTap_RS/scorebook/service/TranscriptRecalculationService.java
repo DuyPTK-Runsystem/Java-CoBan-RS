@@ -24,6 +24,8 @@ import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.AssessmentColumn;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.AssessmentColumnStatus;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.CalculationResultSource;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.CalculationStatus;
+import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.RetakeExam;
+import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.RetakeExamStatus;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.Scorebook;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.SkillWeightConfig;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentAnnualTranscript;
@@ -32,6 +34,7 @@ import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentSubjectAnnualRe
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentSubjectTermResult;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentTermTranscript;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.AssessmentColumnRepository;
+import com.JavaTraining.BaiTap_RS.scorebook.repository.RetakeExamRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.ScorebookRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.SkillWeightConfigRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.StudentAnnualTranscriptRepository;
@@ -71,6 +74,7 @@ public class TranscriptRecalculationService {
         private final StudentTermTranscriptRepository termTranscriptRepository;
         private final StudentSubjectTermResultRepository termResultRepository;
         private final StudentSubjectAnnualResultRepository annualResultRepository;
+        private final RetakeExamRepository retakeExamRepository;
 
         public TranscriptRecalculationService(
                         SubjectScoreCalculator calculator,
@@ -85,7 +89,8 @@ public class TranscriptRecalculationService {
                         StudentAnnualTranscriptRepository annualTranscriptRepository,
                         StudentTermTranscriptRepository termTranscriptRepository,
                         StudentSubjectTermResultRepository termResultRepository,
-                        StudentSubjectAnnualResultRepository annualResultRepository) {
+                        StudentSubjectAnnualResultRepository annualResultRepository,
+                        RetakeExamRepository retakeExamRepository) {
                 this.calculator = calculator;
                 this.enrollmentRepository = enrollmentRepository;
                 this.semesterRepository = semesterRepository;
@@ -99,6 +104,7 @@ public class TranscriptRecalculationService {
                 this.termTranscriptRepository = termTranscriptRepository;
                 this.termResultRepository = termResultRepository;
                 this.annualResultRepository = annualResultRepository;
+                this.retakeExamRepository = retakeExamRepository;
         }
 
         @Transactional
@@ -236,6 +242,17 @@ public class TranscriptRecalculationService {
                 Long firstSemesterId = semesters.isEmpty() ? null : semesters.get(0).getId();
                 Long secondSemesterId = semesters.size() < 2 ? null : semesters.get(1).getId();
                 List<BigDecimal> annualScores = new ArrayList<>();
+                List<BigDecimal> officialScores = new ArrayList<>();
+                boolean hasRetakeScore = false;
+
+                List<RetakeExam> retakeExams = retakeExamRepository
+                                .findAllByStudentIdAndAcademicYearId(
+                                                annualTranscript.getStudentId(),
+                                                annualTranscript.getAcademicYearId());
+                Map<Long, RetakeExam> retakeBySubject = new HashMap<>();
+                for (RetakeExam retake : retakeExams) {
+                        retakeBySubject.put(retake.getSubjectId(), retake);
+                }
 
                 for (Map.Entry<Long, List<TermResultRef>> entry : resultsBySubject.entrySet()) {
                         Long subjectId = entry.getKey();
@@ -256,8 +273,26 @@ public class TranscriptRecalculationService {
                         annualResult.setHk1TermResultId(first == null ? null : first.result().getId());
                         annualResult.setHk2TermResultId(second == null ? null : second.result().getId());
                         annualResult.setRegularDtbmhCn(regularScore);
-                        annualResult.setOfficialDtbmhCn(regularScore);
-                        annualResult.setCalculationSource(CalculationResultSource.REGULAR);
+
+                        RetakeExam retake = retakeBySubject.get(subjectId);
+                        if (retake != null && retake.getStatus() == RetakeExamStatus.SCORED
+                                        && retake.getRetakeScore() != null) {
+                                annualResult.setRetakeId(retake.getId());
+                                annualResult.setOfficialDtbmhCn(retake.getRetakeScore());
+                                annualResult.setCalculationSource(CalculationResultSource.RETAKE);
+                                hasRetakeScore = true;
+                                if (type == SubjectType.ACADEMIC) {
+                                        officialScores.add(retake.getRetakeScore());
+                                }
+                        } else {
+                                annualResult.setRetakeId(null);
+                                annualResult.setOfficialDtbmhCn(regularScore);
+                                annualResult.setCalculationSource(CalculationResultSource.REGULAR);
+                                if (type == SubjectType.ACADEMIC && regularScore != null) {
+                                        officialScores.add(regularScore);
+                                }
+                        }
+
                         annualResult.setCalculatedVersion(requestedVersion);
                         annualResult.setCalculatedAt(LocalDateTime.now());
                         annualResultRepository.save(annualResult);
@@ -267,9 +302,11 @@ public class TranscriptRecalculationService {
                 }
 
                 BigDecimal annualAverage = calculator.calculateAnnualAverage(annualScores);
+                BigDecimal finalAverage = calculator.calculateAnnualAverage(officialScores);
                 annualTranscript.setRegularDtbcn(annualAverage);
-                annualTranscript.setFinalDtbcn(annualAverage);
-                annualTranscript.setResultSource(CalculationResultSource.REGULAR);
+                annualTranscript.setFinalDtbcn(finalAverage);
+                annualTranscript.setResultSource(
+                                hasRetakeScore ? CalculationResultSource.RETAKE : CalculationResultSource.REGULAR);
                 annualTranscript.setCalculatedVersion(requestedVersion);
                 annualTranscript.setCalculatedAt(LocalDateTime.now());
                 annualTranscript.setLastCalculationTaskId(taskId);
