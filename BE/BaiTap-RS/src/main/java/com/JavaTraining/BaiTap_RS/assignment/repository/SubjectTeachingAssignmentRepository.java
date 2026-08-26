@@ -53,4 +53,20 @@ public interface SubjectTeachingAssignmentRepository extends JpaRepository<Subje
             @Param("teacherId") Long teacherId,
             @Param("classSubjectId") Long classSubjectId,
             @Param("effectiveDate") LocalDate effectiveDate);
+
+    @Query("""
+            select count(assignment.id) > 0
+            from SubjectTeachingAssignment assignment
+            where assignment.teacherId = :teacherId
+              and assignment.classSubjectId = :classSubjectId
+              and assignment.status = :status
+              and assignment.validFrom <= :to
+              and (assignment.validTo is null or assignment.validTo >= :from)
+            """)
+    boolean existsActiveAssignmentBetween(
+            @Param("teacherId") Long teacherId,
+            @Param("classSubjectId") Long classSubjectId,
+            @Param("status") AssignmentStatus status,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to);
 }

@@ -1,5 +1,6 @@
 package com.JavaTraining.BaiTap_RS.academic.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +21,8 @@ public interface ClassSubjectRepository extends JpaRepository<ClassSubject, Long
     boolean existsBySubjectId(Long subjectId);
 
     List<ClassSubject> findAllByClassIdAndSemesterIdOrderBySubjectIdAsc(Long classId, Long semesterId);
+
+    List<ClassSubject> findAllByClassIdInAndSemesterIdIn(Collection<Long> classIds, Collection<Long> semesterIds);
 
     List<ClassSubject> findAllBySemesterId(Long semesterId);
 

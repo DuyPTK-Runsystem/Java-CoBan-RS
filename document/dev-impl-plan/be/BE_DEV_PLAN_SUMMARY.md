@@ -35,6 +35,7 @@
 |   043 | [Create Student With Student Account](student/043-student-create-with-account-2026-08-26.md)                                        | API v3 tạo Student kèm User, username/password mặc định và role STUDENT                                                                 | Approved | 2026-08-26 |
 |   044 | [Term and Annual Transcript Aggregation](scorebook/044-transcript-aggregation-2026-08-26.md)                                        | Tổng hợp Đtbmh/Đtbhk theo học kỳ và ĐtbmhCN/Đtbcn cả năm, loại trừ môn kỹ năng và bảo vệ version                                        | Approved | 2026-08-26 |
 |   045 | [Retake Foundation and Calculation Integration](scorebook/045-retake-foundation-and-calculation-integration-2026-08-26.md)          | Retake record, nhập/sửa điểm, authorization/audit, task-worker recalculation và nguồn REGULAR/RETAKE                                    | Approved | 2026-08-26 |
+|   046 | [Transcript Query API](scorebook/046-transcript-query-api-2026-08-26.md)                                                            | API read-only bảng điểm học kỳ/cả năm, chi tiết cột điểm, retake, trạng thái calculation và scope học sinh/GVCN/GVBM/giáo vụ/admin    | Proposed | 2026-08-26 |
 
 ## Module folders
 
