@@ -2,9 +2,10 @@
 
 ## 1. Trạng thái và thông tin chung
 
-- **Status**: `Draft - chờ user approval để triển khai`.
+- **Status**: `Approved`.
 - **Application-document version**: `v2`.
 - **Ngày lập plan**: `2026-08-26`.
+- **Phê duyệt**: User phê duyệt qua tin nhắn agent ngày `2026-08-26`.
 - **Module**: Backend `scorebook` / Transcript calculation.
 - **Tài liệu tham chiếu**:
   - `document/application-doc/v2/modules/06-RetakeAndTranscriptModule.md`.
