@@ -4152,6 +4152,262 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "12. Scorebook & Operational Closure",
+            "description": "Operational flow for calculation tasks, transcript status and score audit logs.",
+            "item": [
+                {
+                    "name": "List calculation tasks",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v2/scorebooks/calculation-tasks?status=FAILED&page=0&size=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v2",
+                                "scorebooks",
+                                "calculation-tasks"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "FAILED"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "List failed calculation tasks",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v2/scorebooks/calculation-tasks/failed?page=0&size=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v2",
+                                "scorebooks",
+                                "calculation-tasks",
+                                "failed"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Retry one calculation task",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v2/scorebooks/calculation-tasks/{{taskId}}/retry",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v2",
+                                "scorebooks",
+                                "calculation-tasks",
+                                "{{taskId}}",
+                                "retry"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Retry all failed calculation tasks",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v2/scorebooks/calculation-tasks/retry-all-failed",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v2",
+                                "scorebooks",
+                                "calculation-tasks",
+                                "retry-all-failed"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Request transcript recalculation",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v2/students/{{studentCode}}/transcripts/recalculate?academicYearId={{academicYearId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v2",
+                                "students",
+                                "{{studentCode}}",
+                                "transcripts",
+                                "recalculate"
+                            ],
+                            "query": [
+                                {
+                                    "key": "academicYearId",
+                                    "value": "{{academicYearId}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get annual transcript calculation status",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v2/transcripts/students/{{studentId}}/academic-years/{{academicYearId}}/status",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v2",
+                                "transcripts",
+                                "students",
+                                "{{studentId}}",
+                                "academic-years",
+                                "{{academicYearId}}",
+                                "status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get term transcript calculation status",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v2/transcripts/students/{{studentId}}/semesters/{{semesterId}}/status",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v2",
+                                "transcripts",
+                                "students",
+                                "{{studentId}}",
+                                "semesters",
+                                "{{semesterId}}",
+                                "status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Read score audit logs",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v2/scorebooks/audit-logs?studentId={{studentId}}&page=0&size=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v2",
+                                "scorebooks",
+                                "audit-logs"
+                            ],
+                            "query": [
+                                {
+                                    "key": "studentId",
+                                    "value": "{{studentId}}"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
         }
     ],
     "auth": {
@@ -4242,6 +4498,16 @@
             "key": "attendanceSessionId",
             "type": "string",
             "value": "1"
+        },
+        {
+            "key": "taskId",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "retakeId",
+            "value": "1",
+            "type": "string"
         }
     ]
 }

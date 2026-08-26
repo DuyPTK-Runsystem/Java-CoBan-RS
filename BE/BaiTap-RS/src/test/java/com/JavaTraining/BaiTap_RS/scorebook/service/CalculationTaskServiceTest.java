@@ -181,6 +181,39 @@ class CalculationTaskServiceTest {
         Assertions.assertEquals(HttpStatus.CONFLICT, exception.getStatus());
     }
 
+    @Test
+    void retriesAllFailedTasksAndLeavesNoFailedTaskBehind() {
+        CalculationTask first = task();
+        CalculationTask second = new CalculationTask(
+                STUDENT_ID + 1,
+                ACADEMIC_YEAR_ID,
+                CalculationTaskType.STUDENT_YEAR_RECALC,
+                3L,
+                "RECALC:201:10");
+        ReflectionTestUtils.setField(second, "id", TASK_ID + 1);
+        first.setStatus(CalculationTaskStatus.FAILED);
+        second.setStatus(CalculationTaskStatus.FAILED);
+        Mockito.when(taskRepository.findAllByStatusOrderByCreatedAtAsc(CalculationTaskStatus.FAILED))
+                .thenReturn(List.of(first, second));
+        Mockito.when(taskRepository.findById(TASK_ID)).thenReturn(Optional.of(first));
+        Mockito.when(taskRepository.findById(TASK_ID + 1)).thenReturn(Optional.of(second));
+        Mockito.when(studentRepository.findAllById(Mockito.anyList())).thenReturn(List.of());
+        Mockito.when(annualTranscriptRepository.findByStudentIdAndAcademicYearId(Mockito.anyLong(),
+                Mockito.eq(ACADEMIC_YEAR_ID))).thenReturn(Optional.empty());
+
+        List<ResCalculationTaskDTO> responses = taskService.retryAllFailedTasks();
+
+        Assertions.assertEquals(2, responses.size());
+        Assertions.assertEquals(CalculationTaskStatus.PENDING, first.getStatus());
+        Assertions.assertEquals(CalculationTaskStatus.PENDING, second.getStatus());
+        Mockito.verify(auditService, Mockito.times(2)).writeAudit(
+                Mockito.eq("CALCULATION_TASK_RETRIED"),
+                Mockito.eq("calculation_task"),
+                Mockito.anyLong(),
+                Mockito.any(),
+                Mockito.any());
+    }
+
     private static CalculationTask task() {
         CalculationTask task = new CalculationTask(
                 STUDENT_ID,

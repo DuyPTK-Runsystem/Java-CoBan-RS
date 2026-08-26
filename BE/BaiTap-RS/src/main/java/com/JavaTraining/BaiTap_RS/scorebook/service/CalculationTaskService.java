@@ -145,6 +145,19 @@ public class CalculationTaskService {
         return page.map(task -> toResponse(task, students));
     }
 
+    @Transactional(readOnly = true)
+    public Page<ResCalculationTaskDTO> findFailedTasks(ReqFilterCalculationTaskDTO filter) {
+        filter.setStatus(CalculationTaskStatus.FAILED);
+        return findTasks(filter);
+    }
+
+    @Transactional
+    public List<ResCalculationTaskDTO> retryAllFailedTasks() {
+        return taskRepository.findAllByStatusOrderByCreatedAtAsc(CalculationTaskStatus.FAILED).stream()
+                .map(task -> retryTask(task.getId()))
+                .toList();
+    }
+
     @Transactional
     public ResCalculationTaskDTO requestRecalculation(String studentCode, Long academicYearId) {
         Student student = studentLookupService.resolveStudent(null, studentCode);

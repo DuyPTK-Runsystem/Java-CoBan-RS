@@ -28,6 +28,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
 class TranscriptAccessGuardTest {
 
     private static final Long TEACHER_USER_ID = 11L;
@@ -77,7 +78,8 @@ class TranscriptAccessGuardTest {
                 TEACHER_ID, CLASS_SUBJECT_ID, AssignmentStatus.ACTIVE, LocalDate.of(2026, 8, 1),
                 LocalDate.of(2026, 12, 31))).thenReturn(true);
 
-        Assertions.assertDoesNotThrow(() -> guard.assertCanRead(100L, 200L, List.of(semester()), List.of(classSubject())));
+        Assertions.assertDoesNotThrow(
+                () -> guard.assertCanRead(100L, 200L, List.of(semester()), List.of(classSubject())));
     }
 
     @Test

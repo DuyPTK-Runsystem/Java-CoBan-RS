@@ -21,6 +21,8 @@ public interface CalculationTaskRepository
 
     Optional<CalculationTask> findByIdempotencyKey(String idempotencyKey);
 
+    List<CalculationTask> findAllByStatusOrderByCreatedAtAsc(CalculationTaskStatus status);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             SELECT task

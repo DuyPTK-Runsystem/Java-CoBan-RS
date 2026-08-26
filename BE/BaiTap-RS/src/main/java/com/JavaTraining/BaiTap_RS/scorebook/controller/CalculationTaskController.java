@@ -1,5 +1,7 @@
 package com.JavaTraining.BaiTap_RS.scorebook.controller;
 
+import java.util.List;
+
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqFilterCalculationTaskDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResCalculationTaskDTO;
@@ -42,6 +44,14 @@ public class CalculationTaskController {
         return taskService.findTasks(filter);
     }
 
+    @GetMapping("/scorebooks/calculation-tasks/failed")
+    @ApiMessage("Tra cứu calculation task lỗi")
+    @PreAuthorize(OFFICE_ROLES)
+    public Page<ResCalculationTaskDTO> findFailedTasks(
+            @Valid @ModelAttribute ReqFilterCalculationTaskDTO filter) {
+        return taskService.findFailedTasks(filter);
+    }
+
     @PostMapping("/scorebooks/calculation-tasks/{taskId}/retry")
     @ApiMessage("Retry calculation task")
     @PreAuthorize(OFFICE_ROLES)
@@ -49,7 +59,14 @@ public class CalculationTaskController {
         return taskService.retryTask(taskId);
     }
 
-    @PostMapping("/students/{studentCode}/transcripts/recalculate")
+    @PostMapping("/scorebooks/calculation-tasks/retry-all-failed")
+    @ApiMessage("Retry toàn bộ calculation task lỗi")
+    @PreAuthorize(OFFICE_ROLES)
+    public List<ResCalculationTaskDTO> retryAllFailedTasks() {
+        return taskService.retryAllFailedTasks();
+    }
+
+    @PostMapping("/students/{studentCode:[A-Za-z][A-Za-z0-9]*}/transcripts/recalculate")
     @ApiMessage("Yêu cầu tính lại bảng điểm")
     @PreAuthorize(OFFICE_ROLES)
     public ResponseEntity<ResCalculationTaskDTO> recalculate(
@@ -58,7 +75,7 @@ public class CalculationTaskController {
         return ResponseEntity.accepted().body(taskService.requestRecalculation(studentCode, academicYearId));
     }
 
-    @PostMapping("/students/{studentId:\\d+}/transcripts/recalculate")
+    @PostMapping("/students/{studentId:[0-9]+}/transcripts/recalculate")
     @ApiMessage("Yêu cầu tính lại bảng điểm theo studentId")
     @PreAuthorize(OFFICE_ROLES)
     public ResponseEntity<ResCalculationTaskDTO> recalculateById(
