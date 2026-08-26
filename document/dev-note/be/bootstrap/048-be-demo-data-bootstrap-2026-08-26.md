@@ -38,6 +38,7 @@
 ### Documentation
 
 - `document/dev-impl-plan/be/bootstrap/048-be-demo-data-bootstrap-2026-08-26.md`
+- [`048-be-seeded-data-catalog-2026-08-26.md`](048-be-seeded-data-catalog-2026-08-26.md) — catalog chi tiết dữ liệu đã seed.
 - `document/dev-impl-plan/be/BE_DEV_PLAN_SUMMARY.md`
 - `document/dev-impl-plan/summary/DEV_PLAN_SUMMARY.md`
 
