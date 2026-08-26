@@ -46,6 +46,7 @@
 |   045 | scorebook          | [Retake Foundation and Calculation Integration](scorebook/045-retake-foundation-and-calculation-integration-2026-08-26.md)            | Completed; validation PASS                                 | 2026-08-26 |
 |   046 | scorebook          | [Transcript Query API](scorebook/046-transcript-query-api-2026-08-26.md)                                                               | Main tests/Checkstyle/PMD PASS; full-suite limit recorded   | 2026-08-26 |
 |   047 | scorebook          | [BE Operational Closure](scorebook/047-be-operational-closure-2026-08-26.md)                                                             | Completed; validation PASS                                 | 2026-08-26 |
+|   048 | bootstrap          | [BE Demo Data Bootstrap](bootstrap/048-be-demo-data-bootstrap-2026-08-26.md)                                                             | Completed; validation PASS                                 | 2026-08-26 |
 
 ## Module folders
 

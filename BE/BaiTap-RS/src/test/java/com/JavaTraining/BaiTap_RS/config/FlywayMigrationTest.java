@@ -26,7 +26,21 @@ class FlywayMigrationTest {
                 Statement statement = connection.createStatement();
                 ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM role")) {
             moveToFirstRow(resultSet, "role seed query should return a row");
-            Assertions.assertEquals(4, resultSet.getInt(1), "clean migration should seed four roles");
+            boolean fourRoles = resultSet.getInt(1) == 4;
+
+            try (ResultSet adminResult = statement.executeQuery("""
+                        SELECT app_user.password, role.code
+                        FROM app_user
+                        JOIN user_role ON user_role.user_id = app_user.user_id
+                        JOIN role ON role.role_id = user_role.role_id
+                        WHERE app_user.user_name = 'admin'
+                        """)) {
+                moveToFirstRow(adminResult, "mandatory admin seed should return a row");
+                boolean validAdmin = new BCryptPasswordEncoder().matches("admin", adminResult.getString(1))
+                        && "ADMIN".equals(adminResult.getString(2));
+                Assertions.assertTrue(fourRoles && validAdmin,
+                        "clean migration should seed four roles and admin with BCrypt password");
+            }
         }
     }
 

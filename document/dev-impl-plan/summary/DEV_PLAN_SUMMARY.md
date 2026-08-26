@@ -72,3 +72,4 @@ Example:
 |   045 | BE             | [Retake Foundation and Calculation Integration](../be/scorebook/045-retake-foundation-and-calculation-integration-2026-08-26.md)          | Approved                                           | 2026-08-26 |
 |   046 | BE             | [Transcript Query API](../be/scorebook/046-transcript-query-api-2026-08-26.md)                                                            | Completed                                          | 2026-08-26 |
 |   047 | BE             | [BE Operational Closure](../be/scorebook/047-be-operational-closure-2026-08-26.md)                                                       | Completed                                          | 2026-08-26 |
+|   048 | BE             | [BE Demo Data Bootstrap](../be/bootstrap/048-be-demo-data-bootstrap-2026-08-26.md)                                                   | Completed; validation PASS                         | 2026-08-26 |
