@@ -12,3 +12,4 @@
 | 016 | Student UI Date Format, Input Examples và Storybook | [Student UI Date Format, Input Examples và Storybook](student/016-student-ui-date-format-input-examples-storybook-2026-08-19.md) | Completed; amendment 16.1 implemented | 2026-08-19 |
 | 021 | Student CSV Download và Pagination Options | [Student CSV Download và Pagination Options](student/021-student-csv-download-pagination-options-go-to-page-2026-08-19.md) | Completed; Birthday/Address sort removed | 2026-08-19 |
 | 022 | FE Documentation Structure by Module | [FE Documentation Structure by Module](tooling/022-fe-doc-structure-by-module-2026-08-19.md) | Completed | 2026-08-19 |
+| 049 | Frontend API Catalog | [Frontend API Catalog](tooling/049-frontend-api-catalog-2026-08-26.md) | Completed | 2026-08-26 |

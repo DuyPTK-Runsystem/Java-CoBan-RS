@@ -68,6 +68,12 @@ Any rule marked **TBD** is intentionally unresolved and must not be invented dur
   - Constraints
   - JPA relationship guidance
 
+- [Frontend API Catalog](FrontendApiGuide.md)
+  - Auth endpoints
+  - Student endpoints
+  - Request/query/response mapping
+  - FE error and authentication handling
+
 ---
 
 ## 4. High-Level Architecture

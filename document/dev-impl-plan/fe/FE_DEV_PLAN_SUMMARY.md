@@ -11,6 +11,7 @@
 | 016 | [Student UI Date Format, Input Examples và Storybook](student/016-student-ui-date-format-input-examples-storybook-2026-08-19.md) | Student date format `dd-mm-yyyy`, required input examples and deterministic component Storybook stories | Approved; amendment 16.1 implemented | 2026-08-19 |
 | 021 | [Student CSV Download và Pagination Options](student/021-student-csv-download-pagination-options-go-to-page-2026-08-19.md) | Download toàn bộ Student CSV; page size 10/20/50; Go to page | Completed | 2026-08-19 |
 | 022 | [FE Documentation Structure by Module](tooling/022-fe-doc-structure-by-module-2026-08-19.md) | Group FE plans and Dev Notes by module/work group | Completed | 2026-08-19 |
+| 049 | [Frontend API Catalog](tooling/049-frontend-api-catalog-2026-08-26.md) | Consolidated v1 Auth and Student API reference for FE integration | Approved | 2026-08-26 |
 
 ## Current FE notes
 
