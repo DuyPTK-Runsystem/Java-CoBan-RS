@@ -33,6 +33,7 @@
 |   042 | [Subject Calculation Engine & Worker Lifecycle](scorebook/042-subject-calculation-engine-and-worker-lifecycle-2026-08-25.md)        | Pure calculation engine (Đtbmh, skill_score, Đtbhk, ĐtbmhCN, Đtbcn), worker lifecycle, claim, retry, version protection, API            | Approved | 2026-08-25 |
 | 042.1 | [Student Code Input Resolution & Display Across All Modules](student/042.1-student-code-input-resolution-and-display-2026-08-25.md) | Cho phép nhập studentCode bên cạnh studentId, chuẩn hóa StudentLookupService, hiển thị thông tin học sinh thân thiện và API code lookup | Approved | 2026-08-25 |
 |   043 | [Create Student With Student Account](student/043-student-create-with-account-2026-08-26.md)                               | API v3 tạo Student kèm User, username/password mặc định và role STUDENT                                               | Approved | 2026-08-26 |
+|   044 | [Term and Annual Transcript Aggregation](scorebook/044-transcript-aggregation-2026-08-26.md) | Tổng hợp Đtbmh/Đtbhk theo học kỳ và ĐtbmhCN/Đtbcn cả năm, loại trừ môn kỹ năng và bảo vệ version | Draft - Pending approval | 2026-08-26 |
 
 ## Module folders
 
