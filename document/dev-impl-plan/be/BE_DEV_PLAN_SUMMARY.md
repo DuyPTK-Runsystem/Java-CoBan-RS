@@ -32,6 +32,7 @@
 |   041 | [Transcript Result Schema Foundation](scorebook/041-transcript-result-schema-foundation-2026-08-25.md)                              | V16 migration, student_subject_term_result, student_subject_annual_result, transcript result fields, entity & repo                      | Approved | 2026-08-25 |
 |   042 | [Subject Calculation Engine & Worker Lifecycle](scorebook/042-subject-calculation-engine-and-worker-lifecycle-2026-08-25.md)        | Pure calculation engine (Đtbmh, skill_score, Đtbhk, ĐtbmhCN, Đtbcn), worker lifecycle, claim, retry, version protection, API            | Approved | 2026-08-25 |
 | 042.1 | [Student Code Input Resolution & Display Across All Modules](student/042.1-student-code-input-resolution-and-display-2026-08-25.md) | Cho phép nhập studentCode bên cạnh studentId, chuẩn hóa StudentLookupService, hiển thị thông tin học sinh thân thiện và API code lookup | Approved | 2026-08-25 |
+|   043 | [Create Student With Student Account](student/043-student-create-with-account-2026-08-26.md)                               | API v3 tạo Student kèm User, username/password mặc định và role STUDENT                                               | Approved | 2026-08-26 |
 
 ## Module folders
 

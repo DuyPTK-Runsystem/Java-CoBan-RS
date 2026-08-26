@@ -67,3 +67,4 @@ Example:
 |   041 | BE             | [Transcript Result Schema Foundation](../be/scorebook/041-transcript-result-schema-foundation-2026-08-25.md)                              | Approved                                           | 2026-08-25 |
 |   042 | BE             | [Subject Calculation Engine & Worker Lifecycle](../be/scorebook/042-subject-calculation-engine-and-worker-lifecycle-2026-08-25.md)        | Approved                                           | 2026-08-25 |
 | 042.1 | BE             | [Student Code Input Resolution & Display Across All Modules](../be/student/042.1-student-code-input-resolution-and-display-2026-08-25.md) | Approved                                           | 2026-08-25 |
+|   043 | BE             | [Create Student With Student Account](../be/student/043-student-create-with-account-2026-08-26.md)                               | Approved                                           | 2026-08-26 |

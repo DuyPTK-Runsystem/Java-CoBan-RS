@@ -41,6 +41,7 @@
 |   041 | scorebook          | [Transcript Result Schema Foundation](scorebook/041-transcript-result-schema-foundation-2026-08-25.md)                                  | Completed; validation PASS                                 | 2026-08-25 |
 | 042.1 | student            | [Student Code Input Resolution & Display Across All Modules](student/042.1-student-code-input-resolution-and-display-2026-08-25.md) | Completed; validation PASS                                 | 2026-08-25 |
 |   042 | scorebook          | [Subject Calculation Engine & Worker Lifecycle](scorebook/042-subject-calculation-engine-and-worker-lifecycle-2026-08-25.md)       | Completed; validation PASS                                 | 2026-08-25 |
+|   043 | student            | [Create Student With Student Account](student/043-student-create-with-account-2026-08-26.md)                                  | Completed; validation PASS                                 | 2026-08-26 |
 
 ## Module folders
 
