@@ -26,7 +26,7 @@ function logout(): void {
 <template>
   <AuthenticatedLayout
     :user-name="session?.user.username ?? ''"
-    :navigation="[{ label: 'V2 workspace', to: '/v2', icon: 'pi pi-sitemap' }]"
+    :navigation="[{ label: 'Năm học & học kỳ', to: '/v2/academic-years', icon: 'pi pi-calendar' }]"
     @logout="logout"
   >
     <RouterView />

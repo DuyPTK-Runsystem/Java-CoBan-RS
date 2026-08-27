@@ -18,9 +18,11 @@ export default defineConfig({
       include: [
         'src/components/{LoginForm,RegisterForm,StudentSearchForm}.vue',
         'src/components/{EmptyState,FormAlert,StatusTag,ServerPagination,ConfirmAction,PageState}.vue',
-        'src/services/{apiClient,authSession,userApi,studentApi}.ts',
+        'src/components/{AcademicYearDialog,AcademicYearTable,SemesterDialog,SemesterStatusDialog,SemesterTable}.vue',
+        'src/services/{apiClient,authSession,userApi,studentApi,academicApi}.ts',
+        'src/utils/academicDate.ts',
         'src/types/{api,ui}.ts',
-        'src/views/{LoginView,RegisterView}.vue',
+        'src/views/{LoginView,RegisterView,AcademicYearListView,SemesterListView}.vue',
       ],
     },
   },

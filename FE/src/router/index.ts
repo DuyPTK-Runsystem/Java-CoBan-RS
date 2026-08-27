@@ -60,6 +60,16 @@ const router = createRouter({
           component: RouterView,
         },
         {
+          path: 'academic-years',
+          name: 'v2-academic-years',
+          component: () => import('@/views/AcademicYearListView.vue'),
+        },
+        {
+          path: 'academic-years/:academicYearId/semesters',
+          name: 'v2-semesters',
+          component: () => import('@/views/SemesterListView.vue'),
+        },
+        {
           // Business routes must be registered before this neutral outlet.
           path: ':pathMatch(.*)*',
           name: 'v2-outlet',

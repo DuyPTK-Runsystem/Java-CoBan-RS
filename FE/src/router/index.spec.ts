@@ -39,10 +39,10 @@ describe('router authentication guard', () => {
 
     await router.push('/v2/academic-years')
 
-    expect(router.currentRoute.value.name).toBe('v2-outlet')
+    expect(router.currentRoute.value.name).toBe('v2-academic-years')
     expect(router.currentRoute.value.matched.map((record) => record.path)).toEqual([
       '/v2',
-      '/v2/:pathMatch(.*)*',
+      '/v2/academic-years',
     ])
     expect(router.currentRoute.value.meta).toMatchObject({
       requiresAuth: true,
@@ -72,7 +72,9 @@ describe('router authentication guard', () => {
     ['/students', 'students'],
     ['/students/new', 'student-create'],
     ['/students/4/edit', 'student-edit'],
-  ])('keeps the legacy route %s mapped to %s', (path, name) => {
+    ['/v2/academic-years', 'v2-academic-years'],
+    ['/v2/academic-years/1/semesters', 'v2-semesters'],
+  ])('keeps the supported route %s mapped to %s', (path, name) => {
     expect(router.resolve(path).name).toBe(name)
   })
 })
