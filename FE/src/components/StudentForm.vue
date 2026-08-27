@@ -67,9 +67,10 @@ function validateStudentCode(showRequiredError: boolean): boolean {
   return !errors.studentCode
 }
 
-function updateStudentCode(value: string): void {
-  values.studentCode = value
-  if (studentCodeTypingPattern.test(value.trim())) {
+function updateStudentCode(value: string | undefined): void {
+  const nextValue = value ?? ''
+  values.studentCode = nextValue
+  if (studentCodeTypingPattern.test(nextValue.trim())) {
     errors.studentCode = undefined
     return
   }
