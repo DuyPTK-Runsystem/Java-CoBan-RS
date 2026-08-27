@@ -31,9 +31,4 @@ export interface AuthSession {
   user: UserSummary
 }
 
-export interface RestResponse<T> {
-  statusCode: number
-  error?: string
-  message?: string | string[]
-  data: T
-}
+export type { ApiResponse as RestResponse } from '@/types/api'

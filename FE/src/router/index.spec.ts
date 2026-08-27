@@ -24,4 +24,11 @@ describe('router authentication guard', () => {
 
     expect(router.currentRoute.value.name).toBe('students')
   })
+
+  it('marks the v2 shell as authenticated and module-neutral', () => {
+    const route = router.resolve('/v2')
+
+    expect(route.name).toBe('v2-shell')
+    expect(route.meta).toMatchObject({ requiresAuth: true, module: 'v2', shell: 'authenticated' })
+  })
 })

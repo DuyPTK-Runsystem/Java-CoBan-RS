@@ -36,7 +36,11 @@ a { color: inherit; text-decoration: none; }
 .field-hint { color: var(--secondary); font-size: 13px; }
 .form-alert { padding: 12px 14px; border-radius: 8px; font-size: 14px; }
 .form-alert-error { color: #93000a; background: #ffdad6; }
+.form-alert-warning { color: #713f12; background: #fef3c7; }
 .form-alert-info { color: #1e3a8a; background: #dbeafe; }
+.form-alert-success { color: #065f46; background: #d1fae5; }
+.form-alert-message { margin: 0; }
+.form-alert-list { display: grid; gap: 4px; margin: 8px 0 0; padding-left: 20px; }
 .form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
 .form-actions-stacked { display: grid; }
 .inline-field { display: flex; gap: 10px; }
@@ -71,6 +75,10 @@ a { color: inherit; text-decoration: none; }
 .table-actions { display: flex; gap: 2px; }
 .empty-state { display: grid; justify-items: center; gap: 8px; padding: 28px; color: #64748b; }
 .empty-state i { font-size: 24px; }
+.empty-state p { margin: 0; text-align: center; }
+.page-state { display: grid; justify-items: center; gap: 10px; padding: 32px; }
+.page-state-loading { color: #475569; }
+.page-state-error { justify-items: stretch; gap: 12px; }
 
 @media (max-width: 900px) {
   .search-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

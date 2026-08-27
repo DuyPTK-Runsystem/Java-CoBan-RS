@@ -1,11 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+import { configureApiClient } from '@/services/apiClient'
 import { hasAuthenticatedSession } from '@/services/authSession'
 
 declare module 'vue-router' {
   interface RouteMeta {
     guestOnly?: boolean
     requiresAuth?: boolean
+    module?: string
+    shell?: 'authenticated'
   }
 }
 
@@ -46,6 +49,12 @@ const router = createRouter({
       component: () => import('@/views/StudentFormView.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/v2',
+      name: 'v2-shell',
+      component: () => import('@/views/AuthenticatedV2ShellView.vue'),
+      meta: { requiresAuth: true, module: 'v2', shell: 'authenticated' },
+    },
     { path: '/:pathMatch(.*)*', redirect: '/login' },
   ],
 })
@@ -59,6 +68,12 @@ router.beforeEach((to) => {
     return { name: 'students' }
   }
   return true
+})
+
+configureApiClient({
+  onUnauthorized: async () => {
+    if (router.currentRoute.value.name !== 'login') await router.replace({ name: 'login' })
+  },
 })
 
 export default router

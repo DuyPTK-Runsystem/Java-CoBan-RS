@@ -12,12 +12,14 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
-    coverage: {
+      coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'json-summary'],
       include: [
         'src/components/{LoginForm,RegisterForm,StudentSearchForm}.vue',
-        'src/services/{authSession,userApi}.ts',
+        'src/components/{EmptyState,FormAlert,StatusTag,ServerPagination,ConfirmAction,PageState}.vue',
+        'src/services/{apiClient,authSession,userApi,studentApi}.ts',
+        'src/types/{api,ui}.ts',
         'src/views/{LoginView,RegisterView}.vue',
       ],
     },

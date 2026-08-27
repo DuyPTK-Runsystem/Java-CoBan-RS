@@ -13,6 +13,7 @@
 | 022 | [FE Documentation Structure by Module](tooling/022-fe-doc-structure-by-module-2026-08-19.md) | Group FE plans and Dev Notes by module/work group | Completed | 2026-08-19 |
 | 049 | [Frontend API Catalog](tooling/049-frontend-api-catalog-2026-08-26.md) | Consolidated v1 Auth and Student API reference for FE integration | Approved | 2026-08-26 |
 | 050 | [Frontend Documentation Refactor](tooling/050-frontend-documentation-refactor-2026-08-27.md) | Legacy Student UI routing, v2 API guide heading and enum canonicalization | Approved | 2026-08-27 |
+| 051 | [FE v2 Shell & API Integration Foundation](tooling/051-fe-v2-shell-api-integration-foundation-2026-08-27.md) | Shared fetch/API types, HTTP error handling, state components, authenticated shell and v2 route preparation | Approved; implementation completed | 2026-08-27 |
 
 ## Current FE notes
 

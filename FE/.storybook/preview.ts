@@ -2,6 +2,7 @@ import { setup } from '@storybook/vue3'
 import type { Preview } from '@storybook/vue3'
 import Aura from '@primevue/themes/aura'
 import PrimeVue from 'primevue/config'
+import ConfirmationService from 'primevue/confirmationservice'
 
 import '../src/styles.css'
 import 'primeicons/primeicons.css'
@@ -16,6 +17,7 @@ setup((app) => {
       },
     },
   })
+  app.use(ConfirmationService)
 })
 
 const preview: Preview = {
