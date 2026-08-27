@@ -2,15 +2,105 @@ import { apiClient } from '@/services/apiClient'
 import type {
   AcademicYear,
   AcademicYearRequest,
+  ClassSubject,
+  CreateClassSubjectRequest,
+  CreateSchoolClassRequest,
   CreateSemesterRequest,
+  GradeLevel,
+  GradeLevelRequest,
   ReopenSemesterRequest,
+  SchoolClass,
   Semester,
   SemesterCompletenessReport,
+  Subject,
+  SubjectApplicability,
+  SubjectApplicabilityRequest,
+  SubjectRequest,
+  SubjectStatus,
+  UpdateClassSubjectRequest,
+  UpdateSchoolClassRequest,
   UpdateSemesterRequest,
 } from '@/types/academic'
 
 const academicYearsPath = '/api/v2/academic-years'
 const semestersPath = '/api/v2/semesters'
+const gradesPath = '/api/v2/grades'
+const classesPath = '/api/v2/classes'
+const subjectsPath = '/api/v2/subjects'
+const classSubjectsPath = '/api/v2/class-subjects'
+
+export function fetchGrades(token: string): Promise<GradeLevel[]> {
+  return apiClient.get<GradeLevel[]>(gradesPath, { token })
+}
+
+export function createGrade(token: string, request: GradeLevelRequest): Promise<GradeLevel> {
+  return apiClient.post<GradeLevel>(gradesPath, request, { token })
+}
+
+export function updateGrade(token: string, gradeId: number, request: GradeLevelRequest): Promise<GradeLevel> {
+  return apiClient.put<GradeLevel>(`${gradesPath}/${gradeId}`, request, { token })
+}
+
+export function deleteGrade(token: string, gradeId: number): Promise<void> {
+  return apiClient.delete<void>(`${gradesPath}/${gradeId}`, { token })
+}
+
+export function fetchSchoolClasses(token: string, academicYearId?: number): Promise<SchoolClass[]> {
+  return apiClient.get<SchoolClass[]>(classesPath, {
+    token,
+    query: academicYearId === undefined ? undefined : new URLSearchParams({ academicYearId: String(academicYearId) }),
+  })
+}
+
+export function createSchoolClass(token: string, request: CreateSchoolClassRequest): Promise<SchoolClass> {
+  return apiClient.post<SchoolClass>(classesPath, request, { token })
+}
+
+export function updateSchoolClass(token: string, classId: number, request: UpdateSchoolClassRequest): Promise<SchoolClass> {
+  return apiClient.put<SchoolClass>(`${classesPath}/${classId}`, request, { token })
+}
+
+export function closeSchoolClass(token: string, classId: number): Promise<SchoolClass> {
+  return apiClient.post<SchoolClass>(`${classesPath}/${classId}/close`, undefined, { token })
+}
+
+export function deleteSchoolClass(token: string, classId: number): Promise<void> {
+  return apiClient.delete<void>(`${classesPath}/${classId}`, { token })
+}
+
+export function fetchSubjects(token: string, status?: SubjectStatus): Promise<Subject[]> {
+  return apiClient.get<Subject[]>(subjectsPath, {
+    token,
+    query: status === undefined ? undefined : new URLSearchParams({ status }),
+  })
+}
+
+export function createSubject(token: string, request: SubjectRequest): Promise<Subject> {
+  return apiClient.post<Subject>(subjectsPath, request, { token })
+}
+
+export function updateSubject(token: string, subjectId: number, request: SubjectRequest): Promise<Subject> {
+  return apiClient.put<Subject>(`${subjectsPath}/${subjectId}`, request, { token })
+}
+
+export function createSubjectApplicability(token: string, subjectId: number, request: SubjectApplicabilityRequest): Promise<SubjectApplicability> {
+  return apiClient.post<SubjectApplicability>(`${subjectsPath}/${subjectId}/applicabilities`, request, { token })
+}
+
+export function fetchClassSubjects(token: string, classId: number, semesterId: number): Promise<ClassSubject[]> {
+  return apiClient.get<ClassSubject[]>(`/api/v2/classes/${classId}/subjects`, {
+    token,
+    query: new URLSearchParams({ semesterId: String(semesterId) }),
+  })
+}
+
+export function createClassSubject(token: string, request: CreateClassSubjectRequest): Promise<ClassSubject> {
+  return apiClient.post<ClassSubject>(classSubjectsPath, request, { token })
+}
+
+export function updateClassSubject(token: string, classSubjectId: number, request: UpdateClassSubjectRequest): Promise<ClassSubject> {
+  return apiClient.put<ClassSubject>(`${classSubjectsPath}/${classSubjectId}`, request, { token })
+}
 
 export function fetchAcademicYears(token: string): Promise<AcademicYear[]> {
   return apiClient.get<AcademicYear[]>(academicYearsPath, { token })

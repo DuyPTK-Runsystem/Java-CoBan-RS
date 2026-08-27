@@ -76,3 +76,4 @@ Example:
 |   049 | FE             | [Frontend API Catalog](../fe/tooling/049-frontend-api-catalog-2026-08-26.md)                                                        | Approved                                           | 2026-08-26 |
 |   050 | FE             | [Frontend Documentation Refactor](../fe/tooling/050-frontend-documentation-refactor-2026-08-27.md)                                  | Approved                                           | 2026-08-27 |
 |   051 | FE             | [FE v2 Shell & API Integration Foundation](../fe/tooling/051-fe-v2-shell-api-integration-foundation-2026-08-27.md)                     | Approved; implementation completed                 | 2026-08-27 |
+|   053 | FE             | [Grade, Class, Subject & Class-Subject UI](../fe/academic/053-grade-class-subject-management-ui-2026-08-27.md)                         | Approved phases 0–6; phases 4–5 completed; Phase 6 blocked by backend contract | 2026-08-27 |

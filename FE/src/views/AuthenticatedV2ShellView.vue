@@ -26,7 +26,13 @@ function logout(): void {
 <template>
   <AuthenticatedLayout
     :user-name="session?.user.username ?? ''"
-    :navigation="[{ label: 'Năm học & học kỳ', to: '/v2/academic-years', icon: 'pi pi-calendar' }]"
+    :navigation="[
+      { label: 'Năm học & học kỳ', to: '/v2/academic-years', icon: 'pi pi-calendar' },
+      { label: 'Khối', to: '/v2/academic-catalog/grades', icon: 'pi pi-sitemap' },
+      { label: 'Lớp', to: '/v2/academic-catalog/classes', icon: 'pi pi-building' },
+      { label: 'Môn học', to: '/v2/academic-catalog/subjects', icon: 'pi pi-book' },
+      { label: 'Lớp-môn', to: '/v2/academic-catalog/class-subjects', icon: 'pi pi-link' },
+    ]"
     @logout="logout"
   >
     <RouterView />

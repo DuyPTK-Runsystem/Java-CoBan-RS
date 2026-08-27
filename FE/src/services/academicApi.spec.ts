@@ -2,14 +2,30 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
   activateSemester,
+  closeSchoolClass,
   closeAcademicYear,
+  createClassSubject,
   createAcademicYear,
+  createGrade,
+  createSchoolClass,
   createSemester,
+  createSubject,
+  createSubjectApplicability,
+  deleteGrade,
+  deleteSchoolClass,
+  fetchClassSubjects,
   fetchAcademicYears,
+  fetchGrades,
+  fetchSchoolClasses,
   fetchSemesters,
+  fetchSubjects,
   getSemesterCompletenessReport,
   lockSemester,
   reopenSemester,
+  updateClassSubject,
+  updateGrade,
+  updateSchoolClass,
+  updateSubject,
   updateAcademicYear,
   updateSemester,
 } from './academicApi'
@@ -85,5 +101,57 @@ describe('academicApi', () => {
 
     await closeAcademicYear('token', 7)
     expect(fetchMock.mock.calls[1][0]).toBe('http://localhost:8081/api/v2/academic-years/7/close')
+  })
+
+  it('uses the catalog lifecycle endpoints with typed request bodies', async () => {
+    fetchMock.mockImplementation(() => Promise.resolve(new Response(JSON.stringify({ data: { id: 1 } }), { status: 200 })))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const gradeRequest = { code: 'G6', name: 'Khối 6', gradeLevel: 6 as const, displayOrder: 1, nextGradeId: null, active: true, description: null }
+    const classCreateRequest = { academicYearId: 7, gradeLevelId: 1, classCode: '6A1', className: 'Lớp 6A1', capacity: 40, status: 'PLANNED' as const }
+    const classUpdateRequest = { gradeLevelId: 1, classCode: '6A1', className: null, capacity: 42, status: 'ACTIVE' as const }
+    const subjectRequest = { code: 'MAT', name: 'Toán', subjectType: 'ACADEMIC' as const, applicationScope: 'GRADE' as const, status: 'ACTIVE' as const }
+    const applicabilityRequest = { semesterId: 11, scopeType: 'GRADE' as const, gradeLevelId: 1, classId: null }
+    const classSubjectCreateRequest = { classId: 21, subjectId: 31, semesterId: 11, status: 'ACTIVE' as const }
+
+    await fetchGrades('token')
+    await createGrade('token', gradeRequest)
+    await updateGrade('token', 1, gradeRequest)
+    await deleteGrade('token', 1)
+    await fetchSchoolClasses('token', 7)
+    await createSchoolClass('token', classCreateRequest)
+    await updateSchoolClass('token', 21, classUpdateRequest)
+    await closeSchoolClass('token', 21)
+    await deleteSchoolClass('token', 21)
+    await fetchSubjects('token', 'ACTIVE')
+    await createSubject('token', subjectRequest)
+    await updateSubject('token', 31, subjectRequest)
+    await createSubjectApplicability('token', 31, applicabilityRequest)
+    await fetchClassSubjects('token', 21, 11)
+    await createClassSubject('token', classSubjectCreateRequest)
+    await updateClassSubject('token', 41, { status: 'INACTIVE' })
+
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      'http://localhost:8081/api/v2/grades',
+      'http://localhost:8081/api/v2/grades',
+      'http://localhost:8081/api/v2/grades/1',
+      'http://localhost:8081/api/v2/grades/1',
+      'http://localhost:8081/api/v2/classes?academicYearId=7',
+      'http://localhost:8081/api/v2/classes',
+      'http://localhost:8081/api/v2/classes/21',
+      'http://localhost:8081/api/v2/classes/21/close',
+      'http://localhost:8081/api/v2/classes/21',
+      'http://localhost:8081/api/v2/subjects?status=ACTIVE',
+      'http://localhost:8081/api/v2/subjects',
+      'http://localhost:8081/api/v2/subjects/31',
+      'http://localhost:8081/api/v2/subjects/31/applicabilities',
+      'http://localhost:8081/api/v2/classes/21/subjects?semesterId=11',
+      'http://localhost:8081/api/v2/class-subjects',
+      'http://localhost:8081/api/v2/class-subjects/41',
+    ])
+    expect(fetchMock.mock.calls[1][1]).toMatchObject({ method: 'POST', body: JSON.stringify(gradeRequest) })
+    expect(fetchMock.mock.calls[6][1]).toMatchObject({ method: 'PUT', body: JSON.stringify(classUpdateRequest) })
+    expect(fetchMock.mock.calls[12][1]).toMatchObject({ method: 'POST', body: JSON.stringify(applicabilityRequest) })
+    expect(fetchMock.mock.calls[15][1]).toMatchObject({ method: 'PUT', body: JSON.stringify({ status: 'INACTIVE' }) })
   })
 })

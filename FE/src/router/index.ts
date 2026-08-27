@@ -70,6 +70,26 @@ const router = createRouter({
           component: () => import('@/views/SemesterListView.vue'),
         },
         {
+          path: 'academic-catalog/grades',
+          name: 'v2-academic-grades',
+          component: () => import('@/views/GradeListView.vue'),
+        },
+        {
+          path: 'academic-catalog/classes',
+          name: 'v2-academic-classes',
+          component: () => import('@/views/SchoolClassListView.vue'),
+        },
+        {
+          path: 'academic-catalog/subjects',
+          name: 'v2-academic-subjects',
+          component: () => import('@/views/SubjectListView.vue'),
+        },
+        {
+          path: 'academic-catalog/class-subjects',
+          name: 'v2-academic-class-subjects',
+          component: () => import('@/views/ClassSubjectListView.vue'),
+        },
+        {
           // Business routes must be registered before this neutral outlet.
           path: ':pathMatch(.*)*',
           name: 'v2-outlet',
