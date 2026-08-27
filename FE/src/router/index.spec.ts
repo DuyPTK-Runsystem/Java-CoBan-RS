@@ -1,6 +1,8 @@
+import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { clearAuthSession, saveAuthSession } from '@/services/authSession'
+import AuthenticatedV2ShellView from '@/views/AuthenticatedV2ShellView.vue'
 
 import router from './index'
 
@@ -30,5 +32,47 @@ describe('router authentication guard', () => {
 
     expect(route.name).toBe('v2-shell')
     expect(route.meta).toMatchObject({ requiresAuth: true, module: 'v2', shell: 'authenticated' })
+  })
+
+  it('renders a nested v2 child through the authenticated layout outlet', async () => {
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01' } })
+
+    await router.push('/v2/academic-years')
+
+    expect(router.currentRoute.value.name).toBe('v2-outlet')
+    expect(router.currentRoute.value.matched.map((record) => record.path)).toEqual([
+      '/v2',
+      '/v2/:pathMatch(.*)*',
+    ])
+    expect(router.currentRoute.value.meta).toMatchObject({
+      requiresAuth: true,
+      module: 'v2',
+      shell: 'authenticated',
+    })
+
+    const wrapper = mount(AuthenticatedV2ShellView, {
+      global: {
+        plugins: [router],
+        stubs: {
+          AuthenticatedLayout: {
+            template: '<div data-testid="authenticated-layout"><slot /></div>',
+          },
+          RouterView: { template: '<div data-testid="nested-route-outlet" />' },
+        },
+      },
+    })
+
+    expect(wrapper.get('[data-testid="authenticated-layout"]').exists()).toBe(true)
+    expect(wrapper.get('[data-testid="nested-route-outlet"]').exists()).toBe(true)
+  })
+
+  it.each([
+    ['/login', 'login'],
+    ['/register', 'register'],
+    ['/students', 'students'],
+    ['/students/new', 'student-create'],
+    ['/students/4/edit', 'student-edit'],
+  ])('keeps the legacy route %s mapped to %s', (path, name) => {
+    expect(router.resolve(path).name).toBe(name)
   })
 })

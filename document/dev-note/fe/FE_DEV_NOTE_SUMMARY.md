@@ -14,4 +14,4 @@
 | 022 | FE Documentation Structure by Module | [FE Documentation Structure by Module](tooling/022-fe-doc-structure-by-module-2026-08-19.md) | Completed | 2026-08-19 |
 | 049 | Frontend API Catalog | [Frontend API Catalog](tooling/049-frontend-api-catalog-2026-08-26.md) | Completed | 2026-08-26 |
 | 050 | Frontend Documentation Refactor | [Frontend Documentation Refactor](tooling/050-frontend-documentation-refactor-2026-08-27.md) | Completed | 2026-08-27 |
-| 051 | FE v2 Shell & API Integration Foundation | [FE v2 Shell & API Integration Foundation](tooling/051-fe-v2-shell-api-integration-foundation-2026-08-27.md) | Completed; validation PASS | 2026-08-27 |
+| 051 | FE v2 Shell & API Integration Foundation | [FE v2 Shell & API Integration Foundation](tooling/051-fe-v2-shell-api-integration-foundation-2026-08-27.md) | Completed; maintenance patch applied; validation PASS | 2026-08-27 |

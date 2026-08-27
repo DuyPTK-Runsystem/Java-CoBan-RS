@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, RouterView } from 'vue-router'
 
 import { configureApiClient } from '@/services/apiClient'
 import { hasAuthenticatedSession } from '@/services/authSession'
@@ -51,9 +51,21 @@ const router = createRouter({
     },
     {
       path: '/v2',
-      name: 'v2-shell',
       component: () => import('@/views/AuthenticatedV2ShellView.vue'),
       meta: { requiresAuth: true, module: 'v2', shell: 'authenticated' },
+      children: [
+        {
+          path: '',
+          name: 'v2-shell',
+          component: RouterView,
+        },
+        {
+          // Business routes must be registered before this neutral outlet.
+          path: ':pathMatch(.*)*',
+          name: 'v2-outlet',
+          component: RouterView,
+        },
+      ],
     },
     { path: '/:pathMatch(.*)*', redirect: '/login' },
   ],

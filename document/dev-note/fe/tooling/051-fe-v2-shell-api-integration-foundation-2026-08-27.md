@@ -19,7 +19,8 @@
   presentation components: `PageState`, `EmptyState`, `StatusTag`,
   `FormAlert`, `ServerPagination`, `ConfirmAction`.
 - Mở rộng `AuthenticatedLayout` bằng static navigation config/named slot;
-  thêm authenticated `/v2` shell outlet và route metadata `module`/`shell`.
+  thêm authenticated `/v2` shell parent với child outlet và route metadata
+  `module`/`shell`.
 - Cập nhật Storybook preview cho confirmation service, FE README và coverage
   include.
 
@@ -53,7 +54,8 @@
 - `FE/src/components/{PageState,EmptyState,StatusTag,FormAlert,ServerPagination,ConfirmAction}.stories.ts`
 - `FE/src/views/AuthenticatedV2ShellView.vue` — authenticated v2 outlet.
 - `FE/src/router/index.ts` — route metadata, `/v2` route và auth failure
-  redirect callback.
+  redirect callback; `/v2` được tổ chức thành authenticated parent có index
+  child và neutral child outlet cho namespace `/v2/...`.
 - `FE/src/main.ts` — giữ bootstrap gọn; API/router integration được cấu hình
   ở router boundary.
 - `FE/src/styles.css` — shared warning/success/page-state styles.
@@ -86,14 +88,18 @@
   visibility. Backend vẫn là nguồn authorization cuối cùng.
 - Không migrate shared components vào legacy Student UI vì không cần để hoàn
   thành foundation và việc đó có thể làm thay đổi visual/behavior hiện tại.
+- Child `/v2/...` hiện chỉ là neutral `RouterView` outlet, không tạo business
+  screen; route nghiệp vụ tương lai phải được đăng ký trước catch-all child.
+- Khi `onUnauthorized()` throw/reject, `apiClient` nuốt riêng lỗi callback và
+  vẫn reject bằng `ApiError` gốc có status `401`.
 
 ## Validation
 
 | Check | Result |
 |---|---|
 | `npm run lint` | PASS |
-| `npm run test` | PASS — 20 test files, 57 tests |
-| `npm run test:coverage` | PASS — 94.08% statements, 81.65% branches |
+| `npm run test` | PASS — 20 test files, 64 tests |
+| `npm run test:coverage` | PASS — 94.11% statements, 81.89% branches |
 | `npm run build` | PASS — `vue-tsc --noEmit` và Vite production build |
 | `npm run build-storybook` | PASS |
 | `git diff --check` | PASS |
@@ -104,7 +110,9 @@ thất bại.
 
 ## Deviations from Developer Plan
 
-- Không có deviation về phạm vi. Callback `401` được đặt trực tiếp tại
+- Maintenance follow-up trước Plan 052 xử lý hai gap của implementation 051:
+  route `/v2` được nesting đúng và callback lỗi không che `ApiError 401`.
+- Không có deviation về phạm vi business. Callback `401` được đặt trực tiếp tại
   `router/index.ts` thay vì `main.ts` để bảo đảm service/view test và runtime
   dùng cùng một application boundary; đây là cách triển khai cụ thể của
   dependency callback trong plan.
@@ -116,11 +124,11 @@ thất bại.
 ## Known blockers, skipped checks and remaining risks
 
 - `/v2` chưa hiển thị business screen cho tới khi có plan nghiệp vụ và API
-  contract được approve; route hiện cố ý không có child view.
+  contract được approve; child hiện chỉ là neutral outlet.
 - Role-aware navigation/capability guard vẫn chưa thể triển khai vì auth
   response/JWT hiện không expose role contract.
-- Storybook warning về chunk size và runtime `eval` thuộc dependency/tooling
-  hiện tại, chưa xử lý trong scope plan 051.
+- Storybook warning về chunk size, runtime `eval` và package metadata PrimeVue
+  thuộc dependency/tooling hiện tại, chưa xử lý trong scope maintenance patch.
 - Không chạy backend validation vì plan chỉ thay đổi FE, types, FE tooling và
   documentation.
 

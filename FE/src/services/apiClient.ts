@@ -170,7 +170,11 @@ async function request<T>(path: string, options: ApiRequestOptions = {}): Promis
     const error = await toApiError(response)
     if (response.status === 401) {
       clearAuthSession()
-      await onUnauthorized?.()
+      try {
+        await onUnauthorized?.()
+      } catch {
+        // Preserve the transport error when the application redirect fails.
+      }
     }
     throw error
   }

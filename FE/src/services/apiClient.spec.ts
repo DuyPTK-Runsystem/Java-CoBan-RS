@@ -65,6 +65,27 @@ describe('apiClient', () => {
     expect(redirect).toHaveBeenCalledOnce()
   })
 
+  it('preserves the original ApiError when the 401 redirect handler rejects', async () => {
+    const redirectFailure = new Error('Router redirect failed')
+    const redirect = vi.fn().mockRejectedValue(redirectFailure)
+    saveAuthSession({ accessToken: 'expired-token', user: { id: 1, username: 'academic.admin' } })
+    configureApiClient({ onUnauthorized: redirect })
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ message: 'Expired token' }), { status: 401 }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const error = await apiClient.get('/api/v2/private', { authenticated: true }).catch((value: unknown) => value)
+
+    expect(isApiError(error, 401)).toBe(true)
+    expect(error).toMatchObject({
+      name: 'ApiError',
+      status: 401,
+      kind: 'unauthorized',
+      message: 'Expired token',
+    })
+    expect(sessionStorage.length).toBe(0)
+    expect(redirect).toHaveBeenCalledOnce()
+  })
+
   it('keeps the session and preserves forbidden semantics on 403', async () => {
     saveAuthSession({ accessToken: 'valid-token', user: { id: 1, username: 'academic.admin' } })
     fetchMock.mockResolvedValue(new Response(null, { status: 403 }))
