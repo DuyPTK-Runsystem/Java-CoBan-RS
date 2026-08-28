@@ -336,7 +336,7 @@ onMounted(() => { void loadSubjects(); void loadContext() })
       <p v-else>Chọn năm học khi cần cấu hình phạm vi áp dụng.</p>
     </div>
     <div class="page-heading-actions">
-      <Button label="Lớp-môn" icon="pi pi-link" severity="secondary" outlined @click="router.push({ name: 'v2-academic-class-subjects' })" />
+      <Button label="Quản lí môn học các lớp" icon="pi pi-link" severity="secondary" outlined @click="router.push({ name: 'v2-academic-class-subjects' })" />
       <Button label="Tạo môn" icon="pi pi-plus" @click="openCreate" />
     </div>
   </div>
@@ -344,7 +344,7 @@ onMounted(() => { void loadSubjects(); void loadContext() })
   <FormAlert v-if="errorMessage && !forbidden" tone="error" :message="errorMessage" />
   <section class="content-surface">
     <div class="search-grid">
-      <div class="field-group"><label for="subject-year">Năm học cấu hình</label><Select id="subject-year" v-model="selectedAcademicYearId" :options="academicYears" option-label="code" option-value="id" placeholder="Chọn năm học" :loading="contextLoading" fluid /></div>
+      <div class="field-group"><label for="subject-year">Năm học</label><Select id="subject-year" v-model="selectedAcademicYearId" :options="academicYears" option-label="code" option-value="id" placeholder="Chọn năm học" :loading="contextLoading" fluid /></div>
       <div class="field-group"><label for="subject-search">Tìm môn</label><InputText id="subject-search" v-model="searchText" placeholder="Mã hoặc tên môn" /></div>
       <div class="field-group"><label for="subject-type-filter">Loại môn</label><Select id="subject-type-filter" v-model="typeFilter" :options="typeOptions" option-label="label" option-value="value" fluid /></div>
       <div class="field-group"><label for="subject-scope-filter">Phạm vi</label><Select id="subject-scope-filter" v-model="scopeFilter" :options="scopeOptions" option-label="label" option-value="value" fluid /></div>

@@ -90,6 +90,21 @@ const router = createRouter({
           component: () => import('@/views/ClassSubjectListView.vue'),
         },
         {
+          path: 'enrollments',
+          name: 'v2-enrollments',
+          component: () => import('@/views/EnrollmentListView.vue'),
+        },
+        {
+          path: 'teachers',
+          name: 'v2-teachers',
+          component: () => import('@/views/TeacherListView.vue'),
+        },
+        {
+          path: 'teaching-assignments',
+          name: 'v2-teaching-assignments',
+          component: () => import('@/views/TeachingAssignmentView.vue'),
+        },
+        {
           // Business routes must be registered before this neutral outlet.
           path: ':pathMatch(.*)*',
           name: 'v2-outlet',

@@ -79,6 +79,9 @@
   are inside Vietnamese tags without adjacent duplicate text; the dialog shows
   subject scope as `Theo khối` or `Theo lớp`, Vietnamese status options, and no
   raw `ACTIVE` status value in visible dialog copy.
+- Applied the requested Vietnamese UI wording refinement: `Năm học cấu hình`
+  is now `Năm học`, and the `Lớp-môn` navigation/action/title is now
+  `Quản lí môn học các lớp`.
 
 ## Validation
 
@@ -90,6 +93,7 @@
 | `cd FE && npm run build` | PASS |
 | `cd FE && npm run build-storybook` | PASS — Storybook bundle generated |
 | `git diff --check` | PASS |
+| Follow-up `npm run lint`, `npm run test -- --run src/views/SubjectListView.spec.ts src/router/index.spec.ts`, `npm run build` | PASS |
 
 ## Deviations, blockers and next steps
 

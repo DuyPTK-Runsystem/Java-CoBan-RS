@@ -192,7 +192,7 @@ onMounted(() => { void loadContext() })
   <div class="page-heading">
     <div>
       <p class="eyebrow">Academic catalog</p>
-      <h1>Lớp-môn</h1>
+      <h1>Quản lí môn học các lớp</h1>
       <p>Gán môn học và cập nhật trạng thái theo lớp, năm học và học kỳ.</p>
     </div>
     <div class="page-heading-actions">

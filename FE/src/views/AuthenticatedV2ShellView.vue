@@ -31,7 +31,10 @@ function logout(): void {
       { label: 'Khối', to: '/v2/academic-catalog/grades', icon: 'pi pi-sitemap' },
       { label: 'Lớp', to: '/v2/academic-catalog/classes', icon: 'pi pi-building' },
       { label: 'Môn học', to: '/v2/academic-catalog/subjects', icon: 'pi pi-book' },
-      { label: 'Lớp-môn', to: '/v2/academic-catalog/class-subjects', icon: 'pi pi-link' },
+      { label: 'Quản lí môn học các lớp', to: '/v2/academic-catalog/class-subjects', icon: 'pi pi-link' },
+      { label: 'Xếp lớp', to: '/v2/enrollments', icon: 'pi pi-users' },
+      { label: 'Hồ sơ giáo viên', to: '/v2/teachers', icon: 'pi pi-id-card' },
+      { label: 'Phân công giảng dạy', to: '/v2/teaching-assignments', icon: 'pi pi-briefcase' },
     ]"
     @logout="logout"
   >
