@@ -20,3 +20,4 @@
 | 053.1 | Academic | [Subject Applicability Management & Dialog Layout](academic/053.1-subject-applicability-management-and-dialog-layout-2026-08-28.md) | Completed; validation PASS | 2026-08-28 |
 | 054 | Enrollment | [Student Enrollment & Class Placement UI](enrollment/054-student-enrollment-class-placement-ui-2026-08-28.md) | Completed; grade selector, wording, context layout and transfer feedback refinement applied; validation PASS | 2026-08-28 |
 | 055 | Teacher | [Teacher Profile & Teaching Assignment UI](teacher/055-teacher-profile-and-teaching-assignment-ui-2026-08-28.md) | Completed; validation PASS | 2026-08-28 |
+| 056 | Attendance | [Attendance Workspace UI](attendance/056-attendance-workspace-ui-2026-08-28.md) | Completed; validation PASS | 2026-08-28 |

@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Plan 056 — Attendance Workspace UI</title>
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --surface: #fff;
+      --surface-soft: #eef3f6;
+      --text: #17232c;
+      --muted: #61707b;
+      --line: #d7e0e5;
+      --primary: #0f766e;
+      --primary-soft: #e4f3f1;
+      --success: #18794e;
+      --success-soft: #e7f6ed;
+      --warning: #9a6700;
+      --warning-soft: #fff5d6;
+      --danger: #b42318;
+      --danger-soft: #ffefed;
+      --shadow: 0 12px 28px rgb(23 35 44 / 7%);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      min-width: 320px;
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      font: 14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 64px;
+      padding: 0 28px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .brand-mark {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: 8px;
+      color: #fff;
+      background: var(--primary);
+      font-size: 12px;
+    }
+    .header-actions { display: flex; align-items: center; gap: 16px; color: var(--muted); }
+    .body { display: flex; min-height: calc(100vh - 64px); }
+    .sidebar {
+      width: 236px;
+      flex: 0 0 236px;
+      padding: 24px 14px;
+      border-right: 1px solid var(--line);
+      background: var(--surface);
+    }
+    .sidebar-title { margin: 0 12px 12px; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+    .nav { display: grid; gap: 6px; }
+    .nav button, .screen-tabs button { border: 0; color: inherit; background: transparent; text-align: left; }
+    .nav button { padding: 10px 12px; border-radius: 7px; color: var(--muted); font-weight: 600; }
+    .nav button.active { color: var(--primary); background: var(--primary-soft); }
+    .content { width: min(100%, 1320px); margin: 0 auto; padding: 30px; }
+    .eyebrow { margin: 0 0 4px; color: var(--primary); font-size: 12px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+    .heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: 28px; line-height: 1.2; }
+    h2 { font-size: 18px; line-height: 1.3; }
+    h3 { font-size: 15px; }
+    .muted { color: var(--muted); }
+    .button { padding: 9px 14px; border: 1px solid var(--line); border-radius: 7px; color: var(--text); background: var(--surface); font-weight: 600; }
+    .button.primary { border-color: var(--primary); color: #fff; background: var(--primary); }
+    .button.text { border-color: transparent; color: var(--primary); background: transparent; }
+    .button.danger { color: var(--danger); background: var(--danger-soft); }
+    .heading-actions, .toolbar, .action-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .screen-tabs { display: flex; gap: 4px; margin-bottom: 18px; padding: 4px; overflow-x: auto; border-radius: 8px; background: var(--surface-soft); }
+    .screen-tabs button { padding: 10px 14px; white-space: nowrap; border-radius: 7px; color: var(--muted); font-weight: 700; }
+    .screen-tabs button.active { color: var(--primary); background: var(--surface); box-shadow: 0 2px 8px rgb(23 35 44 / 9%); }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .surface { margin-bottom: 18px; padding: 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: var(--shadow); }
+    .context-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)) auto; gap: 12px; align-items: end; }
+    .field { display: grid; gap: 5px; }
+    .field label { color: var(--muted); font-size: 12px; font-weight: 700; }
+    input, select, textarea { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 6px; color: var(--text); background: var(--surface); }
+    textarea { min-height: 90px; resize: vertical; }
+    .calendar-banner { display: flex; gap: 10px; align-items: flex-start; margin-top: 16px; padding: 12px 14px; border-left: 3px solid var(--success); color: var(--success); background: var(--success-soft); }
+    .calendar-banner strong { display: block; }
+    .calendar-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; color: var(--muted); font-size: 12px; }
+    .session-meta { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
+    .stat { padding: 13px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-soft); }
+    .stat span { display: block; color: var(--muted); font-size: 12px; }
+    .stat strong { display: block; margin-top: 3px; font-size: 20px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; min-width: 760px; border-collapse: collapse; }
+    th, td { padding: 12px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+    th { color: var(--muted); font-size: 12px; font-weight: 700; }
+    .primary-cell { display: grid; gap: 2px; }
+    .primary-cell small { color: var(--muted); }
+    .tag { display: inline-flex; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .tag.present, .tag.success { color: var(--success); background: var(--success-soft); }
+    .tag.absent, .tag.danger { color: var(--danger); background: var(--danger-soft); }
+    .tag.excused, .tag.warning { color: var(--warning); background: var(--warning-soft); }
+    .tag.late { color: #9a4d00; background: #fff0e1; }
+    .tag.early { color: #6b4aa0; background: #f1eaff; }
+    .tag.neutral { color: var(--muted); background: var(--surface-soft); }
+    .note { margin-top: 14px; color: var(--muted); font-size: 12px; }
+    .filter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; gap: 12px; align-items: end; margin: 16px 0 18px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; margin-bottom: 18px; }
+    .summary-grid .stat strong { font-size: 18px; }
+    .summary-grid .stat { min-height: 76px; }
+    .pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; color: var(--muted); font-size: 12px; }
+    .pagination .action-row { justify-content: flex-end; }
+    .modal-backdrop { display: none; position: fixed; inset: 0; z-index: 5; place-items: center; padding: 20px; background: rgb(23 35 44 / 42%); }
+    .modal-backdrop.open { display: grid; }
+    .modal { width: min(100%, 560px); max-height: calc(100vh - 40px); overflow: auto; padding: 22px; border-radius: 10px; background: var(--surface); box-shadow: 0 20px 60px rgb(23 35 44 / 24%); }
+    .modal-head, .modal-foot { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .modal-head { margin-bottom: 18px; }
+    .modal-foot { justify-content: flex-end; margin-top: 20px; }
+    .close { border: 0; color: var(--muted); background: transparent; font-size: 20px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .wide { grid-column: 1 / -1; }
+    .student-callout { margin-bottom: 16px; padding: 11px 12px; border-radius: 7px; background: var(--primary-soft); }
+    @media (max-width: 1060px) {
+      .context-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .context-grid .button { grid-column: 1 / -1; justify-self: start; }
+      .summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 760px) {
+      .header { padding: 0 16px; }
+      .header-actions span { display: none; }
+      .body { display: block; }
+      .sidebar { width: 100%; padding: 10px 16px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .sidebar-title { display: none; }
+      .nav { display: flex; overflow-x: auto; }
+      .nav button { white-space: nowrap; }
+      .content { padding: 22px 16px; }
+      .heading { display: grid; }
+      .heading-actions .button { flex: 1; }
+      .context-grid, .filter-grid, .form-grid { grid-template-columns: 1fr; }
+      .context-grid .button, .wide { grid-column: auto; }
+      .summary-grid, .session-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .pagination { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="brand"><span class="brand-mark">AC</span><span>THCS Demo · Academic Core</span></div>
+      <div class="header-actions"><span>Đăng nhập: teacher.demo</span><button class="button text" type="button">Đăng xuất</button></div>
+    </header>
+    <div class="body">
+      <aside class="sidebar" aria-label="Điều hướng">
+        <p class="sidebar-title">Workspace</p>
+        <nav class="nav">
+          <button type="button">Năm học &amp; học kỳ</button>
+          <button type="button">Xếp lớp</button>
+          <button type="button">Phân công giảng dạy</button>
+          <button class="active" type="button">Điểm danh</button>
+        </nav>
+      </aside>
+      <main class="content">
+        <p class="eyebrow">Attendance · Plan 056</p>
+        <div class="heading">
+          <div><h1>Điểm danh</h1><p class="muted">Mở buổi học, ghi nhận ngoại lệ và theo dõi chuyên cần trong một workspace</p></div>
+          <div class="heading-actions"><button class="button" type="button">↻ Làm mới dữ liệu</button></div>
+        </div>
+
+        <div class="screen-tabs" role="tablist" aria-label="Nhóm màn hình điểm danh">
+          <button class="active" type="button" data-screen="session">Điểm danh theo buổi</button>
+          <button type="button" data-screen="history">Lịch sử của học sinh</button>
+          <button type="button" data-screen="summary">Báo cáo lớp</button>
+        </div>
+
+        <section class="screen active" data-panel="session">
+          <div class="surface">
+            <div class="toolbar" style="justify-content: space-between; margin-bottom: 14px"><div><h2>Context điểm danh</h2><p class="muted">Chọn đủ năm học, học kỳ, lớp, ngày và buổi trước khi mở session</p></div><span class="tag neutral">Backend quyết định quyền</span></div>
+            <div class="context-grid">
+              <div class="field"><label for="session-year">Năm học</label><select id="session-year"><option>2026–2027 · ACTIVE</option></select></div>
+              <div class="field"><label for="session-semester">Học kỳ</label><select id="session-semester"><option>Học kỳ 1</option><option>Học kỳ 2</option></select></div>
+              <div class="field"><label for="session-class">Lớp</label><select id="session-class"><option>6A1 · Khối 6</option><option>6A2 · Khối 6</option></select></div>
+              <div class="field"><label for="session-date">Ngày điểm danh</label><input id="session-date" type="date" value="2026-09-04"></div>
+              <div class="field"><label for="session-period">Buổi</label><select id="session-period"><option>MORNING · Sáng</option><option>AFTERNOON · Chiều</option></select></div>
+              <button class="button primary" id="open-session" type="button">Mở buổi điểm danh</button>
+            </div>
+            <div class="calendar-banner"><span aria-hidden="true">✓</span><div><strong>Ngày học hợp lệ · SCHEDULED</strong><span>04/09/2026 có buổi sáng đã cấu hình trong lịch học kỳ.</span></div></div>
+            <div class="calendar-legend"><span class="tag success">SCHEDULED · Có thể mở session</span><span class="tag neutral">NO_CLASS · Không ghi điểm danh</span></div>
+          </div>
+
+          <div class="surface">
+            <div class="toolbar" style="justify-content: space-between"><div><h2>Danh sách học sinh · Buổi sáng</h2><p class="muted">Session #5012 · 04/09/2026 · 6A1</p></div><span class="tag success" id="session-state">Đã mở · 32 học sinh</span></div>
+            <div class="session-meta">
+              <div class="stat"><span>Session ID</span><strong>#5012</strong></div>
+              <div class="stat"><span>Học sinh</span><strong>32</strong></div>
+              <div class="stat"><span>Đã có ngoại lệ</span><strong>3</strong></div>
+              <div class="stat"><span>Mặc định</span><strong>PRESENT</strong></div>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Học sinh</th><th>Trạng thái hiện tại</th><th>Ghi chú</th><th>Cập nhật gần nhất</th><th>Thao tác</th></tr></thead><tbody>
+              <tr data-student="Nguyễn Minh An · HS001"><td><div class="primary-cell"><strong>Nguyễn Minh An</strong><small>HS001</small></div></td><td><span class="tag present">PRESENT · mặc định</span></td><td>—</td><td>Chưa có record</td><td><button class="button text" type="button" data-open="exception">Ghi nhận</button></td></tr>
+              <tr data-student="Trần Gia Bảo · HS002"><td><div class="primary-cell"><strong>Trần Gia Bảo</strong><small>HS002</small></div></td><td><span class="tag absent">ABSENT</span></td><td>Chưa nộp giấy xin phép</td><td>08:04 · teacher.demo</td><td><div class="action-row"><button class="button text" type="button" data-open="exception">Sửa</button><button class="button danger" type="button" data-delete>↺ Xóa</button></div></td></tr>
+              <tr data-student="Lê Khánh Chi · HS003"><td><div class="primary-cell"><strong>Lê Khánh Chi</strong><small>HS003</small></div></td><td><span class="tag excused">EXCUSED</span></td><td>Đau bụng</td><td>08:07 · teacher.demo</td><td><div class="action-row"><button class="button text" type="button" data-open="exception">Sửa</button><button class="button danger" type="button" data-delete>↺ Xóa</button></div></td></tr>
+              <tr data-student="Phạm Đức Long · HS004"><td><div class="primary-cell"><strong>Phạm Đức Long</strong><small>HS004</small></div></td><td><span class="tag late">LATE</span></td><td>Đến lúc 07:52</td><td>08:09 · teacher.demo</td><td><div class="action-row"><button class="button text" type="button" data-open="exception">Sửa</button><button class="button danger" type="button" data-delete>↺ Xóa</button></div></td></tr>
+            </tbody></table></div>
+            <p class="note">Không có exception thì hệ thống suy ra <strong>PRESENT</strong>; thao tác xóa chỉ xóa exception và trả học sinh về mặc định có mặt.</p>
+          </div>
+        </section>
+
+        <section class="screen" data-panel="history">
+          <div class="surface">
+            <div class="toolbar" style="justify-content: space-between"><div><h2>Lịch sử chuyên cần của tôi</h2><p class="muted">Read-only · dữ liệu của học sinh đang đăng nhập</p></div><span class="tag neutral">/attendance/students/me/history</span></div>
+            <div class="filter-grid">
+              <div class="field"><label for="history-year">Năm học</label><select id="history-year"><option>2026–2027</option></select></div>
+              <div class="field"><label for="history-semester">Học kỳ</label><select id="history-semester"><option>Tất cả học kỳ</option><option>Học kỳ 1</option></select></div>
+              <div class="field"><label for="history-from">Từ ngày</label><input id="history-from" type="date" value="2026-09-01"></div>
+              <div class="field"><label for="history-to">Đến ngày</label><input id="history-to" type="date" value="2026-09-30"></div>
+              <button class="button primary" type="button">Xem lịch sử</button>
+            </div>
+            <div class="summary-grid">
+              <div class="stat"><span>Buổi hợp lệ</span><strong>20</strong></div><div class="stat"><span>Có mặt</span><strong>18</strong></div><div class="stat"><span>Vắng phép</span><strong>1</strong></div><div class="stat"><span>Vắng không phép</span><strong>0</strong></div><div class="stat"><span>Đi trễ</span><strong>1</strong></div><div class="stat"><span>Về sớm</span><strong>0</strong></div>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Ngày</th><th>Buổi</th><th>Lớp</th><th>Trạng thái</th><th>Exception</th><th>Ghi chú</th></tr></thead><tbody>
+              <tr><td>04/09/2026</td><td>Sáng</td><td>6A1</td><td><span class="tag present">PRESENT</span></td><td>—</td><td>—</td></tr>
+              <tr><td>03/09/2026</td><td>Chiều</td><td>6A1</td><td><span class="tag late">LATE</span></td><td>LATE</td><td>Đến lúc 07:52</td></tr>
+              <tr><td>02/09/2026</td><td>Sáng</td><td>6A1</td><td><span class="tag excused">EXCUSED</span></td><td>EXCUSED</td><td>Đau bụng</td></tr>
+              <tr><td>01/09/2026</td><td>Sáng</td><td>6A1</td><td><span class="tag present">PRESENT</span></td><td>—</td><td>—</td></tr>
+            </tbody></table></div>
+            <div class="pagination"><span>Hiển thị 1–4 trong 20 bản ghi</span><div class="action-row"><button class="button" type="button">← Trước</button><span>Trang 1 / 5</span><button class="button" type="button">Sau →</button></div></div>
+          </div>
+        </section>
+
+        <section class="screen" data-panel="summary">
+          <div class="surface">
+            <div class="toolbar" style="justify-content: space-between"><div><h2>Báo cáo chuyên cần theo lớp</h2><p class="muted">Số liệu on-demand theo buổi học hợp lệ và enrollment tại ngày điểm danh</p></div><span class="tag neutral">/attendance/classes/{classId}/summary</span></div>
+            <div class="filter-grid">
+              <div class="field"><label for="summary-class">Lớp</label><select id="summary-class"><option>6A1 · Khối 6</option></select></div>
+              <div class="field"><label for="summary-semester">Học kỳ</label><select id="summary-semester"><option>Học kỳ 1</option></select></div>
+              <div class="field"><label for="summary-from">Từ ngày</label><input id="summary-from" type="date" value="2026-09-01"></div>
+              <div class="field"><label for="summary-to">Đến ngày</label><input id="summary-to" type="date" value="2026-09-30"></div>
+              <button class="button primary" type="button">Tải báo cáo</button>
+            </div>
+            <div class="summary-grid">
+              <div class="stat"><span>Buổi hợp lệ</span><strong>20</strong></div><div class="stat"><span>Tổng có mặt</span><strong>612</strong></div><div class="stat"><span>Vắng phép</span><strong>18</strong></div><div class="stat"><span>Vắng không phép</span><strong>7</strong></div><div class="stat"><span>Đi trễ</span><strong>21</strong></div><div class="stat"><span>Về sớm</span><strong>4</strong></div>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Học sinh</th><th>Buổi hợp lệ</th><th>Có mặt</th><th>Vắng phép</th><th>Vắng K/P</th><th>Đi trễ</th><th>Về sớm</th><th>Tỷ lệ</th></tr></thead><tbody>
+              <tr><td><div class="primary-cell"><strong>Nguyễn Minh An</strong><small>HS001</small></div></td><td>20</td><td>20</td><td>0</td><td>0</td><td>0</td><td>0</td><td><span class="tag success">100%</span></td></tr>
+              <tr><td><div class="primary-cell"><strong>Trần Gia Bảo</strong><small>HS002</small></div></td><td>20</td><td>18</td><td>1</td><td>0</td><td>1</td><td>0</td><td><span class="tag success">90%</span></td></tr>
+              <tr><td><div class="primary-cell"><strong>Lê Khánh Chi</strong><small>HS003</small></div></td><td>20</td><td>19</td><td>1</td><td>0</td><td>0</td><td>0</td><td><span class="tag success">95%</span></td></tr>
+              <tr><td><div class="primary-cell"><strong>Phạm Đức Long</strong><small>HS004</small></div></td><td>20</td><td>17</td><td>0</td><td>2</td><td>1</td><td>0</td><td><span class="tag warning">85%</span></td></tr>
+            </tbody></table></div>
+            <div class="pagination"><span>Hiển thị 1–4 trong 32 học sinh · sắp xếp theo mã học sinh</span><div class="action-row"><button class="button" type="button">← Trước</button><span>Trang 1 / 8</span><button class="button" type="button">Sau →</button></div></div>
+            <p class="note">`attendanceRate` do backend trả về; FE không tự tính điểm hay tạo bản ghi PRESENT.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" data-modal="exception" role="dialog" aria-modal="true" aria-labelledby="exception-title">
+    <div class="modal">
+      <div class="modal-head"><div><h2 id="exception-title">Ghi nhận ngoại lệ điểm danh</h2><p class="muted">Chỉ lưu exception; không tạo record PRESENT</p></div><button class="close" type="button" data-close aria-label="Đóng">×</button></div>
+      <div class="student-callout"><strong id="selected-student">Nguyễn Minh An · HS001</strong><br><span class="muted">Session #5012 · 04/09/2026 · Sáng</span></div>
+      <div class="form-grid"><div class="field wide"><label for="exception-status">Trạng thái (*)</label><select id="exception-status"><option>ABSENT</option><option>EXCUSED</option><option>LATE</option><option>EARLY_LEAVE</option></select></div><div class="field wide"><label for="exception-note">Ghi chú</label><textarea id="exception-note" maxlength="500" placeholder="Tối đa 500 ký tự"></textarea></div></div>
+      <div class="modal-foot"><button class="button" type="button" data-close>Hủy</button><button class="button primary" type="button" data-close>Lưu ngoại lệ</button></div>
+    </div>
+  </div>
+
+  <script>
+    const tabButtons = document.querySelectorAll('[data-screen]')
+    const panels = document.querySelectorAll('[data-panel]')
+    tabButtons.forEach((button) => button.addEventListener('click', () => {
+      tabButtons.forEach((item) => item.classList.toggle('active', item === button))
+      panels.forEach((panel) => panel.classList.toggle('active', panel.dataset.panel === button.dataset.screen))
+    }))
+
+    const closeAll = () => document.querySelectorAll('.modal-backdrop.open').forEach((modal) => modal.classList.remove('open'))
+    document.querySelectorAll('[data-open]').forEach((button) => button.addEventListener('click', () => {
+      const row = button.closest('tr')
+      const student = row?.dataset.student
+      if (student) document.querySelector('#selected-student').textContent = student
+      closeAll()
+      document.querySelector(`[data-modal="${button.dataset.open}"]`).classList.add('open')
+    }))
+    document.querySelectorAll('[data-close]').forEach((button) => button.addEventListener('click', closeAll))
+    document.querySelectorAll('.modal-backdrop').forEach((modal) => modal.addEventListener('click', (event) => {
+      if (event.target === modal) modal.classList.remove('open')
+    }))
+    document.querySelectorAll('[data-delete]').forEach((button) => button.addEventListener('click', () => {
+      if (!window.confirm('Xóa exception và trả học sinh về PRESENT mặc định?')) return
+      const row = button.closest('tr')
+      const statusCell = row?.children[1]
+      const noteCell = row?.children[2]
+      const timeCell = row?.children[3]
+      if (statusCell) statusCell.innerHTML = '<span class="tag present">PRESENT · mặc định</span>'
+      if (noteCell) noteCell.textContent = '—'
+      if (timeCell) timeCell.textContent = 'Đã xóa exception'
+      button.remove()
+    }))
+    document.querySelector('#open-session').addEventListener('click', (event) => {
+      event.currentTarget.textContent = '✓ Session đã mở'
+      event.currentTarget.classList.remove('primary')
+      document.querySelector('#session-state').textContent = 'Đã mở · 32 học sinh'
+    })
+  </script>
+</body>
+</html>

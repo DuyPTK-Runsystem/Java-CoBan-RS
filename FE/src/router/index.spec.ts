@@ -79,6 +79,7 @@ describe('router authentication guard', () => {
     ['/v2/academic-catalog/subjects', 'v2-academic-subjects'],
     ['/v2/academic-catalog/class-subjects', 'v2-academic-class-subjects'],
     ['/v2/enrollments', 'v2-enrollments'],
+    ['/v2/attendance', 'v2-attendance'],
   ])('keeps the supported route %s mapped to %s', (path, name) => {
     expect(router.resolve(path).name).toBe(name)
   })

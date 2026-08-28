@@ -79,3 +79,4 @@ NNN-short-topic-yyyy-mm-dd.md
 | 053.1 | BE/FE        | [Subject Applicability Management & Dialog Layout](../fe/academic/053.1-subject-applicability-management-and-dialog-layout-2026-08-28.md) | Completed; BE/FE validation PASS | 2026-08-28 |
 | 054 | FE             | [Student Enrollment & Class Placement UI](../fe/enrollment/054-student-enrollment-class-placement-ui-2026-08-28.md) | Completed; grade selector, wording, context layout and transfer feedback refinement applied; validation PASS | 2026-08-28 |
 | 055 | FE             | [Teacher Profile & Teaching Assignment UI](../fe/teacher/055-teacher-profile-and-teaching-assignment-ui-2026-08-28.md) | Completed; validation PASS | 2026-08-28 |
+| 056 | FE             | [Attendance Workspace UI](../fe/attendance/056-attendance-workspace-ui-2026-08-28.md) | Completed; validation PASS | 2026-08-28 |

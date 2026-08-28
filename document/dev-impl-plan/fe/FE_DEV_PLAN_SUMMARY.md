@@ -19,6 +19,7 @@
 | 053.1 | [Subject Applicability Management & Dialog Layout](academic/053.1-subject-applicability-management-and-dialog-layout-2026-08-28.md) | FE integration for applicability read/update/deactivate/reactivate and catalog Dialog margin correction, paired with the BE contract extension | Completed; validation PASS                                                     | 2026-08-28 |
 |   054 | [Student Enrollment & Class Placement UI](enrollment/054-student-enrollment-class-placement-ui-2026-08-28.md)                       | Student Enrollment UI for academic-year context, unassigned students, class roster, single/bulk placement, transfer and history                | Completed; validation PASS                                                     | 2026-08-28 |
 |   055 | [Teacher Profile & Teaching Assignment UI](teacher/055-teacher-profile-and-teaching-assignment-ui-2026-08-28.md)                    | Teacher Profile UI (list, create, edit, user link) and Teaching Assignment UI (homeroom & subject assignments, schedule view)                  | Approved; implementation completed; validation PASS                            | 2026-08-28 |
+|   056 | [Attendance Workspace UI](attendance/056-attendance-workspace-ui-2026-08-28.md)                                                     | Hợp nhất Attendance Session, Exception Entry và Attendance History/Summary trong một workspace `/v2/attendance` với wireframe review       | Approved; implementation completed; validation PASS                              | 2026-08-28 |
 
 ## Current FE notes
 

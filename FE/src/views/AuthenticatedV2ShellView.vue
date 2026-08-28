@@ -35,6 +35,7 @@ function logout(): void {
       { label: 'Xếp lớp', to: '/v2/enrollments', icon: 'pi pi-users' },
       { label: 'Hồ sơ giáo viên', to: '/v2/teachers', icon: 'pi pi-id-card' },
       { label: 'Phân công giảng dạy', to: '/v2/teaching-assignments', icon: 'pi pi-briefcase' },
+      { label: 'Điểm danh', to: '/v2/attendance', icon: 'pi pi-calendar' },
     ]"
     @logout="logout"
   >

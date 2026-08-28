@@ -105,6 +105,11 @@ const router = createRouter({
           component: () => import('@/views/TeachingAssignmentView.vue'),
         },
         {
+          path: 'attendance',
+          name: 'v2-attendance',
+          component: () => import('@/views/AttendanceWorkspaceView.vue'),
+        },
+        {
           // Business routes must be registered before this neutral outlet.
           path: ':pathMatch(.*)*',
           name: 'v2-outlet',
