@@ -1,0 +1,11 @@
+<script setup lang="ts">
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import StatusTag from '@/components/StatusTag.vue'
+import type { Teacher, TeacherStatus } from '@/types/teacher'
+const props = withDefaults(defineProps<{ visible?: boolean; teacher?: Teacher | null }>(), { visible: false, teacher: null })
+const emit = defineEmits<{ 'update:visible': [value: boolean]; schedule: [teacher: Teacher] }>()
+const labels: Record<TeacherStatus, string> = { ACTIVE: 'Đang công tác', ON_LEAVE: 'Nghỉ phép', INACTIVE: 'Ngừng công tác' }
+function date(v: string | null): string { return v ? v.split('-').reverse().join('/') : '—' }
+</script>
+<template><Dialog :visible="props.visible" modal header="Chi tiết giáo viên" :style="{ width: 'min(100% - 2rem, 680px)' }" @update:visible="emit('update:visible', $event)"><template v-if="props.teacher"><div class="status-dialog-content"><div class="status-dialog-heading"><div><h2>{{ props.teacher.teacherName }}</h2><p class="dialog-caption">{{ props.teacher.teacherCode }}</p></div><StatusTag :label="labels[props.teacher.status]" :severity="props.teacher.status === 'ACTIVE' ? 'success' : props.teacher.status === 'ON_LEAVE' ? 'warn' : 'contrast'" /></div><div class="detail-grid"><div class="detail-item"><span>Ngày sinh</span><strong>{{ date(props.teacher.dateOfBirth) }}</strong></div><div class="detail-item"><span>Giới tính</span><strong>{{ props.teacher.gender || '—' }}</strong></div><div class="detail-item"><span>Điện thoại</span><strong>{{ props.teacher.phone || '—' }}</strong></div><div class="detail-item"><span>Email</span><strong>{{ props.teacher.email || '—' }}</strong></div><div class="detail-item"><span>Tổ chuyên môn</span><strong>{{ props.teacher.department || '—' }}</strong></div><div class="detail-item"><span>Ngày vào trường</span><strong>{{ date(props.teacher.joinDate) }}</strong></div><div class="detail-item detail-item-wide"><span>Tài khoản liên kết</span><strong>{{ props.teacher.userId ? `User #${props.teacher.userId}` : 'Chưa liên kết' }}</strong></div></div><div class="form-actions"><Button label="Xem lịch sử phân công" icon="pi pi-calendar" severity="secondary" outlined @click="emit('schedule', props.teacher!)" /><Button label="Đóng" icon="pi pi-times" @click="emit('update:visible', false)" /></div></div></template></Dialog></template>

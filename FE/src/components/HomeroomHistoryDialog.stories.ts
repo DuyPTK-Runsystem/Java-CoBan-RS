@@ -1,0 +1,2 @@
+import type { Meta, StoryObj } from '@storybook/vue3'; import HomeroomHistoryDialog from './HomeroomHistoryDialog.vue'
+const meta = { title: 'Assignment/HomeroomHistoryDialog', component: HomeroomHistoryDialog, args: { visible: true, assignments: [{ id: 1, classId: 1, teacherId: 1, validFrom: '2026-09-01', validTo: null, status: 'ACTIVE' as const, assignedBy: null }] } } satisfies Meta<typeof HomeroomHistoryDialog>; export default meta; type Story = StoryObj<typeof meta>; export const History: Story = {}; export const Empty: Story = { args: { assignments: [] } }
