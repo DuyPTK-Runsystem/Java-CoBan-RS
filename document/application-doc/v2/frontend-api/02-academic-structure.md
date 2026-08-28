@@ -144,11 +144,21 @@ Base:
 | `POST` | `/api/v2/subjects` | Office | `ReqCreateSubjectDTO` | `201 ResSubjectDTO` |
 | `PUT` | `/api/v2/subjects/{subjectId}` | Office | `ReqUpdateSubjectDTO` | `ResSubjectDTO` |
 | `POST` | `/api/v2/subjects/{subjectId}/applicabilities` | Office | applicability DTO | `201 ResSubjectApplicabilityDTO` |
+| `GET` | `/api/v2/subjects/{subjectId}/applicabilities` | Office | `semesterId?`, `status?` | `ResSubjectApplicabilityDTO[]` |
+| `PUT` | `/api/v2/subjects/{subjectId}/applicabilities/{applicabilityId}` | Office | `ReqUpdateSubjectApplicabilityDTO` | `ResSubjectApplicabilityDTO` |
+| `DELETE` | `/api/v2/subjects/{subjectId}/applicabilities/{applicabilityId}` | Office | — | `204` |
 
 Subject type, status and application scope use the canonical wire enums in
 [`07-enums-and-known-drift.md`](07-enums-and-known-drift.md).
 
 **Do not use `NORMAL` for `SubjectType` in FE current wire types.**
+
+Applicability GET returns both `ACTIVE` and `INACTIVE` records by default. PUT is
+a guarded full replacement of semester, scope, target and status; `subjectId`
+is immutable, and a tuple already used by `class_subject` cannot be moved to a
+different semester or target. DELETE is a soft delete: it changes status to
+`INACTIVE`, preserves the row and does not delete existing `class_subject` or
+score data. Applicability belonging to a `CLOSED` semester is read-only.
 
 ### Class Subject
 

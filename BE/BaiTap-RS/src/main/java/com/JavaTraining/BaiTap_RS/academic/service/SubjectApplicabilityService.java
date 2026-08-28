@@ -1,16 +1,18 @@
 package com.JavaTraining.BaiTap_RS.academic.service;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.requests.ReqCreateSubjectApplicabilityDTO;
+import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.requests.ReqUpdateSubjectApplicabilityDTO;
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResSubjectApplicabilityDTO;
-import com.JavaTraining.BaiTap_RS.academic.domain.entity.ApplicationScope;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Semester;
-import com.JavaTraining.BaiTap_RS.academic.domain.entity.SemesterStatus;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Subject;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectApplicability;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectApplicabilityStatus;
-import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectType;
-import com.JavaTraining.BaiTap_RS.academic.repository.GradeLevelRepository;
-import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
+import com.JavaTraining.BaiTap_RS.academic.repository.ClassSubjectRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SemesterRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectApplicabilityRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectRepository;
@@ -25,29 +27,50 @@ public class SubjectApplicabilityService {
     private final SubjectRepository subjectRepository;
     private final SubjectApplicabilityRepository applicabilityRepository;
     private final SemesterRepository semesterRepository;
-    private final GradeLevelRepository gradeLevelRepository;
-    private final SchoolClassRepository schoolClassRepository;
+    private final ClassSubjectRepository classSubjectRepository;
+    private final AcademicCatalogAuditService auditService;
+    private final SubjectApplicabilityValidator validator;
 
     public SubjectApplicabilityService(
             SubjectRepository subjectRepository,
             SubjectApplicabilityRepository applicabilityRepository,
             SemesterRepository semesterRepository,
-            GradeLevelRepository gradeLevelRepository,
-            SchoolClassRepository schoolClassRepository) {
+            ClassSubjectRepository classSubjectRepository,
+            AcademicCatalogAuditService auditService,
+            SubjectApplicabilityValidator validator) {
         this.subjectRepository = subjectRepository;
         this.applicabilityRepository = applicabilityRepository;
         this.semesterRepository = semesterRepository;
-        this.gradeLevelRepository = gradeLevelRepository;
-        this.schoolClassRepository = schoolClassRepository;
+        this.classSubjectRepository = classSubjectRepository;
+        this.auditService = auditService;
+        this.validator = validator;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ResSubjectApplicabilityDTO> listApplicabilities(
+            Long subjectId,
+            Long semesterId,
+            SubjectApplicabilityStatus status) {
+        findSubject(subjectId);
+        List<SubjectApplicability> records = applicabilityRepository.findAllByFilters(subjectId, semesterId, status);
+        return records.stream().map(this::toResponse).toList();
     }
 
     @Transactional
-    public ResSubjectApplicabilityDTO createApplicability(Long subjectId, ReqCreateSubjectApplicabilityDTO request) {
-        Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy môn học"));
-        Semester semester = semesterRepository.findById(request.semesterId())
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy học kỳ"));
-        validateTarget(subject, semester, request);
+    public ResSubjectApplicabilityDTO createApplicability(
+            Long subjectId,
+            ReqCreateSubjectApplicabilityDTO request) {
+        Subject subject = findSubject(subjectId);
+        Semester semester = findSemester(request.semesterId());
+        validator.validateTarget(
+                subject,
+                semester,
+                request.semesterId(),
+                request.scopeType(),
+                request.gradeLevelId(),
+                request.classId(),
+                null,
+                SubjectApplicabilityStatus.ACTIVE);
         SubjectApplicability applicability = new SubjectApplicability(
                 subjectId,
                 request.semesterId(),
@@ -55,63 +78,101 @@ public class SubjectApplicabilityService {
                 request.gradeLevelId(),
                 request.classId(),
                 SubjectApplicabilityStatus.ACTIVE);
-        return toResponse(applicabilityRepository.save(applicability));
+        SubjectApplicability saved = applicabilityRepository.save(applicability);
+        auditService.writeAudit(
+                "SUBJECT_APPLICABILITY_CREATED",
+                "subject_applicability",
+                saved.getId(),
+                null,
+                applicabilityData(saved));
+        return toResponse(saved);
     }
 
-    private void validateTarget(Subject subject, Semester semester, ReqCreateSubjectApplicabilityDTO request) {
-        if (subject.getApplicationScope() != request.scopeType()) {
-            throw conflict("Scope áp dụng không khớp cấu hình môn học");
-        }
-        if (semester.getStatus() == SemesterStatus.CLOSED) {
-            throw conflict("Không cấu hình môn cho học kỳ đã CLOSED");
-        }
-        if (request.scopeType() == ApplicationScope.GRADE) {
-            requireGradeTarget(subject.getId(), request);
-        } else {
-            requireClassTarget(subject, semester, request);
-        }
-    }
-
-    private void requireGradeTarget(Long subjectId, ReqCreateSubjectApplicabilityDTO request) {
-        if (request.gradeLevelId() == null || request.classId() != null) {
-            throw conflict("Scope GRADE phải có gradeLevelId và không có classId");
-        }
-        if (!gradeLevelRepository.existsById(request.gradeLevelId())) {
-            throw new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy khối");
-        }
-        if (applicabilityRepository.existsBySubjectIdAndSemesterIdAndScopeTypeAndGradeLevelIdAndStatus(
-                subjectId,
+    @Transactional
+    public ResSubjectApplicabilityDTO updateApplicability(
+            Long subjectId,
+            Long applicabilityId,
+            ReqUpdateSubjectApplicabilityDTO request) {
+        Subject subject = findSubject(subjectId);
+        SubjectApplicability applicability = findOwnedApplicability(subjectId, applicabilityId);
+        Semester semester = findSemester(request.semesterId());
+        validator.validateTarget(
+                subject,
+                semester,
                 request.semesterId(),
-                ApplicationScope.GRADE,
+                request.scopeType(),
                 request.gradeLevelId(),
-                SubjectApplicabilityStatus.ACTIVE)) {
-            throw conflict("Cấu hình môn theo khối đã tồn tại");
+                request.classId(),
+                applicabilityId,
+                request.status());
+
+        boolean tupleChanged = !applicability.getSemesterId().equals(request.semesterId())
+                || applicability.getScopeType() != request.scopeType()
+                || !Objects.equals(applicability.getGradeLevelId(), request.gradeLevelId())
+                || !Objects.equals(applicability.getClassId(), request.classId());
+        if (tupleChanged && classSubjectRepository.existsByApplicabilityTarget(
+                subjectId,
+                applicability.getSemesterId(),
+                applicability.getScopeType(),
+                applicability.getGradeLevelId(),
+                applicability.getClassId())) {
+            throw conflict("Không thể đổi học kỳ hoặc phạm vi đã được dùng cho lớp-môn");
         }
+
+        Map<String, Object> beforeData = applicabilityData(applicability);
+        applicability.setSemesterId(request.semesterId());
+        applicability.setScopeType(request.scopeType());
+        applicability.setGradeLevelId(request.gradeLevelId());
+        applicability.setClassId(request.classId());
+        applicability.setStatus(request.status());
+        String action = beforeData.get("status").equals(applicability.getStatus().name())
+                ? "SUBJECT_APPLICABILITY_UPDATED"
+                : "SUBJECT_APPLICABILITY_STATUS_CHANGED";
+        auditService.writeAudit(
+                action,
+                "subject_applicability",
+                applicabilityId,
+                beforeData,
+                applicabilityData(applicability));
+        return toResponse(applicability);
     }
 
-    private void requireClassTarget(
-            Subject subject,
-            Semester semester,
-            ReqCreateSubjectApplicabilityDTO request) {
-        if (request.classId() == null || request.gradeLevelId() != null) {
-            throw conflict("Scope CLASS phải có classId và không có gradeLevelId");
+    @Transactional
+    public void deactivateApplicability(Long subjectId, Long applicabilityId) {
+        findSubject(subjectId);
+        SubjectApplicability applicability = findOwnedApplicability(subjectId, applicabilityId);
+        Semester semester = findSemester(applicability.getSemesterId());
+        validator.ensureSemesterMutable(semester);
+        if (applicability.getStatus() == SubjectApplicabilityStatus.INACTIVE) {
+            return;
         }
-        schoolClassRepository.findById(request.classId())
-                .filter(schoolClass -> schoolClass.getAcademicYearId().equals(semester.getAcademicYearId()))
-                .orElseThrow(() -> conflict("Lớp không thuộc năm học của học kỳ"));
-        if (subject.getSubjectType() == SubjectType.SKILL
-                && applicabilityRepository.countBySubjectIdAndStatus(
-                        subject.getId(), SubjectApplicabilityStatus.ACTIVE) > 0) {
-            throw conflict("Môn SKILL chỉ được cấu hình trong một học kỳ");
+        Map<String, Object> beforeData = applicabilityData(applicability);
+        applicability.setStatus(SubjectApplicabilityStatus.INACTIVE);
+        auditService.writeAudit(
+                "SUBJECT_APPLICABILITY_DEACTIVATED",
+                "subject_applicability",
+                applicabilityId,
+                beforeData,
+                applicabilityData(applicability));
+    }
+
+    private Subject findSubject(Long subjectId) {
+        return subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy môn học"));
+    }
+
+    private Semester findSemester(Long semesterId) {
+        return semesterRepository.findById(semesterId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy học kỳ"));
+    }
+
+    private SubjectApplicability findOwnedApplicability(Long subjectId, Long applicabilityId) {
+        SubjectApplicability applicability = applicabilityRepository.findById(applicabilityId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy cấu hình phạm vi áp dụng"));
+        if (!applicability.getSubjectId().equals(subjectId)) {
+            throw new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy cấu hình phạm vi áp dụng");
         }
-        if (applicabilityRepository.existsBySubjectIdAndSemesterIdAndScopeTypeAndClassIdAndStatus(
-                subject.getId(),
-                request.semesterId(),
-                ApplicationScope.CLASS,
-                request.classId(),
-                SubjectApplicabilityStatus.ACTIVE)) {
-            throw conflict("Cấu hình môn theo lớp đã tồn tại");
-        }
+        return applicability;
     }
 
     private ResSubjectApplicabilityDTO toResponse(SubjectApplicability applicability) {
@@ -123,6 +184,18 @@ public class SubjectApplicabilityService {
                 applicability.getGradeLevelId(),
                 applicability.getClassId(),
                 applicability.getStatus());
+    }
+
+    private Map<String, Object> applicabilityData(SubjectApplicability applicability) {
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("id", applicability.getId());
+        data.put("subjectId", applicability.getSubjectId());
+        data.put("semesterId", applicability.getSemesterId());
+        data.put("scopeType", applicability.getScopeType().name());
+        data.put("gradeLevelId", applicability.getGradeLevelId());
+        data.put("classId", applicability.getClassId());
+        data.put("status", applicability.getStatus().name());
+        return data;
     }
 
     private AppException conflict(String message) {

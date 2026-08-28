@@ -225,6 +225,10 @@ export interface SubjectApplicabilityRequest {
   classId: number | null
 }
 
+export interface UpdateSubjectApplicabilityRequest extends SubjectApplicabilityRequest {
+  status: SubjectApplicabilityStatus
+}
+
 export interface ClassSubject {
   id: number
   classId: number

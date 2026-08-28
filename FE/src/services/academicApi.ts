@@ -15,10 +15,12 @@ import type {
   Subject,
   SubjectApplicability,
   SubjectApplicabilityRequest,
+  SubjectApplicabilityStatus,
   SubjectRequest,
   SubjectStatus,
   UpdateClassSubjectRequest,
   UpdateSchoolClassRequest,
+  UpdateSubjectApplicabilityRequest,
   UpdateSemesterRequest,
 } from '@/types/academic'
 
@@ -85,6 +87,24 @@ export function updateSubject(token: string, subjectId: number, request: Subject
 
 export function createSubjectApplicability(token: string, subjectId: number, request: SubjectApplicabilityRequest): Promise<SubjectApplicability> {
   return apiClient.post<SubjectApplicability>(`${subjectsPath}/${subjectId}/applicabilities`, request, { token })
+}
+
+export function fetchSubjectApplicabilities(token: string, subjectId: number, semesterId?: number, status?: SubjectApplicabilityStatus): Promise<SubjectApplicability[]> {
+  const query = new URLSearchParams()
+  if (semesterId !== undefined) query.set('semesterId', String(semesterId))
+  if (status !== undefined) query.set('status', status)
+  return apiClient.get<SubjectApplicability[]>(`${subjectsPath}/${subjectId}/applicabilities`, {
+    token,
+    query: query.size ? query : undefined,
+  })
+}
+
+export function updateSubjectApplicability(token: string, subjectId: number, applicabilityId: number, request: UpdateSubjectApplicabilityRequest): Promise<SubjectApplicability> {
+  return apiClient.put<SubjectApplicability>(`${subjectsPath}/${subjectId}/applicabilities/${applicabilityId}`, request, { token })
+}
+
+export function deactivateSubjectApplicability(token: string, subjectId: number, applicabilityId: number): Promise<void> {
+  return apiClient.delete<void>(`${subjectsPath}/${subjectId}/applicabilities/${applicabilityId}`, { token })
 }
 
 export function fetchClassSubjects(token: string, classId: number, semesterId: number): Promise<ClassSubject[]> {

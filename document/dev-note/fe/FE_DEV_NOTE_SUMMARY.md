@@ -17,3 +17,4 @@
 | 051 | FE v2 Shell & API Integration Foundation | [FE v2 Shell & API Integration Foundation](tooling/051-fe-v2-shell-api-integration-foundation-2026-08-27.md) | Completed; maintenance patch applied; validation PASS | 2026-08-27 |
 | 052 | Academic Year & Semester UI | [Academic Year & Semester UI](academic/052-academic-year-semester-ui-2026-08-27.md) | Completed; route/view orchestration and lifecycle flow delivered | 2026-08-27 |
 | 053 | Grade, Class, Subject & Class-Subject UI | [Grade, Class, Subject & Class-Subject UI](academic/053-grade-class-subject-management-ui-2026-08-27.md) | Phases 4–5 API/view integration completed; Phase 6 blocked by backend contract | 2026-08-27 |
+| 053.1 | Academic | [Subject Applicability Management & Dialog Layout](academic/053.1-subject-applicability-management-and-dialog-layout-2026-08-28.md) | Completed; validation PASS | 2026-08-28 |

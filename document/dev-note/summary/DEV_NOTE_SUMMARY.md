@@ -76,3 +76,4 @@ NNN-short-topic-yyyy-mm-dd.md
 |   051 | FE             | [FE v2 Shell & API Integration Foundation](../fe/tooling/051-fe-v2-shell-api-integration-foundation-2026-08-27.md)                                  | Completed; maintenance patch applied; validation PASS    | 2026-08-27 |
 |   052 | FE             | [Academic Year & Semester UI](../fe/academic/052-academic-year-semester-ui-2026-08-27.md)                                   | Completed; route/view orchestration and lifecycle flow delivered | 2026-08-27 |
 |   053 | FE             | [Grade, Class, Subject & Class-Subject UI](../fe/academic/053-grade-class-subject-management-ui-2026-08-27.md)           | Phases 4–5 API/view integration completed; Phase 6 blocked by backend contract | 2026-08-27 |
+| 053.1 | BE/FE        | [Subject Applicability Management & Dialog Layout](../fe/academic/053.1-subject-applicability-management-and-dialog-layout-2026-08-28.md) | Completed; BE/FE validation PASS | 2026-08-28 |

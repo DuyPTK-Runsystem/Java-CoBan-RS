@@ -38,6 +38,7 @@
 |   046 | [Transcript Query API](scorebook/046-transcript-query-api-2026-08-26.md)                                                            | API read-only bảng điểm học kỳ/cả năm, chi tiết cột điểm, retake, trạng thái calculation và scope học sinh/GVCN/GVBM/giáo vụ/admin      | Completed | 2026-08-26 |
 |   047 | [BE Operational Closure](scorebook/047-be-operational-closure-2026-08-26.md)                                                       | Audit log điểm, failed calculation task/retry, trạng thái tính tổng kết, security matrix và Postman flow vận hành                          | Completed | 2026-08-26 |
 |   048 | [BE Demo Data Bootstrap](bootstrap/048-be-demo-data-bootstrap-2026-08-26.md)                                                   | Seed admin bắt buộc và demo fixture cho identity, academic catalog, enrollment và teaching assignment                                  | Completed | 2026-08-26 |
+| 053.1 | [Subject Applicability Management & Dialog Layout](../fe/academic/053.1-subject-applicability-management-and-dialog-layout-2026-08-28.md) | BE applicability GET/full guarded PUT/soft DELETE contract, with paired FE management and Dialog margin correction | Completed; validation PASS | 2026-08-28 |
 
 ## Module folders
 

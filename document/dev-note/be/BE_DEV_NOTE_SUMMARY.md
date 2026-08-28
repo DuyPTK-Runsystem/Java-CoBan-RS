@@ -47,6 +47,7 @@
 |   046 | scorebook          | [Transcript Query API](scorebook/046-transcript-query-api-2026-08-26.md)                                                               | Main tests/Checkstyle/PMD PASS; full-suite limit recorded   | 2026-08-26 |
 |   047 | scorebook          | [BE Operational Closure](scorebook/047-be-operational-closure-2026-08-26.md)                                                             | Completed; validation PASS                                 | 2026-08-26 |
 |   048 | bootstrap          | [BE Demo Data Bootstrap](bootstrap/048-be-demo-data-bootstrap-2026-08-26.md)                                                             | Completed; validation PASS                                 | 2026-08-26 |
+| 053.1 | academic           | [Subject Applicability Management & Dialog Layout](../fe/academic/053.1-subject-applicability-management-and-dialog-layout-2026-08-28.md) | Completed; validation PASS | 2026-08-28 |
 
 ## Module folders
 

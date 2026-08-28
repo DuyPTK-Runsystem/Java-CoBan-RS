@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import Button from 'primevue/button'
+import ConfirmDialog from 'primevue/confirmdialog'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
+import { useConfirm } from 'primevue/useconfirm'
 import { useRouter } from 'vue-router'
 
 import SubjectApplicabilityDialog from '@/components/SubjectApplicabilityDialog.vue'
@@ -11,9 +13,9 @@ import SubjectTable from '@/components/SubjectTable.vue'
 import FormAlert from '@/components/FormAlert.vue'
 import PageState from '@/components/PageState.vue'
 import { clearAuthSession, getAuthSession } from '@/services/authSession'
-import { createSubject, createSubjectApplicability, fetchAcademicYears, fetchGrades, fetchSchoolClasses, fetchSemesters, fetchSubjects, updateSubject } from '@/services/academicApi'
+import { createSubject, createSubjectApplicability, deactivateSubjectApplicability, fetchAcademicYears, fetchGrades, fetchSchoolClasses, fetchSemesters, fetchSubjects, fetchSubjectApplicabilities, updateSubject, updateSubjectApplicability } from '@/services/academicApi'
 import { isApiError } from '@/types/api'
-import type { AcademicYear, ApplicationScope, GradeLevel, SchoolClass, Semester, Subject, SubjectApplicabilityFormValues, SubjectFormValues, SubjectStatus, SubjectType } from '@/types/academic'
+import type { AcademicYear, ApplicationScope, GradeLevel, SchoolClass, Semester, Subject, SubjectApplicability, SubjectApplicabilityFormValues, SubjectFormValues, SubjectStatus, SubjectType } from '@/types/academic'
 import type { LoadingState } from '@/types/ui'
 
 type StatusFilter = 'ALL' | SubjectStatus
@@ -21,6 +23,7 @@ type TypeFilter = 'ALL' | SubjectType
 type ScopeFilter = 'ALL' | ApplicationScope
 
 const router = useRouter()
+const confirm = useConfirm()
 const subjects = ref<Subject[]>([])
 const academicYears = ref<AcademicYear[]>([])
 const semesters = ref<Semester[]>([])
@@ -40,10 +43,13 @@ const dialogVisible = ref(false)
 const applicabilityVisible = ref(false)
 const dialogMode = ref<'create' | 'edit'>('create')
 const selectedSubject = ref<Subject | null>(null)
+const applicabilityMode = ref<'create' | 'edit'>('create')
+const selectedApplicability = ref<SubjectApplicability | null>(null)
+const applicabilities = ref<SubjectApplicability[]>([])
+const applicabilityLoading = ref(false)
 const saving = ref(false)
 const dialogErrorMessage = ref('')
 const applicabilityErrorMessage = ref('')
-const createdApplicability = ref('')
 
 const statusOptions: Array<{ label: string; value: StatusFilter }> = [
   { label: 'Tất cả trạng thái', value: 'ALL' },
@@ -186,15 +192,45 @@ async function saveSubject(values: SubjectFormValues): Promise<void> {
 
 function openApplicability(subject: Subject): void {
   selectedSubject.value = subject
+  selectedApplicability.value = null
+  applicabilityMode.value = 'create'
   applicabilityErrorMessage.value = ''
-  createdApplicability.value = ''
   applicabilityVisible.value = true
+  void loadApplicabilities()
 }
 
 function closeApplicability(): void {
   applicabilityVisible.value = false
+  selectedApplicability.value = null
+  applicabilityMode.value = 'create'
   applicabilityErrorMessage.value = ''
-  createdApplicability.value = ''
+}
+
+async function loadApplicabilities(): Promise<void> {
+  const accessToken = token()
+  if (!accessToken || !selectedSubject.value) return
+  applicabilityLoading.value = true
+  applicabilityErrorMessage.value = ''
+  try {
+    applicabilities.value = await fetchSubjectApplicabilities(accessToken, selectedSubject.value.id)
+  } catch (error) {
+    if (isApiError(error, 401)) return
+    applicabilityErrorMessage.value = messageFor(error, 'Không thể tải danh sách phạm vi áp dụng.')
+  } finally {
+    applicabilityLoading.value = false
+  }
+}
+
+function openApplicabilityCreate(): void {
+  selectedApplicability.value = null
+  applicabilityMode.value = 'create'
+  applicabilityErrorMessage.value = ''
+}
+
+function openApplicabilityEdit(applicability: SubjectApplicability): void {
+  selectedApplicability.value = applicability
+  applicabilityMode.value = 'edit'
+  applicabilityErrorMessage.value = ''
 }
 
 async function saveApplicability(values: SubjectApplicabilityFormValues): Promise<void> {
@@ -211,16 +247,76 @@ async function saveApplicability(values: SubjectApplicabilityFormValues): Promis
   saving.value = true
   applicabilityErrorMessage.value = ''
   try {
-    const created = await createSubjectApplicability(accessToken, selectedSubject.value.id, {
+    const request = {
       semesterId: values.semesterId,
       scopeType: values.scopeType,
       gradeLevelId: values.scopeType === 'GRADE' ? values.gradeLevelId : null,
       classId: values.scopeType === 'CLASS' ? values.classId : null,
-    })
-    createdApplicability.value = `Đã tạo cấu hình áp dụng #${created.id}. Backend hiện chưa có API tải lại danh sách applicability.`
+    }
+    if (applicabilityMode.value === 'edit' && selectedApplicability.value) {
+      await updateSubjectApplicability(accessToken, selectedSubject.value.id, selectedApplicability.value.id, {
+        ...request,
+        status: selectedApplicability.value.status,
+      })
+      statusMessage.value = 'Đã cập nhật cấu hình phạm vi áp dụng.'
+    } else {
+      await createSubjectApplicability(accessToken, selectedSubject.value.id, request)
+      statusMessage.value = 'Đã tạo cấu hình phạm vi áp dụng.'
+    }
+    await loadApplicabilities()
+    openApplicabilityCreate()
   } catch (error) {
     if (isApiError(error, 401)) return
-    applicabilityErrorMessage.value = messageFor(error, 'Không thể tạo cấu hình phạm vi áp dụng.')
+    applicabilityErrorMessage.value = messageFor(error, 'Không thể lưu cấu hình phạm vi áp dụng.')
+  } finally {
+    saving.value = false
+  }
+}
+
+function confirmDeactivateApplicability(applicability: SubjectApplicability): void {
+  confirm.require({
+    message: 'Cấu hình sẽ chuyển sang trạng thái ngừng áp dụng và không bị xóa khỏi lịch sử.',
+    header: 'Ngừng áp dụng môn?',
+    icon: 'pi pi-exclamation-triangle',
+    accept: () => { void deactivateApplicability(applicability) },
+  })
+}
+
+async function deactivateApplicability(applicability: SubjectApplicability): Promise<void> {
+  const accessToken = token()
+  if (!accessToken || !selectedSubject.value) return
+  saving.value = true
+  applicabilityErrorMessage.value = ''
+  try {
+    await deactivateSubjectApplicability(accessToken, selectedSubject.value.id, applicability.id)
+    statusMessage.value = 'Đã ngừng áp dụng cấu hình.'
+    await loadApplicabilities()
+  } catch (error) {
+    if (isApiError(error, 401)) return
+    applicabilityErrorMessage.value = messageFor(error, 'Không thể ngừng áp dụng cấu hình.')
+  } finally {
+    saving.value = false
+  }
+}
+
+async function reactivateApplicability(applicability: SubjectApplicability): Promise<void> {
+  const accessToken = token()
+  if (!accessToken || !selectedSubject.value) return
+  saving.value = true
+  applicabilityErrorMessage.value = ''
+  try {
+    await updateSubjectApplicability(accessToken, selectedSubject.value.id, applicability.id, {
+      semesterId: applicability.semesterId,
+      scopeType: applicability.scopeType,
+      gradeLevelId: applicability.gradeLevelId,
+      classId: applicability.classId,
+      status: 'ACTIVE',
+    })
+    statusMessage.value = 'Đã kích hoạt lại cấu hình.'
+    await loadApplicabilities()
+  } catch (error) {
+    if (isApiError(error, 401)) return
+    applicabilityErrorMessage.value = messageFor(error, 'Không thể kích hoạt lại cấu hình.')
   } finally {
     saving.value = false
   }
@@ -231,6 +327,7 @@ onMounted(() => { void loadSubjects(); void loadContext() })
 </script>
 
 <template>
+  <ConfirmDialog />
   <div class="page-heading">
     <div>
       <p class="eyebrow">Academic catalog</p>
@@ -260,5 +357,5 @@ onMounted(() => { void loadSubjects(); void loadContext() })
     </PageState>
   </section>
   <SubjectDialog v-model:visible="dialogVisible" :mode="dialogMode" :initial-value="selectedSubject" :saving="saving" :error-message="dialogErrorMessage" @save="saveSubject" @cancel="closeDialog" />
-  <SubjectApplicabilityDialog v-model:visible="applicabilityVisible" :subject="selectedSubject" :semesters="semesters" :grades="grades" :school-classes="schoolClasses" :saving="saving" :error-message="applicabilityErrorMessage" :created-applicability="createdApplicability" @save="saveApplicability" @cancel="closeApplicability" />
+  <SubjectApplicabilityDialog v-model:visible="applicabilityVisible" :mode="applicabilityMode" :subject="selectedSubject" :initial-value="selectedApplicability" :applicabilities="applicabilities" :applicability-loading="applicabilityLoading" :semesters="semesters" :grades="grades" :school-classes="schoolClasses" :saving="saving" :error-message="applicabilityErrorMessage" @save="saveApplicability" @create="openApplicabilityCreate" @edit="openApplicabilityEdit" @deactivate="confirmDeactivateApplicability" @reactivate="reactivateApplicability" @cancel="closeApplicability" />
 </template>

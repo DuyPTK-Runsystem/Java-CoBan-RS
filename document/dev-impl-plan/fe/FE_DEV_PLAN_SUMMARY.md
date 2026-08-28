@@ -16,6 +16,7 @@
 | 051 | [FE v2 Shell & API Integration Foundation](tooling/051-fe-v2-shell-api-integration-foundation-2026-08-27.md) | Shared fetch/API types, HTTP error handling, state components, authenticated shell and v2 route preparation | Approved; implementation completed | 2026-08-27 |
 | 052 | [Academic Year & Semester UI](academic/052-academic-year-semester-ui-2026-08-27.md) | Academic Year/Semester lists with dialog-based create/edit and Semester status/completeness dialog | Approved; implementation completed | 2026-08-27 |
 | 053 | [Grade, Class, Subject & Class-Subject UI](academic/053-grade-class-subject-management-ui-2026-08-27.md) | Production API/view integration for grade/class, subject/applicability and class-subject flows, with static Storybook coverage | Approved phases 0–6; phases 4–5 completed; Phase 6 blocked by backend contract | 2026-08-27 |
+| 053.1 | [Subject Applicability Management & Dialog Layout](academic/053.1-subject-applicability-management-and-dialog-layout-2026-08-28.md) | FE integration for applicability read/update/deactivate/reactivate and catalog Dialog margin correction, paired with the BE contract extension | Completed; validation PASS | 2026-08-28 |
 
 ## Current FE notes
 

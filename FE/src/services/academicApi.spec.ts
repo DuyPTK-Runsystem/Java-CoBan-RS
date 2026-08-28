@@ -11,6 +11,7 @@ import {
   createSemester,
   createSubject,
   createSubjectApplicability,
+  deactivateSubjectApplicability,
   deleteGrade,
   deleteSchoolClass,
   fetchClassSubjects,
@@ -19,6 +20,7 @@ import {
   fetchSchoolClasses,
   fetchSemesters,
   fetchSubjects,
+  fetchSubjectApplicabilities,
   getSemesterCompletenessReport,
   lockSemester,
   reopenSemester,
@@ -26,6 +28,7 @@ import {
   updateGrade,
   updateSchoolClass,
   updateSubject,
+  updateSubjectApplicability,
   updateAcademicYear,
   updateSemester,
 } from './academicApi'
@@ -112,6 +115,7 @@ describe('academicApi', () => {
     const classUpdateRequest = { gradeLevelId: 1, classCode: '6A1', className: null, capacity: 42, status: 'ACTIVE' as const }
     const subjectRequest = { code: 'MAT', name: 'Toán', subjectType: 'ACADEMIC' as const, applicationScope: 'GRADE' as const, status: 'ACTIVE' as const }
     const applicabilityRequest = { semesterId: 11, scopeType: 'GRADE' as const, gradeLevelId: 1, classId: null }
+    const applicabilityUpdateRequest = { ...applicabilityRequest, status: 'ACTIVE' as const }
     const classSubjectCreateRequest = { classId: 21, subjectId: 31, semesterId: 11, status: 'ACTIVE' as const }
 
     await fetchGrades('token')
@@ -127,6 +131,9 @@ describe('academicApi', () => {
     await createSubject('token', subjectRequest)
     await updateSubject('token', 31, subjectRequest)
     await createSubjectApplicability('token', 31, applicabilityRequest)
+    await fetchSubjectApplicabilities('token', 31, 11, 'ACTIVE')
+    await updateSubjectApplicability('token', 31, 51, applicabilityUpdateRequest)
+    await deactivateSubjectApplicability('token', 31, 51)
     await fetchClassSubjects('token', 21, 11)
     await createClassSubject('token', classSubjectCreateRequest)
     await updateClassSubject('token', 41, { status: 'INACTIVE' })
@@ -145,6 +152,9 @@ describe('academicApi', () => {
       'http://localhost:8081/api/v2/subjects',
       'http://localhost:8081/api/v2/subjects/31',
       'http://localhost:8081/api/v2/subjects/31/applicabilities',
+      'http://localhost:8081/api/v2/subjects/31/applicabilities?semesterId=11&status=ACTIVE',
+      'http://localhost:8081/api/v2/subjects/31/applicabilities/51',
+      'http://localhost:8081/api/v2/subjects/31/applicabilities/51',
       'http://localhost:8081/api/v2/classes/21/subjects?semesterId=11',
       'http://localhost:8081/api/v2/class-subjects',
       'http://localhost:8081/api/v2/class-subjects/41',
@@ -152,6 +162,9 @@ describe('academicApi', () => {
     expect(fetchMock.mock.calls[1][1]).toMatchObject({ method: 'POST', body: JSON.stringify(gradeRequest) })
     expect(fetchMock.mock.calls[6][1]).toMatchObject({ method: 'PUT', body: JSON.stringify(classUpdateRequest) })
     expect(fetchMock.mock.calls[12][1]).toMatchObject({ method: 'POST', body: JSON.stringify(applicabilityRequest) })
-    expect(fetchMock.mock.calls[15][1]).toMatchObject({ method: 'PUT', body: JSON.stringify({ status: 'INACTIVE' }) })
+    expect(fetchMock.mock.calls[13][1]).toMatchObject({ method: 'GET' })
+    expect(fetchMock.mock.calls[14][1]).toMatchObject({ method: 'PUT', body: JSON.stringify(applicabilityUpdateRequest) })
+    expect(fetchMock.mock.calls[15][1]).toMatchObject({ method: 'DELETE' })
+    expect(fetchMock.mock.calls[18][1]).toMatchObject({ method: 'PUT', body: JSON.stringify({ status: 'INACTIVE' }) })
   })
 })

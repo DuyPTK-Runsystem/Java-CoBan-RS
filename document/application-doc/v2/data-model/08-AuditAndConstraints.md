@@ -167,4 +167,10 @@ Plan 026 ghi audit event `STUDENT_ENROLLMENT_TRANSFER` trong cùng transaction v
 nguồn/đích, trạng thái và transfer id; `actor_user_id`, `request_id` và `ip_address` giữ context
 thực hiện thao tác. Enrollment và transfer history không dùng cascade delete.
 
+`subject_applicability` giữ lại cấu hình đã phát sinh trong lịch sử. Thao tác
+DELETE ở API là deactivation và chuyển `status` thành `INACTIVE`, không xóa vật
+lý hoặc cascade sang `class_subject`, scorebook hay assignment. Không được đổi
+semester/target của applicability nếu tuple cũ đã được dùng để tạo
+`class_subject`; chỉ được thay đổi trạng thái trong trường hợp đó.
+
 ---
