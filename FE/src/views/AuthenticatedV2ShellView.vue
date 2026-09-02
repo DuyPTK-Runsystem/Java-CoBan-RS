@@ -23,6 +23,7 @@ const navigation = computed(() => {
   const roles = session.value?.user.roles ?? []
   if (roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE' || role === 'TEACHER')) {
     items.push({ label: 'Sổ điểm', to: '/v2/scorebooks', icon: 'pi pi-book' })
+    items.push({ label: 'Yêu cầu sửa điểm', to: '/v2/score-change-requests', icon: 'pi pi-file-edit' })
   }
   return items
 })
