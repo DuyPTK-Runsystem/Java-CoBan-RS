@@ -17,5 +17,11 @@ public interface AttendanceSessionRepository extends JpaRepository<AttendanceSes
             LocalDate attendanceDate,
             AttendanceSessionPeriod sessionPeriod);
 
+    Optional<AttendanceSession> findByClassIdAndSemesterIdAndAttendanceDateAndSessionPeriod(
+            Long classId,
+            Long semesterId,
+            LocalDate attendanceDate,
+            AttendanceSessionPeriod sessionPeriod);
+
     List<AttendanceSession> findAllByClassIdAndAttendanceDateBetween(Long classId, LocalDate from, LocalDate to);
 }

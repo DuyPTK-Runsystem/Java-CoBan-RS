@@ -39,7 +39,7 @@ public class AcademicYearController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE', 'TEACHER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE', 'TEACHER', 'STUDENT')")
     @ApiMessage("Lấy danh sách năm học")
     public List<ResAcademicYearDTO> listAcademicYears() {
         DeveloperTrace.trace(/* NOPMD GuardLogStatement */

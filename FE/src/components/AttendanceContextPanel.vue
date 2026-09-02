@@ -19,7 +19,7 @@ const props = withDefaults(defineProps<{
   calendarLoading?: boolean
   calendarStatus?: 'SCHEDULED' | 'NO_CLASS' | 'UNKNOWN'
   calendarMessage?: string
-  openDisabled?: boolean
+  showOpen?: boolean
 }>(), {
   academicYears: () => [],
   semesters: () => [],
@@ -33,7 +33,7 @@ const props = withDefaults(defineProps<{
   calendarLoading: false,
   calendarStatus: 'UNKNOWN',
   calendarMessage: '',
-  openDisabled: false,
+  showOpen: false,
 })
 
 const emit = defineEmits<{
@@ -81,6 +81,13 @@ const calendarLabel: Record<'SCHEDULED' | 'NO_CLASS' | 'UNKNOWN', string> = {
           @update:model-value="emit('update:academicYearId', $event)"
         />
       </div>
+      <Button
+        v-if="props.showOpen"
+        label="Mở buổi điểm danh"
+        icon="pi pi-external-link"
+        :loading="props.calendarLoading"
+        @click="emit('open')"
+      />
       <div class="field-group">
         <label for="attendance-semester">Học kỳ</label>
         <Select
@@ -133,13 +140,6 @@ const calendarLabel: Record<'SCHEDULED' | 'NO_CLASS' | 'UNKNOWN', string> = {
           @update:model-value="emit('update:sessionPeriod', $event)"
         />
       </div>
-      <Button
-        label="Mở buổi điểm danh"
-        icon="pi pi-external-link"
-        :disabled="props.openDisabled || !props.academicYearId || !props.semesterId || !props.classId || !props.attendanceDate"
-        :loading="props.calendarLoading"
-        @click="emit('open')"
-      />
     </div>
     <div :class="['attendance-calendar-banner', `attendance-calendar-${props.calendarStatus.toLocaleLowerCase()}`]" role="status" aria-live="polite">
       <i :class="props.calendarStatus === 'SCHEDULED' ? 'pi pi-check-circle' : props.calendarStatus === 'NO_CLASS' ? 'pi pi-ban' : 'pi pi-info-circle'" aria-hidden="true" />

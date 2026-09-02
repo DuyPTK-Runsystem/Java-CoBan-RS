@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import InputText from 'primevue/inputtext'
@@ -45,7 +44,6 @@ const emit = defineEmits<{
   'update:semesterId': [value: number | null]
   'update:from': [value: string]
   'update:to': [value: string]
-  search: []
   pageChange: [page: number, pageSize: number]
 }>()
 
@@ -83,7 +81,6 @@ function handlePageChange(page: number, pageSize: number): void {
       <div class="field-group"><label for="attendance-summary-semester">Học kỳ</label><Select id="attendance-summary-semester" :model-value="props.semesterId" :options="props.semesters" option-label="name" option-value="id" placeholder="Chọn học kỳ" fluid @update:model-value="emit('update:semesterId', $event)" /></div>
       <div class="field-group"><label for="attendance-summary-from">Từ ngày</label><InputText id="attendance-summary-from" :model-value="props.from" type="date" fluid @update:model-value="emit('update:from', $event ?? '')" /></div>
       <div class="field-group"><label for="attendance-summary-to">Đến ngày</label><InputText id="attendance-summary-to" :model-value="props.to" type="date" fluid @update:model-value="emit('update:to', $event ?? '')" /></div>
-      <Button label="Tải báo cáo" icon="pi pi-chart-bar" :loading="props.loading" @click="emit('search')" />
     </div>
     <div v-if="props.response" class="attendance-report-context"><strong>{{ props.response.class.name }}</strong><span>{{ props.response.from }} → {{ props.response.to }}</span><span>{{ props.response.totalElements }} học sinh</span></div>
     <AttendanceSummaryCards :metrics="metrics()" />

@@ -37,6 +37,18 @@ export function createOrGetAttendanceSession(token: string, request: CreateAtten
   return apiClient.post<AttendanceSession>(sessionPath(scope), request, { token })
 }
 
+export function fetchAttendanceSession(token: string, query: CreateAttendanceSessionRequest, scope: AttendanceApiScope = 'teacher'): Promise<AttendanceSession> {
+  return apiClient.get<AttendanceSession>(sessionPath(scope), {
+    token,
+    query: new URLSearchParams({
+      classId: String(query.classId),
+      semesterId: String(query.semesterId),
+      attendanceDate: query.attendanceDate,
+      sessionPeriod: query.sessionPeriod,
+    }),
+  })
+}
+
 export function fetchAttendanceSessionStudents(token: string, sessionId: number, scope: AttendanceApiScope = 'teacher'): Promise<AttendanceStudent[]> {
   return apiClient.get<AttendanceStudent[]>(`${sessionPath(scope)}/${sessionId}/students`, { token })
 }

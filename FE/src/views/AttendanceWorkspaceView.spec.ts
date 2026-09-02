@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   fetchSemesters: vi.fn(),
   fetchAttendanceCalendar: vi.fn(),
   createOrGetAttendanceSession: vi.fn(),
+  fetchAttendanceSession: vi.fn(),
   fetchAttendanceSessionStudents: vi.fn(),
   upsertAttendanceException: vi.fn(),
   deleteAttendanceException: vi.fn(),
@@ -31,6 +32,7 @@ vi.mock('@/services/academicApi', () => ({
 vi.mock('@/services/attendanceApi', () => ({
   fetchAttendanceCalendar: mocks.fetchAttendanceCalendar,
   createOrGetAttendanceSession: mocks.createOrGetAttendanceSession,
+  fetchAttendanceSession: mocks.fetchAttendanceSession,
   fetchAttendanceSessionStudents: mocks.fetchAttendanceSessionStudents,
   upsertAttendanceException: mocks.upsertAttendanceException,
   deleteAttendanceException: mocks.deleteAttendanceException,
@@ -45,7 +47,7 @@ const attendanceSession = { sessionId: 5012, classId: 3, semesterId: 2, attendan
 const attendanceStudents = [{ studentId: 11, studentCode: 'HS001', studentName: 'Nguyễn Minh An', attendanceRecordId: null, status: 'PRESENT', note: null, recordedBy: null, recordedAt: null, updatedBy: null, updatedAt: null }]
 
 const buttonStub = { props: ['label', 'disabled', 'loading'], template: '<button :disabled="disabled" @click="$emit(\'click\')">{{ label }}</button>' }
-const contextStub = { emits: ['open'], template: '<button data-testid="open-session" @click="$emit(\'open\')">Open session</button>' }
+const contextStub = { props: ['showOpen'], emits: ['open'], template: '<div data-testid="attendance-context"><button v-if="showOpen" data-testid="open-session" @click="$emit(\'open\')">Open session</button></div>' }
 const sessionTableStub = { props: ['students'], emits: ['exception', 'delete'], template: '<div data-testid="session-table">{{ students.length }}</div>' }
 const exceptionDialogStub = { props: ['visible'], emits: ['save', 'cancel'], template: '<div data-testid="exception-dialog" :data-visible="visible" />' }
 const historyPanelStub = { emits: ['search', 'pageChange'], template: '<div data-testid="history-panel" />' }
@@ -80,6 +82,7 @@ describe('AttendanceWorkspaceView', () => {
     mocks.fetchSemesters.mockReset().mockResolvedValue(semesters)
     mocks.fetchAttendanceCalendar.mockReset().mockResolvedValue([{ id: 9, academicYearId: 1, semesterId: 2, calendarDate: '2026-09-01', dayType: 'SCHOOL_DAY', reason: null, configuredBy: 5, configuredAt: null, updatedBy: null, updatedAt: null, sessions: [{ id: 10, sessionPeriod: 'MORNING', sessionStatus: 'SCHEDULED', reason: null, configuredBy: 5, configuredAt: null, updatedBy: null, updatedAt: null }] }])
     mocks.createOrGetAttendanceSession.mockReset().mockResolvedValue(attendanceSession)
+    mocks.fetchAttendanceSession.mockReset().mockResolvedValue(attendanceSession)
     mocks.fetchAttendanceSessionStudents.mockReset().mockResolvedValue(attendanceStudents)
     mocks.upsertAttendanceException.mockReset().mockResolvedValue({ attendanceRecordId: 88, sessionId: 5012, studentId: 11, studentCode: 'HS001', studentName: 'Nguyễn Minh An', status: 'LATE', note: '08:05', recordedBy: 5, recordedAt: '2026-09-01T08:05:00', updatedBy: null, updatedAt: null })
     mocks.deleteAttendanceException.mockReset().mockResolvedValue(undefined)
@@ -90,7 +93,7 @@ describe('AttendanceWorkspaceView', () => {
 
   afterEach(() => clearAuthSession())
 
-  it('loads academic context and calendar preflight before a session is opened', async () => {
+  it('loads academic context, calendar and existing session automatically', async () => {
     mountView()
     await flushPromises()
 
@@ -98,17 +101,15 @@ describe('AttendanceWorkspaceView', () => {
     expect(mocks.fetchSchoolClasses).toHaveBeenCalledWith('jwt-token', 1)
     expect(mocks.fetchSemesters).toHaveBeenCalledWith('jwt-token', 1)
     expect(mocks.fetchAttendanceCalendar).toHaveBeenCalledWith('jwt-token', { academicYearId: 1, semesterId: 2, from: '2026-09-01', to: '2026-09-01' })
-    expect(mocks.fetchAttendanceSessionStudents).not.toHaveBeenCalled()
+    expect(mocks.fetchAttendanceSession).toHaveBeenCalledWith('jwt-token', { classId: 3, semesterId: 2, attendanceDate: '2026-09-01', sessionPeriod: 'MORNING' }, 'teacher')
+    expect(mocks.fetchAttendanceSessionStudents).toHaveBeenCalledWith('jwt-token', 5012, 'teacher')
   })
 
-  it('opens a session and loads its students only after the context action', async () => {
+  it('loads students after the automatic session lookup', async () => {
     const wrapper = mountView()
     await flushPromises()
 
-    await wrapper.find('[data-testid="open-session"]').trigger('click')
-    await flushPromises()
-
-    expect(mocks.createOrGetAttendanceSession).toHaveBeenCalledWith('jwt-token', { classId: 3, semesterId: 2, attendanceDate: '2026-09-01', sessionPeriod: 'MORNING' }, 'teacher')
+    expect(mocks.fetchAttendanceSession).toHaveBeenCalledTimes(1)
     expect(mocks.fetchAttendanceSessionStudents).toHaveBeenCalledWith('jwt-token', 5012, 'teacher')
     expect(wrapper.find('[data-testid="session-table"]').text()).toContain('1')
   })
@@ -116,20 +117,77 @@ describe('AttendanceWorkspaceView', () => {
   it('uses the office attendance API for an academic office session', async () => {
     clearAuthSession()
     saveAuthSession({ accessToken: 'office-token', user: { id: 2, username: 'office.demo', roles: ['ACADEMIC_OFFICE'] } })
+    mountView()
+    await flushPromises()
+
+    expect(mocks.fetchAttendanceSession).toHaveBeenCalledWith('office-token', { classId: 3, semesterId: 2, attendanceDate: '2026-09-01', sessionPeriod: 'MORNING' }, 'office')
+    expect(mocks.fetchAttendanceSessionStudents).toHaveBeenCalledWith('office-token', 5012, 'office')
+  })
+
+  it('shows the open-session button only for office roles', async () => {
+    const teacherWrapper = mountView()
+    await flushPromises()
+    expect(teacherWrapper.find('[data-testid="open-session"]').exists()).toBe(false)
+
+    clearAuthSession()
+    saveAuthSession({ accessToken: 'admin-token', user: { id: 1, username: 'admin.demo', roles: ['ADMIN'] } })
+    const adminWrapper = mountView()
+    await flushPromises()
+    expect(adminWrapper.find('[data-testid="open-session"]').exists()).toBe(true)
+    await adminWrapper.find('[data-testid="open-session"]').trigger('click')
+    await flushPromises()
+    expect(mocks.createOrGetAttendanceSession).toHaveBeenCalledWith('admin-token', { classId: 3, semesterId: 2, attendanceDate: '2026-09-01', sessionPeriod: 'MORNING' }, 'office')
+
+    clearAuthSession()
+    saveAuthSession({ accessToken: 'office-token', user: { id: 2, username: 'office.demo', roles: ['ACADEMIC_OFFICE'] } })
+    const officeWrapper = mountView()
+    await flushPromises()
+    expect(officeWrapper.find('[data-testid="open-session"]').exists()).toBe(true)
+  })
+
+  it('shows only student history for a student role', async () => {
+    clearAuthSession()
+    saveAuthSession({ accessToken: 'student-token', user: { id: 8, username: 'student.demo', roles: ['STUDENT'] } })
     const wrapper = mountView()
     await flushPromises()
 
-    await wrapper.find('[data-testid="open-session"]').trigger('click')
+    expect(wrapper.find('[data-testid="attendance-context"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="history-panel"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="summary-panel"]').exists()).toBe(false)
+    expect(mocks.fetchAcademicYears).toHaveBeenCalledWith('student-token')
+    expect(mocks.fetchSemesters).toHaveBeenCalledWith('student-token', 1)
+    expect(mocks.fetchStudentAttendanceHistory).toHaveBeenCalledWith('student-token', {
+      academicYearId: 1,
+      semesterId: 2,
+      from: undefined,
+      to: undefined,
+      page: 0,
+      size: 10,
+    })
+    expect(mocks.fetchSchoolClasses).not.toHaveBeenCalled()
+    expect(mocks.fetchAttendanceCalendar).not.toHaveBeenCalled()
+    expect(mocks.fetchAttendanceSession).not.toHaveBeenCalled()
+    expect(mocks.fetchClassAttendanceSummary).not.toHaveBeenCalled()
+  })
+
+  it('automatically reloads student history after the history filters are selected', async () => {
+    clearAuthSession()
+    saveAuthSession({ accessToken: 'student-token', user: { id: 8, username: 'student.demo', roles: ['STUDENT'] } })
+    const wrapper = mountView()
+    await flushPromises()
+    mocks.fetchStudentAttendanceHistory.mockClear()
+
+    const view = wrapper.vm as unknown as { changeHistoryYear: (value: number | null) => void }
+    view.changeHistoryYear(1)
     await flushPromises()
 
-    expect(mocks.createOrGetAttendanceSession).toHaveBeenCalledWith('office-token', { classId: 3, semesterId: 2, attendanceDate: '2026-09-01', sessionPeriod: 'MORNING' }, 'office')
-    expect(mocks.fetchAttendanceSessionStudents).toHaveBeenCalledWith('office-token', 5012, 'office')
+    expect(mocks.fetchStudentAttendanceHistory).toHaveBeenCalledWith('student-token', expect.objectContaining({ academicYearId: 1, semesterId: 2 }))
   })
 
   it('saves an exception and reloads the session rows', async () => {
     const wrapper = mountView()
     await flushPromises()
-    await (wrapper.vm as unknown as { openSession: () => Promise<void> }).openSession()
+    await (wrapper.vm as unknown as { loadSession: () => Promise<void> }).loadSession()
     await flushPromises()
     const view = wrapper.vm as unknown as { openException: (student: typeof attendanceStudents[number]) => void; saveException: (request: { status: AttendanceExceptionStatus; note: string | null }) => Promise<void> }
     view.openException(attendanceStudents[0])
@@ -143,6 +201,7 @@ describe('AttendanceWorkspaceView', () => {
   it('does not call report APIs for an invalid date range', async () => {
     const wrapper = mountView()
     await flushPromises()
+    const summaryCallCount = mocks.fetchClassAttendanceSummary.mock.calls.length
     const view = wrapper.vm as unknown as { historyFrom: string; historyTo: string; searchHistory: () => void }
     view.historyFrom = '2026-10-01'
     view.historyTo = '2026-09-01'
@@ -150,5 +209,6 @@ describe('AttendanceWorkspaceView', () => {
     await flushPromises()
 
     expect(mocks.fetchStudentAttendanceHistory).not.toHaveBeenCalled()
+    expect(mocks.fetchClassAttendanceSummary).toHaveBeenCalledTimes(summaryCallCount)
   })
 })

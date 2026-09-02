@@ -13,6 +13,7 @@ import FormAlert from '@/components/FormAlert.vue'
 import { fetchAcademicYears, fetchSchoolClasses, fetchSemesters } from '@/services/academicApi'
 import {
   createOrGetAttendanceSession,
+  fetchAttendanceSession,
   deleteAttendanceException,
   fetchAttendanceCalendar,
   fetchAttendanceSessionStudents,
@@ -61,6 +62,7 @@ const calendarMessage = ref('Chọn đủ context để kiểm tra ngày học h
 const calendarLoading = ref(false)
 const calendarError = ref('')
 let calendarRequestKey = ''
+let sessionRequestKey = ''
 
 const session = ref<AttendanceSession | null>(null)
 const sessionStudents = ref<AttendanceStudent[]>([])
@@ -100,6 +102,16 @@ const attendanceScope = computed<AttendanceApiScope>(() => {
   const roles = getAuthSession()?.user.roles ?? []
   return roles.includes('ADMIN') || roles.includes('ACADEMIC_OFFICE') ? 'office' : 'teacher'
 })
+const userRoles = computed(() => getAuthSession()?.user.roles ?? [])
+const isStudent = computed(() => userRoles.value.includes('STUDENT'))
+const canOpenSession = computed(() => userRoles.value.includes('ADMIN') || userRoles.value.includes('ACADEMIC_OFFICE'))
+const showSessionTab = computed(() => !isStudent.value)
+const showHistoryTab = computed(() => isStudent.value)
+const showSummaryTab = computed(() => !isStudent.value)
+
+watch(isStudent, (value) => {
+  tab.value = value ? 'history' : 'session'
+}, { immediate: true })
 
 const selectedClass = computed(() => classes.value.find((item) => item.id === selectedClassId.value) ?? null)
 const selectedSemester = computed(() => semesters.value.find((item) => item.id === selectedSemesterId.value) ?? null)
@@ -273,18 +285,73 @@ async function loadSessionStudents(sessionId: number): Promise<void> {
   }
 }
 
-async function openSession(): Promise<void> {
-  if (selectedClassId.value === null || selectedSemesterId.value === null || !attendanceDate.value || sessionReadOnly.value) return
-  if (calendarStatus.value === 'NO_CLASS') {
-    sessionError.value = 'Không thể mở session cho ngày/buổi không có lịch học.'
-    return
+async function loadSession(): Promise<void> {
+  if (isStudent.value || selectedClassId.value === null || selectedSemesterId.value === null || !attendanceDate.value) return
+  const key = contextKey()
+  sessionRequestKey = key
+  resetSession()
+  const accessToken = token()
+  if (!accessToken) return
+  sessionLoading.value = true
+  sessionError.value = ''
+  sessionForbidden.value = false
+  try {
+    const loadedSession = await fetchAttendanceSession(accessToken, {
+      classId: selectedClassId.value,
+      semesterId: selectedSemesterId.value,
+      attendanceDate: attendanceDate.value,
+      sessionPeriod: sessionPeriod.value,
+    }, attendanceScope.value)
+    if (sessionRequestKey !== key) return
+    session.value = loadedSession
+    await loadSessionStudents(loadedSession.sessionId)
+  } catch (error) {
+    if (isApiError(error, 401)) return
+    if (isApiError(error, 404)) return
+    if (sessionRequestKey !== key) return
+    sessionForbidden.value = isApiError(error, 403)
+    sessionError.value = messageFor(error, 'Không thể tải buổi điểm danh.')
+  } finally {
+    if (sessionRequestKey === key) sessionLoading.value = false
   }
+}
+
+async function loadStudentHistoryContext(): Promise<void> {
+  const accessToken = token()
+  if (!accessToken) return
+  contextLoading.value = true
+  contextError.value = ''
+  contextForbidden.value = false
+  try {
+    const years = await fetchAcademicYears(accessToken)
+    academicYears.value = years
+    const activeYear = years.find((item) => item.status === 'ACTIVE') ?? years[0]
+    historySemesterId.value = null
+    historySemesters.value = []
+    historyAcademicYearId.value = activeYear?.id ?? null
+    if (activeYear) await loadHistorySemesters(activeYear.id)
+  } catch (error) {
+    if (isApiError(error, 401)) return
+    contextForbidden.value = isApiError(error, 403)
+    contextError.value = messageFor(error, 'Không thể tải danh sách năm học.')
+  } finally {
+    contextLoading.value = false
+  }
+}
+
+function openException(student: AttendanceStudent): void {
+  if (sessionReadOnly.value) return
+  selectedStudent.value = student
+  mutationError.value = ''
+  exceptionVisible.value = true
+}
+
+async function openSession(): Promise<void> {
+  if (!canOpenSession.value || selectedClassId.value === null || selectedSemesterId.value === null || !attendanceDate.value || sessionReadOnly.value) return
   const accessToken = token()
   if (!accessToken) return
   sessionSaving.value = true
   sessionError.value = ''
-  mutationError.value = ''
-  statusMessage.value = ''
   try {
     const loadedSession = await createOrGetAttendanceSession(accessToken, {
       classId: selectedClassId.value,
@@ -294,7 +361,6 @@ async function openSession(): Promise<void> {
     }, attendanceScope.value)
     session.value = loadedSession
     await loadSessionStudents(loadedSession.sessionId)
-    statusMessage.value = `Đã mở buổi điểm danh ${loadedSession.attendanceDate} · ${loadedSession.sessionPeriod === 'MORNING' ? 'sáng' : 'chiều'}.`
   } catch (error) {
     if (isApiError(error, 401)) return
     sessionForbidden.value = isApiError(error, 403)
@@ -302,13 +368,6 @@ async function openSession(): Promise<void> {
   } finally {
     sessionSaving.value = false
   }
-}
-
-function openException(student: AttendanceStudent): void {
-  if (sessionReadOnly.value) return
-  selectedStudent.value = student
-  mutationError.value = ''
-  exceptionVisible.value = true
 }
 
 function closeException(): void {
@@ -403,6 +462,15 @@ function searchHistory(): void {
   void loadHistory()
 }
 
+async function loadHistorySemesters(academicYearId: number): Promise<void> {
+  const accessToken = token()
+  if (!accessToken) return
+  const items = await fetchSemesters(accessToken, academicYearId)
+  if (historyAcademicYearId.value !== academicYearId) return
+  historySemesters.value = items
+  historySemesterId.value = items.find((item) => item.status === 'ACTIVE')?.id ?? items[0]?.id ?? null
+}
+
 function changeHistoryYear(value: number | null): void {
   historyAcademicYearId.value = value
   historySemesterId.value = null
@@ -411,13 +479,7 @@ function changeHistoryYear(value: number | null): void {
     historySemesters.value = []
     return
   }
-  const accessToken = token()
-  if (!accessToken) return
-  void fetchSemesters(accessToken, value).then((items) => {
-    if (historyAcademicYearId.value !== value) return
-    historySemesters.value = items
-    historySemesterId.value = items.find((item) => item.status === 'ACTIVE')?.id ?? items[0]?.id ?? null
-  }).catch((error: unknown) => {
+  void loadHistorySemesters(value).catch((error: unknown) => {
     if (isApiError(error, 401)) return
     historyError.value = messageFor(error, 'Không thể tải học kỳ cho năm học đã chọn.')
   })
@@ -431,7 +493,7 @@ function changeHistoryPage(page: number, pageSize: number): void {
 
 async function loadSummary(): Promise<void> {
   const accessToken = token()
-  if (!accessToken || summaryClassId.value === null || summarySemesterId.value === null) return
+  if (isStudent.value || !accessToken || summaryClassId.value === null || summarySemesterId.value === null) return
   const rangeError = validateDateRange(summaryFrom.value, summaryTo.value)
   if (rangeError) {
     summaryError.value = rangeError
@@ -463,11 +525,6 @@ async function loadSummary(): Promise<void> {
   }
 }
 
-function searchSummary(): void {
-  summaryPage.value = 0
-  void loadSummary()
-}
-
 function changeSummaryPage(page: number, pageSize: number): void {
   summaryPage.value = page
   summaryPageSize.value = pageSize
@@ -486,14 +543,30 @@ watch(selectedAcademicYearId, (value, previous) => {
 
 watch([selectedSemesterId, selectedClassId, attendanceDate, sessionPeriod], () => {
   if (initialized.value) {
-    resetSession()
     void loadCalendar()
+    void loadSession()
+  }
+})
+
+watch([summaryClassId, summarySemesterId, summaryFrom, summaryTo], () => {
+  if (initialized.value && showSummaryTab.value) void loadSummary()
+})
+
+watch([historyAcademicYearId, historySemesterId], () => {
+  if (initialized.value && isStudent.value && historyAcademicYearId.value !== null && historySemesterId.value !== null) {
+    searchHistory()
   }
 })
 
 onMounted(async () => {
-  await loadContext()
+  if (isStudent.value) await loadStudentHistoryContext()
+  else await loadContext()
   initialized.value = true
+  if (isStudent.value) void loadHistory()
+  else {
+    void loadSession()
+    if (showSummaryTab.value) void loadSummary()
+  }
 })
 </script>
 
@@ -504,7 +577,7 @@ onMounted(async () => {
       <h1>Điểm danh</h1>
       <p>Mở buổi học, ghi nhận ngoại lệ và theo dõi chuyên cần trong một workspace.</p>
     </div>
-    <div class="page-heading-actions"><Button label="Làm mới context" icon="pi pi-refresh" severity="secondary" outlined :loading="contextLoading" @click="loadContext" /></div>
+    <div class="page-heading-actions"><Button label="Làm mới context" icon="pi pi-refresh" severity="secondary" outlined :loading="contextLoading" @click="isStudent ? loadStudentHistoryContext() : loadContext()" /></div>
   </div>
 
   <FormAlert v-if="statusMessage" tone="success" :message="statusMessage" />
@@ -513,12 +586,12 @@ onMounted(async () => {
   <FormAlert v-if="contextForbidden" tone="warning" message="Bạn không có quyền tải context điểm danh." />
 
   <div class="tab-strip attendance-tab-strip">
-    <Button label="Điểm danh theo buổi" icon="pi pi-calendar" :severity="tab === 'session' ? 'primary' : 'secondary'" :outlined="tab !== 'session'" @click="changeTab('session')" />
-    <Button label="Lịch sử của học sinh" icon="pi pi-history" :severity="tab === 'history' ? 'primary' : 'secondary'" :outlined="tab !== 'history'" @click="changeTab('history')" />
-    <Button label="Báo cáo lớp" icon="pi pi-chart-bar" :severity="tab === 'summary' ? 'primary' : 'secondary'" :outlined="tab !== 'summary'" @click="changeTab('summary')" />
+    <Button v-if="showSessionTab" label="Điểm danh theo buổi" icon="pi pi-calendar" :severity="tab === 'session' ? 'primary' : 'secondary'" :outlined="tab !== 'session'" @click="changeTab('session')" />
+    <Button v-if="showHistoryTab" label="Lịch sử của học sinh" icon="pi pi-history" :severity="tab === 'history' ? 'primary' : 'secondary'" :outlined="tab !== 'history'" @click="changeTab('history')" />
+    <Button v-if="showSummaryTab" label="Báo cáo lớp" icon="pi pi-chart-bar" :severity="tab === 'summary' ? 'primary' : 'secondary'" :outlined="tab !== 'summary'" @click="changeTab('summary')" />
   </div>
 
-  <template v-if="tab === 'session'">
+  <template v-if="tab === 'session' && showSessionTab">
     <AttendanceContextPanel
       v-model:academic-year-id="selectedAcademicYearId"
       v-model:semester-id="selectedSemesterId"
@@ -532,7 +605,7 @@ onMounted(async () => {
       :calendar-loading="calendarLoading"
       :calendar-status="calendarStatus"
       :calendar-message="calendarMessage"
-      :open-disabled="sessionReadOnly || Boolean(contextError)"
+      :show-open="canOpenSession"
       @open="openSession"
     />
     <FormAlert v-if="calendarError" tone="warning" :message="calendarError" />
@@ -545,12 +618,12 @@ onMounted(async () => {
       </div>
       <div v-if="sessionState === 'loading'" class="page-state page-state-loading" role="status"><i class="pi pi-spin pi-spinner" aria-hidden="true" /><span>Đang tải danh sách điểm danh...</span></div>
       <AttendanceSessionTable v-else :students="sessionStudents" :loading="sessionLoading" :read-only="sessionReadOnly" @exception="openException" @delete="confirmDelete" />
-      <p v-if="!session" class="section-caption attendance-session-hint">Chọn context hợp lệ rồi bấm “Mở buổi điểm danh” để tải roster.</p>
+      <p v-if="!session" class="section-caption attendance-session-hint">Chọn đủ context để tự động tải roster của buổi điểm danh đã tồn tại.</p>
     </section>
   </template>
 
   <AttendanceHistoryPanel
-    v-else-if="tab === 'history'"
+    v-else-if="tab === 'history' && showHistoryTab"
     v-model:academic-year-id="historyAcademicYearId"
     v-model:semester-id="historySemesterId"
     v-model:from="historyFrom"
@@ -569,7 +642,7 @@ onMounted(async () => {
   />
 
   <ClassAttendanceSummaryPanel
-    v-else
+    v-else-if="showSummaryTab"
     v-model:class-id="summaryClassId"
     v-model:semester-id="summarySemesterId"
     v-model:from="summaryFrom"
@@ -582,7 +655,6 @@ onMounted(async () => {
     :forbidden="summaryForbidden"
     :page="summaryPage"
     :page-size="summaryPageSize"
-    @search="searchSummary"
     @page-change="changeSummaryPage"
   />
 

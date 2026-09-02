@@ -1,5 +1,6 @@
 package com.JavaTraining.BaiTap_RS.attendance.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.requests.ReqCreateAttendanceSessionDTO;
@@ -7,11 +8,14 @@ import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.requests.ReqUpsertAtten
 import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.response.ResAttendanceExceptionDTO;
 import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.response.ResAttendanceSessionDTO;
 import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.response.ResAttendanceStudentDTO;
+import com.JavaTraining.BaiTap_RS.attendance.domain.entity.AttendanceSessionPeriod;
 import com.JavaTraining.BaiTap_RS.attendance.service.AttendanceService;
+import com.JavaTraining.BaiTap_RS.attendance.service.AttendanceSessionLookupService;
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
 import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -37,9 +42,13 @@ public class AttendanceController {
     private static final String STUDENT_CODE = "studentCode";
 
     private final AttendanceService attendanceService;
+    private final AttendanceSessionLookupService sessionLookupService;
 
-    public AttendanceController(AttendanceService attendanceService) {
+    public AttendanceController(
+            AttendanceService attendanceService,
+            AttendanceSessionLookupService sessionLookupService) {
         this.attendanceService = attendanceService;
+        this.sessionLookupService = sessionLookupService;
     }
 
     @PostMapping
@@ -52,6 +61,19 @@ public class AttendanceController {
                         "AttendanceController.createOrGetSession");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(attendanceService.createOrGetSession(request));
+    }
+
+    @GetMapping
+    @ApiMessage("Lấy buổi điểm danh theo context")
+    @PreAuthorize(TEACHER_ROLE)
+    public ResAttendanceSessionDTO getSession(
+            @RequestParam("classId") @Positive Long classId,
+            @RequestParam("semesterId") @Positive Long semesterId,
+            @RequestParam("attendanceDate")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate attendanceDate,
+            @RequestParam("sessionPeriod") AttendanceSessionPeriod sessionPeriod) {
+        return sessionLookupService.getForTeacher(new ReqCreateAttendanceSessionDTO(
+                classId, semesterId, attendanceDate, sessionPeriod));
     }
 
     @GetMapping("/{sessionId}/students")

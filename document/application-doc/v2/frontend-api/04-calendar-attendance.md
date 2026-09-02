@@ -79,6 +79,7 @@ Authorization: `TEACHER`.
 | Method | Path suffix | Request | Response |
 |---|---|---|---|
 | `POST` | base | create session DTO | `201 ResAttendanceSessionDTO` |
+| `GET` | base | `classId`, `semesterId`, `attendanceDate`, `sessionPeriod` query | `ResAttendanceSessionDTO` or `404` when not created |
 | `GET` | `/{sessionId}/students` | — | `ResAttendanceStudentDTO[]` |
 | `PUT` | `/{sessionId}/exceptions/{studentId}` | exception DTO | `ResAttendanceExceptionDTO` |
 | `PUT` | `/{sessionId}/exceptions/by-code/{studentCode}` | exception DTO | `ResAttendanceExceptionDTO` |
@@ -95,6 +96,16 @@ interface CreateAttendanceSessionRequest {
   sessionPeriod: 'MORNING' | 'AFTERNOON'
 }
 ```
+
+Read an existing session without creating one:
+
+```text
+GET /api/v2/attendance-sessions?classId={classId}&semesterId={semesterId}&attendanceDate=yyyy-MM-dd&sessionPeriod=MORNING|AFTERNOON
+```
+
+The academic-office aliases expose the same query contract. The Attendance
+workspace calls this endpoint automatically after all session context fields
+are selected; `404` means that no session exists yet.
 
 The current exception wire enum is documented canonically in
 [`07-enums-and-known-drift.md`](07-enums-and-known-drift.md).

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
-  createOrGetAttendanceSession,
+  fetchAttendanceSession,
   deleteAttendanceException,
   fetchAttendanceCalendar,
   fetchAttendanceSessionStudents,
@@ -23,19 +23,19 @@ describe('attendanceApi', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     await fetchAttendanceCalendar('token', { academicYearId: 1, semesterId: 2, from: '2026-09-01', to: '2026-09-01' })
-    await createOrGetAttendanceSession('token', { classId: 3, semesterId: 2, attendanceDate: '2026-09-01', sessionPeriod: 'MORNING' })
+    await fetchAttendanceSession('token', { classId: 3, semesterId: 2, attendanceDate: '2026-09-01', sessionPeriod: 'MORNING' })
     await fetchAttendanceSessionStudents('token', 5)
     await upsertAttendanceException('token', 5, 7, { status: 'EXCUSED', note: 'Ốm' })
     await deleteAttendanceException('token', 5, 7)
 
     expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
       'http://localhost:8081/api/v2/calendar/days?academicYearId=1&semesterId=2&from=2026-09-01&to=2026-09-01',
-      'http://localhost:8081/api/v2/attendance-sessions',
+      'http://localhost:8081/api/v2/attendance-sessions?classId=3&semesterId=2&attendanceDate=2026-09-01&sessionPeriod=MORNING',
       'http://localhost:8081/api/v2/attendance-sessions/5/students',
       'http://localhost:8081/api/v2/attendance-sessions/5/exceptions/7',
       'http://localhost:8081/api/v2/attendance-sessions/5/exceptions/7',
     ])
-    expect(fetchMock.mock.calls[1][1]).toMatchObject({ method: 'POST', body: JSON.stringify({ classId: 3, semesterId: 2, attendanceDate: '2026-09-01', sessionPeriod: 'MORNING' }) })
+    expect(fetchMock.mock.calls[1][1]).toMatchObject({ method: 'GET' })
     expect(fetchMock.mock.calls[3][1]).toMatchObject({ method: 'PUT', body: JSON.stringify({ status: 'EXCUSED', note: 'Ốm' }) })
     expect(fetchMock.mock.calls[4][1]).toMatchObject({ method: 'DELETE' })
   })
@@ -44,11 +44,11 @@ describe('attendanceApi', () => {
     fetchMock.mockImplementation(() => Promise.resolve(new Response(JSON.stringify({ data: [] }), { status: 200 })))
     vi.stubGlobal('fetch', fetchMock)
 
-    await createOrGetAttendanceSession('token', { classId: 3, semesterId: 2, attendanceDate: '2026-09-01', sessionPeriod: 'AFTERNOON' }, 'office')
+    await fetchAttendanceSession('token', { classId: 3, semesterId: 2, attendanceDate: '2026-09-01', sessionPeriod: 'AFTERNOON' }, 'office')
     await fetchAttendanceSessionStudents('token', 5, 'office')
 
     expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
-      'http://localhost:8081/api/v2/office/attendance-sessions',
+      'http://localhost:8081/api/v2/office/attendance-sessions?classId=3&semesterId=2&attendanceDate=2026-09-01&sessionPeriod=AFTERNOON',
       'http://localhost:8081/api/v2/office/attendance-sessions/5/students',
     ])
   })

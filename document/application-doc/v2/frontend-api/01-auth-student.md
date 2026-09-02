@@ -38,36 +38,28 @@ Login response `data`:
 }
 ```
 
-### Blocker: role chưa được expose cho FE
+### JWT và role contract
 
 `ResUserDTO` trả thêm `roles`, là danh sách role code canonical của tài khoản.
-Frontend dùng field này để chọn capability/API scope; không suy đoán role từ username
-hoặc JWT claims.
+Frontend dùng field này để chọn capability/API scope. Access token cũng expose claim `role` dạng mảng role code canonical.
 
 JWT hiện chứa:
 
 ```text
 sub
 user_id
+role: string[]
 iat
 exp
 ```
 
-và **không có role claim**.
-
-Vì vậy tại thời điểm tài liệu này:
-
-```text
-FE biết authenticated / unauthenticated
-FE chưa có contract chính thức để biết ADMIN / ACADEMIC_OFFICE / TEACHER / STUDENT
-```
+Ví dụ: `"role": ["ADMIN", "TEACHER"]`. Role code không có tiền tố `ROLE_`.
 
 Hệ quả:
 
-- không suy role từ username;
-- không suy role từ một API gọi thành công;
-- không giả định JWT có role;
-- role-aware sidebar/router cần một contract backend/plan riêng.
+- role claim chỉ phục vụ navigation/visibility/UX và capability hint phía FE;
+- backend vẫn phải kiểm tra authorization bằng authorities hiện tại của tài khoản;
+- JWT role claim không phải bằng chứng cấp quyền độc lập.
 
 Backend authorization vẫn là authoritative.
 

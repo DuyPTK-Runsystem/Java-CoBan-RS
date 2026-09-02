@@ -12,7 +12,7 @@ Base:
 /api/v2/grades
 ```
 
-Authorization hiện tại: `ADMIN`, `ACADEMIC_OFFICE`.
+Authorization hiện tại cho `GET`: `ADMIN`, `ACADEMIC_OFFICE`, `TEACHER`, `STUDENT`; các mutation chỉ dành cho office.
 
 | Method | Path | Request | Response |
 |---|---|---|---|
