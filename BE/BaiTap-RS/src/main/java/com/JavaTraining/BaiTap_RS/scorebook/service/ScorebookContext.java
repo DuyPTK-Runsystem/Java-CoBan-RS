@@ -58,6 +58,11 @@ public class ScorebookContext {
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy sổ điểm"));
     }
 
+    public Scorebook findScorebookByClassSubject(Long classSubjectId) {
+        return scorebookRepository.findByClassSubjectId(classSubjectId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Lớp-môn chưa có sổ điểm"));
+    }
+
     public void validateClassSubject(ClassSubject classSubject) {
         if (classSubject.getStatus() != ClassSubjectStatus.ACTIVE) {
             throw conflict("Chỉ lớp-môn ACTIVE mới được tạo sổ điểm");

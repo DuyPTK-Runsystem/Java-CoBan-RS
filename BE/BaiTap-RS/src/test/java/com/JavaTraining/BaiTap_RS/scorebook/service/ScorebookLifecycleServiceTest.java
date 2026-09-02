@@ -116,6 +116,31 @@ class ScorebookLifecycleServiceTest {
     }
 
     @Test
+    void lookupByClassSubjectReturnsExistingScorebookWithinScope() {
+        Scorebook scorebook = ScorebookTestFixtures.scorebook(ScorebookStatus.OPEN);
+        Mockito.when(classSubjectRepository.findById(20L)).thenReturn(Optional.of(
+                ScorebookTestFixtures.classSubject(ClassSubjectStatus.ACTIVE)));
+        Mockito.when(scorebookRepository.findByClassSubjectId(20L)).thenReturn(Optional.of(scorebook));
+        Mockito.when(columnRepository.findAllByScorebookIdOrderByAssessmentTypeAscColumnNoAsc(90L))
+                .thenReturn(List.of());
+        Mockito.when(weightRepository.findByScorebookId(90L)).thenReturn(Optional.empty());
+
+        com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResScorebookDTO response =
+                lifecycleService.getScorebookByClassSubject(20L);
+
+        Assertions.assertEquals(90L, response.id(), "lookup should return the existing scorebook");
+    }
+
+    @Test
+    void lookupByClassSubjectReturnsNotFoundWhenScorebookIsMissing() {
+        Mockito.when(classSubjectRepository.findById(20L)).thenReturn(Optional.of(
+                ScorebookTestFixtures.classSubject(ClassSubjectStatus.ACTIVE)));
+        Mockito.when(scorebookRepository.findByClassSubjectId(20L)).thenReturn(Optional.empty());
+
+        assertNotFound(() -> lifecycleService.getScorebookByClassSubject(20L));
+    }
+
+    @Test
     void publishRegularScorebookRequiresPeriodicAndFinalColumns() {
         Scorebook scorebook = ScorebookTestFixtures.scorebook(ScorebookStatus.OPEN);
         Mockito.when(scorebookRepository.findById(90L)).thenReturn(Optional.of(scorebook));
@@ -146,5 +171,15 @@ class ScorebookLifecycleServiceTest {
                 org.springframework.http.HttpStatus.CONFLICT,
                 exception.getStatus(),
                 "duplicate scorebook should be a conflict");
+    }
+
+    private void assertNotFound(Runnable action) {
+        com.JavaTraining.BaiTap_RS.common.error.AppException exception = Assertions.assertThrows(
+                com.JavaTraining.BaiTap_RS.common.error.AppException.class,
+                action::run);
+        Assertions.assertEquals(
+                org.springframework.http.HttpStatus.NOT_FOUND,
+                exception.getStatus(),
+                "missing scorebook should be a not-found state");
     }
 }

@@ -69,6 +69,27 @@ class ScorebookGuardTest {
     }
 
     @Test
+    void mappedTeacherCanReadAssignedClassSubject() {
+        authenticate(100L, "TEACHER");
+        Teacher teacher = new Teacher(
+                100L,
+                "GV001",
+                "Nguyen Van A",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                TeacherStatus.ACTIVE);
+        ReflectionTestUtils.setField(teacher, "id", 200L);
+        Mockito.when(teacherRepository.findByUserId(100L)).thenReturn(Optional.of(teacher));
+        ScorebookGuard guard = new ScorebookGuard(teacherRepository, assignmentAccessService);
+
+        verifyClassSubjectAssignment(guard);
+    }
+
+    @Test
     void teacherWithoutMappedPrincipalIsForbidden() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("teacher", null, List.of()));
@@ -82,6 +103,12 @@ class ScorebookGuardTest {
 
     private void verifyTeacherAssignment(ScorebookGuard guard) {
         guard.assertCanManage(new Scorebook(20L, ScorebookStatus.OPEN));
+        Mockito.verify(assignmentAccessService).assertActiveAssignment(
+                Mockito.eq(200L), Mockito.eq(20L), Mockito.any());
+    }
+
+    private void verifyClassSubjectAssignment(ScorebookGuard guard) {
+        guard.assertCanReadClassSubject(20L);
         Mockito.verify(assignmentAccessService).assertActiveAssignment(
                 Mockito.eq(200L), Mockito.eq(20L), Mockito.any());
     }

@@ -26,6 +26,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 class ScorebookAuthorizationIntegrationTest {
 
     private static final String SCOREBOOK_ENDPOINT = "/api/v2/scorebooks/1";
+    private static final String CLASS_SUBJECT_LOOKUP_ENDPOINT =
+            "/api/v2/scorebooks/by-class-subject/20";
 
     @Autowired
     private MockMvc mockMvc;
@@ -50,6 +52,17 @@ class ScorebookAuthorizationIntegrationTest {
     }
 
     @Test
+    @WithMockUser(roles = "STUDENT")
+    void studentCannotLookupScorebookByClassSubject() throws Exception {
+        int status = mockMvc.perform(MockMvcRequestBuilders.get(CLASS_SUBJECT_LOOKUP_ENDPOINT))
+                .andReturn()
+                .getResponse()
+                .getStatus();
+
+        Assertions.assertEquals(403, status, "student should not access class-subject scorebook lookup");
+    }
+
+    @Test
     @WithMockUser(roles = "TEACHER")
     void teacherWithoutApplicationTeacherContextCannotAccessScorebook() throws Exception {
         Scorebook scorebook = scorebookRepository.save(new Scorebook(20L, ScorebookStatus.OPEN));
@@ -69,6 +82,16 @@ class ScorebookAuthorizationIntegrationTest {
                 .getStatus();
 
         Assertions.assertEquals(401, status, "anonymous request should be unauthorized");
+    }
+
+    @Test
+    void anonymousCannotLookupScorebookByClassSubject() throws Exception {
+        int status = mockMvc.perform(MockMvcRequestBuilders.get(CLASS_SUBJECT_LOOKUP_ENDPOINT))
+                .andReturn()
+                .getResponse()
+                .getStatus();
+
+        Assertions.assertEquals(401, status, "anonymous lookup should be unauthorized");
     }
 
     @Test

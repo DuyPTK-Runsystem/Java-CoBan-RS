@@ -1,6 +1,7 @@
 package com.JavaTraining.BaiTap_RS.scorebook.controller;
 
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqCreateAssessmentColumnDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqCreateScorebookDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqUpdateAssessmentColumnDTO;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequestMapping("/api/v2")
+@SuppressWarnings("PMD.GuardLogStatement")
 public class ScorebookController {
 
     private static final String OFFICE_ROLES = "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')";
@@ -44,6 +46,9 @@ public class ScorebookController {
     @PreAuthorize(OFFICE_ROLES)
     public ResponseEntity<ResScorebookDTO> createScorebook(
             @Valid @RequestBody ReqCreateScorebookDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ScorebookController.class,
+                        "ScorebookController.createScorebook");
         return ResponseEntity.status(HttpStatus.CREATED).body(scorebookService.createScorebook(request));
     }
 
@@ -51,13 +56,30 @@ public class ScorebookController {
     @ApiMessage("Lấy sổ điểm")
     @PreAuthorize(SCOREBOOK_ROLES)
     public ResScorebookDTO getScorebook(@PathVariable(SCOREBOOK_ID) @Positive Long scorebookId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScorebookController.class,
+                "ScorebookController.getScorebook");
         return scorebookService.getScorebook(scorebookId);
+    }
+
+    @GetMapping("/scorebooks/by-class-subject/{classSubjectId}")
+    @ApiMessage("Lấy sổ điểm theo lớp-môn")
+    @PreAuthorize(SCOREBOOK_ROLES)
+    public ResScorebookDTO getScorebookByClassSubject(
+            @PathVariable("classSubjectId") @Positive Long classSubjectId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScorebookController.class,
+                "ScorebookController.getScorebookByClassSubject");
+        return scorebookService.getScorebookByClassSubject(classSubjectId);
     }
 
     @PostMapping("/scorebooks/{scorebookId}/open")
     @ApiMessage("Mở sổ điểm")
     @PreAuthorize(SCOREBOOK_ROLES)
     public ResScorebookDTO openScorebook(@PathVariable(SCOREBOOK_ID) @Positive Long scorebookId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScorebookController.class,
+                "ScorebookController.openScorebook");
         return scorebookService.openScorebook(scorebookId);
     }
 
@@ -67,6 +89,9 @@ public class ScorebookController {
     public ResAssessmentColumnDTO addColumn(
             @PathVariable(SCOREBOOK_ID) @Positive Long scorebookId,
             @Valid @RequestBody ReqCreateAssessmentColumnDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ScorebookController.class,
+                        "ScorebookController.addColumn");
         return scorebookService.addColumn(scorebookId, request);
     }
 
@@ -76,6 +101,9 @@ public class ScorebookController {
     public ResAssessmentColumnDTO updateColumn(
             @PathVariable(COLUMN_ID) @Positive Long columnId,
             @Valid @RequestBody ReqUpdateAssessmentColumnDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ScorebookController.class,
+                        "ScorebookController.updateColumn");
         return scorebookService.updateColumn(columnId, request);
     }
 
@@ -83,6 +111,9 @@ public class ScorebookController {
     @ApiMessage("Vô hiệu hóa cột điểm")
     @PreAuthorize(SCOREBOOK_ROLES)
     public ResponseEntity<Void> deactivateColumn(@PathVariable(COLUMN_ID) @Positive Long columnId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScorebookController.class,
+                "ScorebookController.deactivateColumn");
         scorebookService.deactivateColumn(columnId);
         return ResponseEntity.noContent().build();
     }
@@ -93,6 +124,9 @@ public class ScorebookController {
     public ResScorebookDTO upsertSkillWeight(
             @PathVariable(SCOREBOOK_ID) @Positive Long scorebookId,
             @Valid @RequestBody ReqUpsertSkillWeightConfigDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ScorebookController.class,
+                        "ScorebookController.upsertSkillWeight");
         return scorebookService.upsertSkillWeight(scorebookId, request);
     }
 
@@ -100,6 +134,9 @@ public class ScorebookController {
     @ApiMessage("Công bố sổ điểm")
     @PreAuthorize(SCOREBOOK_ROLES)
     public ResScorebookDTO publishScorebook(@PathVariable(SCOREBOOK_ID) @Positive Long scorebookId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScorebookController.class,
+                "ScorebookController.publishScorebook");
         return scorebookService.publishScorebook(scorebookId);
     }
 }

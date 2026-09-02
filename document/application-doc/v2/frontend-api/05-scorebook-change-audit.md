@@ -10,6 +10,7 @@
 |---|---|---|---|---|
 | `POST` | `/api/v2/scorebooks` | Office | `{ classSubjectId }` | `201 ResScorebookDTO` |
 | `GET` | `/api/v2/scorebooks/{scorebookId}` | Office/Teacher | — | `ResScorebookDTO` |
+| `GET` | `/api/v2/scorebooks/by-class-subject/{classSubjectId}` | Office/Teacher | — | `200 ResScorebookDTO`; `404` when no scorebook exists |
 | `POST` | `/api/v2/scorebooks/{scorebookId}/open` | Office/Teacher | — | `ResScorebookDTO` |
 | `POST` | `/api/v2/scorebooks/{scorebookId}/columns` | Office/Teacher | create column | `ResAssessmentColumnDTO` |
 | `PUT` | `/api/v2/assessment-columns/{columnId}` | Office/Teacher | `{ columnName? }` | column DTO |

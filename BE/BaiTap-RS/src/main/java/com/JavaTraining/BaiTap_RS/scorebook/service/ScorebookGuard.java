@@ -42,6 +42,15 @@ public class ScorebookGuard {
         assertCanManage(scorebook);
     }
 
+    public void assertCanReadClassSubject(Long classSubjectId) {
+        if (hasOfficeRole()) {
+            return;
+        }
+        Teacher teacher = currentTeacher();
+        assignmentAccessService.assertActiveAssignment(
+                teacher.getId(), classSubjectId, LocalDate.now(BUSINESS_ZONE));
+    }
+
     private Teacher currentTeacher() {
         Long userId = AuditContext.currentUserId();
         if (userId == null) {

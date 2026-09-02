@@ -8,6 +8,7 @@ import com.JavaTraining.BaiTap_RS.academic.domain.entity.ClassSubject;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Subject;
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqCreateScorebookDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResScorebookDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.AssessmentColumn;
@@ -21,6 +22,7 @@ import com.JavaTraining.BaiTap_RS.scorebook.repository.SkillWeightConfigReposito
 import org.springframework.stereotype.Service;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class ScorebookLifecycleService {
 
     private final ScorebookContext context;
@@ -55,6 +57,9 @@ public class ScorebookLifecycleService {
     }
 
     public ResScorebookDTO createScorebook(ReqCreateScorebookDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScorebookLifecycleService.class,
+                "ScorebookLifecycleService.createScorebook");
         ClassSubject classSubject = context.findClassSubject(request.classSubjectId());
         context.validateClassSubject(classSubject);
         context.findActiveSubject(classSubject.getSubjectId());
@@ -75,12 +80,28 @@ public class ScorebookLifecycleService {
     }
 
     public ResScorebookDTO getScorebook(Long scorebookId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScorebookLifecycleService.class,
+                "ScorebookLifecycleService.getScorebook");
         Scorebook scorebook = context.findScorebook(scorebookId);
         guard.assertCanRead(scorebook);
         return responseService.toResponse(scorebook);
     }
 
+    public ResScorebookDTO getScorebookByClassSubject(Long classSubjectId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScorebookLifecycleService.class,
+                "ScorebookLifecycleService.getScorebookByClassSubject");
+        ClassSubject classSubject = context.findClassSubject(classSubjectId);
+        guard.assertCanReadClassSubject(classSubject.getId());
+        Scorebook scorebook = context.findScorebookByClassSubject(classSubjectId);
+        return responseService.toResponse(scorebook);
+    }
+
     public ResScorebookDTO openScorebook(Long scorebookId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScorebookLifecycleService.class,
+                "ScorebookLifecycleService.openScorebook");
         Scorebook scorebook = context.findScorebook(scorebookId);
         guard.assertCanManage(scorebook);
         validator.ensureDraft(scorebook);
@@ -96,6 +117,9 @@ public class ScorebookLifecycleService {
     }
 
     public ResScorebookDTO publishScorebook(Long scorebookId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScorebookLifecycleService.class,
+                "ScorebookLifecycleService.publishScorebook");
         Scorebook scorebook = context.findScorebook(scorebookId);
         guard.assertCanManage(scorebook);
         validator.ensureOpen(scorebook);
