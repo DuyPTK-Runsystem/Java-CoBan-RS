@@ -135,15 +135,18 @@ public class SemesterNotificationDispatchService {
 
     private void deliverNotification(SemesterCompletenessNotification notification) {
         notification.setAttemptCount(notification.getAttemptCount() + 1);
+        if (mailSender == null) {
+            notification.setStatus(NotificationStatus.FAILED);
+            notification.setErrorMessage("Email sender is not configured");
+            return;
+        }
         try {
-            if (mailSender != null) {
-                SimpleMailMessage message = new SimpleMailMessage();
-                message.setFrom(fromEmail);
-                message.setTo(notification.getRecipientEmail());
-                message.setSubject(notification.getSubject());
-                message.setText(notification.getBodyContent());
-                mailSender.send(message);
-            }
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(notification.getRecipientEmail());
+            message.setSubject(notification.getSubject());
+            message.setText(notification.getBodyContent());
+            mailSender.send(message);
             notification.setStatus(NotificationStatus.SENT);
             notification.setSentAt(LocalDateTime.now());
             notification.setErrorMessage(null);

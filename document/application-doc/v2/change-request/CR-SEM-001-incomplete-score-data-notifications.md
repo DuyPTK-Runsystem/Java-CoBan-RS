@@ -10,6 +10,10 @@
 - Related Developer Plan: `document/dev-impl-plan/be/academic/040-semester-completeness-notification-cr-sem-001-2026-08-25.md` (and historical Plan 027)
 - Scope owner: Academic Structure and future Assessment/Scoring notification flow
 
+### Amendment 040.1 (2026-09-03)
+
+Notification delivery is email-only. The system records delivery success only when the mail sender returns successfully; it does not claim recipient receipt. Legacy `IN_APP` rows are not automatically changed or deleted by migration. If they exist during rollout, the migration fails safely and requires a separately approved data-remediation plan.
+
 ## 2. Reason for change
 
 The semester lifecycle is standardized as:

@@ -177,4 +177,42 @@ class SemesterNotificationDispatchServiceTest {
                 Assertions.assertEquals(2, failedNotif.getAttemptCount(), "attempt count should be 2");
                 Mockito.verify(notificationRepository).save(failedNotif);
         }
+
+        @Test
+        void marksNotificationFailedWhenEmailSenderIsNotConfigured() {
+                SemesterNotificationDispatchService serviceWithoutMail =
+                                new SemesterNotificationDispatchService(
+                                                notificationRepository,
+                                                recipientResolverService,
+                                                null);
+                SemesterRecipientInfo recip = new SemesterRecipientInfo(
+                                "teacher@school.edu.vn",
+                                "SUBJECT_TEACHER",
+                                10L,
+                                "Tháº§y A",
+                                "TiÃªu Ä‘á»",
+                                "Ná»™i dung",
+                                List.of("Issue 1"));
+
+                Mockito.when(recipientResolverService.resolveRecipients(Mockito.eq(1L), Mockito.eq("t-7d"),
+                                Mockito.any(), Mockito.any())).thenReturn(List.of(recip));
+                Mockito.when(notificationRepository
+                                .findBySemesterIdAndCheckpointCodeAndRecipientEmailAndNotificationChannel(
+                                                1L, "t-7d", "teacher@school.edu.vn", NotificationChannel.EMAIL))
+                                .thenReturn(Optional.empty());
+
+                List<ResSemesterNotificationDTO> dtos = serviceWithoutMail.dispatchNotifications(
+                                1L,
+                                "t-7d",
+                                100L,
+                                new SemesterCompletenessSummaryDTO(false, 0, 0, 0, 1, 0, 0, 0, List.of("Issue 1")),
+                                List.of());
+
+                Assertions.assertEquals(1, dtos.size(), "dtos size should match");
+                ArgumentCaptor<SemesterCompletenessNotification> captor = ArgumentCaptor
+                                .forClass(SemesterCompletenessNotification.class);
+                Mockito.verify(notificationRepository).save(captor.capture());
+                Assertions.assertEquals(NotificationStatus.FAILED, captor.getValue().getStatus(),
+                                "unconfigured email sender must not be reported as sent");
+        }
 }

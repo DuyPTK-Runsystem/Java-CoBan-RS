@@ -38,6 +38,7 @@
 |   038 | scorebook          | [Score Change Request](scorebook/038-score-change-request-2026-08-25.md)                                                              | Implemented; validation PASS; e2e persistence test pending | 2026-08-25 |
 |   039 | academic           | [Semester Lock Lifecycle, Service & Batch](academic/039-semester-lock-2026-08-25.md)                                                  | Completed; validation PASS                                 | 2026-08-25 |
 |   040 | academic           | [Semester Completeness Notification (CR-SEM-001)](academic/040-semester-completeness-notification-cr-sem-001-2026-08-25.md)           | Completed; validation PASS                                 | 2026-08-25 |
+| 040.1 | academic           | [Email-only Notification Contract Amendment](academic/040.1-email-only-notification-contract-2026-09-03.md) | Implemented; final validation incomplete | 2026-09-03 |
 |   041 | scorebook          | [Transcript Result Schema Foundation](scorebook/041-transcript-result-schema-foundation-2026-08-25.md)                                | Completed; validation PASS                                 | 2026-08-25 |
 | 042.1 | student            | [Student Code Input Resolution & Display Across All Modules](student/042.1-student-code-input-resolution-and-display-2026-08-25.md)   | Completed; validation PASS                                 | 2026-08-25 |
 |   042 | scorebook          | [Subject Calculation Engine & Worker Lifecycle](scorebook/042-subject-calculation-engine-and-worker-lifecycle-2026-08-25.md)          | Completed; validation PASS                                 | 2026-08-25 |
@@ -63,3 +64,5 @@
 - `attendance/`: Attendance session foundation, exception attendance and GVCN-scope notes.
 - `scorebook/`: Scorebook lifecycle, assessment-column configuration and skill-weight foundation notes.
 - `academic/`: Academic structure, semester lifecycle, lock batch, completeness evaluation and notifications.
+
+Plan 040.1: Email-only notification contract — Completed; full test, Checkstyle, PMD and build PASS. Existing IN_APP data must be preflighted before production migration.

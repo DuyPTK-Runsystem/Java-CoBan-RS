@@ -37,14 +37,29 @@ class SemesterCompletenessNotificationFlywayMigrationTest {
                         SELECT COUNT(*)
                         FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
                         WHERE CONSTRAINT_NAME IN (
-                            'ck_scn_channel',
+                            'ck_scn_channel_email_only',
                             'ck_scn_status',
                             'uk_sem_notif_chk_recip'
                         )
                         """)) {
             moveToFirstRow(resultSet, "constraint query should return a row");
             Assertions.assertEquals(3, resultSet.getInt(1),
-                    "V15 should enforce channel, status and unique constraints");
+                    "notification migrations should enforce email-only channel, status and unique constraints");
+        }
+
+        try (Connection connection = dataSource.getConnection();
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery("""
+                        SELECT CHECK_CLAUSE
+                        FROM INFORMATION_SCHEMA.CHECK_CONSTRAINTS
+                        WHERE CONSTRAINT_NAME = 'ck_scn_channel_email_only'
+                        """)) {
+            moveToFirstRow(resultSet, "email-only channel check should exist");
+            String checkClause = resultSet.getString(1);
+            Assertions.assertTrue(checkClause.contains("EMAIL"),
+                    "channel constraint should allow EMAIL");
+            Assertions.assertFalse(checkClause.contains("IN_APP"),
+                    "channel constraint should reject IN_APP");
         }
     }
 

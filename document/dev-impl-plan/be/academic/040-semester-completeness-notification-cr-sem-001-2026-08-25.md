@@ -184,4 +184,8 @@
 - Hoàn thành toàn bộ mã nguồn backend, migration Flyway V15, dịch vụ phân giải người nhận, dịch vụ gửi thông báo qua Spring Mail kèm cơ chế idempotent, retry và cách ly lỗi.
 - Đảm bảo 100% kiểm tra chất lượng mã nguồn: Checkstyle PASS (0 lỗi), PMD PASS (0 vi phạm), Unit/Integration Tests PASS (200/200 tests), Coverage cao (> 90%), Build artifact PASS.
 
+## 8. Amendment 040.1 — Email-only contract (2026-09-03)
+
+Plan 040.1 đã được user phê duyệt để chuẩn hóa contract thành email-only. `IN_APP` không còn là channel hợp lệ; `checkpointCode` vẫn được giữ trong persistence để phục vụ idempotency nhưng không phải UI concern. Việc gửi chỉ được đánh dấu `SENT` khi `JavaMailSender` trả về thành công; không xác nhận việc người nhận đã nhận email. Xem [Developer Plan 040.1](040.1-email-only-notification-contract-2026-09-03.md).
+
 
