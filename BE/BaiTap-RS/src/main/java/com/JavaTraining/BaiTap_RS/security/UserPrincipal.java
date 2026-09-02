@@ -1,6 +1,7 @@
 package com.JavaTraining.BaiTap_RS.security;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.JavaTraining.BaiTap_RS.user.domain.entity.Role;
 import com.JavaTraining.BaiTap_RS.user.domain.entity.User;
@@ -28,10 +29,16 @@ public class UserPrincipal implements UserDetails {
         return id;
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public List<String> getRoleCodes() {
         return roles.stream()
                 .map(Role::getCode)
+                .sorted()
+                .toList();
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return getRoleCodes().stream()
                 .map(code -> "ROLE_" + code)
                 .map(SimpleGrantedAuthority::new)
                 .toList();

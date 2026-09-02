@@ -1,6 +1,8 @@
 package com.JavaTraining.BaiTap_RS.user.controller;
 
+import com.JavaTraining.BaiTap_RS.user.domain.entity.Role;
 import com.JavaTraining.BaiTap_RS.user.domain.entity.User;
+import com.JavaTraining.BaiTap_RS.user.repository.RoleRepository;
 import com.JavaTraining.BaiTap_RS.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +47,9 @@ class AuthControllerIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @BeforeEach
     void cleanDatabase() {
@@ -146,6 +151,11 @@ class AuthControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerJson(USERNAME, PASSWORD, PASSWORD)))
                 .andReturn();
+        User registeredUser = userRepository.findByUsername(USERNAME).orElseThrow();
+        Role studentRole = roleRepository.findByCode("STUDENT")
+                .orElseGet(() -> roleRepository.save(new Role("STUDENT", "Student", "Student")));
+        registeredUser.addRole(studentRole);
+        userRepository.save(registeredUser);
 
         MvcResult loginResult = mockMvc.perform(MockMvcRequestBuilders
                         .post(LOGIN_PATH)
@@ -154,6 +164,8 @@ class AuthControllerIntegrationTest {
                 .andReturn();
         String loginResponse = loginResult.getResponse().getContentAsString();
         String accessToken = extractAccessToken(loginResult);
+        byte[] jwtPayloadBytes = java.util.Base64.getUrlDecoder().decode(accessToken.split("\\.")[1]);
+        JsonNode jwtPayload = objectMapper.readTree(jwtPayloadBytes);
 
         MvcResult accountResult = mockMvc.perform(MockMvcRequestBuilders
                         .get(ACCOUNT_PATH)
@@ -171,6 +183,7 @@ class AuthControllerIntegrationTest {
                         && accessToken != null
                         && !accessToken.isBlank()
                         && loginResponse.contains("\"access_token\"")
+                        && "[\"STUDENT\"]".equals(jwtPayload.path("role").toString())
                         && loginResponse.contains("\"username\":\"" + USERNAME + "\"")
                         && !loginResponse.contains("\"password\"")
                         && accountResult.getResponse().getStatus() == 200
@@ -234,4 +247,5 @@ class AuthControllerIntegrationTest {
         JsonNode response = objectMapper.readTree(result.getResponse().getContentAsString());
         return response.path("data").path("access_token").asText();
     }
+
 }

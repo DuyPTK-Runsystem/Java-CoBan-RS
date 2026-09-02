@@ -42,6 +42,7 @@ public class JwtTokenService {
         Map<String, Object> payload = Map.of(
                 "sub", principal.getUsername(),
                 "user_id", principal.getId(),
+                "role", principal.getRoleCodes(),
                 "iat", now.getEpochSecond(),
                 "exp", now.plusSeconds(accessTokenValidityInSeconds).getEpochSecond());
         String headerPart = encodeJson(header);

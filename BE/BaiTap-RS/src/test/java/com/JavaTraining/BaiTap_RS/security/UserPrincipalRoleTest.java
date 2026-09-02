@@ -21,9 +21,9 @@ class UserPrincipalRoleTest {
                 .map(GrantedAuthority::getAuthority)
                 .collect(java.util.stream.Collectors.toSet());
 
-        Assertions.assertEquals(
-                Set.of("ROLE_ADMIN", "ROLE_TEACHER"),
-                authorities,
-                "role codes should become Spring Security role authorities");
+        Assertions.assertTrue(
+                authorities.equals(Set.of("ROLE_ADMIN", "ROLE_TEACHER"))
+                        && principal.getRoleCodes().equals(java.util.List.of("ADMIN", "TEACHER")),
+                "role codes should map to authorities and canonical sorted codes");
     }
 }
