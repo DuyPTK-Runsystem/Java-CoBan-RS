@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqFilterCalculationTaskDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResCalculationTaskDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.CalculationTask;
@@ -26,11 +27,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 /**
  * NFR-CALC-005: Tạo hoặc gộp calculation task theo idempotency key.
  */
 @Service
-@SuppressWarnings("PMD.TooManyMethods")
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.GuardLogStatement"})
 public class CalculationTaskService {
 
     private final CalculationTaskRepository taskRepository;
@@ -57,6 +59,9 @@ public class CalculationTaskService {
 
     @Transactional
     public CalculationTask ensureRecalcTask(Long studentId, Long academicYearId, long sourceVersion) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalculationTaskService.class,
+                "CalculationTaskService.ensureRecalcTask");
         String key = "RECALC:" + studentId + ":" + academicYearId;
 
         return taskRepository.findByIdempotencyKey(key)
@@ -66,6 +71,9 @@ public class CalculationTaskService {
 
     @Transactional
     public Long claimNextTask(String workerId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalculationTaskService.class,
+                "CalculationTaskService.claimNextTask");
         List<CalculationTask> tasks = taskRepository.findAvailableForUpdate(
                 CalculationTaskStatus.PENDING,
                 LocalDateTime.now(),
@@ -80,6 +88,9 @@ public class CalculationTaskService {
 
     @Transactional
     public void markSucceeded(Long taskId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalculationTaskService.class,
+                "CalculationTaskService.markSucceeded");
         CalculationTask task = findTask(taskId);
         long currentVersion = annualTranscriptRepository
                 .findByStudentIdAndAcademicYearId(task.getStudentId(), task.getAcademicYearId())
@@ -94,6 +105,9 @@ public class CalculationTaskService {
 
     @Transactional
     public void markFailed(Long taskId, Throwable failure) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalculationTaskService.class,
+                "CalculationTaskService.markFailed");
         CalculationTask task = findTask(taskId);
         String message = failure.getMessage() == null ? failure.getClass().getSimpleName() : failure.getMessage();
         String error = message.length() > 2000 ? message.substring(0, 2000) : message;
@@ -106,6 +120,9 @@ public class CalculationTaskService {
 
     @Transactional
     public ResCalculationTaskDTO retryTask(Long taskId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalculationTaskService.class,
+                "CalculationTaskService.retryTask");
         CalculationTask task = findTask(taskId);
         if (task.getStatus() != CalculationTaskStatus.FAILED) {
             throw new AppException(HttpStatus.CONFLICT, "Chỉ calculation task FAILED mới được retry");
@@ -127,6 +144,9 @@ public class CalculationTaskService {
 
     @Transactional(readOnly = true)
     public Page<ResCalculationTaskDTO> findTasks(ReqFilterCalculationTaskDTO filter) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalculationTaskService.class,
+                "CalculationTaskService.findTasks");
         Long studentId = filter.getStudentId();
         if (filter.getStudentCode() != null && !filter.getStudentCode().isBlank()) {
             Student student = studentLookupService.resolveStudent(studentId, filter.getStudentCode());
@@ -147,12 +167,18 @@ public class CalculationTaskService {
 
     @Transactional(readOnly = true)
     public Page<ResCalculationTaskDTO> findFailedTasks(ReqFilterCalculationTaskDTO filter) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalculationTaskService.class,
+                "CalculationTaskService.findFailedTasks");
         filter.setStatus(CalculationTaskStatus.FAILED);
         return findTasks(filter);
     }
 
     @Transactional
     public List<ResCalculationTaskDTO> retryAllFailedTasks() {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalculationTaskService.class,
+                "CalculationTaskService.retryAllFailedTasks");
         return taskRepository.findAllByStatusOrderByCreatedAtAsc(CalculationTaskStatus.FAILED).stream()
                 .map(task -> retryTask(task.getId()))
                 .toList();
@@ -160,12 +186,18 @@ public class CalculationTaskService {
 
     @Transactional
     public ResCalculationTaskDTO requestRecalculation(String studentCode, Long academicYearId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalculationTaskService.class,
+                "CalculationTaskService.requestRecalculation");
         Student student = studentLookupService.resolveStudent(null, studentCode);
         return requestRecalculation(student, academicYearId);
     }
 
     @Transactional
     public ResCalculationTaskDTO requestRecalculation(Long studentId, Long academicYearId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalculationTaskService.class,
+                "CalculationTaskService.requestRecalculation");
         Student student = studentLookupService.resolveStudent(studentId, null);
         return requestRecalculation(student, academicYearId);
     }

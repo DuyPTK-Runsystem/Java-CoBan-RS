@@ -7,6 +7,7 @@ import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.requests.ReqUpdateSchoolC
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResSchoolClassDTO;
 import com.JavaTraining.BaiTap_RS.academic.service.SchoolClassService;
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
@@ -26,9 +27,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequestMapping("/api/v2/classes")
-@PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')")
 // FR-CLASS-001..011 and BR-AUTH-005: class metadata mutations are office-only.
+@SuppressWarnings("PMD.GuardLogStatement")
 public class SchoolClassController {
+
+    private static final String OFFICE_ROLES = "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')";
 
     private final SchoolClassService schoolClassService;
 
@@ -41,33 +44,52 @@ public class SchoolClassController {
     @ApiMessage("Lấy danh sách lớp")
     public List<ResSchoolClassDTO> listSchoolClasses(
             @RequestParam(value = "academicYearId", required = false) @Positive Long academicYearId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SchoolClassController.class,
+                "SchoolClassController.listSchoolClasses");
         return schoolClassService.listSchoolClasses(academicYearId);
     }
 
     @PostMapping
+    @PreAuthorize(OFFICE_ROLES)
     @ApiMessage("Tạo lớp")
     public ResponseEntity<ResSchoolClassDTO> createSchoolClass(
             @Valid @RequestBody ReqCreateSchoolClassDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SchoolClassController.class,
+                "SchoolClassController.createSchoolClass");
         return ResponseEntity.status(HttpStatus.CREATED).body(schoolClassService.createSchoolClass(request));
     }
 
     @PutMapping("/{classId}")
+    @PreAuthorize(OFFICE_ROLES)
     @ApiMessage("Cập nhật lớp")
     public ResSchoolClassDTO updateSchoolClass(
             @PathVariable("classId") @Positive Long classId,
             @Valid @RequestBody ReqUpdateSchoolClassDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SchoolClassController.class,
+                "SchoolClassController.updateSchoolClass");
         return schoolClassService.updateSchoolClass(classId, request);
     }
 
     @PostMapping("/{classId}/close")
+    @PreAuthorize(OFFICE_ROLES)
     @ApiMessage("Đóng lớp")
     public ResSchoolClassDTO closeSchoolClass(@PathVariable("classId") @Positive Long classId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SchoolClassController.class,
+                "SchoolClassController.closeSchoolClass");
         return schoolClassService.closeSchoolClass(classId);
     }
 
     @DeleteMapping("/{classId}")
+    @PreAuthorize(OFFICE_ROLES)
     @ApiMessage("Xóa lớp")
     public ResponseEntity<Void> deleteSchoolClass(@PathVariable("classId") @Positive Long classId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SchoolClassController.class,
+                "SchoolClassController.deleteSchoolClass");
         schoolClassService.deleteSchoolClass(classId);
         return ResponseEntity.noContent().build();
     }

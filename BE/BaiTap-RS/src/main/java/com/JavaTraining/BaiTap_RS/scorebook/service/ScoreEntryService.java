@@ -10,6 +10,7 @@ import com.JavaTraining.BaiTap_RS.academic.domain.entity.ClassSubject;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Semester;
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqBulkScoreItemDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqBulkUpsertStudentScoreDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqUpsertStudentScoreDTO;
@@ -23,11 +24,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 /**
  * Service chính điều phối các thao tác nhập và sửa điểm học sinh (Single & Bulk).
  */
 @Service
-@SuppressWarnings("PMD.CouplingBetweenObjects")
+@SuppressWarnings({"PMD.CouplingBetweenObjects", "PMD.GuardLogStatement"})
 public class ScoreEntryService {
 
     private final ScoreEntryContext entryContext;
@@ -58,6 +60,9 @@ public class ScoreEntryService {
     @Transactional
     public ResStudentScoreDTO upsertSingleScore(
             Long columnId, Long studentId, ReqUpsertStudentScoreDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ScoreEntryService.class,
+                        "ScoreEntryService.upsertSingleScore");
 
         AssessmentColumn column = entryContext.findActiveColumn(columnId);
         Scorebook scorebook = entryContext.findWritableScorebook(column.getScorebookId());
@@ -94,6 +99,9 @@ public class ScoreEntryService {
     @Transactional
     public List<ResStudentScoreDTO> bulkUpsertScores(
             Long columnId, ReqBulkUpsertStudentScoreDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ScoreEntryService.class,
+                        "ScoreEntryService.bulkUpsertScores");
 
         AssessmentColumn column = entryContext.findActiveColumn(columnId);
         Scorebook scorebook = entryContext.findWritableScorebook(column.getScorebookId());
@@ -157,6 +165,9 @@ public class ScoreEntryService {
     @Transactional
     public ResStudentScoreDTO upsertSingleScoreByCode(
             Long columnId, String studentCode, ReqUpsertStudentScoreDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ScoreEntryService.class,
+                        "ScoreEntryService.upsertSingleScoreByCode");
         Student student = studentLookupService.resolveStudent(null, studentCode);
         return upsertSingleScore(columnId, student.getId(), request);
     }

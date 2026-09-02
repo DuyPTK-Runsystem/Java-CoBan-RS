@@ -19,11 +19,13 @@ import com.JavaTraining.BaiTap_RS.academic.repository.SemesterRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectApplicabilityRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectRepository;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class ClassSubjectService {
 
     private final ClassSubjectRepository classSubjectRepository;
@@ -47,6 +49,9 @@ public class ClassSubjectService {
 
     @Transactional(readOnly = true)
     public List<ResClassSubjectDTO> listByClassAndSemester(Long classId, Long semesterId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ClassSubjectService.class,
+                "ClassSubjectService.listByClassAndSemester");
         return classSubjectRepository.findAllByClassIdAndSemesterIdOrderBySubjectIdAsc(classId, semesterId)
                 .stream()
                 .map(this::toResponse)
@@ -55,6 +60,9 @@ public class ClassSubjectService {
 
     @Transactional
     public ResClassSubjectDTO createClassSubject(ReqCreateClassSubjectDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ClassSubjectService.class,
+                "ClassSubjectService.createClassSubject");
         SchoolClass schoolClass = schoolClassRepository.findById(request.classId())
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy lớp"));
         Subject subject = subjectRepository.findById(request.subjectId())
@@ -85,6 +93,9 @@ public class ClassSubjectService {
 
     @Transactional
     public ResClassSubjectDTO updateClassSubject(Long id, ReqUpdateClassSubjectDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ClassSubjectService.class,
+                "ClassSubjectService.updateClassSubject");
         ClassSubject classSubject = classSubjectRepository.findById(id)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy lớp-môn"));
         classSubject.setStatus(request.status());

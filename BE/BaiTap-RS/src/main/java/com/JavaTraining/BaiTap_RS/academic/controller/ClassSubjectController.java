@@ -7,6 +7,7 @@ import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.requests.ReqUpdateClassSu
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResClassSubjectDTO;
 import com.JavaTraining.BaiTap_RS.academic.service.ClassSubjectService;
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequestMapping("/api/v2")
+@SuppressWarnings("PMD.GuardLogStatement")
 public class ClassSubjectController {
 
     private final ClassSubjectService classSubjectService;
@@ -39,6 +41,9 @@ public class ClassSubjectController {
     public List<ResClassSubjectDTO> listByClassAndSemester(
             @PathVariable("classId") @Positive Long classId,
             @RequestParam("semesterId") @Positive Long semesterId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ClassSubjectController.class,
+                        "ClassSubjectController.listByClassAndSemester");
         return classSubjectService.listByClassAndSemester(classId, semesterId);
     }
 
@@ -47,6 +52,9 @@ public class ClassSubjectController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')")
     public ResponseEntity<ResClassSubjectDTO> createClassSubject(
             @Valid @RequestBody ReqCreateClassSubjectDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ClassSubjectController.class,
+                        "ClassSubjectController.createClassSubject");
         return ResponseEntity.status(HttpStatus.CREATED).body(classSubjectService.createClassSubject(request));
     }
 
@@ -56,6 +64,9 @@ public class ClassSubjectController {
     public ResClassSubjectDTO updateClassSubject(
             @PathVariable("classSubjectId") @Positive Long classSubjectId,
             @Valid @RequestBody ReqUpdateClassSubjectDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ClassSubjectController.class,
+                        "ClassSubjectController.updateClassSubject");
         return classSubjectService.updateClassSubject(classSubjectId, request);
     }
 }

@@ -17,11 +17,13 @@ import com.JavaTraining.BaiTap_RS.academic.repository.SemesterRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectApplicabilityRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectRepository;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class SubjectApplicabilityService {
 
     private final SubjectRepository subjectRepository;
@@ -51,6 +53,9 @@ public class SubjectApplicabilityService {
             Long subjectId,
             Long semesterId,
             SubjectApplicabilityStatus status) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SubjectApplicabilityService.class,
+                        "SubjectApplicabilityService.listApplicabilities");
         findSubject(subjectId);
         List<SubjectApplicability> records = applicabilityRepository.findAllByFilters(subjectId, semesterId, status);
         return records.stream().map(this::toResponse).toList();
@@ -60,6 +65,9 @@ public class SubjectApplicabilityService {
     public ResSubjectApplicabilityDTO createApplicability(
             Long subjectId,
             ReqCreateSubjectApplicabilityDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SubjectApplicabilityService.class,
+                        "SubjectApplicabilityService.createApplicability");
         Subject subject = findSubject(subjectId);
         Semester semester = findSemester(request.semesterId());
         validator.validateTarget(
@@ -93,6 +101,9 @@ public class SubjectApplicabilityService {
             Long subjectId,
             Long applicabilityId,
             ReqUpdateSubjectApplicabilityDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SubjectApplicabilityService.class,
+                        "SubjectApplicabilityService.updateApplicability");
         Subject subject = findSubject(subjectId);
         SubjectApplicability applicability = findOwnedApplicability(subjectId, applicabilityId);
         Semester semester = findSemester(request.semesterId());
@@ -139,6 +150,9 @@ public class SubjectApplicabilityService {
 
     @Transactional
     public void deactivateApplicability(Long subjectId, Long applicabilityId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SubjectApplicabilityService.class,
+                "SubjectApplicabilityService.deactivateApplicability");
         findSubject(subjectId);
         SubjectApplicability applicability = findOwnedApplicability(subjectId, applicabilityId);
         Semester semester = findSemester(applicability.getSemesterId());

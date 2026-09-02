@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
 import com.JavaTraining.BaiTap_RS.student.repository.StudentRepository;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@SuppressWarnings("PMD.TooManyMethods")
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.GuardLogStatement"})
 public class StudentLookupService {
 
     private static final String STUDENT_NOT_FOUND_MESSAGE = "Không tìm thấy học sinh";
@@ -30,6 +31,9 @@ public class StudentLookupService {
 
     @Transactional(readOnly = true)
     public Student resolveStudent(Long studentId, String studentCode) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentLookupService.class,
+                "StudentLookupService.resolveStudent");
         String normalizedCode = normalizeCode(studentCode);
         if (studentId == null && normalizedCode == null) {
             throw badRequest("Phải cung cấp studentId hoặc studentCode");
@@ -47,6 +51,9 @@ public class StudentLookupService {
 
     @Transactional(readOnly = true)
     public List<Student> resolveStudents(Collection<Long> studentIds, Collection<String> studentCodes) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentLookupService.class,
+                "StudentLookupService.resolveStudents");
         Set<Long> uniqueIds = normalizeIds(studentIds);
         Set<String> uniqueCodes = normalizeCodes(studentCodes);
         validateIdentifiersPresent(uniqueIds, uniqueCodes);

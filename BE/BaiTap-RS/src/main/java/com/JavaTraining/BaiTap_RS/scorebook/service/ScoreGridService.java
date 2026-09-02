@@ -1,6 +1,7 @@
 package com.JavaTraining.BaiTap_RS.scorebook.service;
 
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.ClassSubject;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResStudentScoreGridDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.Scorebook;
 import org.springframework.data.domain.PageRequest;
@@ -9,10 +10,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 /**
  * Service chuyên biệt đọc dữ liệu bảng điểm (score grid) có phân trang.
  */
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class ScoreGridService {
 
     private final ScoreEntryContext entryContext;
@@ -30,6 +33,9 @@ public class ScoreGridService {
 
     @Transactional(readOnly = true)
     public ResStudentScoreGridDTO getScoreGrid(Long scorebookId, int page, int size) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScoreGridService.class,
+                "ScoreGridService.getScoreGrid");
         Scorebook scorebook = entryContext.findWritableScorebook(scorebookId);
         guard.assertCanRead(scorebook);
 

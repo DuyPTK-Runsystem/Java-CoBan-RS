@@ -19,12 +19,13 @@ import com.JavaTraining.BaiTap_RS.academic.repository.AcademicYearRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SemesterRepository;
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@SuppressWarnings("PMD.TooManyMethods")
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.GuardLogStatement"})
 public class SemesterService {
 
     private static final Set<Integer> NOTIFICATION_OFFSETS = Set.of(
@@ -51,6 +52,9 @@ public class SemesterService {
 
     @Transactional(readOnly = true)
     public List<ResSemesterDTO> listByAcademicYear(Long academicYearId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterService.class,
+                "SemesterService.listByAcademicYear");
         return semesterRepository.findAllByAcademicYearIdOrderByDisplayOrderAsc(academicYearId)
                 .stream()
                 .map(semesterMapper::toResponse)
@@ -59,6 +63,9 @@ public class SemesterService {
 
     @Transactional
     public ResSemesterDTO createSemester(ReqCreateSemesterDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterService.class,
+                "SemesterService.createSemester");
         AcademicYear year = findAcademicYear(request.academicYearId());
         validateDatesWithinYear(year, request.startDate(), request.endDate());
         if (semesterRepository.existsByAcademicYearIdAndCode(request.academicYearId(), request.code())) {
@@ -83,6 +90,9 @@ public class SemesterService {
 
     @Transactional
     public ResSemesterDTO updateSemester(Long id, ReqUpdateSemesterDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterService.class,
+                "SemesterService.updateSemester");
         Semester semester = findSemester(id);
         if (semester.getStatus() == SemesterStatus.CLOSED) {
             throw new AppException(HttpStatus.CONFLICT, "Không thể cập nhật học kỳ đã CLOSED");
@@ -111,6 +121,9 @@ public class SemesterService {
 
     @Transactional
     public ResSemesterDTO activateSemester(Long id) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterService.class,
+                "SemesterService.activateSemester");
         Semester semester = findSemester(id);
         if (semester.getStatus() != SemesterStatus.DRAFT) {
             throw new AppException(HttpStatus.CONFLICT, "Chỉ học kỳ DRAFT mới được kích hoạt");
@@ -121,6 +134,9 @@ public class SemesterService {
 
     @Transactional
     public ResSemesterDTO lockSemester(Long id) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterService.class,
+                "SemesterService.lockSemester");
         return semesterLockService.lockSemester(
                 id,
                 LockSource.MANUAL,
@@ -131,6 +147,9 @@ public class SemesterService {
 
     @Transactional
     public ResSemesterDTO reopenSemester(Long id, ReqReopenSemesterDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterService.class,
+                "SemesterService.reopenSemester");
         return semesterLockService.reopenSemester(
                 id,
                 request,
@@ -142,6 +161,9 @@ public class SemesterService {
     public ResSemesterCompletenessDecisionDTO evaluateCompletenessCheckpoint(
             Long semesterId,
             LocalDate checkpointDate) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SemesterService.class,
+                        "SemesterService.evaluateCompletenessCheckpoint");
         Semester semester = findSemester(semesterId);
         LocalDate lockDate = calculateEffectiveLockDate(semester);
 
@@ -169,6 +191,9 @@ public class SemesterService {
     }
 
     public LocalDate calculateEffectiveLockDate(Semester semester) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterService.class,
+                "SemesterService.calculateEffectiveLockDate");
         if (semester.getReopenUntil() != null) {
             return semester.getReopenUntil().toLocalDate();
         }

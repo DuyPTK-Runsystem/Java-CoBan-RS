@@ -3,16 +3,21 @@ package com.JavaTraining.BaiTap_RS.academic.service;
 import java.util.List;
 
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.SemesterCompletenessSummaryDTO;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import org.springframework.stereotype.Service;
 
 @Service
 @SuppressWarnings({
         "PMD.ConsecutiveLiteralAppends",
-        "PMD.UseObjectForClearerAPI"
+        "PMD.UseObjectForClearerAPI",
+        "PMD.GuardLogStatement"
 })
 public class SemesterNotificationTemplateService {
 
     public String buildAcademicOfficeSubject(String semesterName, String checkpointCode) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterNotificationTemplateService.class,
+                "SemesterNotificationTemplateService.buildAcademicOfficeSubject");
         return String.format("[Cảnh báo dữ liệu điểm] Học kỳ %s - Checkpoint %s",
                 semesterName, checkpointCode);
     }
@@ -22,6 +27,9 @@ public class SemesterNotificationTemplateService {
             String checkpointCode,
             SemesterCompletenessSummaryDTO summary,
             List<String> details) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SemesterNotificationTemplateService.class,
+                        "SemesterNotificationTemplateService.buildAcademicOfficeBody");
         StringBuilder builder = new StringBuilder(512);
         builder.append("Kính gửi Ban Giám hiệu / Phòng Giáo vụ,\n\n")
                 .append(String.format("Hệ thống thông báo tình trạng dữ liệu điểm của học kỳ [%s] tại mốc [%s]:\n",
@@ -46,11 +54,17 @@ public class SemesterNotificationTemplateService {
     }
 
     public String buildSubjectTeacherSubject(String semesterName, String subjectName, String className) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterNotificationTemplateService.class,
+                "SemesterNotificationTemplateService.buildSubjectTeacherSubject");
         return String.format("[Nhắc nhở nhập điểm] Môn %s - Lớp %s - Học kỳ %s",
                 subjectName, className, semesterName);
     }
 
     public String buildHomeroomTeacherSubject(String semesterName, String className) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterNotificationTemplateService.class,
+                "SemesterNotificationTemplateService.buildHomeroomTeacherSubject");
         return String.format("[Báo cáo tiến độ điểm lớp %s] Học kỳ %s",
                 className, semesterName);
     }
@@ -61,6 +75,9 @@ public class SemesterNotificationTemplateService {
             String checkpointCode,
             String roleDescription,
             List<String> scopedDetails) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SemesterNotificationTemplateService.class,
+                        "SemesterNotificationTemplateService.buildTeacherBody");
         StringBuilder builder = new StringBuilder(512);
         builder.append("Kính gửi Thầy/Cô ").append(teacherName != null ? teacherName : "").append(",\n\n")
                 .append(String.format(

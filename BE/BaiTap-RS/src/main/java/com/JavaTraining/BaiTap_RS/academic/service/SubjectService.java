@@ -11,11 +11,13 @@ import com.JavaTraining.BaiTap_RS.academic.domain.entity.Subject;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectStatus;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectRepository;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class SubjectService {
 
     private final SubjectRepository subjectRepository;
@@ -30,6 +32,9 @@ public class SubjectService {
 
     @Transactional(readOnly = true)
     public List<ResSubjectDTO> listSubjects(SubjectStatus status) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SubjectService.class,
+                "SubjectService.listSubjects");
         List<Subject> subjects = status == null
                 ? subjectRepository.findAllByOrderByCodeAsc()
                 : subjectRepository.findAllByStatusOrderByCodeAsc(status);
@@ -38,6 +43,9 @@ public class SubjectService {
 
     @Transactional
     public ResSubjectDTO createSubject(ReqCreateSubjectDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SubjectService.class,
+                "SubjectService.createSubject");
         if (subjectRepository.existsByCode(request.code())) {
             throw conflict("Mã môn học đã tồn tại");
         }
@@ -54,6 +62,9 @@ public class SubjectService {
 
     @Transactional
     public ResSubjectDTO updateSubject(Long id, ReqUpdateSubjectDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SubjectService.class,
+                "SubjectService.updateSubject");
         Subject subject = findSubject(id);
         if (subjectRepository.existsByCodeAndIdNot(request.code(), id)) {
             throw conflict("Mã môn học đã tồn tại");

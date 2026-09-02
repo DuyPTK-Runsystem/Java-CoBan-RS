@@ -11,6 +11,7 @@ import com.JavaTraining.BaiTap_RS.assignment.domain.DTOs.response.ResSubjectTeac
 import com.JavaTraining.BaiTap_RS.assignment.service.HomeroomAssignmentService;
 import com.JavaTraining.BaiTap_RS.assignment.service.SubjectTeachingAssignmentService;
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequestMapping("/api/v2")
+@SuppressWarnings("PMD.GuardLogStatement")
 public class AssignmentController {
 
     private static final String OFFICE_ROLES = "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')";
@@ -47,6 +49,9 @@ public class AssignmentController {
     @PreAuthorize(OFFICE_ROLES)
     public List<ResHomeroomAssignmentDTO> listHomeroomByClass(
             @PathVariable("classId") @Positive Long classId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AssignmentController.class,
+                        "AssignmentController.listHomeroomByClass");
         return homeroomAssignmentService.listHomeroomByClass(classId);
     }
 
@@ -55,6 +60,9 @@ public class AssignmentController {
     @PreAuthorize(OFFICE_ROLES)
     public List<ResSubjectTeachingAssignmentDTO> listSubjectTeachingByTeacher(
             @PathVariable("teacherId") @Positive Long teacherId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AssignmentController.class,
+                        "AssignmentController.listSubjectTeachingByTeacher");
         return subjectTeachingAssignmentService.listSubjectTeachingByTeacher(teacherId);
     }
 
@@ -64,6 +72,9 @@ public class AssignmentController {
     public ResponseEntity<ResHomeroomAssignmentDTO> createHomeroomAssignment(
             @PathVariable("classId") @Positive Long classId,
             @Valid @RequestBody ReqCreateHomeroomAssignmentDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AssignmentController.class,
+                        "AssignmentController.createHomeroomAssignment");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(homeroomAssignmentService.createHomeroomAssignment(classId, request));
     }
@@ -74,6 +85,9 @@ public class AssignmentController {
     public ResHomeroomAssignmentDTO replaceHomeroomAssignment(
             @PathVariable(ASSIGNMENT_ID) @Positive Long assignmentId,
             @Valid @RequestBody ReqReplaceAssignmentDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AssignmentController.class,
+                        "AssignmentController.replaceHomeroomAssignment");
         return homeroomAssignmentService.replaceHomeroomAssignment(assignmentId, request);
     }
 
@@ -83,6 +97,9 @@ public class AssignmentController {
     public ResHomeroomAssignmentDTO endHomeroomAssignment(
             @PathVariable(ASSIGNMENT_ID) @Positive Long assignmentId,
             @Valid @RequestBody ReqEndAssignmentDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AssignmentController.class,
+                        "AssignmentController.endHomeroomAssignment");
         return homeroomAssignmentService.endHomeroomAssignment(assignmentId, request);
     }
 
@@ -92,6 +109,9 @@ public class AssignmentController {
     public ResponseEntity<ResSubjectTeachingAssignmentDTO> createSubjectTeachingAssignment(
             @PathVariable("classSubjectId") @Positive Long classSubjectId,
             @Valid @RequestBody ReqCreateSubjectTeachingAssignmentDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AssignmentController.class,
+                        "AssignmentController.createSubjectTeachingAssignment");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(subjectTeachingAssignmentService.createSubjectTeachingAssignment(classSubjectId, request));
     }
@@ -102,6 +122,9 @@ public class AssignmentController {
     public ResSubjectTeachingAssignmentDTO replaceSubjectTeachingAssignment(
             @PathVariable(ASSIGNMENT_ID) @Positive Long assignmentId,
             @Valid @RequestBody ReqReplaceAssignmentDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AssignmentController.class,
+                        "AssignmentController.replaceSubjectTeachingAssignment");
         return subjectTeachingAssignmentService.replaceSubjectTeachingAssignment(assignmentId, request);
     }
 
@@ -111,6 +134,9 @@ public class AssignmentController {
     public ResSubjectTeachingAssignmentDTO endSubjectTeachingAssignment(
             @PathVariable(ASSIGNMENT_ID) @Positive Long assignmentId,
             @Valid @RequestBody ReqEndAssignmentDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AssignmentController.class,
+                        "AssignmentController.endSubjectTeachingAssignment");
         return subjectTeachingAssignmentService.endSubjectTeachingAssignment(assignmentId, request);
     }
 }

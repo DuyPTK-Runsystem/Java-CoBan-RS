@@ -10,6 +10,7 @@ import com.JavaTraining.BaiTap_RS.academic.domain.entity.AcademicYearStatus;
 import com.JavaTraining.BaiTap_RS.academic.repository.AcademicYearRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.enrollment.repository.StudentYearEnrollmentRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class AcademicYearService {
 
     private final AcademicYearRepository academicYearRepository;
@@ -37,6 +39,9 @@ public class AcademicYearService {
 
     @Transactional(readOnly = true)
     public List<ResAcademicYearDTO> listAcademicYears() {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AcademicYearService.class,
+                "AcademicYearService.listAcademicYears");
         return academicYearRepository.findAll(Sort.by(Sort.Direction.DESC, "startDate"))
                 .stream()
                 .map(this::toResponse)
@@ -45,6 +50,9 @@ public class AcademicYearService {
 
     @Transactional
     public ResAcademicYearDTO createAcademicYear(ReqCreateAcademicYearDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AcademicYearService.class,
+                "AcademicYearService.createAcademicYear");
         validator.validateCreate(request);
         AcademicYear academicYear = new AcademicYear(
                 request.code(),
@@ -57,6 +65,9 @@ public class AcademicYearService {
 
     @Transactional
     public ResAcademicYearDTO updateAcademicYear(Long id, ReqUpdateAcademicYearDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AcademicYearService.class,
+                "AcademicYearService.updateAcademicYear");
         AcademicYear academicYear = findAcademicYear(id);
         validator.ensureOpen(academicYear);
         validator.validateUpdate(id, request);
@@ -71,6 +82,9 @@ public class AcademicYearService {
     // BR-AY-005: đóng năm học không xóa dữ liệu lịch sử.
     @Transactional
     public ResAcademicYearDTO closeAcademicYear(Long id) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AcademicYearService.class,
+                "AcademicYearService.closeAcademicYear");
         AcademicYear academicYear = findAcademicYear(id);
         validator.ensureOpen(academicYear);
         academicYear.setStatus(AcademicYearStatus.CLOSED);
@@ -80,6 +94,9 @@ public class AcademicYearService {
     // BR-AY-004: không xóa năm học đã có lớp hoặc phân lớp.
     @Transactional
     public void deleteAcademicYear(Long id) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AcademicYearService.class,
+                "AcademicYearService.deleteAcademicYear");
         AcademicYear academicYear = findAcademicYear(id);
         if (schoolClassRepository.existsByAcademicYearId(id)
                 || enrollmentRepository.existsByAcademicYearId(id)) {

@@ -8,6 +8,7 @@ import com.JavaTraining.BaiTap_RS.academic.service.AcademicCatalogAuditService;
 import com.JavaTraining.BaiTap_RS.assignment.repository.HomeroomAssignmentRepository;
 import com.JavaTraining.BaiTap_RS.assignment.repository.SubjectTeachingAssignmentRepository;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.teacher.domain.DTOs.requests.ReqCreateTeacherDTO;
 import com.JavaTraining.BaiTap_RS.teacher.domain.DTOs.requests.ReqUpdateTeacherDTO;
 import com.JavaTraining.BaiTap_RS.teacher.domain.DTOs.response.ResTeacherDTO;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class TeacherService {
 
     private final TeacherRepository teacherRepository;
@@ -49,6 +51,9 @@ public class TeacherService {
 
     @Transactional(readOnly = true)
     public List<ResTeacherDTO> listTeachers(TeacherStatus status) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                TeacherService.class,
+                "TeacherService.listTeachers");
         List<Teacher> teachers = status == null
                 ? teacherRepository.findAllByOrderByTeacherCodeAsc()
                 : teacherRepository.findAllByStatusOrderByTeacherCodeAsc(status);
@@ -57,11 +62,17 @@ public class TeacherService {
 
     @Transactional(readOnly = true)
     public ResTeacherDTO getTeacher(Long id) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                TeacherService.class,
+                "TeacherService.getTeacher");
         return toResponse(findTeacher(id));
     }
 
     @Transactional
     public ResTeacherDTO createTeacher(ReqCreateTeacherDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                TeacherService.class,
+                "TeacherService.createTeacher");
         validateUserLink(request.userId(), null);
         if (teacherRepository.existsByTeacherCode(request.teacherCode())) {
             throw conflict("Mã giáo viên đã tồn tại");
@@ -101,6 +112,9 @@ public class TeacherService {
 
     @Transactional
     public ResTeacherDTO updateTeacher(Long id, ReqUpdateTeacherDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                TeacherService.class,
+                "TeacherService.updateTeacher");
         Teacher teacher = findTeacher(id);
         validateUserLink(request.userId(), id);
         if (teacherRepository.existsByTeacherCodeAndIdNot(request.teacherCode(), id)) {
@@ -126,6 +140,9 @@ public class TeacherService {
 
     @Transactional
     public void deleteTeacher(Long id) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                TeacherService.class,
+                "TeacherService.deleteTeacher");
         Teacher teacher = findTeacher(id);
         if (homeroomAssignmentRepository.existsByTeacherId(id)
                 || subjectTeachingAssignmentRepository.existsByTeacherId(id)) {

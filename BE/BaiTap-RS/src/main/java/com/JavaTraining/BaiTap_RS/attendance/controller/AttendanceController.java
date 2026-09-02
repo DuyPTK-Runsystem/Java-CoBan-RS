@@ -9,6 +9,7 @@ import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.response.ResAttendanceS
 import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.response.ResAttendanceStudentDTO;
 import com.JavaTraining.BaiTap_RS.attendance.service.AttendanceService;
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequestMapping({"/api/v2/attendance-sessions", "/api/v2/attendance/sessions"})
+@SuppressWarnings("PMD.GuardLogStatement")
 public class AttendanceController {
 
     private static final String TEACHER_ROLE = "hasRole('TEACHER')";
@@ -45,6 +47,9 @@ public class AttendanceController {
     @PreAuthorize(TEACHER_ROLE)
     public ResponseEntity<ResAttendanceSessionDTO> createOrGetSession(
             @Valid @RequestBody ReqCreateAttendanceSessionDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AttendanceController.class,
+                        "AttendanceController.createOrGetSession");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(attendanceService.createOrGetSession(request));
     }
@@ -54,6 +59,9 @@ public class AttendanceController {
     @PreAuthorize(TEACHER_ROLE)
     public List<ResAttendanceStudentDTO> listSessionStudents(
             @PathVariable(SESSION_ID) @Positive Long sessionId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AttendanceController.class,
+                        "AttendanceController.listSessionStudents");
         return attendanceService.listSessionStudents(sessionId);
     }
 
@@ -64,6 +72,9 @@ public class AttendanceController {
             @PathVariable(SESSION_ID) @Positive Long sessionId,
             @PathVariable(STUDENT_ID) @Positive Long studentId,
             @Valid @RequestBody ReqUpsertAttendanceExceptionDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AttendanceController.class,
+                        "AttendanceController.upsertException");
         return attendanceService.upsertException(sessionId, studentId, request);
     }
 
@@ -74,6 +85,9 @@ public class AttendanceController {
             @PathVariable(SESSION_ID) @Positive Long sessionId,
             @PathVariable(STUDENT_CODE) String studentCode,
             @Valid @RequestBody ReqUpsertAttendanceExceptionDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AttendanceController.class,
+                        "AttendanceController.upsertExceptionByCode");
         return attendanceService.upsertExceptionByCode(sessionId, studentCode, request);
     }
 
@@ -83,6 +97,9 @@ public class AttendanceController {
     public ResponseEntity<Void> deleteException(
             @PathVariable(SESSION_ID) @Positive Long sessionId,
             @PathVariable(STUDENT_ID) @Positive Long studentId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AttendanceController.class,
+                        "AttendanceController.deleteException");
         attendanceService.deleteException(sessionId, studentId);
         return ResponseEntity.noContent().build();
     }
@@ -93,6 +110,9 @@ public class AttendanceController {
     public ResponseEntity<Void> deleteExceptionByCode(
             @PathVariable(SESSION_ID) @Positive Long sessionId,
             @PathVariable(STUDENT_CODE) String studentCode) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AttendanceController.class,
+                        "AttendanceController.deleteExceptionByCode");
         attendanceService.deleteExceptionByCode(sessionId, studentCode);
         return ResponseEntity.noContent().build();
     }

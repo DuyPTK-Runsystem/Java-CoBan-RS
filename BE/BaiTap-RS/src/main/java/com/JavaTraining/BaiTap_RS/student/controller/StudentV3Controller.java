@@ -1,6 +1,7 @@
 package com.JavaTraining.BaiTap_RS.student.controller;
 
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.student.domain.DTOs.requests.ReqCreateStudentV3DTO;
 import com.JavaTraining.BaiTap_RS.student.domain.DTOs.response.ResStudentWithAccountDTO;
 import com.JavaTraining.BaiTap_RS.student.service.StudentAccountService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v3/students")
+@SuppressWarnings("PMD.GuardLogStatement")
 public class StudentV3Controller {
 
     private final StudentAccountService studentAccountService;
@@ -28,6 +30,9 @@ public class StudentV3Controller {
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')")
     public ResponseEntity<ResStudentWithAccountDTO> createStudentWithAccount(
             @Valid @RequestBody ReqCreateStudentV3DTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        StudentV3Controller.class,
+                        "StudentV3Controller.createStudentWithAccount");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(studentAccountService.createStudentWithAccount(request));
     }

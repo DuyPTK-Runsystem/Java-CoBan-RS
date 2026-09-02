@@ -1,5 +1,6 @@
 package com.JavaTraining.BaiTap_RS.scorebook.service;
 
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.CalculationStatus;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentAnnualTranscript;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentTermTranscript;
@@ -7,11 +8,13 @@ import com.JavaTraining.BaiTap_RS.scorebook.repository.StudentAnnualTranscriptRe
 import com.JavaTraining.BaiTap_RS.scorebook.repository.StudentTermTranscriptRepository;
 import org.springframework.stereotype.Service;
 
+
 /**
  * NFR-CALC-005/007: Quản lý trạng thái transcript khi điểm thay đổi.
  * Tạo mới hoặc tăng source_version và đặt status = IN_PROGRESS.
  */
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class TranscriptStateService {
 
     private final StudentAnnualTranscriptRepository annualRepository;
@@ -29,6 +32,9 @@ public class TranscriptStateService {
      * Trả về source_version mới nhất để dùng cho calculation task.
      */
     public long touchAnnualTranscript(Long studentId, Long academicYearId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                TranscriptStateService.class,
+                "TranscriptStateService.touchAnnualTranscript");
         StudentAnnualTranscript annual = annualRepository
                 .findForUpdate(studentId, academicYearId)
                 .orElseGet(() -> annualRepository.save(
@@ -44,6 +50,9 @@ public class TranscriptStateService {
      * Tìm hoặc tạo term transcript, tăng source_version và đặt IN_PROGRESS.
      */
     public void touchTermTranscript(Long annualTranscriptId, Long semesterId, Long studentId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                TranscriptStateService.class,
+                "TranscriptStateService.touchTermTranscript");
         StudentAnnualTranscript annual = annualRepository.findById(annualTranscriptId)
                 .orElseThrow();
 
@@ -62,6 +71,9 @@ public class TranscriptStateService {
      * annual.
      */
     public long touchTranscripts(Long studentId, Long academicYearId, Long semesterId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                TranscriptStateService.class,
+                "TranscriptStateService.touchTranscripts");
         long newSourceVersion = touchAnnualTranscript(studentId, academicYearId);
 
         StudentAnnualTranscript annual = annualRepository

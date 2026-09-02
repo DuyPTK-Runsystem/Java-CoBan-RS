@@ -4,6 +4,7 @@ import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.requests.ReqClassAttend
 import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.response.ResClassAttendanceSummaryDTO;
 import com.JavaTraining.BaiTap_RS.attendance.service.ClassAttendanceSummaryService;
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequestMapping("/api/v2/attendance/classes")
+@SuppressWarnings("PMD.GuardLogStatement")
 public class ClassAttendanceSummaryController {
 
     private final ClassAttendanceSummaryService summaryService;
@@ -31,6 +33,9 @@ public class ClassAttendanceSummaryController {
     public ResClassAttendanceSummaryDTO getClassSummary(
             @PathVariable("classId") @Positive(message = "ID lớp phải là số dương") Long classId,
             @Valid @ModelAttribute ReqClassAttendanceSummaryQuery query) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ClassAttendanceSummaryController.class,
+                        "ClassAttendanceSummaryController.getClassSummary");
         return summaryService.getClassSummary(classId, query);
     }
 }

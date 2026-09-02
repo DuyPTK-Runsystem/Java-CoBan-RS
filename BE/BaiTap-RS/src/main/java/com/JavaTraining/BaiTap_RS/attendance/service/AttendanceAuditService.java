@@ -9,12 +9,14 @@ import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.common.audit.domain.entity.AuditLog;
 import com.JavaTraining.BaiTap_RS.common.audit.repository.AuditLogRepository;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class AttendanceAuditService {
 
     private final AuditLogRepository auditLogRepository;
@@ -30,6 +32,9 @@ public class AttendanceAuditService {
             AttendanceSession session,
             Map<String, Object> beforeData,
             AttendanceRecord after) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AttendanceAuditService.class,
+                        "AttendanceAuditService.writeRecordAudit");
         auditLogRepository.save(new AuditLog(
                 AuditContext.currentUserId(),
                 action,
@@ -42,6 +47,9 @@ public class AttendanceAuditService {
     }
 
     public Map<String, Object> recordData(AttendanceSession session, AttendanceRecord record) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AttendanceAuditService.class,
+                "AttendanceAuditService.recordData");
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("attendanceRecordId", record.getId());
         data.put("sessionId", record.getSessionId());

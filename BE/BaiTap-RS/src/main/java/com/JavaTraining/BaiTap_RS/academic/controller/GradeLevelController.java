@@ -7,6 +7,7 @@ import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.requests.ReqUpdateGradeLe
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResGradeLevelDTO;
 import com.JavaTraining.BaiTap_RS.academic.service.GradeLevelService;
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v2/grades")
 @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')")
 // FR-GRADE-001..005 and BR-AUTH-005: grade metadata mutations are office-only.
+@SuppressWarnings("PMD.GuardLogStatement")
 public class GradeLevelController {
 
     private final GradeLevelService gradeLevelService;
@@ -38,6 +40,9 @@ public class GradeLevelController {
     @GetMapping
     @ApiMessage("Lấy danh sách khối")
     public List<ResGradeLevelDTO> listGradeLevels() {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                GradeLevelController.class,
+                "GradeLevelController.listGradeLevels");
         return gradeLevelService.listGradeLevels();
     }
 
@@ -45,6 +50,9 @@ public class GradeLevelController {
     @ApiMessage("Tạo khối")
     public ResponseEntity<ResGradeLevelDTO> createGradeLevel(
             @Valid @RequestBody ReqCreateGradeLevelDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        GradeLevelController.class,
+                        "GradeLevelController.createGradeLevel");
         return ResponseEntity.status(HttpStatus.CREATED).body(gradeLevelService.createGradeLevel(request));
     }
 
@@ -53,12 +61,18 @@ public class GradeLevelController {
     public ResGradeLevelDTO updateGradeLevel(
             @PathVariable("gradeId") @Positive Long gradeId,
             @Valid @RequestBody ReqUpdateGradeLevelDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        GradeLevelController.class,
+                        "GradeLevelController.updateGradeLevel");
         return gradeLevelService.updateGradeLevel(gradeId, request);
     }
 
     @DeleteMapping("/{gradeId}")
     @ApiMessage("Xóa khối")
     public ResponseEntity<Void> deleteGradeLevel(@PathVariable("gradeId") @Positive Long gradeId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                GradeLevelController.class,
+                "GradeLevelController.deleteGradeLevel");
         gradeLevelService.deleteGradeLevel(gradeId);
         return ResponseEntity.noContent().build();
     }

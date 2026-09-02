@@ -8,12 +8,14 @@ import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResGradeLevelDTO
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.GradeLevel;
 import com.JavaTraining.BaiTap_RS.academic.repository.GradeLevelRepository;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class GradeLevelService {
 
     private final GradeLevelRepository gradeLevelRepository;
@@ -28,6 +30,9 @@ public class GradeLevelService {
 
     @Transactional(readOnly = true)
     public List<ResGradeLevelDTO> listGradeLevels() {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                GradeLevelService.class,
+                "GradeLevelService.listGradeLevels");
         return gradeLevelRepository.findAll(Sort.by(Sort.Direction.ASC, "displayOrder"))
                 .stream()
                 .map(this::toResponse)
@@ -36,6 +41,9 @@ public class GradeLevelService {
 
     @Transactional
     public ResGradeLevelDTO createGradeLevel(ReqCreateGradeLevelDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                GradeLevelService.class,
+                "GradeLevelService.createGradeLevel");
         validator.validateCreate(request);
         GradeLevel grade = new GradeLevel(
                 request.code(),
@@ -50,6 +58,9 @@ public class GradeLevelService {
 
     @Transactional
     public ResGradeLevelDTO updateGradeLevel(Long id, ReqUpdateGradeLevelDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                GradeLevelService.class,
+                "GradeLevelService.updateGradeLevel");
         GradeLevel grade = findGradeLevel(id);
         validator.validateUpdate(id, grade, request);
         grade.setCode(request.code());
@@ -65,6 +76,9 @@ public class GradeLevelService {
     // BR-GRADE-005: khối đã được tham chiếu không bị xóa vật lý.
     @Transactional
     public void deleteGradeLevel(Long id) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                GradeLevelService.class,
+                "GradeLevelService.deleteGradeLevel");
         GradeLevel grade = findGradeLevel(id);
         validator.validateDelete(id);
         gradeLevelRepository.delete(grade);

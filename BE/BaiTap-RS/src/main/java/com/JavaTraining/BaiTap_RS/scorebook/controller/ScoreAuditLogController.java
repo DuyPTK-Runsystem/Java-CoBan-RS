@@ -1,6 +1,7 @@
 package com.JavaTraining.BaiTap_RS.scorebook.controller;
 
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqFilterScoreAuditLogDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResScoreAuditLogDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.service.ScoreAuditLogService;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequestMapping("/api/v2/scorebooks/audit-logs")
+@SuppressWarnings("PMD.GuardLogStatement")
 public class ScoreAuditLogController {
 
     private final ScoreAuditLogService scoreAuditLogService;
@@ -28,6 +30,9 @@ public class ScoreAuditLogController {
     @ApiMessage("Tra cứu audit log điểm")
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE', 'TEACHER')")
     public Page<ResScoreAuditLogDTO> find(@Valid @ModelAttribute ReqFilterScoreAuditLogDTO filter) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScoreAuditLogController.class,
+                "ScoreAuditLogController.find");
         return scoreAuditLogService.findLogs(filter);
     }
 }

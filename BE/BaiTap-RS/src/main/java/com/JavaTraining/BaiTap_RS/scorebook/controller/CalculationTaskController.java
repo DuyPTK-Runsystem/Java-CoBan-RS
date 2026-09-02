@@ -3,6 +3,7 @@ package com.JavaTraining.BaiTap_RS.scorebook.controller;
 import java.util.List;
 
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqFilterCalculationTaskDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResCalculationTaskDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.service.CalculationTaskService;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequestMapping("/api/v2")
+@SuppressWarnings("PMD.GuardLogStatement")
 public class CalculationTaskController {
 
     private static final String OFFICE_ROLES = "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')";
@@ -41,6 +43,9 @@ public class CalculationTaskController {
     @PreAuthorize(OFFICE_ROLES)
     public Page<ResCalculationTaskDTO> findTasks(
             @Valid @ModelAttribute ReqFilterCalculationTaskDTO filter) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        CalculationTaskController.class,
+                        "CalculationTaskController.findTasks");
         return taskService.findTasks(filter);
     }
 
@@ -49,6 +54,9 @@ public class CalculationTaskController {
     @PreAuthorize(OFFICE_ROLES)
     public Page<ResCalculationTaskDTO> findFailedTasks(
             @Valid @ModelAttribute ReqFilterCalculationTaskDTO filter) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        CalculationTaskController.class,
+                        "CalculationTaskController.findFailedTasks");
         return taskService.findFailedTasks(filter);
     }
 
@@ -56,6 +64,9 @@ public class CalculationTaskController {
     @ApiMessage("Retry calculation task")
     @PreAuthorize(OFFICE_ROLES)
     public ResCalculationTaskDTO retry(@PathVariable(TASK_ID) @Positive Long taskId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalculationTaskController.class,
+                "CalculationTaskController.retry");
         return taskService.retryTask(taskId);
     }
 
@@ -63,6 +74,9 @@ public class CalculationTaskController {
     @ApiMessage("Retry toàn bộ calculation task lỗi")
     @PreAuthorize(OFFICE_ROLES)
     public List<ResCalculationTaskDTO> retryAllFailedTasks() {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalculationTaskController.class,
+                "CalculationTaskController.retryAllFailedTasks");
         return taskService.retryAllFailedTasks();
     }
 
@@ -72,6 +86,9 @@ public class CalculationTaskController {
     public ResponseEntity<ResCalculationTaskDTO> recalculate(
             @PathVariable(STUDENT_CODE) String studentCode,
             @RequestParam("academicYearId") @Positive Long academicYearId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        CalculationTaskController.class,
+                        "CalculationTaskController.recalculate");
         return ResponseEntity.accepted().body(taskService.requestRecalculation(studentCode, academicYearId));
     }
 
@@ -81,6 +98,9 @@ public class CalculationTaskController {
     public ResponseEntity<ResCalculationTaskDTO> recalculateById(
             @PathVariable(STUDENT_ID) @Positive Long studentId,
             @RequestParam("academicYearId") @Positive Long academicYearId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        CalculationTaskController.class,
+                        "CalculationTaskController.recalculateById");
         return ResponseEntity.accepted().body(taskService.requestRecalculation(studentId, academicYearId));
     }
 }

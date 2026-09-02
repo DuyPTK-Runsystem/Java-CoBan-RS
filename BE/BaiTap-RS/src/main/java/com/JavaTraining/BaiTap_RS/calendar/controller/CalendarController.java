@@ -7,6 +7,7 @@ import com.JavaTraining.BaiTap_RS.calendar.domain.DTOs.requests.ReqUpsertCalenda
 import com.JavaTraining.BaiTap_RS.calendar.domain.DTOs.response.ResCalendarDayDTO;
 import com.JavaTraining.BaiTap_RS.calendar.service.CalendarService;
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequestMapping("/api/v2/calendar")
+@SuppressWarnings("PMD.GuardLogStatement")
 public class CalendarController {
 
     private static final String OFFICE_ROLES = "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')";
@@ -43,6 +45,9 @@ public class CalendarController {
             @PathVariable(CALENDAR_DATE)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate calendarDate,
             @Valid @RequestBody ReqUpsertCalendarDayDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        CalendarController.class,
+                        "CalendarController.upsertDay");
         return ResponseEntity.status(HttpStatus.OK).body(calendarService.upsertDay(calendarDate, request));
     }
 
@@ -54,6 +59,9 @@ public class CalendarController {
             @RequestParam("semesterId") @Positive Long semesterId,
             @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        CalendarController.class,
+                        "CalendarController.listDays");
         return calendarService.listDays(academicYearId, semesterId, from, to);
     }
 }

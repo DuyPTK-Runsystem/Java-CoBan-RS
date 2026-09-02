@@ -12,6 +12,7 @@ import com.JavaTraining.BaiTap_RS.academic.domain.entity.ClassSubject;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Semester;
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqCreateScoreChangeRequestDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqFilterScoreChangeRequestDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqRejectScoreChangeRequestDTO;
@@ -38,7 +39,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@SuppressWarnings({ "PMD.CouplingBetweenObjects", "PMD.TooManyMethods", "PMD.ExcessiveImports" })
+@SuppressWarnings({
+        "PMD.CouplingBetweenObjects",
+        "PMD.TooManyMethods",
+        "PMD.ExcessiveImports",
+        "PMD.GuardLogStatement"
+})
 public class ScoreChangeRequestService {
 
     private static final String ENTITY_TYPE = "ScoreChangeRequest";
@@ -89,6 +95,9 @@ public class ScoreChangeRequestService {
 
     @Transactional
     public ResScoreChangeRequestDetailDTO createRequest(ReqCreateScoreChangeRequestDTO input) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScoreChangeRequestService.class,
+                "ScoreChangeRequestService.createRequest");
         Long actorId = currentActor();
         AssessmentColumn column = context.findActiveColumn(input.assessmentColumnId());
         Scorebook scorebook = context.findScorebook(column.getScorebookId());
@@ -123,6 +132,9 @@ public class ScoreChangeRequestService {
 
     @Transactional(readOnly = true)
     public Page<ResScoreChangeRequestDTO> findRequests(ReqFilterScoreChangeRequestDTO filter) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScoreChangeRequestService.class,
+                "ScoreChangeRequestService.findRequests");
         applyStudentCodeFilter(filter);
         if (!isOfficeRole()) {
             filter.setRequestedBy(currentActor());
@@ -136,6 +148,9 @@ public class ScoreChangeRequestService {
 
     @Transactional(readOnly = true)
     public ResScoreChangeRequestDetailDTO getRequest(Long requestId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScoreChangeRequestService.class,
+                "ScoreChangeRequestService.getRequest");
         ScoreChangeRequest request = findRequest(requestId);
         assertCanRead(request);
         Student student = studentLookupService.resolveStudent(request.getStudentId(), null);
@@ -144,6 +159,9 @@ public class ScoreChangeRequestService {
 
     @Transactional
     public ResScoreChangeRequestDetailDTO approveAndApply(Long requestId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScoreChangeRequestService.class,
+                "ScoreChangeRequestService.approveAndApply");
         Long reviewerId = currentActor();
         assertOfficeRole();
         ScoreChangeRequest request = findRequestForUpdate(requestId);
@@ -175,6 +193,9 @@ public class ScoreChangeRequestService {
     @Transactional
     public ResScoreChangeRequestDetailDTO rejectRequest(
             Long requestId, ReqRejectScoreChangeRequestDTO input) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ScoreChangeRequestService.class,
+                        "ScoreChangeRequestService.rejectRequest");
         Long reviewerId = currentActor();
         assertOfficeRole();
         ScoreChangeRequest request = findRequestForUpdate(requestId);
@@ -191,6 +212,9 @@ public class ScoreChangeRequestService {
 
     @Transactional
     public ResScoreChangeRequestDetailDTO cancelRequest(Long requestId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScoreChangeRequestService.class,
+                "ScoreChangeRequestService.cancelRequest");
         Long actorId = currentActor();
         ScoreChangeRequest request = findRequestForUpdate(requestId);
         validator.validatePending(request);

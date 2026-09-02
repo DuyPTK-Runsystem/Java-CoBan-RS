@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.student.domain.DTOs.requests.ReqCreateStudentDTO;
 import com.JavaTraining.BaiTap_RS.student.domain.DTOs.requests.ReqFetchStudentDTO;
 import com.JavaTraining.BaiTap_RS.student.domain.DTOs.requests.ReqUpdateStudentDTO;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class StudentService {
 
     private static final int DEFAULT_PAGE_SIZE = 10;
@@ -38,6 +40,9 @@ public class StudentService {
 
     @Transactional(readOnly = true)
     public ResStudentPageDTO fetchStudents(ReqFetchStudentDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentService.class,
+                "StudentService.fetchStudents");
         Pageable pageable = PageRequest.of(
                 resolvePage(request.getPage()),
                 resolveSize(request.getSize()),
@@ -56,16 +61,25 @@ public class StudentService {
 
     @Transactional(readOnly = true)
     public ResStudentDTO getStudent(Long studentId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentService.class,
+                "StudentService.getStudent");
         return toStudentDTO(findStudent(studentId));
     }
 
     @Transactional(readOnly = true)
     public ResStudentDTO getStudentByCode(String studentCode) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentService.class,
+                "StudentService.getStudentByCode");
         return toStudentDTO(findStudentByCode(studentCode));
     }
 
     @Transactional
     public ResStudentDTO createStudent(ReqCreateStudentDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentService.class,
+                "StudentService.createStudent");
         if (studentRepository.existsByStudentCode(request.getStudentCode())) {
             throw new AppException(HttpStatus.CONFLICT, "Mã sinh viên đã tồn tại");
         }
@@ -77,6 +91,9 @@ public class StudentService {
 
     @Transactional
     public ResStudentDTO updateStudent(Long studentId, ReqUpdateStudentDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentService.class,
+                "StudentService.updateStudent");
         Student student = findStudent(studentId);
         student.setStudentName(request.getStudentName());
         StudentInfo info = student.getStudentInfo();
@@ -93,6 +110,9 @@ public class StudentService {
 
     @Transactional
     public void deleteStudent(Long studentId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentService.class,
+                "StudentService.deleteStudent");
         Student student = findStudent(studentId);
         studentRepository.delete(student);
     }
@@ -118,6 +138,9 @@ public class StudentService {
      */
     @Transactional(readOnly = true)
     public ResStudentCodeDTO generateStudentCode() {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentService.class,
+                "StudentService.generateStudentCode");
         Set<String> existingCodes = new HashSet<>();
         for (int attempt = 0; attempt < MAX_GENERATE_CODE_BATCH_ATTEMPTS; attempt++) {
             Set<String> candidates = studentCodeGenerator.generateCandidates(GENERATE_CODE_BATCH_SIZE);

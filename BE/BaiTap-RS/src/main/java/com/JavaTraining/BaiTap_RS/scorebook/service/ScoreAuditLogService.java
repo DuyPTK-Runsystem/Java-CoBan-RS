@@ -12,6 +12,7 @@ import com.JavaTraining.BaiTap_RS.academic.repository.SemesterRepository;
 import com.JavaTraining.BaiTap_RS.common.audit.domain.entity.AuditLog;
 import com.JavaTraining.BaiTap_RS.common.audit.repository.AuditLogRepository;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqFilterScoreAuditLogDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResScoreAuditLogDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.Scorebook;
@@ -36,7 +37,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@SuppressWarnings({ "PMD.CouplingBetweenObjects", "PMD.TooManyMethods", "PMD.ExcessiveImports" })
+@SuppressWarnings({
+        "PMD.CouplingBetweenObjects",
+        "PMD.TooManyMethods",
+        "PMD.ExcessiveImports",
+        "PMD.GuardLogStatement"
+})
 public class ScoreAuditLogService {
 
     private final AuditLogRepository auditLogRepository;
@@ -72,6 +78,9 @@ public class ScoreAuditLogService {
 
     @Transactional(readOnly = true)
     public Page<ResScoreAuditLogDTO> findLogs(ReqFilterScoreAuditLogDTO filter) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScoreAuditLogService.class,
+                "ScoreAuditLogService.findLogs");
         validateDateRange(filter);
         Long resolvedStudentId = resolveStudentId(filter);
         Pageable pageable = PageRequest.of(

@@ -7,6 +7,7 @@ import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.common.audit.domain.entity.AuditLog;
 import com.JavaTraining.BaiTap_RS.common.audit.repository.AuditLogRepository;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.ClassTransferHistory;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.StudentYearEnrollment;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class EnrollmentAuditService {
 
     private final AuditLogRepository auditLogRepository;
@@ -31,6 +33,9 @@ public class EnrollmentAuditService {
             SchoolClass sourceClass,
             SchoolClass targetClass,
             ClassTransferHistory history) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        EnrollmentAuditService.class,
+                        "EnrollmentAuditService.writeTransferAudit");
         auditLogRepository.save(new AuditLog(
                 actorUserId,
                 "STUDENT_ENROLLMENT_TRANSFER",

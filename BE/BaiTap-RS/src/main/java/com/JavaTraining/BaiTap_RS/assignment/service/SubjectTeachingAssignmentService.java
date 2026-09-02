@@ -12,11 +12,13 @@ import com.JavaTraining.BaiTap_RS.assignment.domain.entity.AssignmentStatus;
 import com.JavaTraining.BaiTap_RS.assignment.domain.entity.SubjectTeachingAssignment;
 import com.JavaTraining.BaiTap_RS.assignment.repository.SubjectTeachingAssignmentRepository;
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.teacher.domain.entity.Teacher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class SubjectTeachingAssignmentService {
 
     private static final LocalDate OPEN_ENDED = LocalDate.of(9999, 12, 31);
@@ -36,6 +38,9 @@ public class SubjectTeachingAssignmentService {
 
     @Transactional(readOnly = true)
     public List<ResSubjectTeachingAssignmentDTO> listSubjectTeachingByTeacher(Long teacherId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SubjectTeachingAssignmentService.class,
+                "SubjectTeachingAssignmentService.listSubjectTeachingByTeacher");
         return subjectTeachingRepository.findAllByTeacherIdOrderByValidFromDesc(teacherId)
                 .stream()
                 .map(this::toResponse)
@@ -46,6 +51,9 @@ public class SubjectTeachingAssignmentService {
     public ResSubjectTeachingAssignmentDTO createSubjectTeachingAssignment(
             Long classSubjectId,
             ReqCreateSubjectTeachingAssignmentDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SubjectTeachingAssignmentService.class,
+                        "SubjectTeachingAssignmentService.createSubjectTeachingAssignment");
         ClassSubject classSubject = guard.findClassSubject(classSubjectId);
         Teacher teacher = guard.findActiveTeacher(request.teacherId());
         guard.validateWindowInSemester(classSubject, request.validFrom(), request.validTo());
@@ -76,6 +84,9 @@ public class SubjectTeachingAssignmentService {
     public ResSubjectTeachingAssignmentDTO replaceSubjectTeachingAssignment(
             Long assignmentId,
             ReqReplaceAssignmentDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SubjectTeachingAssignmentService.class,
+                        "SubjectTeachingAssignmentService.replaceSubjectTeachingAssignment");
         SubjectTeachingAssignment current = guard.findSubjectTeachingAssignment(assignmentId);
         if (current.getStatus() != AssignmentStatus.ACTIVE) {
             throw guard.conflict("Chỉ phân công ACTIVE mới được thay thế");
@@ -104,6 +115,9 @@ public class SubjectTeachingAssignmentService {
     public ResSubjectTeachingAssignmentDTO endSubjectTeachingAssignment(
             Long assignmentId,
             ReqEndAssignmentDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SubjectTeachingAssignmentService.class,
+                        "SubjectTeachingAssignmentService.endSubjectTeachingAssignment");
         SubjectTeachingAssignment assignment = guard.findSubjectTeachingAssignment(assignmentId);
         if (assignment.getStatus() != AssignmentStatus.ACTIVE) {
             throw guard.conflict("Chỉ phân công ACTIVE mới được kết thúc");

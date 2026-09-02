@@ -6,6 +6,7 @@ import java.util.Map;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectType;
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqUpsertSkillWeightConfigDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResScorebookDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.Scorebook;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class ScorebookSkillWeightService {
 
     private final ScorebookContext context;
@@ -43,6 +45,9 @@ public class ScorebookSkillWeightService {
     }
 
     public ResScorebookDTO upsertSkillWeight(Long scorebookId, ReqUpsertSkillWeightConfigDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScorebookSkillWeightService.class,
+                "ScorebookSkillWeightService.upsertSkillWeight");
         Scorebook scorebook = context.findScorebook(scorebookId);
         guard.assertCanManage(scorebook);
         validator.ensureWritable(scorebook);

@@ -13,6 +13,7 @@ import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectStatus;
 import com.JavaTraining.BaiTap_RS.academic.service.SubjectApplicabilityService;
 import com.JavaTraining.BaiTap_RS.academic.service.SubjectService;
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequestMapping("/api/v2/subjects")
+@SuppressWarnings("PMD.GuardLogStatement")
 public class SubjectController {
 
     private static final String ACADEMIC_OFFICE_ROLE = "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')";
@@ -51,6 +53,9 @@ public class SubjectController {
     @ApiMessage("Lấy danh sách môn học")
     @PreAuthorize("isAuthenticated()")
     public List<ResSubjectDTO> listSubjects(@RequestParam(value = "status", required = false) SubjectStatus status) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SubjectController.class,
+                "SubjectController.listSubjects");
         return subjectService.listSubjects(status);
     }
 
@@ -58,6 +63,9 @@ public class SubjectController {
     @ApiMessage("Tạo môn học")
     @PreAuthorize(ACADEMIC_OFFICE_ROLE)
     public ResponseEntity<ResSubjectDTO> createSubject(@Valid @RequestBody ReqCreateSubjectDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SubjectController.class,
+                "SubjectController.createSubject");
         return ResponseEntity.status(HttpStatus.CREATED).body(subjectService.createSubject(request));
     }
 
@@ -67,6 +75,9 @@ public class SubjectController {
     public ResSubjectDTO updateSubject(
             @PathVariable(SUBJECT_ID_PATH_VARIABLE) @Positive Long subjectId,
             @Valid @RequestBody ReqUpdateSubjectDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SubjectController.class,
+                        "SubjectController.updateSubject");
         return subjectService.updateSubject(subjectId, request);
     }
 
@@ -76,6 +87,9 @@ public class SubjectController {
     public ResponseEntity<ResSubjectApplicabilityDTO> createApplicability(
             @PathVariable(SUBJECT_ID_PATH_VARIABLE) @Positive Long subjectId,
             @Valid @RequestBody ReqCreateSubjectApplicabilityDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SubjectController.class,
+                        "SubjectController.createApplicability");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(subjectApplicabilityService.createApplicability(subjectId, request));
     }
@@ -87,6 +101,9 @@ public class SubjectController {
             @PathVariable(SUBJECT_ID_PATH_VARIABLE) @Positive Long subjectId,
             @RequestParam(value = "semesterId", required = false) @Positive Long semesterId,
             @RequestParam(value = "status", required = false) SubjectApplicabilityStatus status) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SubjectController.class,
+                        "SubjectController.listApplicabilities");
         return subjectApplicabilityService.listApplicabilities(subjectId, semesterId, status);
     }
 
@@ -97,6 +114,9 @@ public class SubjectController {
             @PathVariable(SUBJECT_ID_PATH_VARIABLE) @Positive Long subjectId,
             @PathVariable("applicabilityId") @Positive Long applicabilityId,
             @Valid @RequestBody ReqUpdateSubjectApplicabilityDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SubjectController.class,
+                        "SubjectController.updateApplicability");
         return subjectApplicabilityService.updateApplicability(subjectId, applicabilityId, request);
     }
 
@@ -106,6 +126,9 @@ public class SubjectController {
     public ResponseEntity<Void> deactivateApplicability(
             @PathVariable(SUBJECT_ID_PATH_VARIABLE) @Positive Long subjectId,
             @PathVariable("applicabilityId") @Positive Long applicabilityId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SubjectController.class,
+                        "SubjectController.deactivateApplicability");
         subjectApplicabilityService.deactivateApplicability(subjectId, applicabilityId);
         return ResponseEntity.noContent().build();
     }

@@ -8,6 +8,7 @@ import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.requests.ReqAttendanceH
 import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.response.ResStudentAttendanceHistoryDTO;
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
 import com.JavaTraining.BaiTap_RS.student.repository.StudentRepository;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class AttendanceHistoryService {
 
     private final StudentRepository studentRepository;
@@ -32,6 +34,9 @@ public class AttendanceHistoryService {
 
     @Transactional(readOnly = true)
     public ResStudentAttendanceHistoryDTO getHistory(ReqAttendanceHistoryQuery query) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AttendanceHistoryService.class,
+                "AttendanceHistoryService.getHistory");
         validateRange(query);
         Student student = findCurrentStudent();
         List<ResStudentAttendanceHistoryDTO.Item> items = itemCollector.collectItems(student.getId(), query);

@@ -1,6 +1,7 @@
 package com.JavaTraining.BaiTap_RS.scorebook.controller;
 
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqCreateScoreChangeRequestDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqFilterScoreChangeRequestDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqRejectScoreChangeRequestDTO;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequestMapping("/api/v2/score-change-requests")
+@SuppressWarnings("PMD.GuardLogStatement")
 public class ScoreChangeRequestController {
 
     private static final String SCORE_CHANGE_ROLES = "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE', 'TEACHER')";
@@ -43,6 +45,9 @@ public class ScoreChangeRequestController {
     @PreAuthorize(SCORE_CHANGE_ROLES)
     public ResponseEntity<ResScoreChangeRequestDetailDTO> create(
             @Valid @RequestBody ReqCreateScoreChangeRequestDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ScoreChangeRequestController.class,
+                        "ScoreChangeRequestController.create");
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createRequest(request));
     }
 
@@ -50,6 +55,9 @@ public class ScoreChangeRequestController {
     @ApiMessage("Tra cứu yêu cầu sửa điểm")
     @PreAuthorize(SCORE_CHANGE_ROLES)
     public Page<ResScoreChangeRequestDTO> find(@Valid @ModelAttribute ReqFilterScoreChangeRequestDTO filter) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScoreChangeRequestController.class,
+                "ScoreChangeRequestController.find");
         return service.findRequests(filter);
     }
 
@@ -57,6 +65,9 @@ public class ScoreChangeRequestController {
     @ApiMessage("Xem chi tiết yêu cầu sửa điểm")
     @PreAuthorize(SCORE_CHANGE_ROLES)
     public ResScoreChangeRequestDetailDTO get(@PathVariable(REQUEST_ID) @Positive Long requestId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScoreChangeRequestController.class,
+                "ScoreChangeRequestController.get");
         return service.getRequest(requestId);
     }
 
@@ -64,6 +75,9 @@ public class ScoreChangeRequestController {
     @ApiMessage("Phê duyệt và áp dụng yêu cầu sửa điểm")
     @PreAuthorize(OFFICE_ROLES)
     public ResScoreChangeRequestDetailDTO approve(@PathVariable(REQUEST_ID) @Positive Long requestId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScoreChangeRequestController.class,
+                "ScoreChangeRequestController.approve");
         return service.approveAndApply(requestId);
     }
 
@@ -73,6 +87,9 @@ public class ScoreChangeRequestController {
     public ResScoreChangeRequestDetailDTO reject(
             @PathVariable(REQUEST_ID) @Positive Long requestId,
             @Valid @RequestBody ReqRejectScoreChangeRequestDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ScoreChangeRequestController.class,
+                        "ScoreChangeRequestController.reject");
         return service.rejectRequest(requestId, request);
     }
 
@@ -80,6 +97,9 @@ public class ScoreChangeRequestController {
     @ApiMessage("Hủy yêu cầu sửa điểm")
     @PreAuthorize(CANCEL_ROLES)
     public ResScoreChangeRequestDetailDTO cancel(@PathVariable(REQUEST_ID) @Positive Long requestId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScoreChangeRequestController.class,
+                "ScoreChangeRequestController.cancel");
         return service.cancelRequest(requestId);
     }
 }

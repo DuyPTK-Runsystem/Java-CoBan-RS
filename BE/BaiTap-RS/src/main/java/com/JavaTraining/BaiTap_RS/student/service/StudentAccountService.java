@@ -1,6 +1,7 @@
 package com.JavaTraining.BaiTap_RS.student.service;
 
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.student.domain.DTOs.requests.ReqCreateStudentV3DTO;
 import com.JavaTraining.BaiTap_RS.student.domain.DTOs.response.ResStudentWithAccountDTO;
 import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class StudentAccountService {
 
     private final StudentRepository studentRepository;
@@ -39,6 +41,9 @@ public class StudentAccountService {
 
     @Transactional
     public ResStudentWithAccountDTO createStudentWithAccount(ReqCreateStudentV3DTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentAccountService.class,
+                "StudentAccountService.createStudentWithAccount");
         if (studentRepository.existsByStudentCode(request.studentCode())) {
             throw new AppException(HttpStatus.CONFLICT, "Mã sinh viên đã tồn tại");
         }

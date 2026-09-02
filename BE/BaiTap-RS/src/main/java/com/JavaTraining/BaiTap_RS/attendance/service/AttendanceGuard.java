@@ -14,6 +14,7 @@ import com.JavaTraining.BaiTap_RS.attendance.repository.AttendanceEnrollmentRepo
 import com.JavaTraining.BaiTap_RS.calendar.service.CalendarValidityService;
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.EnrollmentStatus;
 import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
 import com.JavaTraining.BaiTap_RS.teacher.domain.entity.Teacher;
@@ -22,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
+@SuppressWarnings({"PMD.GuardLogStatement", "PMD.TooManyMethods"})
 public class AttendanceGuard {
 
     private final SchoolClassRepository schoolClassRepository;

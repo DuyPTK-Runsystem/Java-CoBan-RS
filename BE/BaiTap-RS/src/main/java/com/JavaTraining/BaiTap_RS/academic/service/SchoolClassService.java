@@ -13,12 +13,14 @@ import com.JavaTraining.BaiTap_RS.academic.repository.AcademicYearRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.GradeLevelRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class SchoolClassService {
 
     private final AcademicYearRepository academicYearRepository;
@@ -39,6 +41,9 @@ public class SchoolClassService {
 
     @Transactional(readOnly = true)
     public List<ResSchoolClassDTO> listSchoolClasses(Long academicYearId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SchoolClassService.class,
+                "SchoolClassService.listSchoolClasses");
         List<SchoolClass> classes = academicYearId == null
                 ? schoolClassRepository.findAll(Sort.by(Sort.Direction.ASC, "classCode"))
                 : schoolClassRepository.findAllByAcademicYearIdOrderByClassCodeAsc(academicYearId);
@@ -47,6 +52,9 @@ public class SchoolClassService {
 
     @Transactional
     public ResSchoolClassDTO createSchoolClass(ReqCreateSchoolClassDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SchoolClassService.class,
+                "SchoolClassService.createSchoolClass");
         AcademicYear year = findAcademicYear(request.academicYearId());
         GradeLevel grade = findGradeLevel(request.gradeLevelId());
         validator.validateClassCreation(year, grade, request.status());
@@ -63,6 +71,9 @@ public class SchoolClassService {
 
     @Transactional
     public ResSchoolClassDTO updateSchoolClass(Long id, ReqUpdateSchoolClassDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SchoolClassService.class,
+                "SchoolClassService.updateSchoolClass");
         SchoolClass schoolClass = findSchoolClass(id);
         validator.ensureClassNotClosed(schoolClass);
         AcademicYear year = findAcademicYear(schoolClass.getAcademicYearId());
@@ -81,6 +92,9 @@ public class SchoolClassService {
     // BR-CLASS-006: lớp đóng chỉ được xem và không nhận enrollment mới.
     @Transactional
     public ResSchoolClassDTO closeSchoolClass(Long id) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SchoolClassService.class,
+                "SchoolClassService.closeSchoolClass");
         SchoolClass schoolClass = findSchoolClass(id);
         validator.ensureClassNotClosed(schoolClass);
         schoolClass.setStatus(SchoolClassStatus.CLOSED);
@@ -90,6 +104,9 @@ public class SchoolClassService {
     // BR-CLASS-011: không xóa lớp đã phát sinh enrollment hoặc lịch sử.
     @Transactional
     public void deleteSchoolClass(Long id) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SchoolClassService.class,
+                "SchoolClassService.deleteSchoolClass");
         SchoolClass schoolClass = findSchoolClass(id);
         validator.validateDelete(id);
         schoolClassRepository.delete(schoolClass);

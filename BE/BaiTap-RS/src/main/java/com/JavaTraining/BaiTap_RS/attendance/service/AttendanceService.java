@@ -17,12 +17,14 @@ import com.JavaTraining.BaiTap_RS.attendance.domain.entity.AttendanceSession;
 import com.JavaTraining.BaiTap_RS.attendance.repository.AttendanceRecordRepository;
 import com.JavaTraining.BaiTap_RS.attendance.repository.AttendanceSessionRepository;
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
 import com.JavaTraining.BaiTap_RS.student.service.StudentLookupService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class AttendanceService {
 
     private final AttendanceSessionRepository sessionRepository;
@@ -49,6 +51,9 @@ public class AttendanceService {
 
     @Transactional
     public ResAttendanceSessionDTO createOrGetSession(ReqCreateAttendanceSessionDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AttendanceService.class,
+                "AttendanceService.createOrGetSession");
         SchoolClass schoolClass = guard.findSchoolClass(request.classId());
         Semester semester = guard.findSemester(request.semesterId());
         guard.validateClassSemesterAndDate(
@@ -69,6 +74,9 @@ public class AttendanceService {
 
     @Transactional(readOnly = true)
     public List<ResAttendanceStudentDTO> listSessionStudents(Long sessionId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AttendanceService.class,
+                "AttendanceService.listSessionStudents");
         AttendanceSession session = findSession(sessionId);
         guard.assertCurrentUserHomeroom(session.getClassId(), session.getAttendanceDate());
         List<Student> students = guard.findActiveClassStudents(session.getClassId(), session.getAttendanceDate());
@@ -83,6 +91,9 @@ public class AttendanceService {
             Long sessionId,
             Long studentId,
             ReqUpsertAttendanceExceptionDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AttendanceService.class,
+                        "AttendanceService.upsertException");
         AttendanceSession session = findSession(sessionId);
         guard.assertCurrentUserHomeroom(session.getClassId(), session.getAttendanceDate());
         Student student = studentLookupService.resolveStudent(studentId, null);
@@ -98,12 +109,18 @@ public class AttendanceService {
             Long sessionId,
             String studentCode,
             ReqUpsertAttendanceExceptionDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AttendanceService.class,
+                        "AttendanceService.upsertExceptionByCode");
         Student student = studentLookupService.resolveStudent(null, studentCode);
         return upsertException(sessionId, student.getId(), request);
     }
 
     @Transactional
     public void deleteException(Long sessionId, Long studentId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AttendanceService.class,
+                "AttendanceService.deleteException");
         AttendanceSession session = findSession(sessionId);
         guard.assertCurrentUserHomeroom(session.getClassId(), session.getAttendanceDate());
         AttendanceRecord record = recordRepository.findBySessionIdAndStudentId(sessionId, studentId)
@@ -115,6 +132,9 @@ public class AttendanceService {
 
     @Transactional
     public void deleteExceptionByCode(Long sessionId, String studentCode) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AttendanceService.class,
+                "AttendanceService.deleteExceptionByCode");
         Student student = studentLookupService.resolveStudent(null, studentCode);
         deleteException(sessionId, student.getId());
     }

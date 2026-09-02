@@ -1,6 +1,7 @@
 package com.JavaTraining.BaiTap_RS.scorebook.controller;
 
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqCreateRetakeExamDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqFilterRetakeExamDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqUpdateRetakeScoreDTO;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequestMapping("/api/v2/retake-exams")
+@SuppressWarnings("PMD.GuardLogStatement")
 public class RetakeExamController {
 
     private static final String OFFICE_ROLES = "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')";
@@ -41,6 +43,9 @@ public class RetakeExamController {
     @PreAuthorize(OFFICE_ROLES)
     public ResponseEntity<ResRetakeExamDTO> create(
             @Valid @RequestBody ReqCreateRetakeExamDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        RetakeExamController.class,
+                        "RetakeExamController.create");
         return ResponseEntity.status(HttpStatus.CREATED).body(retakeExamService.createRetakeExam(request));
     }
 
@@ -50,6 +55,9 @@ public class RetakeExamController {
     public ResRetakeExamDTO updateScore(
             @PathVariable(RETAKE_ID) @Positive Long retakeId,
             @Valid @RequestBody ReqUpdateRetakeScoreDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        RetakeExamController.class,
+                        "RetakeExamController.updateScore");
         return retakeExamService.updateRetakeScore(retakeId, request);
     }
 
@@ -58,6 +66,9 @@ public class RetakeExamController {
     @PreAuthorize(OFFICE_ROLES)
     public ResRetakeExamDTO cancel(
             @PathVariable(RETAKE_ID) @Positive Long retakeId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        RetakeExamController.class,
+                        "RetakeExamController.cancel");
         return retakeExamService.cancelRetakeExam(retakeId);
     }
 
@@ -66,6 +77,9 @@ public class RetakeExamController {
     @PreAuthorize(OFFICE_ROLES)
     public ResRetakeExamDTO get(
             @PathVariable(RETAKE_ID) @Positive Long retakeId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        RetakeExamController.class,
+                        "RetakeExamController.get");
         return retakeExamService.getRetakeExam(retakeId);
     }
 
@@ -74,6 +88,9 @@ public class RetakeExamController {
     @PreAuthorize(OFFICE_ROLES)
     public Page<ResRetakeExamDTO> find(
             @Valid @ModelAttribute ReqFilterRetakeExamDTO filter) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        RetakeExamController.class,
+                        "RetakeExamController.find");
         return retakeExamService.findRetakeExams(filter);
     }
 }

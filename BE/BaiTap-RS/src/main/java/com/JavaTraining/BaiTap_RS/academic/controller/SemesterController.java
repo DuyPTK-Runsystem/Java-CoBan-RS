@@ -13,6 +13,7 @@ import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.response.ResSemesterNotif
 import com.JavaTraining.BaiTap_RS.academic.service.SemesterCompletenessService;
 import com.JavaTraining.BaiTap_RS.academic.service.SemesterService;
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequestMapping("/api/v2/semesters")
+@SuppressWarnings("PMD.GuardLogStatement")
 public class SemesterController {
 
     private static final String OFFICE_ROLES = "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')";
@@ -52,6 +54,9 @@ public class SemesterController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE', 'TEACHER', 'STUDENT')")
     public List<ResSemesterDTO> listByAcademicYear(
             @RequestParam("academicYearId") @Positive Long academicYearId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SemesterController.class,
+                        "SemesterController.listByAcademicYear");
         return semesterService.listByAcademicYear(academicYearId);
     }
 
@@ -59,6 +64,9 @@ public class SemesterController {
     @ApiMessage("Tạo học kỳ")
     @PreAuthorize(OFFICE_ROLES)
     public ResponseEntity<ResSemesterDTO> createSemester(@Valid @RequestBody ReqCreateSemesterDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterController.class,
+                "SemesterController.createSemester");
         return ResponseEntity.status(HttpStatus.CREATED).body(semesterService.createSemester(request));
     }
 
@@ -68,6 +76,9 @@ public class SemesterController {
     public ResSemesterDTO updateSemester(
             @PathVariable(SEMESTER_ID) @Positive Long semesterId,
             @Valid @RequestBody ReqUpdateSemesterDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SemesterController.class,
+                        "SemesterController.updateSemester");
         return semesterService.updateSemester(semesterId, request);
     }
 
@@ -75,6 +86,9 @@ public class SemesterController {
     @ApiMessage("Kích hoạt học kỳ")
     @PreAuthorize(OFFICE_ROLES)
     public ResSemesterDTO activateSemester(@PathVariable(SEMESTER_ID) @Positive Long semesterId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterController.class,
+                "SemesterController.activateSemester");
         return semesterService.activateSemester(semesterId);
     }
 
@@ -82,6 +96,9 @@ public class SemesterController {
     @ApiMessage("Khóa học kỳ")
     @PreAuthorize(OFFICE_ROLES)
     public ResSemesterDTO lockSemester(@PathVariable(SEMESTER_ID) @Positive Long semesterId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterController.class,
+                "SemesterController.lockSemester");
         return semesterService.lockSemester(semesterId);
     }
 
@@ -91,6 +108,9 @@ public class SemesterController {
     public ResSemesterDTO reopenSemester(
             @PathVariable(SEMESTER_ID) @Positive Long semesterId,
             @Valid @RequestBody ReqReopenSemesterDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SemesterController.class,
+                        "SemesterController.reopenSemester");
         return semesterService.reopenSemester(semesterId, request);
     }
 
@@ -100,6 +120,9 @@ public class SemesterController {
     public ResSemesterCompletenessReportDTO getCompletenessReport(
             @PathVariable(SEMESTER_ID) @Positive Long semesterId,
             @RequestParam(name = "checkpointCode", required = false) String checkpointCode) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SemesterController.class,
+                        "SemesterController.getCompletenessReport");
         return completenessService.getLatestReport(semesterId, checkpointCode);
     }
 
@@ -109,6 +132,9 @@ public class SemesterController {
     public ResSemesterCompletenessDecisionDTO evaluateCompletenessCheckpoint(
             @PathVariable(SEMESTER_ID) @Positive Long semesterId,
             @RequestParam("checkpointDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkpointDate) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SemesterController.class,
+                        "SemesterController.evaluateCompletenessCheckpoint");
         return semesterService.evaluateCompletenessCheckpoint(semesterId, checkpointDate);
     }
 
@@ -117,6 +143,9 @@ public class SemesterController {
     @PreAuthorize(OFFICE_ROLES)
     public List<ResSemesterNotificationDTO> listNotifications(
             @PathVariable(SEMESTER_ID) @Positive Long semesterId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SemesterController.class,
+                        "SemesterController.listNotifications");
         return completenessService.getNotificationsForSemester(semesterId);
     }
 
@@ -126,6 +155,9 @@ public class SemesterController {
     public List<ResSemesterNotificationDTO> dispatchNotifications(
             @PathVariable(SEMESTER_ID) @Positive Long semesterId,
             @RequestParam(name = "checkpointCode", required = false) String checkpointCode) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SemesterController.class,
+                        "SemesterController.dispatchNotifications");
         return completenessService.dispatchCheckpointNotifications(semesterId, checkpointCode);
     }
 
@@ -134,6 +166,9 @@ public class SemesterController {
     @PreAuthorize(OFFICE_ROLES)
     public List<ResSemesterNotificationDTO> retryFailedNotifications(
             @PathVariable(SEMESTER_ID) @Positive Long semesterId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SemesterController.class,
+                        "SemesterController.retryFailedNotifications");
         return completenessService.retryFailedNotifications(semesterId);
     }
 }

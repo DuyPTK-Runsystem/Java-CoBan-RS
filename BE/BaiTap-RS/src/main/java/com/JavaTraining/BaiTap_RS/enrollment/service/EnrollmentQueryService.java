@@ -3,6 +3,7 @@ package com.JavaTraining.BaiTap_RS.enrollment.service;
 import java.util.List;
 
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClass;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.response.ResClassStudentDTO;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.response.ResEnrollmentDTO;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.response.ResStudentEnrollmentHistoryDTO;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class EnrollmentQueryService {
 
     private final StudentYearEnrollmentRepository enrollmentRepository;
@@ -39,6 +41,9 @@ public class EnrollmentQueryService {
     // FR-ENROLL-004: only active students without any year enrollment are candidates.
     @Transactional(readOnly = true)
     public List<ResUnassignedStudentDTO> listUnassignedStudents(Long academicYearId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                EnrollmentQueryService.class,
+                "EnrollmentQueryService.listUnassignedStudents");
         lookupService.findAcademicYear(academicYearId);
         return enrollmentRepository.findUnassignedStudents(academicYearId)
                 .stream()
@@ -49,6 +54,9 @@ public class EnrollmentQueryService {
 
     @Transactional(readOnly = true)
     public List<ResClassStudentDTO> listClassStudents(Long classId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                EnrollmentQueryService.class,
+                "EnrollmentQueryService.listClassStudents");
         lookupService.findSchoolClass(classId);
         return enrollmentRepository.findByCurrentClassIdAndStatusOrderByStudentIdAsc(
                         classId,
@@ -61,6 +69,9 @@ public class EnrollmentQueryService {
     // FR-ENROLL-005 and BR-ENROLL-002: return the append-only class history.
     @Transactional(readOnly = true)
     public List<ResStudentEnrollmentHistoryDTO> listStudentHistory(Long studentId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                EnrollmentQueryService.class,
+                "EnrollmentQueryService.listStudentHistory");
         Student student = lookupService.findStudent(studentId);
         return enrollmentRepository.findByStudentIdOrderByEnrolledAtAsc(studentId)
                 .stream()
@@ -70,6 +81,9 @@ public class EnrollmentQueryService {
 
     @Transactional(readOnly = true)
     public List<ResStudentEnrollmentHistoryDTO> listStudentHistoryByCode(String studentCode) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                EnrollmentQueryService.class,
+                "EnrollmentQueryService.listStudentHistoryByCode");
         Student student = studentLookupService.resolveStudent(null, studentCode);
         return enrollmentRepository.findByStudentIdOrderByEnrolledAtAsc(student.getId())
                 .stream()

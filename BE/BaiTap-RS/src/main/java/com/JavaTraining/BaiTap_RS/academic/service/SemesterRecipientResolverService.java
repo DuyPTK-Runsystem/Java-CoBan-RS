@@ -18,6 +18,7 @@ import com.JavaTraining.BaiTap_RS.assignment.domain.entity.HomeroomAssignment;
 import com.JavaTraining.BaiTap_RS.assignment.domain.entity.SubjectTeachingAssignment;
 import com.JavaTraining.BaiTap_RS.assignment.repository.HomeroomAssignmentRepository;
 import com.JavaTraining.BaiTap_RS.assignment.repository.SubjectTeachingAssignmentRepository;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.teacher.domain.entity.Teacher;
 import com.JavaTraining.BaiTap_RS.teacher.repository.TeacherRepository;
 import com.JavaTraining.BaiTap_RS.user.domain.entity.User;
@@ -30,7 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings({
         "PMD.CouplingBetweenObjects",
         "PMD.CyclomaticComplexity",
-        "PMD.AvoidInstantiatingObjectsInLoops"
+        "PMD.AvoidInstantiatingObjectsInLoops",
+        "PMD.GuardLogStatement"
 })
 public class SemesterRecipientResolverService {
 
@@ -65,6 +67,9 @@ public class SemesterRecipientResolverService {
             String checkpointCode,
             SemesterCompletenessSummaryDTO summary,
             List<ClassSubjectIncompleteDetail> incompleteDetails) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SemesterRecipientResolverService.class,
+                        "SemesterRecipientResolverService.resolveRecipients");
         List<SemesterRecipientInfo> result = new ArrayList<>();
         Semester semester = semesterRepository.findById(semesterId).orElse(null);
         String semesterName = semester != null ? semester.getName() : "Học kỳ " + semesterId;

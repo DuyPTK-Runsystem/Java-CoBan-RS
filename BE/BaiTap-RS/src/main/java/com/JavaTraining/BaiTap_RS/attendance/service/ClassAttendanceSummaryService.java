@@ -5,11 +5,13 @@ import com.JavaTraining.BaiTap_RS.academic.domain.entity.Semester;
 import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.requests.ReqClassAttendanceSummaryQuery;
 import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.response.ResClassAttendanceSummaryDTO;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class ClassAttendanceSummaryService {
 
     private final AttendanceGuard attendanceGuard;
@@ -27,6 +29,9 @@ public class ClassAttendanceSummaryService {
 
     @Transactional(readOnly = true)
     public ResClassAttendanceSummaryDTO getClassSummary(Long classId, ReqClassAttendanceSummaryQuery query) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ClassAttendanceSummaryService.class,
+                "ClassAttendanceSummaryService.getClassSummary");
         validateDateRange(query);
         SchoolClass schoolClass = attendanceGuard.findSchoolClass(classId);
         Semester semester = attendanceGuard.findSemester(query.semesterId());

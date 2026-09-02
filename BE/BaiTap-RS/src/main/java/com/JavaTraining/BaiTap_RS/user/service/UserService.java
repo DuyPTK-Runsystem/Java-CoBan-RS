@@ -1,12 +1,14 @@
 package com.JavaTraining.BaiTap_RS.user.service;
 
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.security.JwtTokenService;
 import com.JavaTraining.BaiTap_RS.security.UserPrincipal;
 import com.JavaTraining.BaiTap_RS.user.domain.DTOs.requests.ReqLoginUserDTO;
 import com.JavaTraining.BaiTap_RS.user.domain.DTOs.requests.ReqRegisterUserDTO;
 import com.JavaTraining.BaiTap_RS.user.domain.DTOs.response.ResLoginUserDTO;
 import com.JavaTraining.BaiTap_RS.user.domain.DTOs.response.ResUserDTO;
+import com.JavaTraining.BaiTap_RS.user.domain.entity.Role;
 import com.JavaTraining.BaiTap_RS.user.domain.entity.User;
 import com.JavaTraining.BaiTap_RS.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class UserService {
 
     private final UserRepository userRepository;
@@ -39,6 +42,9 @@ public class UserService {
 
     @Transactional
     public ResUserDTO register(ReqRegisterUserDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                UserService.class,
+                "UserService.register");
         if (!request.password().equals(request.confirmPassword())) {
             throw new AppException(HttpStatus.BAD_REQUEST, "Mật khẩu xác nhận không khớp");
         }
@@ -51,6 +57,9 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public ResLoginUserDTO login(ReqLoginUserDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                UserService.class,
+                "UserService.login");
         Authentication authentication = authenticate(request);
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
         String accessToken = jwtTokenService.createAccessToken(principal);
@@ -61,15 +70,22 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public ResUserDTO getCurrentUser(UserPrincipal principal) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                UserService.class,
+                "UserService.getCurrentUser");
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED, "Người dùng không tồn tại"));
         return toUserDTO(user);
     }
 
     public ResUserDTO toUserDTO(User user) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                UserService.class,
+                "UserService.toUserDTO");
         return new ResUserDTO(
                 user.getId(),
                 user.getUsername(),
+                user.getRoles().stream().map(Role::getCode).sorted().toList(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
                 user.getCreatedBy(),

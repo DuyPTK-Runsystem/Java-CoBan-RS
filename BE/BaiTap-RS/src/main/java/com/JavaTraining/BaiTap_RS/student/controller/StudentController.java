@@ -2,6 +2,7 @@ package com.JavaTraining.BaiTap_RS.student.controller;
 
 import com.JavaTraining.BaiTap_RS.batch.studentcsv.StudentCsvExportService;
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.student.domain.DTOs.requests.ReqCreateStudentDTO;
 import com.JavaTraining.BaiTap_RS.student.domain.DTOs.requests.ReqFetchStudentDTO;
 import com.JavaTraining.BaiTap_RS.student.domain.DTOs.requests.ReqUpdateStudentDTO;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RequestMapping("/api/v1/students")
 @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE', 'TEACHER')")
+@SuppressWarnings("PMD.GuardLogStatement")
 public class StudentController {
 
     private final StudentService studentService;
@@ -43,6 +45,9 @@ public class StudentController {
     @GetMapping
     @ApiMessage("Lấy danh sách sinh viên")
     public ResStudentPageDTO fetchStudents(@Valid ReqFetchStudentDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentController.class,
+                "StudentController.fetchStudents");
         return studentService.fetchStudents(request);
     }
 
@@ -50,18 +55,27 @@ public class StudentController {
     @ApiMessage("Lấy thông tin sinh viên")
     public ResStudentDTO getStudent(
             @PathVariable("studentId") @Positive(message = "ID sinh viên phải lớn hơn 0") Long studentId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentController.class,
+                "StudentController.getStudent");
         return studentService.getStudent(studentId);
     }
 
     @GetMapping("/code/{studentCode}")
     @ApiMessage("Lấy thông tin sinh viên theo mã")
     public ResStudentDTO getStudentByCode(@PathVariable("studentCode") String studentCode) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentController.class,
+                "StudentController.getStudentByCode");
         return studentService.getStudentByCode(studentCode);
     }
 
     @PostMapping
     @ApiMessage("Tạo sinh viên")
     public ResponseEntity<ResStudentDTO> createStudent(@Valid @RequestBody ReqCreateStudentDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentController.class,
+                "StudentController.createStudent");
         ResStudentDTO student = studentService.createStudent(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(student);
     }
@@ -71,6 +85,9 @@ public class StudentController {
     public ResStudentDTO updateStudent(
             @PathVariable("studentId") @Positive(message = "ID sinh viên phải lớn hơn 0") Long studentId,
             @Valid @RequestBody ReqUpdateStudentDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentController.class,
+                "StudentController.updateStudent");
         return studentService.updateStudent(studentId, request);
     }
 
@@ -78,6 +95,9 @@ public class StudentController {
     @ApiMessage("Xóa sinh viên")
     public ResponseEntity<Void> deleteStudent(
             @PathVariable("studentId") @Positive(message = "ID sinh viên phải lớn hơn 0") Long studentId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentController.class,
+                "StudentController.deleteStudent");
         studentService.deleteStudent(studentId);
         return ResponseEntity.noContent().build();
     }
@@ -85,11 +105,17 @@ public class StudentController {
     @PostMapping("/code")
     @ApiMessage("Tạo mã sinh viên")
     public ResStudentCodeDTO generateStudentCode() {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentController.class,
+                "StudentController.generateStudentCode");
         return studentService.generateStudentCode();
     }
 
     @GetMapping(value = "/export", produces = "text/csv")
     public ResponseEntity<byte[]> exportStudents() {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                StudentController.class,
+                "StudentController.exportStudents");
         return ResponseEntity.ok()
                 .contentType(new MediaType("text", "csv", java.nio.charset.StandardCharsets.UTF_8))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=students.csv")

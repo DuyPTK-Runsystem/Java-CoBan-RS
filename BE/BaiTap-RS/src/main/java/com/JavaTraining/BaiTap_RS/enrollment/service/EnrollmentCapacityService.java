@@ -10,12 +10,14 @@ import com.JavaTraining.BaiTap_RS.academic.domain.entity.GradeLevel;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClass;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClassStatus;
 import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.response.ResCapacityWarningDTO;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.EnrollmentStatus;
 import com.JavaTraining.BaiTap_RS.enrollment.repository.StudentYearEnrollmentRepository;
 import org.springframework.stereotype.Service;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class EnrollmentCapacityService {
 
     private static final double LOWER_BALANCE_THRESHOLD = 0.8;
@@ -35,6 +37,9 @@ public class EnrollmentCapacityService {
     }
 
     public List<ResCapacityWarningDTO> capacityWarnings(List<SchoolClass> classes) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                EnrollmentCapacityService.class,
+                "EnrollmentCapacityService.capacityWarnings");
         return new ArrayList<>(classes.stream()
                 .map(this::capacityWarning)
                 .flatMap(Optional::stream)

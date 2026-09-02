@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Semester;
 import com.JavaTraining.BaiTap_RS.academic.repository.SemesterRepository;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResStudentAnnualTranscriptDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResStudentTermTranscriptDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResTranscriptCalculationStatusDTO;
@@ -30,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("PMD.CouplingBetweenObjects")
+@SuppressWarnings({"PMD.CouplingBetweenObjects", "PMD.GuardLogStatement"})
 public class TranscriptQueryService {
 
     private final StudentAnnualTranscriptRepository annualTranscriptRepository;
@@ -46,41 +47,65 @@ public class TranscriptQueryService {
 
     @Transactional(readOnly = true)
     public ResStudentTermTranscriptDTO getMyTermTranscript(Long semesterId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                TranscriptQueryService.class,
+                "TranscriptQueryService.getMyTermTranscript");
         return getTermTranscript(currentStudentResolver.currentStudentId(), semesterId, true);
     }
 
     @Transactional(readOnly = true)
     public ResStudentTermTranscriptDTO getTermTranscript(Long studentId, Long semesterId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                TranscriptQueryService.class,
+                "TranscriptQueryService.getTermTranscript");
         return getTermTranscript(studentId, semesterId, false);
     }
 
     @Transactional(readOnly = true)
     public ResStudentAnnualTranscriptDTO getMyAnnualTranscript(Long academicYearId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                TranscriptQueryService.class,
+                "TranscriptQueryService.getMyAnnualTranscript");
         return getAnnualTranscript(currentStudentResolver.currentStudentId(), academicYearId, true);
     }
 
     @Transactional(readOnly = true)
     public ResStudentAnnualTranscriptDTO getAnnualTranscript(Long studentId, Long academicYearId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                TranscriptQueryService.class,
+                "TranscriptQueryService.getAnnualTranscript");
         return getAnnualTranscript(studentId, academicYearId, false);
     }
 
     @Transactional(readOnly = true)
     public ResTranscriptCalculationStatusDTO getMyTermCalculationStatus(Long semesterId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                TranscriptQueryService.class,
+                "TranscriptQueryService.getMyTermCalculationStatus");
         return getTermCalculationStatus(currentStudentResolver.currentStudentId(), semesterId, true);
     }
 
     @Transactional(readOnly = true)
     public ResTranscriptCalculationStatusDTO getTermCalculationStatus(Long studentId, Long semesterId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                TranscriptQueryService.class,
+                "TranscriptQueryService.getTermCalculationStatus");
         return getTermCalculationStatus(studentId, semesterId, false);
     }
 
     @Transactional(readOnly = true)
     public ResTranscriptCalculationStatusDTO getMyAnnualCalculationStatus(Long academicYearId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                TranscriptQueryService.class,
+                "TranscriptQueryService.getMyAnnualCalculationStatus");
         return getAnnualCalculationStatus(currentStudentResolver.currentStudentId(), academicYearId, true);
     }
 
     @Transactional(readOnly = true)
     public ResTranscriptCalculationStatusDTO getAnnualCalculationStatus(Long studentId, Long academicYearId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                TranscriptQueryService.class,
+                "TranscriptQueryService.getAnnualCalculationStatus");
         return getAnnualCalculationStatus(studentId, academicYearId, false);
     }
 

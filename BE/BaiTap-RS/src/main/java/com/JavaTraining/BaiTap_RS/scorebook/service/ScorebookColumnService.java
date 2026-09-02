@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Subject;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectType;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqCreateAssessmentColumnDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqUpdateAssessmentColumnDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResAssessmentColumnDTO;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class ScorebookColumnService {
 
     private final ScorebookContext context;
@@ -43,6 +45,9 @@ public class ScorebookColumnService {
     }
 
     public ResAssessmentColumnDTO addColumn(Long scorebookId, ReqCreateAssessmentColumnDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScorebookColumnService.class,
+                "ScorebookColumnService.addColumn");
         Scorebook scorebook = context.findScorebook(scorebookId);
         guard.assertCanManage(scorebook);
         validator.ensureWritable(scorebook);
@@ -73,6 +78,9 @@ public class ScorebookColumnService {
     }
 
     public ResAssessmentColumnDTO updateColumn(Long columnId, ReqUpdateAssessmentColumnDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScorebookColumnService.class,
+                "ScorebookColumnService.updateColumn");
         AssessmentColumn column = findColumn(columnId);
         Scorebook scorebook = context.findScorebook(column.getScorebookId());
         guard.assertCanManage(scorebook);
@@ -92,6 +100,9 @@ public class ScorebookColumnService {
     }
 
     public void deactivateColumn(Long columnId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                ScorebookColumnService.class,
+                "ScorebookColumnService.deactivateColumn");
         AssessmentColumn column = findColumn(columnId);
         Scorebook scorebook = context.findScorebook(column.getScorebookId());
         guard.assertCanManage(scorebook);

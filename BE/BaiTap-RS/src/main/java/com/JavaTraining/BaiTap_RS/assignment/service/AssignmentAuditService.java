@@ -9,12 +9,14 @@ import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.common.audit.domain.entity.AuditLog;
 import com.JavaTraining.BaiTap_RS.common.audit.repository.AuditLogRepository;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class AssignmentAuditService {
 
     private final AuditLogRepository auditLogRepository;
@@ -26,6 +28,9 @@ public class AssignmentAuditService {
     }
 
     public void writeHomeroomAudit(String action, HomeroomAssignment before, HomeroomAssignment after) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AssignmentAuditService.class,
+                "AssignmentAuditService.writeHomeroomAudit");
         auditLogRepository.save(new AuditLog(
                 AuditContext.currentUserId(),
                 action,
@@ -41,6 +46,9 @@ public class AssignmentAuditService {
             String action,
             SubjectTeachingAssignment before,
             SubjectTeachingAssignment after) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AssignmentAuditService.class,
+                        "AssignmentAuditService.writeSubjectTeachingAudit");
         auditLogRepository.save(new AuditLog(
                 AuditContext.currentUserId(),
                 action,

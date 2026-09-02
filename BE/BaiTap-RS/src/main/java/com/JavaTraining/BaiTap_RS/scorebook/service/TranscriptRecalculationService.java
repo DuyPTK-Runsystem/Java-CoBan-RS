@@ -17,6 +17,7 @@ import com.JavaTraining.BaiTap_RS.academic.repository.ClassSubjectRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SemesterRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectRepository;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.EnrollmentStatus;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.StudentYearEnrollment;
 import com.JavaTraining.BaiTap_RS.enrollment.repository.StudentYearEnrollmentRepository;
@@ -46,6 +47,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 /**
  * Recalculates one student's complete regular transcript in dependency order.
  */
@@ -57,7 +59,8 @@ import org.springframework.transaction.annotation.Transactional;
                 "PMD.AvoidInstantiatingObjectsInLoops",
                 "PMD.CognitiveComplexity",
                 "PMD.CyclomaticComplexity",
-                "PMD.NPathComplexity"
+                "PMD.NPathComplexity",
+        "PMD.GuardLogStatement"
 })
 public class TranscriptRecalculationService {
 
@@ -109,6 +112,9 @@ public class TranscriptRecalculationService {
 
         @Transactional
         public void recalculate(Long studentId, Long academicYearId, Long requestedVersion, Long taskId) {
+            DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                    TranscriptRecalculationService.class,
+                    "TranscriptRecalculationService.recalculate");
                 StudentYearEnrollment enrollment = enrollmentRepository
                                 .findByStudentIdAndAcademicYearId(studentId, academicYearId)
                                 .filter(item -> item.getStatus() == EnrollmentStatus.ACTIVE)

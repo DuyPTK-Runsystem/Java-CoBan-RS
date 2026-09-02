@@ -3,6 +3,7 @@ package com.JavaTraining.BaiTap_RS.scorebook.controller;
 import java.util.List;
 
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqBulkUpsertStudentScoreDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqUpsertStudentScoreDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResStudentScoreDTO;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequestMapping("/api/v2")
+@SuppressWarnings("PMD.GuardLogStatement")
 public class ScoreEntryController {
 
     private static final String SCOREBOOK_ROLES = "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE', 'TEACHER')";
@@ -51,6 +53,9 @@ public class ScoreEntryController {
             @PathVariable(SCOREBOOK_ID) @Positive Long scorebookId,
             @RequestParam(value = "page", defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(value = "size", defaultValue = "10") @Positive int size) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ScoreEntryController.class,
+                        "ScoreEntryController.getScoreGrid");
         return scoreGridService.getScoreGrid(scorebookId, page, size);
     }
 
@@ -61,6 +66,9 @@ public class ScoreEntryController {
             @PathVariable(COLUMN_ID) @Positive Long columnId,
             @PathVariable(STUDENT_ID) @Positive Long studentId,
             @Valid @RequestBody ReqUpsertStudentScoreDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ScoreEntryController.class,
+                        "ScoreEntryController.upsertScore");
         return scoreEntryService.upsertSingleScore(columnId, studentId, request);
     }
 
@@ -71,6 +79,9 @@ public class ScoreEntryController {
             @PathVariable(COLUMN_ID) @Positive Long columnId,
             @PathVariable(STUDENT_CODE) String studentCode,
             @Valid @RequestBody ReqUpsertStudentScoreDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ScoreEntryController.class,
+                        "ScoreEntryController.upsertScoreByCode");
         return scoreEntryService.upsertSingleScoreByCode(columnId, studentCode, request);
     }
 
@@ -80,6 +91,9 @@ public class ScoreEntryController {
     public List<ResStudentScoreDTO> bulkUpsertScores(
             @PathVariable(COLUMN_ID) @Positive Long columnId,
             @Valid @RequestBody ReqBulkUpsertStudentScoreDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        ScoreEntryController.class,
+                        "ScoreEntryController.bulkUpsertScores");
         return scoreEntryService.bulkUpsertScores(columnId, request);
     }
 }

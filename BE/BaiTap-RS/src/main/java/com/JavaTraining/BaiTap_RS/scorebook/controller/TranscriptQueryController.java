@@ -1,6 +1,7 @@
 package com.JavaTraining.BaiTap_RS.scorebook.controller;
 
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResStudentAnnualTranscriptDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResStudentTermTranscriptDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResTranscriptCalculationStatusDTO;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequestMapping("/api/v2/transcripts/students")
+@SuppressWarnings("PMD.GuardLogStatement")
 public class TranscriptQueryController {
 
     private static final String STUDENT_ROLE = "hasRole('STUDENT')";
@@ -34,6 +36,9 @@ public class TranscriptQueryController {
     @PreAuthorize(STUDENT_ROLE)
     public ResStudentTermTranscriptDTO getMyTerm(
             @PathVariable(SEMESTER_ID) @Positive Long semesterId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        TranscriptQueryController.class,
+                        "TranscriptQueryController.getMyTerm");
         return transcriptQueryService.getMyTermTranscript(semesterId);
     }
 
@@ -42,6 +47,9 @@ public class TranscriptQueryController {
     @PreAuthorize(STUDENT_ROLE)
     public ResStudentAnnualTranscriptDTO getMyAnnual(
             @PathVariable(ACADEMIC_YEAR_ID) @Positive Long academicYearId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        TranscriptQueryController.class,
+                        "TranscriptQueryController.getMyAnnual");
         return transcriptQueryService.getMyAnnualTranscript(academicYearId);
     }
 
@@ -50,6 +58,9 @@ public class TranscriptQueryController {
     @PreAuthorize(STUDENT_ROLE)
     public ResTranscriptCalculationStatusDTO getMyTermStatus(
             @PathVariable(SEMESTER_ID) @Positive Long semesterId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        TranscriptQueryController.class,
+                        "TranscriptQueryController.getMyTermStatus");
         return transcriptQueryService.getMyTermCalculationStatus(semesterId);
     }
 
@@ -58,6 +69,9 @@ public class TranscriptQueryController {
     @PreAuthorize(STUDENT_ROLE)
     public ResTranscriptCalculationStatusDTO getMyAnnualStatus(
             @PathVariable(ACADEMIC_YEAR_ID) @Positive Long academicYearId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        TranscriptQueryController.class,
+                        "TranscriptQueryController.getMyAnnualStatus");
         return transcriptQueryService.getMyAnnualCalculationStatus(academicYearId);
     }
 
@@ -67,6 +81,9 @@ public class TranscriptQueryController {
     public ResStudentTermTranscriptDTO getTerm(
             @PathVariable(STUDENT_ID) @Positive Long studentId,
             @PathVariable(SEMESTER_ID) @Positive Long semesterId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        TranscriptQueryController.class,
+                        "TranscriptQueryController.getTerm");
         return transcriptQueryService.getTermTranscript(studentId, semesterId);
     }
 
@@ -76,6 +93,9 @@ public class TranscriptQueryController {
     public ResStudentAnnualTranscriptDTO getAnnual(
             @PathVariable(STUDENT_ID) @Positive Long studentId,
             @PathVariable(ACADEMIC_YEAR_ID) @Positive Long academicYearId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        TranscriptQueryController.class,
+                        "TranscriptQueryController.getAnnual");
         return transcriptQueryService.getAnnualTranscript(studentId, academicYearId);
     }
 
@@ -85,6 +105,9 @@ public class TranscriptQueryController {
     public ResTranscriptCalculationStatusDTO getTermStatus(
             @PathVariable(STUDENT_ID) @Positive Long studentId,
             @PathVariable(SEMESTER_ID) @Positive Long semesterId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        TranscriptQueryController.class,
+                        "TranscriptQueryController.getTermStatus");
         return transcriptQueryService.getTermCalculationStatus(studentId, semesterId);
     }
 
@@ -94,6 +117,9 @@ public class TranscriptQueryController {
     public ResTranscriptCalculationStatusDTO getAnnualStatus(
             @PathVariable(STUDENT_ID) @Positive Long studentId,
             @PathVariable(ACADEMIC_YEAR_ID) @Positive Long academicYearId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        TranscriptQueryController.class,
+                        "TranscriptQueryController.getAnnualStatus");
         return transcriptQueryService.getAnnualCalculationStatus(studentId, academicYearId);
     }
 }

@@ -12,11 +12,13 @@ import com.JavaTraining.BaiTap_RS.assignment.domain.entity.AssignmentStatus;
 import com.JavaTraining.BaiTap_RS.assignment.domain.entity.HomeroomAssignment;
 import com.JavaTraining.BaiTap_RS.assignment.repository.HomeroomAssignmentRepository;
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.teacher.domain.entity.Teacher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class HomeroomAssignmentService {
 
     private static final LocalDate OPEN_ENDED = LocalDate.of(9999, 12, 31);
@@ -38,6 +40,9 @@ public class HomeroomAssignmentService {
     public ResHomeroomAssignmentDTO createHomeroomAssignment(
             Long classId,
             ReqCreateHomeroomAssignmentDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        HomeroomAssignmentService.class,
+                        "HomeroomAssignmentService.createHomeroomAssignment");
         SchoolClass schoolClass = guard.findSchoolClass(classId);
         Teacher teacher = guard.findActiveTeacher(request.teacherId());
         guard.validateWindowInYear(schoolClass, request.validFrom(), request.validTo());
@@ -62,6 +67,9 @@ public class HomeroomAssignmentService {
     public ResHomeroomAssignmentDTO replaceHomeroomAssignment(
             Long assignmentId,
             ReqReplaceAssignmentDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        HomeroomAssignmentService.class,
+                        "HomeroomAssignmentService.replaceHomeroomAssignment");
         HomeroomAssignment current = guard.findHomeroomAssignment(assignmentId);
         if (current.getStatus() != AssignmentStatus.ACTIVE) {
             throw guard.conflict("Chỉ phân công ACTIVE mới được thay thế");
@@ -88,6 +96,9 @@ public class HomeroomAssignmentService {
 
     @Transactional
     public ResHomeroomAssignmentDTO endHomeroomAssignment(Long assignmentId, ReqEndAssignmentDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                HomeroomAssignmentService.class,
+                "HomeroomAssignmentService.endHomeroomAssignment");
         HomeroomAssignment assignment = guard.findHomeroomAssignment(assignmentId);
         if (assignment.getStatus() != AssignmentStatus.ACTIVE) {
             throw guard.conflict("Chỉ phân công ACTIVE mới được kết thúc");
@@ -103,6 +114,9 @@ public class HomeroomAssignmentService {
 
     @Transactional(readOnly = true)
     public List<ResHomeroomAssignmentDTO> listHomeroomByClass(Long classId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                HomeroomAssignmentService.class,
+                "HomeroomAssignmentService.listHomeroomByClass");
         return homeroomRepository.findAllByClassIdOrderByValidFromDesc(classId)
                 .stream()
                 .map(this::toResponse)

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqCreateRetakeExamDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqFilterRetakeExamDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqUpdateRetakeScoreDTO;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class RetakeExamService {
 
     private final RetakeExamRepository retakeExamRepository;
@@ -51,6 +53,9 @@ public class RetakeExamService {
 
     @Transactional
     public ResRetakeExamDTO createRetakeExam(ReqCreateRetakeExamDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                RetakeExamService.class,
+                "RetakeExamService.createRetakeExam");
         StudentAnnualTranscript annualTranscript = annualTranscriptRepository
                 .findByStudentIdAndAcademicYearId(request.studentId(), request.academicYearId())
                 .orElseThrow(() -> new AppException(
@@ -113,6 +118,9 @@ public class RetakeExamService {
 
     @Transactional
     public ResRetakeExamDTO updateRetakeScore(Long retakeId, ReqUpdateRetakeScoreDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                RetakeExamService.class,
+                "RetakeExamService.updateRetakeScore");
         RetakeExam retakeExam = findRetakeExam(retakeId);
         if (retakeExam.getStatus() == RetakeExamStatus.CANCELLED) {
             throw new AppException(
@@ -151,6 +159,9 @@ public class RetakeExamService {
 
     @Transactional
     public ResRetakeExamDTO cancelRetakeExam(Long retakeId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                RetakeExamService.class,
+                "RetakeExamService.cancelRetakeExam");
         RetakeExam retakeExam = findRetakeExam(retakeId);
         if (retakeExam.getStatus() == RetakeExamStatus.CANCELLED) {
             return toResponse(retakeExam);
@@ -182,11 +193,17 @@ public class RetakeExamService {
 
     @Transactional(readOnly = true)
     public ResRetakeExamDTO getRetakeExam(Long retakeId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                RetakeExamService.class,
+                "RetakeExamService.getRetakeExam");
         return toResponse(findRetakeExam(retakeId));
     }
 
     @Transactional(readOnly = true)
     public Page<ResRetakeExamDTO> findRetakeExams(ReqFilterRetakeExamDTO filter) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                RetakeExamService.class,
+                "RetakeExamService.findRetakeExams");
         Pageable pageable = PageRequest.of(
                 filter.getPage(),
                 filter.getSize(),

@@ -3,6 +3,7 @@ package com.JavaTraining.BaiTap_RS.enrollment.controller;
 import java.util.List;
 
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.requests.ReqBulkCreateEnrollmentDTO;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.requests.ReqCreateEnrollmentDTO;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.requests.ReqTransferEnrollmentDTO;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v2")
 @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE', 'TEACHER')")
 // FR-ENROLL-001..005 and BR-AUTH-006: teachers read enrollment, office roles mutate it.
+@SuppressWarnings("PMD.GuardLogStatement")
 public class EnrollmentController {
 
     private final EnrollmentService enrollmentService;
@@ -46,6 +48,9 @@ public class EnrollmentController {
     @GetMapping("/classes/{classId}/students")
     @ApiMessage("Lấy danh sách học sinh của lớp")
     public List<ResClassStudentDTO> listClassStudents(@PathVariable("classId") @Positive Long classId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                EnrollmentController.class,
+                "EnrollmentController.listClassStudents");
         return enrollmentQueryService.listClassStudents(classId);
     }
 
@@ -54,6 +59,9 @@ public class EnrollmentController {
     @ApiMessage("Xếp học sinh vào lớp")
     public ResponseEntity<ResEnrollmentMutationDTO> createEnrollment(
             @Valid @RequestBody ReqCreateEnrollmentDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        EnrollmentController.class,
+                        "EnrollmentController.createEnrollment");
         return ResponseEntity.status(HttpStatus.CREATED).body(enrollmentService.createEnrollment(request));
     }
 
@@ -62,6 +70,9 @@ public class EnrollmentController {
     @ApiMessage("Xếp nhiều học sinh vào lớp")
     public ResEnrollmentMutationDTO createBulkEnrollment(
             @Valid @RequestBody ReqBulkCreateEnrollmentDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        EnrollmentController.class,
+                        "EnrollmentController.createBulkEnrollment");
         return enrollmentService.createBulkEnrollment(request);
     }
 
@@ -71,6 +82,9 @@ public class EnrollmentController {
     public ResEnrollmentMutationDTO transferEnrollment(
             @PathVariable("enrollmentId") @Positive Long enrollmentId,
             @Valid @RequestBody ReqTransferEnrollmentDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        EnrollmentController.class,
+                        "EnrollmentController.transferEnrollment");
         return enrollmentService.transferEnrollment(enrollmentId, request);
     }
 
@@ -78,6 +92,9 @@ public class EnrollmentController {
     @ApiMessage("Lấy danh sách học sinh chưa xếp lớp")
     public List<ResUnassignedStudentDTO> listUnassignedStudents(
             @RequestParam("academicYearId") @Positive Long academicYearId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        EnrollmentController.class,
+                        "EnrollmentController.listUnassignedStudents");
         return enrollmentQueryService.listUnassignedStudents(academicYearId);
     }
 
@@ -85,6 +102,9 @@ public class EnrollmentController {
     @ApiMessage("Lấy lịch sử lớp của học sinh")
     public List<ResStudentEnrollmentHistoryDTO> listStudentHistory(
             @PathVariable("studentId") @Positive Long studentId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        EnrollmentController.class,
+                        "EnrollmentController.listStudentHistory");
         return enrollmentQueryService.listStudentHistory(studentId);
     }
 
@@ -92,6 +112,9 @@ public class EnrollmentController {
     @ApiMessage("Lấy lịch sử lớp của học sinh theo mã")
     public List<ResStudentEnrollmentHistoryDTO> listStudentHistoryByCode(
             @PathVariable("studentCode") String studentCode) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        EnrollmentController.class,
+                        "EnrollmentController.listStudentHistoryByCode");
         return enrollmentQueryService.listStudentHistoryByCode(studentCode);
     }
 }

@@ -11,6 +11,7 @@ import com.JavaTraining.BaiTap_RS.academic.domain.entity.Semester;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SemesterStatus;
 import com.JavaTraining.BaiTap_RS.academic.repository.SemesterRepository;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.EnrollmentStatus;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.StudentYearEnrollment;
 import com.JavaTraining.BaiTap_RS.enrollment.repository.StudentYearEnrollmentRepository;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class SemesterLockService {
 
     private final SemesterRepository semesterRepository;
@@ -52,6 +54,9 @@ public class SemesterLockService {
             Long actorId,
             String reason,
             String correlationId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SemesterLockService.class,
+                        "SemesterLockService.lockSemester");
         Semester semester = semesterRepository.findByIdForUpdate(semesterId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy học kỳ"));
 
@@ -97,6 +102,9 @@ public class SemesterLockService {
             ReqReopenSemesterDTO request,
             Long actorId,
             String correlationId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SemesterLockService.class,
+                        "SemesterLockService.reopenSemester");
         Semester semester = semesterRepository.findByIdForUpdate(semesterId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy học kỳ"));
 

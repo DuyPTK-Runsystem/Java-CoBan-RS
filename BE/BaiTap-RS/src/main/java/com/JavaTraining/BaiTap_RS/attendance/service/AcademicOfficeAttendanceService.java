@@ -84,6 +84,9 @@ public class AcademicOfficeAttendanceService {
 
     @Transactional(readOnly = true)
     public List<ResAttendanceStudentDTO> listSessionStudents(Long sessionId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AcademicOfficeAttendanceService.class,
+                "AcademicOfficeAttendanceService.listSessionStudents");
         AttendanceSession session = findSession(sessionId);
         List<Student> students = guard.findActiveClassStudents(session.getClassId(), session.getAttendanceDate());
         Map<Long, AttendanceRecord> records = findRecordsByStudentId(session, students);
@@ -97,6 +100,9 @@ public class AcademicOfficeAttendanceService {
             Long sessionId,
             Long studentId,
         ReqUpsertAttendanceExceptionDTO request) {
+            DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                    AcademicOfficeAttendanceService.class,
+                    "AcademicOfficeAttendanceService.upsertException");
         AttendanceSession session = findSession(sessionId);
         Student student = studentLookupService.resolveStudent(studentId, null);
         guard.assertStudentInClass(student.getId(), session.getClassId(), session.getAttendanceDate());
@@ -111,12 +117,18 @@ public class AcademicOfficeAttendanceService {
             Long sessionId,
             String studentCode,
             ReqUpsertAttendanceExceptionDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AcademicOfficeAttendanceService.class,
+                        "AcademicOfficeAttendanceService.upsertExceptionByCode");
         Student student = studentLookupService.resolveStudent(null, studentCode);
         return upsertException(sessionId, student.getId(), request);
     }
 
     @Transactional
     public void deleteException(Long sessionId, Long studentId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AcademicOfficeAttendanceService.class,
+                "AcademicOfficeAttendanceService.deleteException");
         AttendanceSession session = findSession(sessionId);
         AttendanceRecord record = recordRepository.findBySessionIdAndStudentId(sessionId, studentId)
                 .orElseThrow(() -> guard.notFound("Không tìm thấy ngoại lệ điểm danh"));
@@ -127,6 +139,9 @@ public class AcademicOfficeAttendanceService {
 
     @Transactional
     public void deleteExceptionByCode(Long sessionId, String studentCode) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AcademicOfficeAttendanceService.class,
+                "AcademicOfficeAttendanceService.deleteExceptionByCode");
         Student student = studentLookupService.resolveStudent(null, studentCode);
         deleteException(sessionId, student.getId());
     }

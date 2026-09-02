@@ -24,6 +24,7 @@ import com.JavaTraining.BaiTap_RS.academic.repository.ClassSubjectRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SemesterLockReportRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectRepository;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.EnrollmentStatus;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.StudentYearEnrollment;
 import com.JavaTraining.BaiTap_RS.enrollment.repository.StudentYearEnrollmentRepository;
@@ -59,7 +60,8 @@ import org.springframework.transaction.annotation.Transactional;
         "PMD.CyclomaticComplexity",
         "PMD.NPathComplexity",
         "PMD.AvoidDuplicateLiterals",
-        "PMD.TooManyMethods"
+        "PMD.TooManyMethods",
+        "PMD.GuardLogStatement"
 })
 public class SemesterCompletenessService {
 
@@ -107,6 +109,9 @@ public class SemesterCompletenessService {
 
     @Transactional(readOnly = true)
     public SemesterCompletenessSummaryDTO evaluateCompleteness(Long semesterId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterCompletenessService.class,
+                "SemesterCompletenessService.evaluateCompleteness");
         List<ClassSubject> classSubjects = classSubjectRepository.findAllBySemesterIdAndStatus(
                 semesterId, ClassSubjectStatus.ACTIVE);
 
@@ -233,6 +238,9 @@ public class SemesterCompletenessService {
 
     @Transactional(readOnly = true)
     public List<ClassSubjectIncompleteDetail> evaluateIncompleteClassSubjectDetails(Long semesterId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterCompletenessService.class,
+                "SemesterCompletenessService.evaluateIncompleteClassSubjectDetails");
         List<ClassSubject> classSubjects = classSubjectRepository.findAllBySemesterIdAndStatus(
                 semesterId, ClassSubjectStatus.ACTIVE);
         List<ClassSubjectIncompleteDetail> result = new ArrayList<>();
@@ -340,6 +348,9 @@ public class SemesterCompletenessService {
 
     @Transactional(readOnly = true)
     public ResSemesterCompletenessReportDTO evaluateCompletenessPreview(Long semesterId, String checkpointCode) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterCompletenessService.class,
+                "SemesterCompletenessService.evaluateCompletenessPreview");
         SemesterCompletenessSummaryDTO summary = evaluateCompleteness(semesterId);
         SemesterLockReportStatus reportStatus = summary.complete()
                 ? SemesterLockReportStatus.COMPLETE
@@ -364,6 +375,9 @@ public class SemesterCompletenessService {
             Long semesterId,
             String checkpointCode,
             String correlationId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        SemesterCompletenessService.class,
+                        "SemesterCompletenessService.evaluateAndSaveReport");
         Optional<SemesterLockReport> existing = reportRepository.findByRunIdAndSemesterIdAndCheckpointCode(
                 runId, semesterId, checkpointCode);
         if (existing.isPresent()) {
@@ -428,6 +442,9 @@ public class SemesterCompletenessService {
 
     @Transactional
     public List<ResSemesterNotificationDTO> dispatchCheckpointNotifications(Long semesterId, String checkpointCode) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterCompletenessService.class,
+                "SemesterCompletenessService.dispatchCheckpointNotifications");
         SemesterCompletenessSummaryDTO summary = evaluateCompleteness(semesterId);
         List<ClassSubjectIncompleteDetail> incompleteDetails = evaluateIncompleteClassSubjectDetails(semesterId);
         if (notificationDispatchService != null) {
@@ -443,6 +460,9 @@ public class SemesterCompletenessService {
 
     @Transactional(readOnly = true)
     public List<ResSemesterNotificationDTO> getNotificationsForSemester(Long semesterId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterCompletenessService.class,
+                "SemesterCompletenessService.getNotificationsForSemester");
         if (notificationDispatchService != null) {
             return notificationDispatchService.getNotificationsForSemester(semesterId);
         }
@@ -451,6 +471,9 @@ public class SemesterCompletenessService {
 
     @Transactional
     public List<ResSemesterNotificationDTO> retryFailedNotifications(Long semesterId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterCompletenessService.class,
+                "SemesterCompletenessService.retryFailedNotifications");
         if (notificationDispatchService != null) {
             return notificationDispatchService.retryFailedNotifications(semesterId);
         }
@@ -459,6 +482,9 @@ public class SemesterCompletenessService {
 
     @Transactional(readOnly = true)
     public ResSemesterCompletenessReportDTO getLatestReport(Long semesterId, String checkpointCode) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterCompletenessService.class,
+                "SemesterCompletenessService.getLatestReport");
         Optional<SemesterLockReport> reportOpt = checkpointCode != null
                 ? reportRepository.findFirstBySemesterIdAndCheckpointCodeOrderByEvaluatedAtDesc(
                         semesterId, checkpointCode)

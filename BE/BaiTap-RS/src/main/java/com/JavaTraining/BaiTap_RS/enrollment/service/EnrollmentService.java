@@ -32,7 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@SuppressWarnings("PMD.CouplingBetweenObjects")
+@SuppressWarnings({"PMD.CouplingBetweenObjects", "PMD.GuardLogStatement"})
 public class EnrollmentService {
     private final StudentYearEnrollmentRepository enrollmentRepository;
     private final ClassTransferHistoryRepository historyRepository;
@@ -59,6 +59,9 @@ public class EnrollmentService {
     // FR-ENROLL-001 and BR-ENROLL-001: create is rejected when the year already has an enrollment.
     @Transactional
     public ResEnrollmentMutationDTO createEnrollment(ReqCreateEnrollmentDTO request) {
+        com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                EnrollmentService.class,
+                "EnrollmentService.createEnrollment");
         AcademicYear year = lookupService.findAcademicYear(request.academicYearId());
         SchoolClass schoolClass = validateTargetClass(request.classId(), year);
         Student student = studentLookupService.resolveStudent(request.studentId(), request.studentCode());
@@ -74,6 +77,9 @@ public class EnrollmentService {
     // FR-ENROLL-002 and BR-COMMON-003: validate every item before persisting any item.
     @Transactional
     public ResEnrollmentMutationDTO createBulkEnrollment(ReqBulkCreateEnrollmentDTO request) {
+        com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                EnrollmentService.class,
+                "EnrollmentService.createBulkEnrollment");
         AcademicYear year = lookupService.findAcademicYear(request.academicYearId());
         SchoolClass schoolClass = validateTargetClass(request.classId(), year);
         List<Student> students = studentLookupService.resolveStudents(request.studentIds(), request.studentCodes());
@@ -102,6 +108,9 @@ public class EnrollmentService {
     // FR-ENROLL-003, BR-ENROLL-002 and NFR-RELIABILITY-005: update and history/audit share one transaction.
     @Transactional
     public ResEnrollmentMutationDTO transferEnrollment(Long enrollmentId, ReqTransferEnrollmentDTO request) {
+        com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                EnrollmentService.class,
+                "EnrollmentService.transferEnrollment");
         StudentYearEnrollment enrollment = lookupService.findEnrollment(enrollmentId);
         if (enrollment.getStatus() != EnrollmentStatus.ACTIVE) {
             throw new AppException(HttpStatus.CONFLICT, "Chỉ enrollment ACTIVE mới được chuyển lớp");
