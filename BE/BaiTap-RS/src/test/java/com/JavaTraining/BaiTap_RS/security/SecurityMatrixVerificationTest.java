@@ -55,6 +55,13 @@ class SecurityMatrixVerificationTest {
     }
 
     @Test
+    @WithMockUser(roles = "TEACHER")
+    void teacherCanReadAttendanceContext() throws Exception {
+        Assertions.assertEquals(200, get("/api/v2/academic-years"));
+        Assertions.assertEquals(200, get("/api/v2/classes?academicYearId=1"));
+    }
+
+    @Test
     @WithMockUser(roles = "ACADEMIC_OFFICE")
     void academicOfficePassesCoarseAuthorizationForOperationalEndpoints() throws Exception {
         Assertions.assertEquals(200, get("/api/v2/scorebooks/audit-logs"));
