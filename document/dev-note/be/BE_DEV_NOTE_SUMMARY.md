@@ -48,6 +48,10 @@
 |   047 | scorebook          | [BE Operational Closure](scorebook/047-be-operational-closure-2026-08-26.md)                                                             | Completed; validation PASS                                 | 2026-08-26 |
 |   048 | bootstrap          | [BE Demo Data Bootstrap](bootstrap/048-be-demo-data-bootstrap-2026-08-26.md)                                                             | Completed; validation PASS                                 | 2026-08-26 |
 | 053.1 | academic           | [Subject Applicability Management & Dialog Layout](../fe/academic/053.1-subject-applicability-management-and-dialog-layout-2026-08-28.md) | Completed; validation PASS | 2026-08-28 |
+| 019.1 | workflow-skill     | [Plan 019 Backend Trace Logging Application](workflow-skill/019-dev-trace-logging-application-2026-09-02.md)                         | Completed; PMD baseline blocker                           | 2026-09-02 |
+| 035.1 | attendance         | [Academic Office Auto-Configure Calendar on Attendance Session](attendance/035.1-academic-office-auto-calendar-on-session-2026-09-02.md) | Completed; focused validation PASS; live API not run | 2026-09-02 |
+| 057 | scorebook          | [Scorebook lookup prerequisite for Amendment 57.1](../../fe/scorebook/057-scorebook-assessment-column-ui-2026-09-01.md) | Implemented; targeted tests/Checkstyle PASS; PMD/build blocked outside Plan 057 | 2026-09-02 |
+| 058 | user-auth          | [JWT role claim](user-auth/058-jwt-role-claim-2026-09-02.md) | Implemented; focused tests/Checkstyle PASS; PMD and full-suite baseline blockers | 2026-09-02 |
 
 ## Module folders
 

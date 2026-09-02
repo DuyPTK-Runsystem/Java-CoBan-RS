@@ -80,3 +80,9 @@ NNN-short-topic-yyyy-mm-dd.md
 | 054 | FE             | [Student Enrollment & Class Placement UI](../fe/enrollment/054-student-enrollment-class-placement-ui-2026-08-28.md) | Completed; grade selector, wording, context layout and transfer feedback refinement applied; validation PASS | 2026-08-28 |
 | 055 | FE             | [Teacher Profile & Teaching Assignment UI](../fe/teacher/055-teacher-profile-and-teaching-assignment-ui-2026-08-28.md) | Completed; validation PASS | 2026-08-28 |
 | 056 | FE             | [Attendance Workspace UI](../fe/attendance/056-attendance-workspace-ui-2026-08-28.md) | Completed; validation PASS | 2026-08-28 |
+| 057 | BE/FE          | [Scorebook & Assessment Column UI](../fe/scorebook/057-scorebook-assessment-column-ui-2026-09-01.md) | Amendment 57.1 plus score-input blur formatting and bulk spacing patch; FE/visual QA PASS; backend PMD/build blocked outside amendment scope | 2026-09-02 |
+| 019.1 | BE             | [Plan 019 Backend Trace Logging Application](../be/workflow-skill/019-dev-trace-logging-application-2026-09-02.md)                         | Completed; PMD baseline blocker                           | 2026-09-02 |
+| 056.1 | BE/FE          | [Attendance Authorization and 403 Contract](../fe/attendance/056.1-attendance-authorization-and-403-2026-09-02.md) | Student history context/auto lookup amendment implemented; FE PASS; BE PMD baseline blocker | 2026-09-02 |
+| 058 | BE             | [JWT role claim](../be/user-auth/058-jwt-role-claim-2026-09-02.md) | Implemented; focused tests/Checkstyle PASS; PMD and full-suite baseline blockers | 2026-09-02 |
+
+Plan 057 PMD follow-up (2026-09-03): backend `test`, Checkstyle, PMD and `build` have been rerun after the approved refactor; PMD is PASS with 0 violations.

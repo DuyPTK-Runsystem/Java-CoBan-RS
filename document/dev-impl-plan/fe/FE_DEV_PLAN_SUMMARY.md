@@ -21,6 +21,8 @@
 |   055 | [Teacher Profile & Teaching Assignment UI](teacher/055-teacher-profile-and-teaching-assignment-ui-2026-08-28.md)                    | Teacher Profile UI (list, create, edit, user link) and Teaching Assignment UI (homeroom & subject assignments, schedule view)                  | Approved; implementation completed; validation PASS                            | 2026-08-28 |
 |   056 | [Attendance Workspace UI](attendance/056-attendance-workspace-ui-2026-08-28.md)                                                     | Hợp nhất Attendance Session, Exception Entry và Attendance History/Summary trong một workspace `/v2/attendance` với wireframe review       | Approved; implementation completed; validation PASS                              | 2026-08-28 |
 
+|   057 | [Scorebook & Assessment Column UI](scorebook/057-scorebook-assessment-column-ui-2026-09-01.md)                                    | Lookup, pagination, complete score editing, role capability, tests and visual QA remediation                                                | Amendment 57.1 implemented; FE/visual QA PASS; backend PMD/build blocked outside amendment scope | 2026-09-01 |
+
 ## Current FE notes
 
 - Frontend scope is not part of plan `001`.

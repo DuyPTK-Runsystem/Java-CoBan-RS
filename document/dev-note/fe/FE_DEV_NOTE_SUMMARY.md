@@ -21,3 +21,7 @@
 | 054 | Enrollment | [Student Enrollment & Class Placement UI](enrollment/054-student-enrollment-class-placement-ui-2026-08-28.md) | Completed; grade selector, wording, context layout and transfer feedback refinement applied; validation PASS | 2026-08-28 |
 | 055 | Teacher | [Teacher Profile & Teaching Assignment UI](teacher/055-teacher-profile-and-teaching-assignment-ui-2026-08-28.md) | Completed; validation PASS | 2026-08-28 |
 | 056 | Attendance | [Attendance Workspace UI](attendance/056-attendance-workspace-ui-2026-08-28.md) | Completed; validation PASS | 2026-08-28 |
+| 057 | Scorebook | [Scorebook & Assessment Column UI](scorebook/057-scorebook-assessment-column-ui-2026-09-01.md) | Amendment 57.1 plus score-input blur formatting and bulk spacing patch; FE/visual QA PASS; backend PMD/build blocked outside amendment scope | 2026-09-02 |
+| 056.1 | Attendance | [Attendance Authorization and 403 Contract](attendance/056.1-attendance-authorization-and-403-2026-09-02.md) | Student history context/auto lookup amendment implemented; FE PASS; BE PMD baseline blocker | 2026-09-02 |
+
+Plan 057 PMD follow-up (2026-09-03): backend PMD baseline was remediated by responsibility/test refactors; `pmdMain` and `pmdTest` PASS with 0 violations.
