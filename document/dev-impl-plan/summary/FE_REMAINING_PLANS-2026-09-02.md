@@ -1,6 +1,6 @@
 # FE Roadmap — Các plan còn lại
 
-Ngày cập nhật: `2026-09-02`  
+Ngày cập nhật: `2026-09-03`
 Application version: `v2`
 
 ## Mục đích
@@ -13,38 +13,48 @@ Note này ghi lại các hạng mục FE còn lại theo roadmap hiện tại. T
 
 | Ưu tiên | Hạng mục | Phạm vi chính | Trạng thái hiện tại | Plan liên quan |
 |---:|---|---|---|---|
-| 1 | Attendance History & Summary UI | Lịch sử điểm danh học sinh; thống kê theo lớp/thời gian | **Đã hoàn thành trong Plan 056**; còn manual walkthrough với live backend và office capability khi contract sẵn sàng | [Plan 056](../fe/attendance/056-attendance-workspace-ui-2026-08-28.md), [Dev Note 056](../../dev-note/fe/attendance/056-attendance-workspace-ui-2026-08-28.md) |
-| 2 | Scorebook Configuration UI | Tạo sổ điểm, assessment column, hệ số/trọng số, cấu hình môn kỹ năng | **Còn làm FE**; backend Scorebook Foundation đã có. Plan 057 đã có phần assessment-column nhưng chưa bao phủ toàn bộ configuration workflow | [BE Plan 036](../be/scorebook/036-scorebook-foundation-2026-08-24.md), [FE Plan 057](../fe/scorebook/057-scorebook-assessment-column-ui-2026-09-01.md) |
-| 3 | Student Score Entry UI | Nhập/sửa điểm đơn lẻ, nhập hàng loạt, trạng thái điểm | **Đang triển khai một phần trong Plan 057**; score grid, single entry và bulk entry đã có, cần chốt completion theo backend quality gate | [BE Plan 037](../be/scorebook/037-student-score-entry-2026-08-24.md), [FE Plan 057](../fe/scorebook/057-scorebook-assessment-column-ui-2026-09-01.md) |
-| 4 | Score Change Request UI | Giáo viên tạo request; giáo vụ duyệt/từ chối; xem lịch sử | **Còn làm FE**; backend Plan 038 đã triển khai, còn e2e persistence test pending theo Dev Note | [BE Plan 038](../be/scorebook/038-score-change-request-2026-08-25.md) |
-| 5 | Semester Lock & Completeness UI | Báo cáo thiếu dữ liệu, khóa/mở học kỳ, trạng thái dữ liệu | **Còn làm FE**; backend Plan 039/040 đã có. Cần UI cho completeness, lock/reopen, quyền và trạng thái lỗi | [BE Plan 039](../be/academic/039-semester-lock-2026-08-25.md), [BE Plan 040](../be/academic/040-semester-completeness-notification-cr-sem-001-2026-08-25.md) |
-| 6 | Transcript Viewer UI | Bảng điểm theo học kỳ/năm, điểm môn, `IN_PROGRESS`/`FINISH`, thời điểm tính gần nhất | **Còn làm FE**; backend transcript schema/aggregation/query đã có Dev Note, cần xác nhận lại contract query trước khi lập plan FE | [BE Plan 041](../be/scorebook/041-transcript-result-schema-foundation-2026-08-25.md), [BE Plan 044](../be/scorebook/044-transcript-aggregation-2026-08-26.md), [BE Plan 046](../be/scorebook/046-transcript-query-api-2026-08-26.md) |
-| 7 | Retake Result UI | Danh sách thi lại, nhập điểm thi lại, hiển thị điểm trước/sau thi lại | **Còn làm FE**; backend Plan 045 đã có foundation, API và calculation integration | [BE Plan 045](../be/scorebook/045-retake-foundation-and-calculation-integration-2026-08-26.md) |
-| 8 | Calculation Task & Audit UI | Theo dõi task lỗi, retry, audit log, trạng thái tính toán | **Còn làm FE**; backend operational APIs đã có trong Plan 047, cần xác định role/capability và màn hình vận hành | [BE Plan 047](../be/scorebook/047-be-operational-closure-2026-08-26.md) |
-| 9 | FE E2E & Release Hardening | E2E flow, responsive, accessibility, permission regression, build/deploy validation | **Chưa có FE plan chi tiết**; thực hiện sau khi các flow chính hoàn tất, gồm cả browser walkthrough với live backend | Chưa gán plan |
+| 1 | Score Change Request UI | Giáo viên tạo request; giáo vụ duyệt/từ chối; xem lịch sử | **Còn làm FE**; backend Plan 038 đã triển khai. Backend vẫn còn e2e persistence test pending theo Dev Note | [BE Plan 038](../be/scorebook/038-score-change-request-2026-08-25.md) |
+| 2 | Semester Lock & Completeness UI | Báo cáo thiếu dữ liệu, checkpoint, khóa/mở học kỳ, notification và trạng thái dữ liệu | **Còn làm FE**; backend Plan 039/040 đã có. UI cần report, decision/checkpoint, notification list/dispatch/retry, lock/reopen, quyền và trạng thái lỗi | [BE Plan 039](../be/academic/039-semester-lock-2026-08-25.md), [BE Plan 040](../be/academic/040-semester-completeness-notification-cr-sem-001-2026-08-25.md) |
+| 3 | Transcript Viewer UI | Bảng điểm theo học kỳ/năm, điểm môn, `IN_PROGRESS`/`FINISH`, thời điểm tính gần nhất | **Còn làm FE**; cần đồng bộ lại trạng thái và contract query của Plan 046 trước khi lập FE plan | [BE Plan 041](../be/scorebook/041-transcript-result-schema-foundation-2026-08-25.md), [BE Plan 044](../be/scorebook/044-transcript-aggregation-2026-08-26.md), [BE Plan 046](../be/scorebook/046-transcript-query-api-2026-08-26.md) |
+| 4 | Retake Result UI | Danh sách thi lại, nhập điểm thi lại, hiển thị điểm trước/sau thi lại | **Còn làm FE**; backend Plan 045 đã có foundation, API và calculation integration | [BE Plan 045](../be/scorebook/045-retake-foundation-and-calculation-integration-2026-08-26.md) |
+| 5 | Calculation Task & Audit UI | Theo dõi task lỗi, retry, audit log, trạng thái tính toán | **Còn làm FE**; cần danh sách/lọc task `FAILED`, lỗi gần nhất, retry đơn/hàng loạt, transcript status, audit log, pagination và role/capability | [BE Plan 047](../be/scorebook/047-be-operational-closure-2026-08-26.md) |
+| 6 | FE E2E & Release Hardening | E2E flow, responsive, accessibility, permission regression, build/deploy validation | **Chưa có FE plan chi tiết**; thực hiện sau các flow chính, gồm browser walkthrough với live backend và smoke test deploy | Chưa gán plan |
+
+## Các hạng mục đã hoàn thành, không còn là remaining plan
+
+| Hạng mục | Trạng thái mới nhất | Ghi chú |
+|---|---|---|
+| Attendance History & Summary UI | **Đã hoàn thành trong Plan 056/056.1** | Đã có history/summary, role-based navigation, automatic session lookup và xử lý `401`/`403`. Còn live-backend/browser walkthrough bổ sung nếu cần release evidence | [Plan 056](../fe/attendance/056-attendance-workspace-ui-2026-08-28.md), [Plan 056.1](../fe/attendance/056.1-attendance-authorization-and-403-2026-09-02.md) |
+| Scorebook Configuration UI | **Đã triển khai phần chính trong Plan 057** | Đã có lifecycle, assessment columns, skill weight và lookup; chỉ còn đồng bộ trạng thái/documentation cuối cùng nếu cần | [FE Plan 057](../fe/scorebook/057-scorebook-assessment-column-ui-2026-09-01.md) |
+| Student Score Entry UI | **Đã triển khai trong Plan 057** | Đã có score grid phân trang, single entry, bulk entry, status/value/note validation và optimistic conflict handling | [FE Plan 057](../fe/scorebook/057-scorebook-assessment-column-ui-2026-09-01.md) |
+| JWT role claim prerequisite | **Đã hoàn thành trong Plan 058** | JWT có claim `role` dạng danh sách; FE dùng cho capability/navigation, backend vẫn authoritative về authorization | [BE Plan 058](../be/user-auth/058-jwt-role-claim-2026-09-02.md) |
 
 ## Trạng thái cần lưu ý
 
 - `Attendance History & Summary UI` không còn là plan FE mới độc lập; đã được
-  gộp và triển khai trong Plan 056.
-- Plan 057 đã triển khai phần lớn Scorebook/Score Entry/Assessment Column và FE
-  visual QA đã PASS, nhưng backend `pmdMain`, `pmdTest` và `build` còn bị chặn
-  bởi các violation ngoài amendment scope. Chưa nên đánh dấu Plan 057 là
-  `COMPLETED` trước khi quality gate được xử lý hoặc có quyết định phạm vi rõ
-  ràng.
+  gộp và triển khai trong Plan 056, sau đó được điều chỉnh thêm trong Plan 056.1.
+- Plan 057 đã triển khai phần chính của Scorebook Configuration và Student Score
+  Entry. Backend PMD/build blocker trước đây đã được xử lý bằng refactor được
+  ghi nhận ngày `2026-09-03`; PMD hiện PASS với 0 violation và build đã được
+  rerun PASS theo summary mới nhất.
 - Plan 053 còn Phase 6 bị block bởi backend contract; cần xử lý nếu release
   hardening yêu cầu đầy đủ module academic.
-- Không suy diễn rằng backend có API là FE đã hoàn thành. Mỗi mục từ 2 đến 8
-  vẫn cần một FE plan chi tiết, approval qua agent message, implementation,
+- Plan 046 có trạng thái không đồng nhất: nội dung Developer Plan còn ghi
+  `Proposed`, trong khi các summary ghi `Completed`. Cần chốt lại contract và
+  trạng thái tài liệu trước khi bắt đầu Transcript Viewer UI.
+- Backend Plan 038 còn e2e persistence test pending; đây là backend follow-up,
+  không nên trộn vào scope FE nếu chưa được approve.
+- Không suy diễn rằng backend có API là FE đã hoàn thành. Các mục remaining
+  vẫn cần FE plan chi tiết, approval qua agent message, implementation,
   Storybook review khi phù hợp và validation thực tế.
 
 ## Thứ tự đề xuất
 
-1. Chốt quality gate và trạng thái cuối của Plan 057.
-2. Scorebook Configuration UI và hoàn thiện Student Score Entry UI.
-3. Score Change Request UI.
-4. Semester Lock & Completeness UI.
-5. Transcript Viewer UI và Retake Result UI.
+1. Chốt trạng thái/documentation cuối của Plan 057 và Plan 056.1.
+2. Score Change Request UI.
+3. Semester Lock & Completeness UI.
+4. Đồng bộ contract Plan 046, sau đó làm Transcript Viewer UI.
+5. Retake Result UI.
 6. Calculation Task & Audit UI.
 7. FE E2E & Release Hardening cho toàn bộ các flow.
 
@@ -55,6 +65,10 @@ Note này ghi lại các hạng mục FE còn lại theo roadmap hiện tại. T
   và responsive behavior.
 - Có unit/component tests; có Storybook deterministic states để review khi
   module có UI tương tác.
+- Có E2E hoặc browser walkthrough cho các role `ADMIN`, `ACADEMIC_OFFICE`,
+  `TEACHER`, `STUDENT` khi flow yêu cầu permission regression.
+- Kiểm tra các mã `401`, `403`, `404`, `409`; persistence sau mutation; phân
+  trang; optimistic locking và trạng thái `IN_PROGRESS`/`FINISH` nếu áp dụng.
 - Chạy validation theo script thực tế trong `FE/package.json`: lint, test,
   coverage, build và Storybook build khi áp dụng.
 - Thực hiện browser walkthrough khi yêu cầu visual QA hoặc release hardening;

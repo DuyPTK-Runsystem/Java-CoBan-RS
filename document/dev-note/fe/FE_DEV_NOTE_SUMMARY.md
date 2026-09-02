@@ -25,3 +25,7 @@
 | 056.1 | Attendance | [Attendance Authorization and 403 Contract](attendance/056.1-attendance-authorization-and-403-2026-09-02.md) | Student history context/auto lookup amendment implemented; FE PASS; BE PMD baseline blocker | 2026-09-02 |
 
 Plan 057 PMD follow-up (2026-09-03): backend PMD baseline was remediated by responsibility/test refactors; `pmdMain` and `pmdTest` PASS with 0 violations.
+
+Plan 059: Score Change Request UI — Completed; FE validation PASS, browser visual QA NOT RUN.
+
+Plan 060: Semester Lock & Completeness UI — Completed; FE validation PASS, no checkpoint/in-app UI, browser/live SMTP NOT RUN.

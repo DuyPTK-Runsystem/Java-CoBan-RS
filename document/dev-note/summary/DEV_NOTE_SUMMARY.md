@@ -62,6 +62,7 @@ NNN-short-topic-yyyy-mm-dd.md
 |   038 | BE             | [Score Change Request](../be/scorebook/038-score-change-request-2026-08-25.md)                                                              | Implemented; validation PASS; e2e persistence test pending | 2026-08-25 |
 |   039 | BE             | [Semester Lock Lifecycle, Service & Batch](../be/academic/039-semester-lock-2026-08-25.md)                                                  | Completed; validation PASS                                 | 2026-08-25 |
 |   040 | BE             | [Semester Completeness Notification (CR-SEM-001)](../be/academic/040-semester-completeness-notification-cr-sem-001-2026-08-25.md)           | Completed; validation PASS                                 | 2026-08-25 |
+| 040.1 | BE             | [Email-only Notification Contract Amendment](../be/academic/040.1-email-only-notification-contract-2026-09-03.md) | Implemented; final validation incomplete | 2026-09-03 |
 |   041 | BE             | [Transcript Result Schema Foundation](../be/scorebook/041-transcript-result-schema-foundation-2026-08-25.md)                                | Completed; validation PASS                                 | 2026-08-25 |
 | 042.1 | BE             | [Student Code Input Resolution & Display Across All Modules](../be/student/042.1-student-code-input-resolution-and-display-2026-08-25.md)   | Completed; validation PASS                                 | 2026-08-25 |
 |   042 | BE             | [Subject Calculation Engine & Worker Lifecycle](../be/scorebook/042-subject-calculation-engine-and-worker-lifecycle-2026-08-25.md)          | Completed; validation PASS                                 | 2026-08-25 |
@@ -86,3 +87,9 @@ NNN-short-topic-yyyy-mm-dd.md
 | 058 | BE             | [JWT role claim](../be/user-auth/058-jwt-role-claim-2026-09-02.md) | Implemented; focused tests/Checkstyle PASS; PMD and full-suite baseline blockers | 2026-09-02 |
 
 Plan 057 PMD follow-up (2026-09-03): backend `test`, Checkstyle, PMD and `build` have been rerun after the approved refactor; PMD is PASS with 0 violations.
+
+Plan 059 (2026-09-03): Score Change Request UI implemented with Vietnamese UX/statuses and context-based flow; FE validation PASS; browser QA NOT RUN.
+
+Plan 060 (2026-09-03): Semester completeness, email notification, lock/reopen UI implemented without checkpoint or in-app UI; FE validation PASS; browser/live SMTP NOT RUN.
+
+Plan 040.1 (2026-09-03): email-only notification contract enforced; missing sender is FAILED and SENT means SMTP client send returned successfully; BE validation PASS; production requires IN_APP preflight.
