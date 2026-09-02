@@ -9,6 +9,7 @@ import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.response.ResAttendanceS
 import com.JavaTraining.BaiTap_RS.attendance.domain.DTOs.response.ResAttendanceStudentDTO;
 import com.JavaTraining.BaiTap_RS.attendance.service.AcademicOfficeAttendanceService;
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequestMapping({"/api/v2/office/attendance-sessions", "/api/v2/academic-office/attendance/sessions"})
+@SuppressWarnings("PMD.GuardLogStatement")
 public class AcademicOfficeAttendanceController {
 
     private static final String OFFICE_ROLES = "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')";
@@ -45,6 +47,11 @@ public class AcademicOfficeAttendanceController {
     @PreAuthorize(OFFICE_ROLES)
     public ResponseEntity<ResAttendanceSessionDTO> createOrGetSession(
             @Valid @RequestBody ReqCreateAttendanceSessionDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AcademicOfficeAttendanceController.class,
+                        "AcademicOfficeAttendanceController.createOrGetSession",
+                        "request classId={}, semesterId={}, attendanceDate={}, sessionPeriod={}",
+                        request.classId(), request.semesterId(), request.attendanceDate(), request.sessionPeriod());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(attendanceService.createOrGetSession(request));
     }
@@ -54,6 +61,9 @@ public class AcademicOfficeAttendanceController {
     @PreAuthorize(OFFICE_ROLES)
     public List<ResAttendanceStudentDTO> listSessionStudents(
             @PathVariable(SESSION_ID) @Positive Long sessionId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AcademicOfficeAttendanceController.class,
+                        "AcademicOfficeAttendanceController.listSessionStudents");
         return attendanceService.listSessionStudents(sessionId);
     }
 
@@ -64,6 +74,9 @@ public class AcademicOfficeAttendanceController {
             @PathVariable(SESSION_ID) @Positive Long sessionId,
             @PathVariable(STUDENT_ID) @Positive Long studentId,
             @Valid @RequestBody ReqUpsertAttendanceExceptionDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AcademicOfficeAttendanceController.class,
+                        "AcademicOfficeAttendanceController.upsertException");
         return attendanceService.upsertException(sessionId, studentId, request);
     }
 
@@ -74,6 +87,9 @@ public class AcademicOfficeAttendanceController {
             @PathVariable(SESSION_ID) @Positive Long sessionId,
             @PathVariable(STUDENT_CODE) String studentCode,
             @Valid @RequestBody ReqUpsertAttendanceExceptionDTO request) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AcademicOfficeAttendanceController.class,
+                        "AcademicOfficeAttendanceController.upsertExceptionByCode");
         return attendanceService.upsertExceptionByCode(sessionId, studentCode, request);
     }
 
@@ -83,6 +99,9 @@ public class AcademicOfficeAttendanceController {
     public ResponseEntity<Void> deleteException(
             @PathVariable(SESSION_ID) @Positive Long sessionId,
             @PathVariable(STUDENT_ID) @Positive Long studentId) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AcademicOfficeAttendanceController.class,
+                        "AcademicOfficeAttendanceController.deleteException");
         attendanceService.deleteException(sessionId, studentId);
         return ResponseEntity.noContent().build();
     }
@@ -93,6 +112,9 @@ public class AcademicOfficeAttendanceController {
     public ResponseEntity<Void> deleteExceptionByCode(
             @PathVariable(SESSION_ID) @Positive Long sessionId,
             @PathVariable(STUDENT_CODE) String studentCode) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        AcademicOfficeAttendanceController.class,
+                        "AcademicOfficeAttendanceController.deleteExceptionByCode");
         attendanceService.deleteExceptionByCode(sessionId, studentCode);
         return ResponseEntity.noContent().build();
     }
