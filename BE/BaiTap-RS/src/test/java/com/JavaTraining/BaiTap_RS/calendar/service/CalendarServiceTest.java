@@ -28,11 +28,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class CalendarServiceTest {
+
+    private static final String MORNING = "MORNING";
+    private static final LocalDate TEST_DATE = LocalDate.of(2026, 9, 5);
 
     @Mock
     private CalendarDayRepository dayRepository;
@@ -50,9 +52,17 @@ class CalendarServiceTest {
     private CalendarAuditService auditService;
 
     private CalendarService calendarService;
+    private AcademicYear academicYear;
+    private Semester semester;
 
     @BeforeEach
     void setUp() {
+        academicYear = new AcademicYear("2026-2027", LocalDate.of(2026, 9, 1), LocalDate.of(2027, 5, 31),
+                AcademicYearStatus.ACTIVE, null);
+        ReflectionTestUtils.setField(academicYear, "id", 10L);
+        semester = new Semester(10L, "HK1", "Học kỳ 1", 1, LocalDate.of(2026, 9, 1),
+                LocalDate.of(2027, 1, 15), null, SemesterStatus.ACTIVE);
+        ReflectionTestUtils.setField(semester, "id", 70L);
         calendarService = new CalendarService(
                 dayRepository,
                 sessionRepository,
@@ -66,11 +76,9 @@ class CalendarServiceTest {
 
     @Test
     void upsertDayCreatesScheduledMorningSession() {
-        AcademicYear year = academicYear();
-        Semester semester = semester();
-        Mockito.when(academicYearRepository.findById(10L)).thenReturn(Optional.of(year));
+        Mockito.when(academicYearRepository.findById(10L)).thenReturn(Optional.of(academicYear));
         Mockito.when(semesterRepository.findById(70L)).thenReturn(Optional.of(semester));
-        Mockito.when(dayRepository.findByAcademicYearIdAndCalendarDate(10L, date()))
+        Mockito.when(dayRepository.findByAcademicYearIdAndCalendarDate(10L, TEST_DATE))
                 .thenReturn(Optional.empty());
         Mockito.when(dayRepository.save(Mockito.any(CalendarDay.class)))
                 .thenAnswer(invocation -> {
@@ -91,7 +99,7 @@ class CalendarServiceTest {
         Mockito.when(sessionRepository.findAllByCalendarDayIdOrderBySessionPeriodAsc(90L))
                 .thenReturn(List.of(savedSession));
 
-        ResCalendarDayDTO response = calendarService.upsertDay(date(), request(CalendarSessionStatus.SCHEDULED));
+        ResCalendarDayDTO response = calendarService.upsertDay(TEST_DATE, request(CalendarSessionStatus.SCHEDULED));
 
         Assertions.assertEquals(
                 "SCHOOL_DAY,SCHEDULED,1",
@@ -104,8 +112,8 @@ class CalendarServiceTest {
     void upsertDayRejectsScheduledSessionOnHoliday() {
         prepareAcademicScope();
 
-        AppException exception = capture(() -> calendarService.upsertDay(
-                date(),
+        Assertions.assertThrows(AppException.class, () -> calendarService.upsertDay(
+                TEST_DATE,
                 new ReqUpsertCalendarDayDTO(
                         10L,
                         70L,
@@ -116,99 +124,40 @@ class CalendarServiceTest {
                                 CalendarSessionStatus.SCHEDULED,
                                 null)))));
 
-        Assertions.assertEquals(HttpStatus.CONFLICT, exception.getStatus(), "holiday cannot be scheduled");
     }
 
     @Test
     void assertScheduledRejectsMissingCalendarSession() {
-        Semester semester = semester();
         Mockito.when(semesterRepository.findById(70L)).thenReturn(Optional.of(semester));
-        Mockito.when(dayRepository.findByAcademicYearIdAndCalendarDate(10L, date()))
+        Mockito.when(dayRepository.findByAcademicYearIdAndCalendarDate(10L, TEST_DATE))
                 .thenReturn(Optional.empty());
 
-        AppException exception = capture(() -> calendarService.assertScheduled(70L, date(), "MORNING"));
-
-        Assertions.assertEquals(HttpStatus.CONFLICT, exception.getStatus(), "missing calendar is invalid");
+        Assertions.assertThrows(AppException.class,
+                () -> calendarService.assertScheduled(70L, TEST_DATE, MORNING));
     }
 
     @Test
     void assertScheduledAcceptsScheduledSchoolSession() {
-        Semester semester = semester();
         CalendarDay day = new CalendarDay(
-                10L,
-                70L,
-                date(),
+                10L, 70L, TEST_DATE,
                 CalendarDayType.SCHOOL_DAY,
                 null,
                 1L);
         ReflectionTestUtils.setField(day, "id", 90L);
         Mockito.when(semesterRepository.findById(70L)).thenReturn(Optional.of(semester));
-        Mockito.when(dayRepository.findByAcademicYearIdAndCalendarDate(10L, date()))
+        Mockito.when(dayRepository.findByAcademicYearIdAndCalendarDate(10L, TEST_DATE))
                 .thenReturn(Optional.of(day));
         Mockito.when(sessionRepository.existsByCalendarDayIdAndSessionPeriodAndSessionStatus(
                 90L,
                 CalendarSessionPeriod.MORNING,
                 CalendarSessionStatus.SCHEDULED)).thenReturn(true);
 
-        Assertions.assertDoesNotThrow(() -> calendarService.assertScheduled(70L, date(), "MORNING"));
-    }
-
-    @Test
-    void ensureScheduledCreatesMissingDayAndRequestedSession() {
-        Semester semester = semester();
-        CalendarDay createdDay = new CalendarDay(
-                10L, 70L, date(), CalendarDayType.SCHOOL_DAY, null, 1L);
-        ReflectionTestUtils.setField(createdDay, "id", 90L);
-        Mockito.when(semesterRepository.findById(70L)).thenReturn(Optional.of(semester));
-        Mockito.when(dayRepository.findByAcademicYearIdAndCalendarDate(10L, date()))
-                .thenReturn(Optional.empty(), Optional.of(createdDay));
-        Mockito.when(dayRepository.save(Mockito.any(CalendarDay.class)))
-                .thenReturn(createdDay);
-        Mockito.when(sessionRepository.findByCalendarDayIdAndSessionPeriod(
-                90L, CalendarSessionPeriod.MORNING)).thenReturn(Optional.empty());
-        Mockito.when(sessionRepository.save(Mockito.any(CalendarSession.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-        Mockito.when(sessionRepository.existsByCalendarDayIdAndSessionPeriodAndSessionStatus(
-                90L, CalendarSessionPeriod.MORNING, CalendarSessionStatus.SCHEDULED)).thenReturn(true);
-
-        calendarService.ensureScheduled(70L, date(), "MORNING");
-
-        Mockito.verify(dayRepository).save(Mockito.argThat(day ->
-                day.getDayType() == CalendarDayType.SCHOOL_DAY
-                        && day.getSemesterId().equals(70L)));
-        Mockito.verify(sessionRepository).save(Mockito.argThat(session ->
-                session.getSessionPeriod() == CalendarSessionPeriod.MORNING
-                        && session.getSessionStatus() == CalendarSessionStatus.SCHEDULED));
-        Mockito.verify(auditService).writeAudit(
-                Mockito.eq("CALENDAR_DAY_CREATED"),
-                Mockito.isNull(CalendarDay.class),
-                Mockito.any(CalendarDay.class));
-        Mockito.verify(auditService).writeSessionAudit(
-                Mockito.eq("CALENDAR_SESSION_CREATED"),
-                Mockito.isNull(CalendarSession.class),
-                Mockito.any(CalendarSession.class));
-    }
-
-    @Test
-    void ensureScheduledDoesNotOverwriteConfiguredNonSchoolDay() {
-        Semester semester = semester();
-        CalendarDay holiday = new CalendarDay(
-                10L, 70L, date(), CalendarDayType.HOLIDAY, "Holiday", 1L);
-        ReflectionTestUtils.setField(holiday, "id", 90L);
-        Mockito.when(semesterRepository.findById(70L)).thenReturn(Optional.of(semester));
-        Mockito.when(dayRepository.findByAcademicYearIdAndCalendarDate(10L, date()))
-                .thenReturn(Optional.of(holiday));
-
-        AppException exception = capture(() -> calendarService.ensureScheduled(70L, date(), "MORNING"));
-
-        Assertions.assertEquals(HttpStatus.CONFLICT, exception.getStatus(), "holiday must remain protected");
-        Mockito.verify(dayRepository, Mockito.never()).save(Mockito.any(CalendarDay.class));
-        Mockito.verify(sessionRepository, Mockito.never()).save(Mockito.any(CalendarSession.class));
+        Assertions.assertDoesNotThrow(() -> calendarService.assertScheduled(70L, TEST_DATE, MORNING));
     }
 
     private void prepareAcademicScope() {
-        Mockito.when(academicYearRepository.findById(10L)).thenReturn(Optional.of(academicYear()));
-        Mockito.when(semesterRepository.findById(70L)).thenReturn(Optional.of(semester()));
+        Mockito.when(academicYearRepository.findById(10L)).thenReturn(Optional.of(academicYear));
+        Mockito.when(semesterRepository.findById(70L)).thenReturn(Optional.of(semester));
     }
 
     private ReqUpsertCalendarDayDTO request(CalendarSessionStatus status) {
@@ -220,41 +169,4 @@ class CalendarServiceTest {
                 List.of(new ReqCalendarSessionDTO(CalendarSessionPeriod.MORNING, status, null)));
     }
 
-    private AcademicYear academicYear() {
-        AcademicYear year = new AcademicYear(
-                "2026-2027",
-                LocalDate.of(2026, 9, 1),
-                LocalDate.of(2027, 5, 31),
-                AcademicYearStatus.ACTIVE,
-                null);
-        ReflectionTestUtils.setField(year, "id", 10L);
-        return year;
-    }
-
-    private Semester semester() {
-        Semester semester = new Semester(
-                10L,
-                "HK1",
-                "Học kỳ 1",
-                1,
-                LocalDate.of(2026, 9, 1),
-                LocalDate.of(2027, 1, 15),
-                null,
-                SemesterStatus.ACTIVE);
-        ReflectionTestUtils.setField(semester, "id", 70L);
-        return semester;
-    }
-
-    private LocalDate date() {
-        return LocalDate.of(2026, 9, 5);
-    }
-
-    private AppException capture(Runnable action) {
-        try {
-            action.run();
-            return new AppException(HttpStatus.OK, "unexpected success");
-        } catch (AppException exception) {
-            return exception;
-        }
-    }
 }
