@@ -102,6 +102,23 @@ export interface SemesterCompletenessReport {
   correlationId: string | null
 }
 
+export type SemesterNotificationStatus = 'PENDING' | 'SENT' | 'FAILED'
+
+/** UI-safe notification model; transport-only fields are intentionally omitted. */
+export interface SemesterNotification {
+  id: number
+  semesterId: number
+  recipientEmail: string
+  recipientRole: string
+  status: SemesterNotificationStatus
+  subject: string
+  attemptCount: number
+  sentAt: string | null
+  errorMessage: string | null
+  createdAt: string
+  updatedAt: string
+}
+
 export type SchoolClassStatus = 'PLANNED' | 'ACTIVE' | 'CLOSED'
 export type SubjectType = 'ACADEMIC' | 'SKILL'
 export type SubjectStatus = 'ACTIVE' | 'INACTIVE'

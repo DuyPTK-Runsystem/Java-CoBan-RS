@@ -13,9 +13,9 @@ import SemesterDialog from '@/components/SemesterDialog.vue'
 import SemesterStatusDialog from '@/components/SemesterStatusDialog.vue'
 import SemesterTable from '@/components/SemesterTable.vue'
 import { clearAuthSession, getAuthSession } from '@/services/authSession'
-import { activateSemester, createSemester, fetchAcademicYears, fetchSemesters, getSemesterCompletenessReport, lockSemester, reopenSemester, updateSemester } from '@/services/academicApi'
+import { activateSemester, createSemester, dispatchSemesterNotifications, fetchAcademicYears, fetchSemesters, fetchSemesterNotifications, getSemesterCompletenessReport, lockSemester, reopenSemester, retryFailedSemesterNotifications, updateSemester } from '@/services/academicApi'
 import { isApiError } from '@/types/api'
-import type { AcademicYear, Semester, SemesterCompletenessReport, SemesterFormValues } from '@/types/academic'
+import type { AcademicYear, Semester, SemesterCompletenessReport, SemesterFormValues, SemesterNotification } from '@/types/academic'
 import type { LoadingState } from '@/types/ui'
 import { formatAcademicDate } from '@/utils/academicDate'
 
@@ -42,6 +42,10 @@ const actionLoading = ref(false)
 const reopenDialogVisible = ref(false)
 const reopenReason = ref('')
 const reopenError = ref('')
+const notifications = ref<SemesterNotification[]>([])
+const notificationsLoading = ref(false)
+const notificationActionLoading = ref(false)
+const notificationError = ref('')
 
 const pageState = computed<LoadingState>(() => loadingState.value === 'success' && semesters.value.length === 0 ? 'empty' : loadingState.value)
 const statusDialogError = computed(() => statusError.value)
@@ -179,8 +183,10 @@ function openStatus(semester: Semester): void {
   selectedSemester.value = semester
   report.value = null
   statusError.value = ''
+  notifications.value = []
+  notificationError.value = ''
   statusDialogVisible.value = true
-  void loadReport(semester)
+  void Promise.all([loadReport(semester), loadNotifications(semester)])
 }
 
 async function loadReport(semester: Semester): Promise<void> {
@@ -195,6 +201,81 @@ async function loadReport(semester: Semester): Promise<void> {
     if (selectedSemester.value?.id === semester.id) statusError.value = messageFor(error, 'Không thể tải báo cáo hoàn thành dữ liệu.')
   } finally {
     reportLoading.value = false
+  }
+}
+
+async function loadNotifications(semester: Semester): Promise<void> {
+  const token = accessToken()
+  if (!token) return
+  notificationsLoading.value = true
+  try {
+    const result = await fetchSemesterNotifications(token, semester.id)
+    if (selectedSemester.value?.id === semester.id) notifications.value = result
+  } catch (error) {
+    if (isApiError(error, 401)) return
+    if (selectedSemester.value?.id === semester.id) notificationError.value = messageFor(error, 'Không thể tải lịch sử gửi email.')
+  } finally {
+    notificationsLoading.value = false
+  }
+}
+
+function confirmDispatchNotifications(): void {
+  const semester = selectedSemester.value
+  if (!semester) return
+  confirm.require({
+    message: `Gửi email nhắc điểm cho học kỳ ${semester.name}?`,
+    header: 'Gửi email nhắc điểm',
+    icon: 'pi pi-send',
+    acceptLabel: 'Gửi email',
+    rejectLabel: 'Hủy',
+    accept: () => { void dispatchNotifications(semester) },
+  })
+}
+
+async function dispatchNotifications(semester: Semester): Promise<void> {
+  const token = accessToken()
+  if (!token) return
+  notificationActionLoading.value = true
+  notificationError.value = ''
+  try {
+    await dispatchSemesterNotifications(token, semester.id)
+    await loadNotifications(semester)
+    statusMessage.value = 'Đã hoàn tất yêu cầu gửi email.'
+  } catch (error) {
+    if (isApiError(error, 401)) return
+    notificationError.value = messageFor(error, 'Không thể gửi email nhắc điểm.')
+  } finally {
+    notificationActionLoading.value = false
+  }
+}
+
+function confirmRetryNotifications(): void {
+  const semester = selectedSemester.value
+  if (!semester) return
+  confirm.require({
+    message: `Thử gửi lại các email bị lỗi của học kỳ ${semester.name}?`,
+    header: 'Thử gửi lại email',
+    icon: 'pi pi-refresh',
+    acceptLabel: 'Thử gửi lại',
+    rejectLabel: 'Hủy',
+    accept: () => { void retryNotifications(semester) },
+  })
+}
+
+async function retryNotifications(semester: Semester): Promise<void> {
+  const token = accessToken()
+  if (!token) return
+  notificationActionLoading.value = true
+  notificationError.value = ''
+  try {
+    await retryFailedSemesterNotifications(token, semester.id)
+    await loadNotifications(semester)
+    statusMessage.value = 'Đã hoàn tất yêu cầu thử gửi lại email.'
+  } catch (error) {
+    if (isApiError(error, 401)) return
+    notificationError.value = messageFor(error, 'Không thể thử gửi lại email.')
+  } finally {
+    notificationActionLoading.value = false
   }
 }
 
@@ -293,7 +374,7 @@ watch(() => route.params.academicYearId, () => { void load() }, { immediate: tru
     </PageState>
   </section>
   <SemesterDialog v-model:visible="dialogVisible" :mode="dialogMode" :academic-year="academicYear" :initial-value="selectedSemester" :saving="saving" :error-message="dialogErrorMessage" @save="saveSemester" @cancel="closeDialog" />
-  <SemesterStatusDialog v-model:visible="statusDialogVisible" :semester="selectedSemester" :report="report" :loading="reportLoading" :action-loading="actionLoading" :error-message="statusDialogError" @lock="confirmLock" @reopen="openReopen" />
+  <SemesterStatusDialog v-model:visible="statusDialogVisible" :semester="selectedSemester" :report="report" :loading="reportLoading" :action-loading="actionLoading" :error-message="statusDialogError" :notifications="notifications" :notifications-loading="notificationsLoading" :notification-action-loading="notificationActionLoading" :notification-error-message="notificationError" @lock="confirmLock" @reopen="openReopen" @dispatch-notifications="confirmDispatchNotifications" @retry-notifications="confirmRetryNotifications" />
   <Dialog v-model:visible="reopenDialogVisible" modal header="Mở lại học kỳ" :style="{ width: 'min(100% - 2rem, 560px)' }" :closable="!actionLoading">
     <p class="dialog-caption">Hãy ghi rõ lý do mở lại học kỳ để lưu audit log.</p>
     <FormAlert v-if="reopenError" tone="error" :message="reopenError" />

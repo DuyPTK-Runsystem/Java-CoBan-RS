@@ -5,7 +5,8 @@ import Dialog from 'primevue/dialog'
 
 import FormAlert from '@/components/FormAlert.vue'
 import StatusTag from '@/components/StatusTag.vue'
-import type { Semester, SemesterCompletenessReport, SemesterLockReportStatus, SemesterStatus } from '@/types/academic'
+import SemesterNotificationPanel from '@/components/SemesterNotificationPanel.vue'
+import type { Semester, SemesterCompletenessReport, SemesterLockReportStatus, SemesterNotification, SemesterStatus } from '@/types/academic'
 import { formatAcademicDateTime } from '@/utils/academicDate'
 
 const props = withDefaults(defineProps<{
@@ -15,6 +16,10 @@ const props = withDefaults(defineProps<{
   loading?: boolean
   actionLoading?: boolean
   errorMessage?: string
+  notifications?: SemesterNotification[]
+  notificationsLoading?: boolean
+  notificationActionLoading?: boolean
+  notificationErrorMessage?: string
 }>(), {
   visible: false,
   semester: null,
@@ -22,12 +27,20 @@ const props = withDefaults(defineProps<{
   loading: false,
   actionLoading: false,
   errorMessage: '',
+  notifications: () => [],
+  notificationsLoading: false,
+  notificationActionLoading: false,
+  notificationErrorMessage: '',
 })
 
 const emit = defineEmits<{
   'update:visible': [visible: boolean]
   lock: []
   reopen: []
+  dispatchNotifications: []
+  retryNotifications: []
+  dispatchNotifications: []
+  retryNotifications: []
 }>()
 
 const statusLabels: Record<SemesterStatus, string> = {
@@ -76,7 +89,7 @@ const canReopen = computed(() => props.semester?.status === 'LOCKED')
         <div>
           <p class="eyebrow">Academic structure</p>
           <h2>{{ props.semester.name }} <span class="muted-code">· {{ props.semester.code }}</span></h2>
-          <p class="section-caption">Semester ID {{ props.semester.id }} · Academic Year ID {{ props.semester.academicYearId }}</p>
+          <p class="section-caption">Thông tin và trạng thái học kỳ</p>
         </div>
         <StatusTag :label="statusLabels[props.semester.status]" :severity="statusSeverities[props.semester.status]" />
       </div>
@@ -101,7 +114,7 @@ const canReopen = computed(() => props.semester?.status === 'LOCKED')
         </ol>
       </div>
       <div class="report-block">
-        <div class="section-heading"><div><h3>Báo cáo hoàn thành dữ liệu điểm</h3><p class="section-caption">Checkpoint {{ props.report?.checkpointCode || '-' }} · Đánh giá lúc {{ formatAcademicDateTime(props.report?.evaluatedAt) }}</p></div><StatusTag v-if="props.report" :label="reportLabels[props.report.reportStatus]" :severity="reportSeverities[props.report.reportStatus]" /></div>
+        <div class="section-heading"><div><h3>Báo cáo hoàn thành dữ liệu điểm</h3><p class="section-caption">Đánh giá lúc {{ formatAcademicDateTime(props.report?.evaluatedAt) }}</p></div><StatusTag v-if="props.report" :label="reportLabels[props.report.reportStatus]" :severity="reportSeverities[props.report.reportStatus]" /></div>
         <div v-if="props.loading" class="page-state page-state-loading"><i class="pi pi-spin pi-spinner" aria-hidden="true" /><span>Đang tải báo cáo...</span></div>
         <FormAlert v-else-if="props.report?.reportStatus === 'FAILED'" tone="error" :message="props.report.failureReason || 'Không thể tải báo cáo hoàn thành dữ liệu.'" />
         <template v-else-if="props.report">
@@ -115,6 +128,7 @@ const canReopen = computed(() => props.semester?.status === 'LOCKED')
         </template>
         <div v-else class="empty-state"><i class="pi pi-file" aria-hidden="true" /><span>Chưa có báo cáo để hiển thị.</span></div>
       </div>
+      <SemesterNotificationPanel :notifications="props.notifications" :loading="props.notificationsLoading" :action-loading="props.notificationActionLoading" :error-message="props.notificationErrorMessage" @dispatch="emit('dispatchNotifications')" @retry="emit('retryNotifications')" />
       <div class="form-actions">
         <Button v-if="canLock" label="Khóa học kỳ" icon="pi pi-lock" severity="warn" :loading="props.actionLoading" @click="emit('lock')" />
         <Button v-if="canReopen" label="Mở lại học kỳ" icon="pi pi-lock-open" severity="info" :loading="props.actionLoading" @click="emit('reopen')" />

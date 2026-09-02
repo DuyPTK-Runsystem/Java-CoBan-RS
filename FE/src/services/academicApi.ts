@@ -12,6 +12,8 @@ import type {
   SchoolClass,
   Semester,
   SemesterCompletenessReport,
+  SemesterNotification,
+  SemesterNotificationStatus,
   Subject,
   SubjectApplicability,
   SubjectApplicabilityRequest,
@@ -164,6 +166,56 @@ export function getSemesterCompletenessReport(token: string, semesterId: number,
 
 export function lockSemester(token: string, semesterId: number): Promise<Semester> {
   return apiClient.post<Semester>(`${semestersPath}/${semesterId}/lock`, undefined, { token })
+}
+
+interface SemesterNotificationResponse {
+  id: number
+  semesterId: number
+  recipientEmail: string
+  recipientRole: string
+  status: SemesterNotificationStatus
+  subject: string
+  attemptCount: number
+  sentAt: string | null
+  errorMessage: string | null
+  createdAt: string
+  updatedAt: string
+  checkpointCode?: string
+  notificationChannel?: string
+  reportId?: number | null
+  recipientTeacherId?: number | null
+  bodyContent?: string
+}
+
+function toSemesterNotification(item: SemesterNotificationResponse): SemesterNotification {
+  return {
+    id: item.id,
+    semesterId: item.semesterId,
+    recipientEmail: item.recipientEmail,
+    recipientRole: item.recipientRole,
+    status: item.status,
+    subject: item.subject,
+    attemptCount: item.attemptCount,
+    sentAt: item.sentAt,
+    errorMessage: item.errorMessage,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+  }
+}
+
+export async function fetchSemesterNotifications(token: string, semesterId: number): Promise<SemesterNotification[]> {
+  const result = await apiClient.get<SemesterNotificationResponse[]>(`${semestersPath}/${semesterId}/notifications`, { token })
+  return result.map(toSemesterNotification)
+}
+
+export async function dispatchSemesterNotifications(token: string, semesterId: number): Promise<SemesterNotification[]> {
+  const result = await apiClient.post<SemesterNotificationResponse[]>(`${semestersPath}/${semesterId}/notifications/dispatch`, undefined, { token })
+  return result.map(toSemesterNotification)
+}
+
+export async function retryFailedSemesterNotifications(token: string, semesterId: number): Promise<SemesterNotification[]> {
+  const result = await apiClient.post<SemesterNotificationResponse[]>(`${semestersPath}/${semesterId}/notifications/retry-failed`, undefined, { token })
+  return result.map(toSemesterNotification)
 }
 
 export function reopenSemester(token: string, semesterId: number, request: ReopenSemesterRequest): Promise<Semester> {

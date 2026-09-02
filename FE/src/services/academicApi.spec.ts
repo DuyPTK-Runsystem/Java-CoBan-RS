@@ -22,6 +22,9 @@ import {
   fetchSubjects,
   fetchSubjectApplicabilities,
   getSemesterCompletenessReport,
+  fetchSemesterNotifications,
+  dispatchSemesterNotifications,
+  retryFailedSemesterNotifications,
   lockSemester,
   reopenSemester,
   updateClassSubject,
@@ -104,6 +107,30 @@ describe('academicApi', () => {
 
     await closeAcademicYear('token', 7)
     expect(fetchMock.mock.calls[1][0]).toBe('http://localhost:8081/api/v2/academic-years/7/close')
+  })
+
+  it('uses email notification endpoints and strips transport-only fields before returning UI data', async () => {
+    const response = {
+      id: 9, semesterId: 11, reportId: 101, checkpointCode: 'PRE_LOCK', recipientEmail: 'office@example.test', recipientRole: 'ACADEMIC_OFFICE',
+      recipientTeacherId: null, notificationChannel: 'EMAIL', status: 'SENT', subject: 'Nhắc nhập điểm', bodyContent: 'Nội dung', attemptCount: 1,
+      sentAt: '2027-01-15T10:00:00', errorMessage: null, createdAt: '2027-01-15T09:00:00', updatedAt: '2027-01-15T10:00:00',
+    }
+    fetchMock.mockImplementation(() => Promise.resolve(new Response(JSON.stringify({ data: [response] }), { status: 200 })))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const notifications = await fetchSemesterNotifications('token', 11)
+    await dispatchSemesterNotifications('token', 11)
+    await retryFailedSemesterNotifications('token', 11)
+
+    expect(notifications[0]).toEqual({
+      id: 9, semesterId: 11, recipientEmail: 'office@example.test', recipientRole: 'ACADEMIC_OFFICE', status: 'SENT', subject: 'Nhắc nhập điểm',
+      attemptCount: 1, sentAt: '2027-01-15T10:00:00', errorMessage: null, createdAt: '2027-01-15T09:00:00', updatedAt: '2027-01-15T10:00:00',
+    })
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      'http://localhost:8081/api/v2/semesters/11/notifications',
+      'http://localhost:8081/api/v2/semesters/11/notifications/dispatch',
+      'http://localhost:8081/api/v2/semesters/11/notifications/retry-failed',
+    ])
   })
 
   it('uses the catalog lifecycle endpoints with typed request bodies', async () => {
