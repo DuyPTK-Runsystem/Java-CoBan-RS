@@ -8,6 +8,24 @@ import { logout as logoutApi } from '@/services/userApi'
 
 const router = useRouter()
 const session = computed(() => getAuthSession())
+const navigation = computed(() => {
+  const items = [
+    { label: 'Năm học & học kỳ', to: '/v2/academic-years', icon: 'pi pi-calendar' },
+    { label: 'Khối', to: '/v2/academic-catalog/grades', icon: 'pi pi-sitemap' },
+    { label: 'Lớp', to: '/v2/academic-catalog/classes', icon: 'pi pi-building' },
+    { label: 'Môn học', to: '/v2/academic-catalog/subjects', icon: 'pi pi-book' },
+    { label: 'Quản lí môn học các lớp', to: '/v2/academic-catalog/class-subjects', icon: 'pi pi-link' },
+    { label: 'Xếp lớp', to: '/v2/enrollments', icon: 'pi pi-users' },
+    { label: 'Hồ sơ giáo viên', to: '/v2/teachers', icon: 'pi pi-id-card' },
+    { label: 'Phân công giảng dạy', to: '/v2/teaching-assignments', icon: 'pi pi-briefcase' },
+    { label: 'Điểm danh', to: '/v2/attendance', icon: 'pi pi-calendar' },
+  ]
+  const roles = session.value?.user.roles ?? []
+  if (roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE' || role === 'TEACHER')) {
+    items.push({ label: 'Sổ điểm', to: '/v2/scorebooks', icon: 'pi pi-book' })
+  }
+  return items
+})
 
 function logout(): void {
   const accessToken = session.value?.accessToken
@@ -26,17 +44,7 @@ function logout(): void {
 <template>
   <AuthenticatedLayout
     :user-name="session?.user.username ?? ''"
-    :navigation="[
-      { label: 'Năm học & học kỳ', to: '/v2/academic-years', icon: 'pi pi-calendar' },
-      { label: 'Khối', to: '/v2/academic-catalog/grades', icon: 'pi pi-sitemap' },
-      { label: 'Lớp', to: '/v2/academic-catalog/classes', icon: 'pi pi-building' },
-      { label: 'Môn học', to: '/v2/academic-catalog/subjects', icon: 'pi pi-book' },
-      { label: 'Quản lí môn học các lớp', to: '/v2/academic-catalog/class-subjects', icon: 'pi pi-link' },
-      { label: 'Xếp lớp', to: '/v2/enrollments', icon: 'pi pi-users' },
-      { label: 'Hồ sơ giáo viên', to: '/v2/teachers', icon: 'pi pi-id-card' },
-      { label: 'Phân công giảng dạy', to: '/v2/teaching-assignments', icon: 'pi pi-briefcase' },
-      { label: 'Điểm danh', to: '/v2/attendance', icon: 'pi pi-calendar' },
-    ]"
+    :navigation="navigation"
     @logout="logout"
   >
     <RouterView />

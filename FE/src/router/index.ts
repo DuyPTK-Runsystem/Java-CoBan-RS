@@ -110,6 +110,11 @@ const router = createRouter({
           component: () => import('@/views/AttendanceWorkspaceView.vue'),
         },
         {
+          path: 'scorebooks',
+          name: 'v2-scorebooks',
+          component: () => import('@/views/ScorebookWorkspaceView.vue'),
+        },
+        {
           // Business routes must be registered before this neutral outlet.
           path: ':pathMatch(.*)*',
           name: 'v2-outlet',

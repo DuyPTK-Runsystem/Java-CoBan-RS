@@ -12,9 +12,12 @@ export type FieldErrors<T extends string> = Partial<Record<T, string>>
 export type LoginField = keyof LoginValues
 export type RegisterField = keyof RegisterValues
 
+export type UserRole = 'ADMIN' | 'ACADEMIC_OFFICE' | 'TEACHER' | 'STUDENT'
+
 export interface UserSummary {
   id: number
   username: string
+  roles?: UserRole[]
   created_at?: string
   updated_at?: string
   created_by?: string

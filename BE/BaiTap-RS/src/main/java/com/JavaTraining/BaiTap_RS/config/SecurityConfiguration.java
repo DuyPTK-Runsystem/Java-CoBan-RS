@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.JavaTraining.BaiTap_RS.common.filter.RequestIdFilter;
 import com.JavaTraining.BaiTap_RS.security.JwtAuthenticationFilter;
+import com.JavaTraining.BaiTap_RS.security.RestAccessDeniedHandler;
 import com.JavaTraining.BaiTap_RS.security.RestAuthenticationEntryPoint;
 import com.JavaTraining.BaiTap_RS.security.UserPrincipal;
 import com.JavaTraining.BaiTap_RS.user.repository.UserRepository;
@@ -53,7 +54,8 @@ public class SecurityConfiguration {
             HttpSecurity http,
             RequestIdFilter requestIdFilter,
             JwtAuthenticationFilter jwtFilter,
-            RestAuthenticationEntryPoint authenticationEntryPoint) throws Exception {
+            RestAuthenticationEntryPoint authenticationEntryPoint,
+            RestAccessDeniedHandler accessDeniedHandler) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -70,7 +72,9 @@ public class SecurityConfiguration {
                         .permitAll()
                         .anyRequest()
                         .authenticated())
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

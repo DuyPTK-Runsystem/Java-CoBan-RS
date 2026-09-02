@@ -31,6 +31,7 @@ import type {
   ClassAttendanceSummaryResponse,
   StudentAttendanceHistoryResponse,
   UpsertAttendanceExceptionRequest,
+  AttendanceApiScope,
 } from '@/types/attendance'
 import type { LoadingState } from '@/types/ui'
 import { useRouter } from 'vue-router'
@@ -94,6 +95,11 @@ const summaryResponse = ref<ClassAttendanceSummaryResponse | null>(null)
 const summaryLoading = ref(false)
 const summaryError = ref('')
 const summaryForbidden = ref(false)
+
+const attendanceScope = computed<AttendanceApiScope>(() => {
+  const roles = getAuthSession()?.user.roles ?? []
+  return roles.includes('ADMIN') || roles.includes('ACADEMIC_OFFICE') ? 'office' : 'teacher'
+})
 
 const selectedClass = computed(() => classes.value.find((item) => item.id === selectedClassId.value) ?? null)
 const selectedSemester = computed(() => semesters.value.find((item) => item.id === selectedSemesterId.value) ?? null)
@@ -257,7 +263,7 @@ async function loadSessionStudents(sessionId: number): Promise<void> {
   sessionError.value = ''
   sessionForbidden.value = false
   try {
-    sessionStudents.value = await fetchAttendanceSessionStudents(accessToken, sessionId, 'teacher')
+    sessionStudents.value = await fetchAttendanceSessionStudents(accessToken, sessionId, attendanceScope.value)
   } catch (error) {
     if (isApiError(error, 401)) return
     sessionForbidden.value = isApiError(error, 403)
@@ -285,7 +291,7 @@ async function openSession(): Promise<void> {
       semesterId: selectedSemesterId.value,
       attendanceDate: attendanceDate.value,
       sessionPeriod: sessionPeriod.value,
-    }, 'teacher')
+    }, attendanceScope.value)
     session.value = loadedSession
     await loadSessionStudents(loadedSession.sessionId)
     statusMessage.value = `Đã mở buổi điểm danh ${loadedSession.attendanceDate} · ${loadedSession.sessionPeriod === 'MORNING' ? 'sáng' : 'chiều'}.`
@@ -317,7 +323,7 @@ async function saveException(request: UpsertAttendanceExceptionRequest): Promise
   sessionSaving.value = true
   mutationError.value = ''
   try {
-    await upsertAttendanceException(accessToken, session.value.sessionId, selectedStudent.value.studentId, request, 'teacher')
+    await upsertAttendanceException(accessToken, session.value.sessionId, selectedStudent.value.studentId, request, attendanceScope.value)
     await loadSessionStudents(session.value.sessionId)
     statusMessage.value = `Đã cập nhật ngoại lệ cho ${selectedStudent.value.studentCode}.`
     closeException()
@@ -347,7 +353,7 @@ async function removeException(student: AttendanceStudent): Promise<void> {
   sessionSaving.value = true
   mutationError.value = ''
   try {
-    await deleteAttendanceException(accessToken, session.value.sessionId, student.studentId, 'teacher')
+    await deleteAttendanceException(accessToken, session.value.sessionId, student.studentId, attendanceScope.value)
     await loadSessionStudents(session.value.sessionId)
     statusMessage.value = `Đã xóa ngoại lệ của ${student.studentCode}; trạng thái trở về có mặt.`
   } catch (error) {

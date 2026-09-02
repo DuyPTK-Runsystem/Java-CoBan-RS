@@ -40,7 +40,9 @@ Login response `data`:
 
 ### Blocker: role chưa được expose cho FE
 
-`ResUserDTO` hiện **không có `roles`**.
+`ResUserDTO` trả thêm `roles`, là danh sách role code canonical của tài khoản.
+Frontend dùng field này để chọn capability/API scope; không suy đoán role từ username
+hoặc JWT claims.
 
 JWT hiện chứa:
 

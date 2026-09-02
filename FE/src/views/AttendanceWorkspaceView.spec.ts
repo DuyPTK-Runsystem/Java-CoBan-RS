@@ -74,7 +74,7 @@ function mountView() {
 describe('AttendanceWorkspaceView', () => {
   beforeEach(async () => {
     clearAuthSession()
-    saveAuthSession({ accessToken: 'jwt-token', user: { id: 5, username: 'teacher.demo' } })
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 5, username: 'teacher.demo', roles: ['TEACHER'] } })
     mocks.fetchAcademicYears.mockReset().mockResolvedValue(academicYears)
     mocks.fetchSchoolClasses.mockReset().mockResolvedValue(classes)
     mocks.fetchSemesters.mockReset().mockResolvedValue(semesters)
@@ -111,6 +111,19 @@ describe('AttendanceWorkspaceView', () => {
     expect(mocks.createOrGetAttendanceSession).toHaveBeenCalledWith('jwt-token', { classId: 3, semesterId: 2, attendanceDate: '2026-09-01', sessionPeriod: 'MORNING' }, 'teacher')
     expect(mocks.fetchAttendanceSessionStudents).toHaveBeenCalledWith('jwt-token', 5012, 'teacher')
     expect(wrapper.find('[data-testid="session-table"]').text()).toContain('1')
+  })
+
+  it('uses the office attendance API for an academic office session', async () => {
+    clearAuthSession()
+    saveAuthSession({ accessToken: 'office-token', user: { id: 2, username: 'office.demo', roles: ['ACADEMIC_OFFICE'] } })
+    const wrapper = mountView()
+    await flushPromises()
+
+    await wrapper.find('[data-testid="open-session"]').trigger('click')
+    await flushPromises()
+
+    expect(mocks.createOrGetAttendanceSession).toHaveBeenCalledWith('office-token', { classId: 3, semesterId: 2, attendanceDate: '2026-09-01', sessionPeriod: 'MORNING' }, 'office')
+    expect(mocks.fetchAttendanceSessionStudents).toHaveBeenCalledWith('office-token', 5012, 'office')
   })
 
   it('saves an exception and reloads the session rows', async () => {
