@@ -12,9 +12,11 @@ import com.JavaTraining.BaiTap_RS.calendar.domain.entity.CalendarSession;
 import com.JavaTraining.BaiTap_RS.calendar.domain.entity.CalendarSessionPeriod;
 import com.JavaTraining.BaiTap_RS.calendar.domain.entity.CalendarSessionStatus;
 import com.JavaTraining.BaiTap_RS.calendar.repository.CalendarSessionRepository;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import org.springframework.stereotype.Service;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class CalendarSessionService {
 
     private final CalendarSessionRepository sessionRepository;
@@ -28,6 +30,9 @@ public class CalendarSessionService {
     }
 
     public void upsertSessions(CalendarDay day, List<ReqCalendarSessionDTO> requests, Long userId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalendarSessionService.class,
+                "CalendarSessionService.upsertSessions");
         Map<CalendarSessionPeriod, ReqCalendarSessionDTO> requested = requests.stream()
                 .collect(Collectors.toMap(
                         ReqCalendarSessionDTO::sessionPeriod,
@@ -45,6 +50,20 @@ public class CalendarSessionService {
                 updateSession(session, request, userId);
                 auditService.writeSessionAudit("CALENDAR_SESSION_UPDATED", before, session);
             }
+        }
+    }
+
+    public void ensureScheduled(CalendarDay day, CalendarSessionPeriod period, Long userId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalendarSessionService.class,
+                "CalendarSessionService.ensureScheduled",
+                "ensuring dayId={}, period={}, status={}",
+                day.getId(), period, CalendarSessionStatus.SCHEDULED);
+        if (sessionRepository.findByCalendarDayIdAndSessionPeriod(day.getId(), period).isEmpty()) {
+            createSession(day, new ReqCalendarSessionDTO(
+                    period,
+                    CalendarSessionStatus.SCHEDULED,
+                    null), userId);
         }
     }
 

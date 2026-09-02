@@ -2,6 +2,7 @@ package com.JavaTraining.BaiTap_RS.calendar.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.AcademicYear;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Semester;
@@ -17,12 +18,17 @@ import com.JavaTraining.BaiTap_RS.calendar.repository.CalendarDayRepository;
 import com.JavaTraining.BaiTap_RS.calendar.repository.CalendarSessionRepository;
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class CalendarService {
+
+    private static final String ASSERT_SCHEDULED = "CalendarService.assertScheduled";
+    private static final String ENSURE_SCHEDULED = "CalendarService.ensureScheduled";
 
     private final CalendarDayRepository dayRepository;
     private final CalendarSessionRepository sessionRepository;
@@ -54,6 +60,9 @@ public class CalendarService {
 
     @Transactional
     public ResCalendarDayDTO upsertDay(LocalDate calendarDate, ReqUpsertCalendarDayDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalendarService.class,
+                "CalendarService.upsertDay");
         AcademicYear academicYear = findAcademicYear(request.academicYearId());
         Semester semester = findSemester(request.semesterId());
         validator.validateScope(academicYear, semester, calendarDate);
@@ -87,6 +96,9 @@ public class CalendarService {
             Long semesterId,
             LocalDate from,
             LocalDate to) {
+                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                        CalendarService.class,
+                        "CalendarService.listDays");
         AcademicYear academicYear = findAcademicYear(academicYearId);
         Semester semester = findSemester(semesterId);
         validator.validateScope(academicYear, semester, from);
@@ -102,17 +114,95 @@ public class CalendarService {
 
     @Transactional(readOnly = true)
     public void assertScheduled(Long semesterId, LocalDate attendanceDate, String sessionPeriod) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalendarService.class,
+                ASSERT_SCHEDULED);
         Semester semester = findSemester(semesterId);
         CalendarSessionPeriod period = validator.parsePeriod(sessionPeriod);
-        CalendarDay day = dayRepository.findByAcademicYearIdAndCalendarDate(
-                        semester.getAcademicYearId(), attendanceDate)
-                .filter(candidate -> candidate.getSemesterId().equals(semesterId))
-                .orElseThrow(() -> conflict("Ngày điểm danh chưa được cấu hình lịch học"));
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalendarService.class,
+                ASSERT_SCHEDULED,
+                "lookup academicYearId={}, semesterId={}, date={}, period={}",
+                semester.getAcademicYearId(), semesterId, attendanceDate, period);
+        Optional<CalendarDay> calendarDayResult = dayRepository.findByAcademicYearIdAndCalendarDate(
+                semester.getAcademicYearId(), attendanceDate);
+        if (calendarDayResult.isEmpty()) {
+            DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                    CalendarService.class,
+                    ASSERT_SCHEDULED,
+                    "calendar day not found academicYearId={}, date={}, requestedSemesterId={}",
+                    semester.getAcademicYearId(), attendanceDate, semesterId);
+            throw conflict("Ngày điểm danh chưa được cấu hình lịch học");
+        }
+        CalendarDay calendarDay = calendarDayResult.get();
+        if (!calendarDay.getSemesterId().equals(semesterId)) {
+            DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                    CalendarService.class,
+                    ASSERT_SCHEDULED,
+                    "calendar day semester mismatch dayId={}, calendarSemesterId={}, requestedSemesterId={}, date={}",
+                    calendarDay.getId(), calendarDay.getSemesterId(), semesterId, attendanceDate);
+            throw conflict("Ngày điểm danh chưa được cấu hình lịch học");
+        }
+        CalendarDay day = calendarDay;
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalendarService.class,
+                ASSERT_SCHEDULED,
+                "calendar day found dayId={}, daySemesterId={}, dayType={}",
+                day.getId(), day.getSemesterId(), day.getDayType());
         boolean scheduled = sessionRepository.existsByCalendarDayIdAndSessionPeriodAndSessionStatus(
                 day.getId(), period, CalendarSessionStatus.SCHEDULED);
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalendarService.class,
+                ASSERT_SCHEDULED,
+                "session lookup dayId={}, period={}, requiredStatus={}, scheduled={}",
+                day.getId(), period, CalendarSessionStatus.SCHEDULED, scheduled);
         if (day.getDayType() != CalendarDayType.SCHOOL_DAY || !scheduled) {
+            DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                    CalendarService.class,
+                    ASSERT_SCHEDULED,
+                    "calendar rejected dayId={}, dayType={}, period={}, scheduled={}",
+                    day.getId(), day.getDayType(), period, scheduled);
             throw conflict("Buổi điểm danh không phải buổi học hợp lệ");
         }
+    }
+
+    @Transactional
+    public void ensureScheduled(Long semesterId, LocalDate attendanceDate, String sessionPeriod) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                CalendarService.class,
+                ENSURE_SCHEDULED,
+                "ensuring calendar academicYearId={}, semesterId={}, date={}, period={}",
+                "pending", semesterId, attendanceDate, sessionPeriod);
+        Semester semester = findSemester(semesterId);
+        CalendarSessionPeriod period = validator.parsePeriod(sessionPeriod);
+        Optional<CalendarDay> calendarDayResult = dayRepository.findByAcademicYearIdAndCalendarDate(
+                semester.getAcademicYearId(), attendanceDate);
+        CalendarDay day;
+        if (calendarDayResult.isEmpty()) {
+            day = dayRepository.save(new CalendarDay(
+                    semester.getAcademicYearId(),
+                    semesterId,
+                    attendanceDate,
+                    CalendarDayType.SCHOOL_DAY,
+                    null,
+                    AuditContext.currentUserId()));
+            auditService.writeAudit("CALENDAR_DAY_CREATED", null, day);
+            DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                    CalendarService.class,
+                    ENSURE_SCHEDULED,
+                    "calendar day auto-created dayId={}, academicYearId={}, semesterId={}, date={}, dayType={}",
+                    day.getId(), semester.getAcademicYearId(), semesterId, attendanceDate, day.getDayType());
+        } else {
+            day = calendarDayResult.get();
+            if (!day.getSemesterId().equals(semesterId)) {
+                throw conflict("Ngày điểm danh chưa được cấu hình lịch học");
+            }
+            if (day.getDayType() != CalendarDayType.SCHOOL_DAY) {
+                throw conflict("Buổi điểm danh không phải buổi học hợp lệ");
+            }
+        }
+        sessionService.ensureScheduled(day, period, AuditContext.currentUserId());
+        assertScheduled(semesterId, attendanceDate, sessionPeriod);
     }
 
     private ResCalendarDayDTO toResponse(CalendarDay day) {

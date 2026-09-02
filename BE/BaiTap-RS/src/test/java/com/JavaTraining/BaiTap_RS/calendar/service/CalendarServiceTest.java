@@ -153,6 +153,59 @@ class CalendarServiceTest {
         Assertions.assertDoesNotThrow(() -> calendarService.assertScheduled(70L, date(), "MORNING"));
     }
 
+    @Test
+    void ensureScheduledCreatesMissingDayAndRequestedSession() {
+        Semester semester = semester();
+        CalendarDay createdDay = new CalendarDay(
+                10L, 70L, date(), CalendarDayType.SCHOOL_DAY, null, 1L);
+        ReflectionTestUtils.setField(createdDay, "id", 90L);
+        Mockito.when(semesterRepository.findById(70L)).thenReturn(Optional.of(semester));
+        Mockito.when(dayRepository.findByAcademicYearIdAndCalendarDate(10L, date()))
+                .thenReturn(Optional.empty(), Optional.of(createdDay));
+        Mockito.when(dayRepository.save(Mockito.any(CalendarDay.class)))
+                .thenReturn(createdDay);
+        Mockito.when(sessionRepository.findByCalendarDayIdAndSessionPeriod(
+                90L, CalendarSessionPeriod.MORNING)).thenReturn(Optional.empty());
+        Mockito.when(sessionRepository.save(Mockito.any(CalendarSession.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        Mockito.when(sessionRepository.existsByCalendarDayIdAndSessionPeriodAndSessionStatus(
+                90L, CalendarSessionPeriod.MORNING, CalendarSessionStatus.SCHEDULED)).thenReturn(true);
+
+        calendarService.ensureScheduled(70L, date(), "MORNING");
+
+        Mockito.verify(dayRepository).save(Mockito.argThat(day ->
+                day.getDayType() == CalendarDayType.SCHOOL_DAY
+                        && day.getSemesterId().equals(70L)));
+        Mockito.verify(sessionRepository).save(Mockito.argThat(session ->
+                session.getSessionPeriod() == CalendarSessionPeriod.MORNING
+                        && session.getSessionStatus() == CalendarSessionStatus.SCHEDULED));
+        Mockito.verify(auditService).writeAudit(
+                Mockito.eq("CALENDAR_DAY_CREATED"),
+                Mockito.isNull(CalendarDay.class),
+                Mockito.any(CalendarDay.class));
+        Mockito.verify(auditService).writeSessionAudit(
+                Mockito.eq("CALENDAR_SESSION_CREATED"),
+                Mockito.isNull(CalendarSession.class),
+                Mockito.any(CalendarSession.class));
+    }
+
+    @Test
+    void ensureScheduledDoesNotOverwriteConfiguredNonSchoolDay() {
+        Semester semester = semester();
+        CalendarDay holiday = new CalendarDay(
+                10L, 70L, date(), CalendarDayType.HOLIDAY, "Holiday", 1L);
+        ReflectionTestUtils.setField(holiday, "id", 90L);
+        Mockito.when(semesterRepository.findById(70L)).thenReturn(Optional.of(semester));
+        Mockito.when(dayRepository.findByAcademicYearIdAndCalendarDate(10L, date()))
+                .thenReturn(Optional.of(holiday));
+
+        AppException exception = capture(() -> calendarService.ensureScheduled(70L, date(), "MORNING"));
+
+        Assertions.assertEquals(HttpStatus.CONFLICT, exception.getStatus(), "holiday must remain protected");
+        Mockito.verify(dayRepository, Mockito.never()).save(Mockito.any(CalendarDay.class));
+        Mockito.verify(sessionRepository, Mockito.never()).save(Mockito.any(CalendarSession.class));
+    }
+
     private void prepareAcademicScope() {
         Mockito.when(academicYearRepository.findById(10L)).thenReturn(Optional.of(academicYear()));
         Mockito.when(semesterRepository.findById(70L)).thenReturn(Optional.of(semester()));

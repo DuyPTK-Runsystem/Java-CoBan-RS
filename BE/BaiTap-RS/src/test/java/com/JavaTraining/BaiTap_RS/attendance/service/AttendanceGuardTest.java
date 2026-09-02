@@ -78,6 +78,20 @@ class AttendanceGuardTest {
     }
 
     @Test
+    void validateClassSemesterAndDateForOfficeEnsuresCalendarInsteadOfAssertingIt() {
+        guard.validateClassSemesterAndDateForOffice(
+                schoolClass(), semester(), LocalDate.of(2026, 9, 5),
+                com.JavaTraining.BaiTap_RS.attendance.domain.entity.AttendanceSessionPeriod.MORNING);
+
+        Mockito.verify(calendarValidityService).ensureScheduled(
+                70L,
+                LocalDate.of(2026, 9, 5),
+                com.JavaTraining.BaiTap_RS.attendance.domain.entity.AttendanceSessionPeriod.MORNING);
+        Mockito.verify(calendarValidityService, Mockito.never()).assertScheduled(
+                Mockito.anyLong(), Mockito.any(LocalDate.class), Mockito.any());
+    }
+
+    @Test
     void assertCurrentUserHomeroomRejectsTeacherWithoutAssignment() {
         authenticate(100L);
         Mockito.when(teacherRepository.findByUserId(100L)).thenReturn(Optional.of(teacher()));

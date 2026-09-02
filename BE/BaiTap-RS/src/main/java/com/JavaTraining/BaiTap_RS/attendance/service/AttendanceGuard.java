@@ -65,7 +65,33 @@ public class AttendanceGuard {
         if (attendanceDate.isBefore(semester.getStartDate()) || attendanceDate.isAfter(semester.getEndDate())) {
             throw new AppException(HttpStatus.CONFLICT, "Ngày điểm danh phải nằm trong thời gian học kỳ");
         }
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AttendanceGuard.class,
+                "AttendanceGuard.validateClassSemesterAndDate",
+                "calendar validation classId={}, semesterId={}, academicYearId={}, date={}, period={}",
+                schoolClass.getId(), semester.getId(), semester.getAcademicYearId(), attendanceDate, sessionPeriod);
         calendarValidityService.assertScheduled(semester.getId(), attendanceDate, sessionPeriod);
+    }
+
+    public void validateClassSemesterAndDateForOffice(
+            SchoolClass schoolClass,
+            Semester semester,
+            LocalDate attendanceDate,
+            AttendanceSessionPeriod sessionPeriod) {
+        validateClassAndSemester(schoolClass, semester);
+        validateAttendanceDate(semester, attendanceDate);
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AttendanceGuard.class,
+                "AttendanceGuard.validateClassSemesterAndDateForOffice",
+                "calendar ensure classId={}, semesterId={}, academicYearId={}, date={}, period={}",
+                schoolClass.getId(), semester.getId(), semester.getAcademicYearId(), attendanceDate, sessionPeriod);
+        calendarValidityService.ensureScheduled(semester.getId(), attendanceDate, sessionPeriod);
+    }
+
+    private void validateAttendanceDate(Semester semester, LocalDate attendanceDate) {
+        if (attendanceDate.isBefore(semester.getStartDate()) || attendanceDate.isAfter(semester.getEndDate())) {
+            throw new AppException(HttpStatus.CONFLICT, "Ngày điểm danh phải nằm trong thời gian học kỳ");
+        }
     }
 
     public void validateClassAndSemester(SchoolClass schoolClass, Semester semester) {

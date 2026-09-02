@@ -17,12 +17,14 @@ import com.JavaTraining.BaiTap_RS.attendance.domain.entity.AttendanceSession;
 import com.JavaTraining.BaiTap_RS.attendance.repository.AttendanceRecordRepository;
 import com.JavaTraining.BaiTap_RS.attendance.repository.AttendanceSessionRepository;
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
+import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
 import com.JavaTraining.BaiTap_RS.student.service.StudentLookupService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("PMD.GuardLogStatement")
 public class AcademicOfficeAttendanceService {
 
     private static final String ACTION_EXCEPTION_CREATED = "OFFICE_ATTENDANCE_EXCEPTION_CREATED";
@@ -53,9 +55,19 @@ public class AcademicOfficeAttendanceService {
 
     @Transactional
     public ResAttendanceSessionDTO createOrGetSession(ReqCreateAttendanceSessionDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AcademicOfficeAttendanceService.class,
+                "AcademicOfficeAttendanceService.createOrGetSession");
         SchoolClass schoolClass = guard.findSchoolClass(request.classId());
         Semester semester = guard.findSemester(request.semesterId());
-        guard.validateClassSemesterAndDate(
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AcademicOfficeAttendanceService.class,
+                "AcademicOfficeAttendanceService.createOrGetSession",
+                "resolved classId={}, classAcademicYearId={}, semesterId={}, "
+                        + "semesterAcademicYearId={}, semesterRange={}..{}",
+                schoolClass.getId(), schoolClass.getAcademicYearId(), semester.getId(), semester.getAcademicYearId(),
+                semester.getStartDate(), semester.getEndDate());
+        guard.validateClassSemesterAndDateForOffice(
                 schoolClass, semester, request.attendanceDate(), request.sessionPeriod());
         AttendanceSession session = sessionRepository.findByClassIdAndAttendanceDateAndSessionPeriod(
                         request.classId(),
