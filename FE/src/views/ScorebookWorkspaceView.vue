@@ -11,6 +11,7 @@ import BulkScoreEntryDialog from '@/components/BulkScoreEntryDialog.vue'
 import FormAlert from '@/components/FormAlert.vue'
 import ScorebookContextPanel from '@/components/ScorebookContextPanel.vue'
 import ScorebookStatusHeader from '@/components/ScorebookStatusHeader.vue'
+import ScoreChangeRequestForm, { type ScoreChangeRequestFormContext } from '@/components/ScoreChangeRequestForm.vue'
 import ScoreEntryDialog from '@/components/ScoreEntryDialog.vue'
 import ScoreGrid from '@/components/ScoreGrid.vue'
 import SkillWeightPanel from '@/components/SkillWeightPanel.vue'
@@ -22,6 +23,7 @@ import {
   fetchSubjects,
 } from '@/services/academicApi'
 import { clearAuthSession, getAuthSession } from '@/services/authSession'
+import { createScoreChangeRequest } from '@/services/scoreChangeRequestApi'
 import {
   bulkUpsertStudentScores,
   createAssessmentColumn,
@@ -51,6 +53,7 @@ import type {
   UpsertSkillWeightRequest,
   UpsertStudentScoreRequest,
 } from '@/types/scorebook'
+import type { CreateScoreChangeRequest } from '@/types/scoreChangeRequest'
 import type { UserRole } from '@/types/user'
 
 type LookupState = 'idle' | 'loading' | 'empty' | 'ready' | 'error'
@@ -83,10 +86,12 @@ const columnDialogVisible = ref(false)
 const columnDialogMode = ref<'create' | 'edit'>('create')
 const selectedColumn = ref<AssessmentColumn | null>(null)
 const scoreDialogVisible = ref(false)
+const scoreChangeRequestDialogVisible = ref(false)
 const bulkDialogVisible = ref(false)
 const selectedStudent = ref<StudentScoreGridRow | null>(null)
 const selectedScore = ref<StudentScore | null>(null)
 const selectedGridColumn = ref<ScoreGridColumn | null>(null)
+const scoreChangeRequestContext = ref<ScoreChangeRequestFormContext | null>(null)
 const dialogError = ref('')
 let contextRequestId = 0
 let lookupRequestId = 0
@@ -127,11 +132,13 @@ function clearMessages(): void {
 function resetDialogs(): void {
   columnDialogVisible.value = false
   scoreDialogVisible.value = false
+  scoreChangeRequestDialogVisible.value = false
   bulkDialogVisible.value = false
   selectedColumn.value = null
   selectedStudent.value = null
   selectedScore.value = null
   selectedGridColumn.value = null
+  scoreChangeRequestContext.value = null
   dialogError.value = ''
 }
 
@@ -451,6 +458,41 @@ function openBulkDialog(column: ScoreGridColumn): void {
   bulkDialogVisible.value = true
 }
 
+function openScoreChangeRequest(context: { studentName: string; score: StudentScore | null }): void {
+  if (!selectedStudent.value || !selectedGridColumn.value) return
+  scoreDialogVisible.value = false
+  scoreChangeRequestContext.value = {
+    studentCode: selectedStudent.value.studentCode,
+    studentName: selectedStudent.value.studentName || context.studentName,
+    columnId: selectedGridColumn.value.columnId,
+    columnName: selectedGridColumn.value.columnName,
+    currentStatus: context.score?.scoreStatus,
+    currentValue: context.score?.scoreValue ?? null,
+  }
+  scoreChangeRequestDialogVisible.value = true
+}
+
+async function submitScoreChangeRequest(request: CreateScoreChangeRequest): Promise<void> {
+  const accessToken = token()
+  if (!accessToken) return
+  saving.value = true
+  dialogError.value = ''
+  try {
+    await createScoreChangeRequest(accessToken, request)
+    scoreChangeRequestDialogVisible.value = false
+    statusMessage.value = 'Đã gửi yêu cầu sửa điểm. Yêu cầu đang chờ duyệt.'
+  } catch (error) {
+    if (isApiError(error, 401)) return
+    if (isApiError(error, 409)) {
+      dialogError.value = messageFor(error, 'Yêu cầu không thể gửi vì dữ liệu hoặc request đang chờ đã thay đổi.')
+      return
+    }
+    dialogError.value = messageFor(error, 'Không thể gửi yêu cầu sửa điểm.')
+  } finally {
+    saving.value = false
+  }
+}
+
 async function saveScore(request: UpsertStudentScoreRequest): Promise<void> {
   const accessToken = token()
   if (!accessToken || !selectedStudent.value || !selectedGridColumn.value) return
@@ -626,11 +668,27 @@ onMounted(() => { void load() })
     v-model:visible="scoreDialogVisible"
     :student-name="selectedStudent?.studentName"
     :score="selectedScore"
+    :read-only="scorebook?.status !== 'OPEN'"
     :saving="saving"
     :error-message="dialogError"
     @save="saveScore"
     @cancel="scoreDialogVisible = false"
+    @request-change="openScoreChangeRequest"
   />
+  <Dialog
+    v-model:visible="scoreChangeRequestDialogVisible"
+    header="Tạo yêu cầu sửa điểm"
+    modal
+    :style="{ width: 'min(620px, calc(100vw - 32px))' }"
+  >
+    <ScoreChangeRequestForm
+      v-if="scoreChangeRequestContext"
+      :context="scoreChangeRequestContext"
+      :loading="saving"
+      @submit="submitScoreChangeRequest"
+      @cancel="scoreChangeRequestDialogVisible = false"
+    />
+  </Dialog>
   <BulkScoreEntryDialog
     v-model:visible="bulkDialogVisible"
     :column="selectedGridColumn"

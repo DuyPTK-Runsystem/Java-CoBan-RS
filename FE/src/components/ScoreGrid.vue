@@ -59,7 +59,7 @@ function label(score: StudentScore | null): string {
             </div>
           </template>
           <template #body="slot">
-            <button class="scorebook-score-cell" type="button" :disabled="props.readOnly" @click="emit('edit', slot.data, column, scoreFor(slot.data, column))">
+            <button class="scorebook-score-cell" type="button" :aria-label="`${slot.data.studentName} · ${column.columnName || `Cột ${column.columnNo}`}`" @click="emit('edit', slot.data, column, scoreFor(slot.data, column))">
               {{ label(scoreFor(slot.data, column)) }}
             </button>
           </template>

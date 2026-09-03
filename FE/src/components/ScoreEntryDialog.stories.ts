@@ -42,3 +42,43 @@ export const Conflict: Story = {
   args: { errorMessage: 'Dữ liệu đã thay đổi. Vui lòng kiểm tra phiên bản mới trước khi lưu lại.' },
 }
 
+export const RequestCorrection: Story = {
+  args: {
+    score: {
+      scoreId: 1,
+      assessmentColumnId: 7,
+      studentId: 11,
+      studentCode: 'HS001',
+      studentName: 'Nguyễn Minh An',
+      scoreStatus: 'SCORED',
+      scoreValue: 7.5,
+      note: null,
+      enteredBy: 5,
+      enteredAt: '2026-09-02T08:00:00',
+      updatedBy: null,
+      updatedAt: null,
+      version: 3,
+    },
+  },
+}
+
+export const ReadOnly: Story = {
+  args: {
+    readOnly: true,
+    score: {
+      scoreId: 1,
+      assessmentColumnId: 7,
+      studentId: 11,
+      studentCode: 'HS001',
+      studentName: 'Nguyễn Minh An',
+      scoreStatus: 'SCORED',
+      scoreValue: 7.5,
+      note: 'Điểm hiện tại',
+      enteredBy: 5,
+      enteredAt: '2026-09-02T08:00:00',
+      updatedBy: null,
+      updatedAt: null,
+      version: 3,
+    },
+  },
+}

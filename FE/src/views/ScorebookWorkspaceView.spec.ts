@@ -25,6 +25,7 @@ const mocks = vi.hoisted(() => ({
   upsertSkillWeight: vi.fn(),
   upsertStudentScore: vi.fn(),
   bulkUpsertStudentScores: vi.fn(),
+  createScoreChangeRequest: vi.fn(),
 }))
 
 vi.mock('primevue/useconfirm', () => ({ useConfirm: () => ({ require: mocks.confirmRequire }) }))
@@ -49,6 +50,9 @@ vi.mock('@/services/scorebookApi', () => ({
   upsertStudentScore: mocks.upsertStudentScore,
   bulkUpsertStudentScores: mocks.bulkUpsertStudentScores,
 }))
+vi.mock('@/services/scoreChangeRequestApi', () => ({
+  createScoreChangeRequest: mocks.createScoreChangeRequest,
+}))
 
 const years = [{ id: 1, code: '2026-2027', startDate: '2026-09-01', endDate: '2027-05-31', status: 'ACTIVE' as const, notes: null }]
 const semesters = [{ id: 2, academicYearId: 1, code: 'HK1', name: 'Học kỳ 1', displayOrder: 1, startDate: '2026-09-01', endDate: '2026-12-31', automaticLockAt: null, status: 'ACTIVE' as const, lockedAt: null, lockedBy: null, lockReason: null, reopenUntil: null }]
@@ -69,12 +73,14 @@ function mountView() {
         AssessmentColumnDialog: simpleStub,
         AssessmentColumnPanel: simpleStub,
         BulkScoreEntryDialog: simpleStub,
+        Dialog: simpleStub,
         Button: buttonStub,
         ConfirmDialog: simpleStub,
         FormAlert: { props: ['message'], template: '<div>{{ message }}</div>' },
         ScorebookContextPanel: simpleStub,
         ScorebookStatusHeader: simpleStub,
         ScoreEntryDialog: simpleStub,
+        ScoreChangeRequestForm: simpleStub,
         ScoreGrid: simpleStub,
         SkillWeightPanel: simpleStub,
       },
