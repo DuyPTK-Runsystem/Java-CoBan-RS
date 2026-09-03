@@ -27,6 +27,6 @@
 
 Plan 057 PMD follow-up (2026-09-03): backend PMD baseline was remediated by responsibility/test refactors; `pmdMain` and `pmdTest` PASS with 0 violations.
 
-Plan 059: Score Change Request UI — Completed; FE validation PASS, browser visual QA NOT RUN.
+Plan 059: Score Change Request UI — Completed; score-cell and dropdown student-selection UX amendments completed, current score shown before proposal, detail cards/actions aligned, request time formatted as dd-mm-yyyy hh:mm:ss; FE validation PASS, browser visual QA NOT RUN; typography amended to prioritize Roboto with system fallback.
 
 Plan 060: Semester Lock & Completeness UI — Completed; FE validation PASS, no checkpoint/in-app UI, browser/live SMTP NOT RUN.

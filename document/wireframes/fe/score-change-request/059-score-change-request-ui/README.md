@@ -17,6 +17,9 @@ Mở [`index.html`](index.html) bằng trình duyệt. Dùng bộ chọn “Tr�
 
 - Bố cục list + filter + pagination.
 - Form tạo yêu cầu và phân biệt snapshot trước sửa với giá trị đề xuất.
+- Form mở từ ô điểm đã chọn: tự hiển thị học sinh, cột điểm, điểm hiện tại và context; GV chỉ nhập giá trị/trạng thái mới và lý do.
+- Form tạo từ trang yêu cầu: GV chọn học sinh và cột điểm bằng dropdown trong scorebook; sau lựa chọn, điểm hiện tại được hiển thị trước phần đề xuất.
+- Nhóm button dialog nằm cùng hàng và căn phải; button chính “Gửi yêu cầu” nằm cuối nhóm.
 - Chọn bối cảnh năm học → học kỳ → lớp → môn/lớp học phần; tự lookup, không nhập mã sổ điểm.
 - Màn hình giáo vụ với duyệt/từ chối; từ chối yêu cầu lý do.
 - Hủy chỉ xuất hiện cho yêu cầu “Chờ duyệt” phù hợp quyền sở hữu.

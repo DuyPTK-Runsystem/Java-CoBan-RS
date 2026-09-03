@@ -7,6 +7,9 @@
 - Application-document version: `v2`.
 - Wireframe bắt buộc review trước implementation: [`README.md`](../../../../wireframes/fe/score-change-request/059-score-change-request-ui/README.md) · [`index.html`](../../../../wireframes/fe/score-change-request/059-score-change-request-ui/index.html).
 - Phạm vi đã triển khai: Developer Plan, wireframe, FE production UI, typed API service và Storybook fixtures.
+- Quyết định typography cập nhật ngày 2026-09-03: dùng `Roboto` làm font mặc định FE; `Segoe UI` không còn là font ưu tiên vì không có trên máy hiện tại. Production nạp Roboto qua Google Fonts và giữ system fallback khi offline.
+- Amendment UX cập nhật ngày 2026-09-03: mở request trực tiếp từ ô điểm trong scorebook; sổ điểm `PUBLISHED/CLOSED` vẫn cho mở ô để tạo request nhưng khóa lưu trực tiếp; context học sinh/cột điểm/điểm hiện tại được truyền sang request form.
+- Amendment UX cập nhật tiếp: mọi form tạo request đều bỏ nhập mã HS; từ trang yêu cầu, GV chọn học sinh và cột điểm bằng dropdown được nạp từ score grid, sau đó xem điểm hiện tại trước khi nhập giá trị mới.
 
 ## 1. Mục tiêu
 
@@ -44,7 +47,7 @@ List response (`ResScoreChangeRequestDTO`) chỉ có request/column/student, pro
 
 - Trang danh sách “Yêu cầu sửa điểm của tôi”, lọc trạng thái/mã học sinh/bối cảnh môn học/cột điểm và phân trang phía máy chủ.
 - Người dùng chọn năm học → học kỳ → lớp → môn/lớp học phần hoặc bối cảnh thân thiện; FE tự lookup dữ liệu request/scorebook theo bối cảnh. Không yêu cầu người dùng nhập hoặc nhớ `scorebookId`.
-- Tạo yêu cầu từ bối cảnh đã lookup; chọn học sinh bằng `studentCode` khi contract hỗ trợ, giữ `studentId` là technical identifier nội bộ.
+- Tạo yêu cầu từ bối cảnh đã lookup; chọn học sinh bằng dropdown hiển thị mã + họ tên từ score grid, giữ `studentId`/`studentCode` là identifier nội bộ do FE tự map.
 - Form trạng thái/giá trị đề xuất/lý do; validation trước submit; không tự tính điểm trung bình.
 - Detail drawer/modal hiển thị snapshot `beforeStatus`/`beforeValue`, proposed status/value, reason, status timeline, requester/reviewer và thời điểm.
 - Nút `Hủy` chỉ hiện cho request `PENDING` do requester tạo; xác nhận trước mutation; sau thành công refresh detail/list.

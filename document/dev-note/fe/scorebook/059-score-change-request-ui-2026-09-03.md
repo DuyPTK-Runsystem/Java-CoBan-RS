@@ -12,6 +12,11 @@
 - Thêm form và detail components cùng Storybook fixtures.
 - Context UI dùng năm học, học kỳ, lớp và môn học; không hiển thị `scorebookId` như input/context kỹ thuật.
 - Nhãn trạng thái, validation và thông báo người dùng hiển thị bằng tiếng Việt.
+- Cập nhật typography: FE ưu tiên `Roboto`, nạp webfont qua Google Fonts và giữ fallback hệ thống khi không có mạng; thay thế lựa chọn `Segoe UI` trước đó.
+- UX amendment: từ `ScoreEntryDialog`, GV có thể mở yêu cầu sửa điểm với context ô điểm đã chọn; form hiển thị readonly học sinh/cột điểm/điểm hiện tại, còn sổ điểm read-only vẫn cho mở ô nhưng khóa lưu trực tiếp.
+- UX amendment tiếp theo: bỏ input mã HS khỏi form tạo request; tại trang yêu cầu, GV chọn học sinh và cột điểm bằng dropdown từ score grid, rồi xem điểm hiện tại trước phần đề xuất.
+- UI alignment amendment: tách các trường detail thành card riêng có label/value rõ ràng; nhóm action trong detail căn phải và responsive; filter bar giữ chung baseline.
+- Date display amendment: thời gian gửi request ở list/detail được format thành `dd-mm-yyyy hh:mm:ss`; API value vẫn giữ nguyên.
 
 ## Files thay đổi thuộc Plan 059
 
@@ -20,22 +25,32 @@
 - `FE/src/types/scoreChangeRequest.ts`
 - `FE/src/views/ScoreChangeRequestView.vue`
 - `FE/src/components/ScoreChangeRequestForm.vue`
-- `FE/src/components/ScoreChangeRequestForm.stories.ts`
+- `FE/src/components/ScoreChangeRequestForm.spec.ts`
 - `FE/src/components/ScoreChangeRequestDetail.vue`
+- `FE/src/components/ScoreChangeRequestDetail.spec.ts`
+- `FE/src/utils/scoreChangeRequestDate.ts`
+- `FE/src/utils/scoreChangeRequestDate.spec.ts`
+- `FE/src/components/ScoreChangeRequestForm.stories.ts`
+- `FE/src/components/ScoreEntryDialog.vue`
+- `FE/src/components/ScoreEntryDialog.spec.ts`
+- `FE/src/components/ScoreEntryDialog.stories.ts`
+- `FE/src/components/ScoreGrid.vue`
+- `FE/src/views/ScorebookWorkspaceView.vue`
+- `FE/src/views/ScorebookWorkspaceView.spec.ts`
 - `FE/src/components/ScoreChangeRequestDetail.stories.ts`
 - `FE/src/router/index.ts`
 - `FE/src/views/AuthenticatedV2ShellView.vue`
 
 ## Validation
 
-Final validation: lint PASS; test PASS (46 files/148 tests); coverage PASS (84.35% statements); production build PASS; Storybook build PASS; browser visual QA NOT RUN vì chưa có browser session.
+Final validation after date-format amendment: lint PASS; test PASS (49 files/162 tests); production build PASS; Storybook build status from prior UI alignment PASS; browser visual QA NOT RUN vì chưa có browser session.
 
-- `git diff --check`: PASS; chỉ phát cảnh báo LF/CRLF của các thay đổi có sẵn trong working tree.
-- `npm.cmd run lint`: FAIL lần đầu do 2 import không dùng trong `ScoreChangeRequestView.vue`; đã sửa. Lần chạy lại bị ngắt trước khi có kết quả cuối.
-- `npm.cmd run test`: NOT RUN/đang chạy khi phiên bị dừng, chưa có kết quả cuối.
-- `npm.cmd run test:coverage`: NOT RUN.
-- `npm.cmd run build`: NOT RUN.
-- `npm.cmd run build-storybook`: NOT RUN.
+- `git diff --check`: PASS.
+- `npm run lint`: PASS sau alignment.
+- `npm run test -- --reporter=dot`: PASS sau date-format amendment (49 files/162 tests).
+- `npm run test:coverage`: NOT RUN trong amendment date-format này.
+- `npm run build`: PASS.
+- `npm run build-storybook`: PASS.
 - Browser visual QA: NOT RUN.
 
 ## Contract blocker / missing API
@@ -47,5 +62,4 @@ Final validation: lint PASS; test PASS (46 files/148 tests); coverage PASS (84.3
 
 ## Deviations và next steps
 
-- Validation chưa hoàn tất do user yêu cầu dừng và báo cáo ngay.
-- Đã chạy lại toàn bộ FE gates; Plan 059 được ghi nhận Completed. Browser visual QA chưa chạy vì chưa có browser session.
+- Đã hoàn tất UX/alignment amendments: cả flow từ score cell và flow tạo từ trang lịch sử đều chọn học sinh bằng UI, hiển thị điểm hiện tại; detail dialog đã căn chỉnh card/action; browser visual QA chưa chạy vì chưa có browser session.

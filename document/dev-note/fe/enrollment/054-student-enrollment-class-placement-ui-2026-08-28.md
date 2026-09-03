@@ -28,6 +28,8 @@
   prefer `className` and fall back to `classCode`/technical id.
 - Updated the global FE typography stack to prioritize `Segoe UI`, with
   system sans-serif fallbacks when that font is unavailable.
+- This typography decision was superseded on 2026-09-03 by the Plan 059
+  amendment: `Roboto` is now the FE default, with system fallbacks.
 - Kept bulk placement payload on `studentIds`; kept local `LocalDateTime`
   formatting without `toISOString()` timezone conversion.
 - Reloaded unassigned list and roster after successful mutations; rendered

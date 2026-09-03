@@ -91,7 +91,7 @@ NNN-short-topic-yyyy-mm-dd.md
 
 Plan 057 PMD follow-up (2026-09-03): backend `test`, Checkstyle, PMD and `build` have been rerun after the approved refactor; PMD is PASS with 0 violations.
 
-Plan 059 (2026-09-03): Score Change Request UI implemented with Vietnamese UX/statuses and context-based flow; FE validation PASS; browser QA NOT RUN.
+Plan 059 (2026-09-03): Score Change Request UI implemented with Vietnamese UX/statuses and context-based flow; UX amended to open from score cell and select student/column from score grid without manual student-code entry; current score shown before proposal; detail cards/actions aligned; request time shown as dd-mm-yyyy hh:mm:ss; FE validation PASS; browser QA NOT RUN. Typography later amended to prioritize Roboto with system fallback.
 
 Plan 060 (2026-09-03): Semester completeness, email notification, lock/reopen UI implemented without checkpoint or in-app UI; FE validation PASS; browser/live SMTP NOT RUN.
 
