@@ -92,6 +92,7 @@ NNN-short-topic-yyyy-mm-dd.md
 |   059 | FE             | [Score Change Request UI](../fe/scorebook/059-score-change-request-ui-2026-09-03.md)                                                        | Completed; score-cell UX and row alignment corrected; FE validation PASS; browser QA PASS                                                    | 2026-09-03 |
 |   060 | FE             | [Semester Lock & Completeness UI](../fe/academic/060-semester-lock-completeness-ui-2026-09-03.md)                                           | Completed; FE validation PASS; live backend/SMTP NOT RUN                                                                                     | 2026-09-03 |
 |   061 | FE             | [Transcript Viewer UI](../fe/scorebook/061-transcript-viewer-ui-2026-09-03.md)                                                              | Completed; dynamic matrix table, attendance integration and columnNo gap mapping; validation PASS                                            | 2026-09-03 |
+|   062 | FE             | [Retake Result UI](../fe/scorebook/062-retake-result-ui-2026-09-03.md)                                                                      | Completed; Amendment 62.1 backend error message prioritization implemented; validation PASS                                                  | 2026-09-04 |
 
 Plan 057 PMD follow-up (2026-09-03): backend `test`, Checkstyle, PMD and `build` have been rerun after the approved refactor; PMD is PASS with 0 violations.
 
@@ -100,3 +101,5 @@ Plan 059 (2026-09-03): Score Change Request UI implemented with Vietnamese UX/st
 Plan 060 (2026-09-03): Semester completeness, email notification, lock/reopen UI implemented without checkpoint or in-app UI; FE validation PASS; browser/live SMTP NOT RUN.
 
 Plan 040.1 (2026-09-03): email-only notification contract enforced; missing sender is FAILED and SENT means SMTP client send returned successfully; BE validation PASS; production requires IN_APP preflight.
+
+Plan 062 (2026-09-03): Retake Result UI implemented with list, create, score entry, cancel, before/after score comparison, official score read from Transcript API, calculation status tracking (IN_PROGRESS/FINISH), comprehensive Storybook stories and unit tests; Amendment 62.1 (2026-09-04) prioritizes backend error messages over generic fallback; FE validation PASS (59 test files, 242 tests passed); browser/live backend walkthrough PASS.

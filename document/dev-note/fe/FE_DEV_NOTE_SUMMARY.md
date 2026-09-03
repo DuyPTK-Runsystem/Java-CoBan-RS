@@ -28,9 +28,12 @@
 |   059 | Scorebook                                           | [Score Change Request UI](scorebook/059-score-change-request-ui-2026-09-03.md)                                                      | Completed; score-cell UX and row alignment corrected; FE validation PASS; browser QA PASS                                                    | 2026-09-03 |
 |   060 | Academic                                            | [Semester Lock & Completeness UI](academic/060-semester-lock-completeness-ui-2026-09-03.md)                                         | Completed; FE validation PASS; browser/live SMTP NOT RUN                                                                                     | 2026-09-03 |
 |   061 | Scorebook                                           | [Transcript Viewer UI](scorebook/061-transcript-viewer-ui-2026-09-03.md)                                                            | Completed; dynamic matrix table, attendance integration and columnNo gap mapping; validation PASS                                            | 2026-09-03 |
+|   062 | Scorebook                                           | [Retake Result UI](scorebook/062-retake-result-ui-2026-09-03.md)                                                                    | Completed; Amendment 62.1 backend error message prioritization implemented; validation PASS                                                  | 2026-09-04 |
 
 Plan 057 PMD follow-up (2026-09-03): backend PMD baseline was remediated by responsibility/test refactors; `pmdMain` and `pmdTest` PASS with 0 violations.
 
 Plan 059: Score Change Request UI — Completed; score-cell and dropdown student-selection UX amendments completed, current score shown before proposal, detail cards/actions and list-row vertical alignment corrected, request time formatted as dd-mm-yyyy hh:mm:ss; FE validation PASS, browser visual QA PASS for table alignment; typography amended to prioritize Roboto with system fallback.
 
 Plan 060: Semester Lock & Completeness UI — Completed; FE validation PASS, no checkpoint/in-app UI, browser/live SMTP NOT RUN.
+
+Plan 062: Retake Result UI — Completed; unified RetakeResultDialog (create, score, cancel), responsive RetakeResultTable, before/after score comparison, official score read from Transcript API, calculation status tracking (IN_PROGRESS/FINISH), comprehensive Storybook stories and unit tests; Amendment 62.1 prioritizes backend error messages over generic fallback; FE validation PASS (59 test files, 242 tests passed), live backend/browser walkthrough PASS.

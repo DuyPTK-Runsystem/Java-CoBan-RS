@@ -2,7 +2,9 @@
 
 ## 1. Trạng thái và thông tin chung
 
-- **Status**: `Draft — chờ user approval`.
+- **Status**: `Completed`.
+- **Approval**: Người dùng đã phê duyệt Plan 062.
+- **Dev Note**: [`062-retake-result-ui-2026-09-03.md`](../../../dev-note/fe/scorebook/062-retake-result-ui-2026-09-03.md).
 - **Application-document version**: `v2`.
 - **Ngày lập plan**: `2026-09-03`.
 - **Module**: Frontend `scorebook` / Retake Result.

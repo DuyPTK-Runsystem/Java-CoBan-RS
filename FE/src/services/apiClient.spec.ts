@@ -121,4 +121,35 @@ describe('apiClient', () => {
     expect(await result.text()).toContain('id,name')
     expect(fetchMock).toHaveBeenCalledWith('http://localhost:8081/api/v2/example/export', expect.objectContaining({ headers: { Accept: 'text/csv' } }))
   })
+
+  it('normalizes RFC 7807 problem details with detail and title', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({
+      statusCode: 409,
+      title: 'Conflict',
+      detail: 'Chưa có điểm tổng kết thường (regular_dtbmh_cn)...',
+    }), { status: 409 }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(apiClient.post('/api/v2/retake-exams', {})).rejects.toSatisfy((error: unknown) => {
+      return isApiError(error, 409)
+        && error.kind === 'conflict'
+        && error.message === 'Chưa có điểm tổng kết thường (regular_dtbmh_cn)...'
+        && error.globalMessages[0] === 'Chưa có điểm tổng kết thường (regular_dtbmh_cn)...'
+    })
+  })
+
+  it('normalizes string array in errors field', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({
+      statusCode: 400,
+      errors: ['Học sinh không hợp lệ', 'Năm học không hợp lệ'],
+    }), { status: 400 }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(apiClient.post('/api/v2/retake-exams', {})).rejects.toSatisfy((error: unknown) => {
+      return isApiError(error, 400)
+        && error.kind === 'validation'
+        && error.globalMessages.length === 2
+        && error.globalMessages[0] === 'Học sinh không hợp lệ'
+    })
+  })
 })

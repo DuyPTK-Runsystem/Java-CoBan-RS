@@ -22,6 +22,9 @@ interface ErrorPayload {
   error?: unknown
   message?: unknown
   errors?: unknown
+  detail?: unknown
+  details?: unknown
+  title?: unknown
 }
 
 let onUnauthorized: (() => void | Promise<void>) | undefined
@@ -66,7 +69,10 @@ function isFieldName(value: string): boolean {
 }
 
 function normalizeErrors(payload: ErrorPayload | null): { rawMessages: string[]; globalMessages: string[]; validationErrors: ValidationError[] } {
-  const rawMessages = asMessages(payload?.message)
+  const rawMessages = asMessages(payload?.message ?? payload?.detail ?? payload?.details)
+  if (Array.isArray(payload?.errors)) {
+    rawMessages.push(...asMessages(payload.errors))
+  }
   const validationMap = new Map<string, string[]>()
   const globalMessages: string[] = []
 
@@ -117,7 +123,7 @@ function fallbackMessage(status: number): string {
 function safePayloadMessage(payload: ErrorPayload | null, status: number, details: ReturnType<typeof normalizeErrors>): string {
   if (details.globalMessages.length > 0) return details.globalMessages.join(' ')
   if (details.validationErrors.length > 0) return details.validationErrors.flatMap((error) => error.messages).join(' ')
-  const errorMessages = asMessages(payload?.error)
+  const errorMessages = asMessages(payload?.error ?? payload?.title)
   return errorMessages.join(' ') || fallbackMessage(status)
 }
 

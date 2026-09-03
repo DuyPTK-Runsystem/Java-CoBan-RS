@@ -125,6 +125,11 @@ const router = createRouter({
           component: () => import('@/views/TranscriptViewerView.vue'),
         },
         {
+          path: 'retake-exams',
+          name: 'v2-retake-exams',
+          component: () => import('@/views/RetakeResultView.vue'),
+        },
+        {
           // Business routes must be registered before this neutral outlet.
           path: ':pathMatch(.*)*',
           name: 'v2-outlet',

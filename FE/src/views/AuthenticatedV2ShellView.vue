@@ -26,6 +26,9 @@ const navigation = computed(() => {
     items.push({ label: 'Sổ điểm', to: '/v2/scorebooks', icon: 'pi pi-book' })
     items.push({ label: 'Yêu cầu sửa điểm', to: '/v2/score-change-requests', icon: 'pi pi-file-edit' })
   }
+  if (!roles.length || roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE')) {
+    items.push({ label: 'Kết quả thi lại', to: '/v2/retake-exams', icon: 'pi pi-check-square' })
+  }
   return items
 })
 
