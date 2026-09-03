@@ -29,7 +29,7 @@ public class ClassAttendanceSummaryController {
 
     @GetMapping("/{classId}/summary")
     @ApiMessage("Lấy báo cáo chuyên cần của lớp")
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE', 'TEACHER')")
     public ResClassAttendanceSummaryDTO getClassSummary(
             @PathVariable("classId") @Positive(message = "ID lớp phải là số dương") Long classId,
             @Valid @ModelAttribute ReqClassAttendanceSummaryQuery query) {

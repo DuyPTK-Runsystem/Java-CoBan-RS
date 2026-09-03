@@ -20,6 +20,8 @@ import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
 import com.JavaTraining.BaiTap_RS.teacher.domain.entity.Teacher;
 import com.JavaTraining.BaiTap_RS.teacher.repository.TeacherRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -106,6 +108,13 @@ public class AttendanceGuard {
         validateCurrentUserHomeroomInRange(classId, effectiveDate, effectiveDate);
     }
 
+    public void validateCurrentUserCanViewClassSummary(Long classId, LocalDate from, LocalDate to) {
+        if (hasOfficeRole()) {
+            return;
+        }
+        validateCurrentUserHomeroomInRange(classId, from, to);
+    }
+
     public void validateCurrentUserHomeroomInRange(Long classId, LocalDate from, LocalDate to) {
         Long currentUserId = AuditContext.currentUserId();
         if (currentUserId == null) {
@@ -146,5 +155,12 @@ public class AttendanceGuard {
 
     public AppException notFound(String message) {
         return new AppException(HttpStatus.NOT_FOUND, message);
+    }
+
+    private boolean hasOfficeRole() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority())
+                        || "ROLE_ACADEMIC_OFFICE".equals(authority.getAuthority()));
     }
 }

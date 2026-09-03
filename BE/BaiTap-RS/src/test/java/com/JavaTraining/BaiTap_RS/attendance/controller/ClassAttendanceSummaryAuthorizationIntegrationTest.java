@@ -40,14 +40,26 @@ class ClassAttendanceSummaryAuthorizationIntegrationTest {
 
     @Test
     @WithMockUser(roles = "ACADEMIC_OFFICE")
-    void academicOfficeCannotAccessClassSummary() throws Exception {
+    void academicOfficePassesClassSummaryAuthorization() throws Exception {
         int status = mockMvc.perform(MockMvcRequestBuilders.get(SUMMARY_ENDPOINT))
                 .andReturn()
                 .getResponse()
                 .getStatus();
 
-        Assertions.assertEquals(403, status,
-                "academic office should not access teacher class summary endpoint");
+        Assertions.assertEquals(404, status,
+                "academic office should pass authorization before missing class validation");
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void adminPassesClassSummaryAuthorization() throws Exception {
+        int status = mockMvc.perform(MockMvcRequestBuilders.get(SUMMARY_ENDPOINT))
+                .andReturn()
+                .getResponse()
+                .getStatus();
+
+        Assertions.assertEquals(404, status,
+                "admin should pass authorization before missing class validation");
     }
 
     @Test

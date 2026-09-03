@@ -140,7 +140,7 @@ class ClassAttendanceSummaryServiceTest {
         Mockito.when(attendanceGuard.findSchoolClass(classId)).thenReturn(schoolClass);
         Mockito.when(attendanceGuard.findSemester(semesterId)).thenReturn(semester);
         Mockito.doThrow(new AppException(HttpStatus.FORBIDDEN, "GVCN chỉ được thao tác lớp được phân công"))
-                .when(attendanceGuard).validateCurrentUserHomeroomInRange(classId, from, to);
+                .when(attendanceGuard).validateCurrentUserCanViewClassSummary(classId, from, to);
 
         Assertions.assertThrows(
                 AppException.class,

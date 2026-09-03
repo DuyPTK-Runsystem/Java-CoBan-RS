@@ -196,7 +196,13 @@ earlyLeaveCount
 GET /api/v2/attendance/classes/{classId}/summary
 ```
 
-Authorization: `TEACHER`.
+Authorization: `ADMIN`, `ACADEMIC_OFFICE` hoặc `TEACHER`.
+
+Scope:
+
+- `ADMIN` và `ACADEMIC_OFFICE` được xem báo cáo của mọi lớp, không cần phân công GVCN.
+- `TEACHER` chỉ được xem lớp mình là GVCN trong khoảng ngày truy vấn.
+- User đã xác thực nhưng thiếu role phù hợp nhận `403`; request anonymous nhận `401`.
 
 Required query:
 

@@ -36,7 +36,7 @@ public class ClassAttendanceSummaryService {
         SchoolClass schoolClass = attendanceGuard.findSchoolClass(classId);
         Semester semester = attendanceGuard.findSemester(query.semesterId());
         attendanceGuard.validateClassAndSemester(schoolClass, semester);
-        attendanceGuard.validateCurrentUserHomeroomInRange(classId, query.from(), query.to());
+        attendanceGuard.validateCurrentUserCanViewClassSummary(classId, query.from(), query.to());
 
         ClassAttendanceSummaryCollector.AggregatedClassData aggregatedData = collector.collect(
                 classId,

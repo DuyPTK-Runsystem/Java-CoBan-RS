@@ -282,7 +282,8 @@ Kiểm tra task JaCoCo bằng `./gradlew.bat tasks --all`; nếu không có task
 
 - API v2 báo cáo chuyên cần read-only theo lớp và thời gian.
 - Class summary và per-student summary đúng theo calendar/enrollment/exception.
-- Authorization không cho đọc lớp ngoài phạm vi GVCN.
+- Authorization giữ ownership theo assignment cho `TEACHER`; quyền đọc mọi lớp của `ADMIN` và `ACADEMIC_OFFICE`
+  được bổ sung tại Amendment 033.1.
 - Không ảnh hưởng flow mutation attendance hoặc student history.
 - Có unit/integration tests và validation result thực tế.
 - Có Dev Note trong `document/dev-note/be/attendance/` sau implementation.
@@ -291,3 +292,38 @@ Kiểm tra task JaCoCo bằng `./gradlew.bat tasks --all`; nếu không có task
 
 Plan này chỉ được coi là approved sau khi user xác nhận rõ ràng bằng tin nhắn qua agent.
 Trước approval, không sửa production code, test code, migration hoặc API contract.
+
+## 13. Amendment 033.1: Mở quyền xem báo cáo cho giáo vụ và admin
+
+- Trạng thái: `Approved` — user phê duyệt triển khai qua tin nhắn agent ngày `2026-09-03`.
+- Phạm vi: chỉ mở rộng quyền đọc endpoint class attendance summary; không thay đổi quyền ghi điểm danh.
+- Lý do: FE đã hiển thị tab `Báo cáo lớp` cho `ACADEMIC_OFFICE` và `ADMIN`, nhưng endpoint hiện chỉ cho
+  `TEACHER`, khiến hai role này nhận `403` khi đủ context để tự động tải báo cáo.
+
+### 13.1. Quyền sau amendment
+
+- `ADMIN` và `ACADEMIC_OFFICE`: được xem báo cáo của mọi lớp qua
+  `GET /api/v2/attendance/classes/{classId}/summary`; không yêu cầu hồ sơ giáo viên hoặc phân công GVCN.
+- `TEACHER`: giữ nguyên kiểm tra phải là GVCN của lớp trong khoảng `from` đến `to`.
+- Role khác: tiếp tục nhận `403` từ method authorization.
+- Anonymous: tiếp tục nhận `401` theo security contract hiện tại.
+
+### 13.2. Quyết định triển khai
+
+- Controller đổi sang `hasAnyRole('ADMIN', 'ACADEMIC_OFFICE', 'TEACHER')`.
+- `AttendanceGuard` thêm một method dành riêng cho read-only class summary. Method này bypass homeroom lookup
+  chỉ khi authority là `ROLE_ADMIN` hoặc `ROLE_ACADEMIC_OFFICE`, rồi giữ nguyên guard ownership cho teacher.
+- `ClassAttendanceSummaryService` chỉ gọi method guard mới. Các method guard đang phục vụ mutation attendance
+  không đổi semantics.
+- Không đổi endpoint, query DTO, response DTO, aggregation, pagination, quy tắc suy diễn `PRESENT`, database
+  schema hoặc API student history.
+
+### 13.3. Test acceptance
+
+- `STUDENT` vẫn bị từ chối với `403`.
+- Anonymous vẫn bị từ chối với `401`.
+- `ACADEMIC_OFFICE` và `ADMIN` vượt qua authorization; lỗi dữ liệu lớp không tồn tại được xử lý ở domain layer,
+  không bị nhầm thành `403`.
+- Teacher vẫn bị từ chối khi không có assignment GVCN trong khoảng ngày.
+- Unit test xác nhận office/admin không gọi `TeacherRepository` hoặc `HomeroomAssignmentRepository` cho read-only
+  summary.
