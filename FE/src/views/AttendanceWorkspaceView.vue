@@ -69,6 +69,7 @@ const sessionStudents = ref<AttendanceStudent[]>([])
 const sessionLoading = ref(false)
 const sessionError = ref('')
 const sessionForbidden = ref(false)
+const sessionOpening = ref(false)
 const sessionSaving = ref(false)
 const exceptionVisible = ref(false)
 const selectedStudent = ref<AttendanceStudent | null>(null)
@@ -350,7 +351,7 @@ async function openSession(): Promise<void> {
   if (!canOpenSession.value || selectedClassId.value === null || selectedSemesterId.value === null || !attendanceDate.value || sessionReadOnly.value) return
   const accessToken = token()
   if (!accessToken) return
-  sessionSaving.value = true
+  sessionOpening.value = true
   sessionError.value = ''
   try {
     const loadedSession = await createOrGetAttendanceSession(accessToken, {
@@ -366,7 +367,7 @@ async function openSession(): Promise<void> {
     sessionForbidden.value = isApiError(error, 403)
     sessionError.value = messageFor(error, 'Không thể mở buổi điểm danh.')
   } finally {
-    sessionSaving.value = false
+    sessionOpening.value = false
   }
 }
 
@@ -606,6 +607,7 @@ onMounted(async () => {
       :calendar-status="calendarStatus"
       :calendar-message="calendarMessage"
       :show-open="canOpenSession"
+      :open-loading="sessionOpening"
       @open="openSession"
     />
     <FormAlert v-if="calendarError" tone="warning" :message="calendarError" />

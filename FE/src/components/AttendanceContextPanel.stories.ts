@@ -17,6 +17,7 @@ const meta = {
     sessionPeriod: 'MORNING',
     calendarStatus: 'SCHEDULED',
     calendarMessage: 'Ngày và buổi học hợp lệ để mở attendance session.',
+    showOpen: true,
   },
   parameters: { layout: 'padded' },
 } satisfies Meta<typeof AttendanceContextPanel>
@@ -27,3 +28,4 @@ type Story = StoryObj<typeof meta>
 export const Scheduled: Story = {}
 export const NoClass: Story = { args: { calendarStatus: 'NO_CLASS', calendarMessage: 'Ngày này là ngày nghỉ, không ghi điểm danh.' } }
 export const Loading: Story = { args: { calendarLoading: true } }
+export const Opening: Story = { args: { openLoading: true } }
