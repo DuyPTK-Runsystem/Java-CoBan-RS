@@ -317,7 +317,8 @@ function rebindSelectedScore(): void {
 
 async function handleConflict(error: unknown): Promise<boolean> {
   if (!isApiError(error, 409)) return false
-  conflictMessage.value = 'Dữ liệu đã thay đổi ở nơi khác. Hệ thống đã tải lại phiên bản mới; vui lòng kiểm tra trước khi lưu lại.'
+  const apiMessage = messageFor(error, '')
+  conflictMessage.value = apiMessage || 'Dữ liệu đã thay đổi ở nơi khác. Hệ thống đã tải lại phiên bản mới; vui lòng kiểm tra trước khi lưu lại.'
   dialogError.value = conflictMessage.value
   await reloadAuthoritative(false)
   return true

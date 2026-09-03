@@ -1,10 +1,16 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 
 import ServerPagination from '@/components/ServerPagination.vue'
-import type { ScoreGridColumn, StudentScore, StudentScoreGrid } from '@/types/scorebook'
+import {
+  type ScoreGridColumn,
+  type StudentScore,
+  type StudentScoreGrid,
+  compareAssessmentColumns,
+} from '@/types/scorebook'
 
 const props = defineProps<{ grid: StudentScoreGrid | null; loading?: boolean; readOnly?: boolean }>()
 const emit = defineEmits<{
@@ -12,6 +18,8 @@ const emit = defineEmits<{
   'bulk-edit': [column: ScoreGridColumn]
   'page-change': [page: number, size: number]
 }>()
+
+const displayedColumns = computed(() => [...(props.grid?.columns ?? [])].sort(compareAssessmentColumns))
 
 function scoreFor(student: StudentScoreGrid['students'][number], column: ScoreGridColumn): StudentScore | null {
   return student.scores[String(column.columnId)] ?? null
@@ -43,7 +51,7 @@ function label(score: StudentScore | null): string {
       <DataTable :value="props.grid.students" striped-rows responsive-layout="scroll" class="scorebook-grid-table">
         <Column field="studentCode" header="Mã HS" />
         <Column field="studentName" header="Họ và tên" />
-        <Column v-for="column in props.grid.columns" :key="column.columnId">
+        <Column v-for="column in displayedColumns" :key="column.columnId">
           <template #header>
             <div class="scorebook-column-header">
               <span>{{ column.assessmentType }} · {{ column.columnName || `Cột ${column.columnNo}` }}</span>

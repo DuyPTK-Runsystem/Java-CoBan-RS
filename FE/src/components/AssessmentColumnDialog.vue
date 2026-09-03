@@ -26,7 +26,6 @@ const emit = defineEmits<{
 }>()
 
 const type = ref<AssessmentType>('KTTT')
-const columnNo = ref<number | null>(1)
 const columnName = ref('')
 const validationMessage = ref('')
 const types = [
@@ -39,7 +38,6 @@ const title = computed(() => props.mode === 'create' ? 'Thêm assessment column'
 watch(() => props.visible, (visible) => {
   if (!visible) return
   type.value = props.column?.assessmentType ?? 'KTTT'
-  columnNo.value = props.column?.columnNo ?? 1
   columnName.value = props.column?.columnName ?? ''
   validationMessage.value = ''
 })
@@ -51,13 +49,8 @@ function save(): void {
     return
   }
   if (props.mode === 'create') {
-    if (!Number.isInteger(columnNo.value) || (columnNo.value ?? 0) <= 0) {
-      validationMessage.value = 'Số thứ tự phải là số nguyên dương.'
-      return
-    }
     emit('save', {
       assessmentType: type.value,
-      columnNo: columnNo.value as number,
       columnName: columnName.value.trim() || null,
     })
     return
@@ -70,15 +63,9 @@ function save(): void {
   <Dialog :visible="props.visible" :header="title" modal :style="{ width: 'min(560px, calc(100vw - 32px))' }" @update:visible="emit('update:visible', $event)">
     <div class="form-stack">
       <div v-if="validationMessage || props.errorMessage" class="form-alert form-alert-error" role="alert">{{ validationMessage || props.errorMessage }}</div>
-      <div v-if="props.mode === 'create'" class="form-grid-two">
-        <div class="field-group">
-          <label for="assessment-type">Loại</label>
-          <Select id="assessment-type" v-model="type" :options="types" option-label="label" option-value="value" fluid />
-        </div>
-        <div class="field-group">
-          <label for="assessment-column-no">Số thứ tự</label>
-          <InputText id="assessment-column-no" v-model.number="columnNo" type="number" min="1" step="1" fluid />
-        </div>
+      <div v-if="props.mode === 'create'" class="field-group">
+        <label for="assessment-type">Loại</label>
+        <Select id="assessment-type" v-model="type" :options="types" option-label="label" option-value="value" fluid />
       </div>
       <div class="field-group">
         <label for="assessment-column-name">Tên cột</label>

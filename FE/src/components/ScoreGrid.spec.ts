@@ -40,4 +40,20 @@ describe('ScoreGrid', () => {
 
     expect(wrapper.emitted('page-change')).toEqual([[2, 20]])
   })
+
+  it('sorts displayed columns in order KTTT/KTTX -> KTĐK -> KTCK and columnNo', () => {
+    const unorderedGrid: StudentScoreGrid = {
+      ...grid,
+      columns: [
+        { columnId: 1, assessmentType: 'KTCK', columnNo: 1, columnName: 'Cuối kỳ' },
+        { columnId: 2, assessmentType: 'KTĐK', columnNo: 2, columnName: 'Giữa kỳ 2' },
+        { columnId: 3, assessmentType: 'KTTT', columnNo: 1, columnName: 'Thường xuyên' },
+        { columnId: 4, assessmentType: 'KTĐK', columnNo: 1, columnName: 'Giữa kỳ 1' },
+      ],
+    }
+    const wrapper = shallowMount(ScoreGrid, { props: { grid: unorderedGrid } })
+    const view = wrapper.vm as unknown as { displayedColumns: Array<{ columnId: number }> }
+
+    expect(view.displayedColumns.map((c) => c.columnId)).toEqual([3, 4, 2, 1])
+  })
 })

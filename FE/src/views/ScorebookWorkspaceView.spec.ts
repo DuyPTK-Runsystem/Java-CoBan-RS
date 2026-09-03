@@ -180,13 +180,19 @@ describe('ScorebookWorkspaceView', () => {
     expect(mocks.createScorebook).toHaveBeenCalledWith('office-token', { classSubjectId: 20 })
   })
 
-  it('reloads authoritative metadata and grid after a 409', async () => {
+  it('reloads authoritative metadata and sets conflictMessage from API after a 409', async () => {
     const wrapper = mountView()
     await flushPromises()
-    const view = wrapper.vm as unknown as { handleConflict: (error: unknown) => Promise<boolean> }
+    const view = wrapper.vm as unknown as {
+      handleConflict: (error: unknown) => Promise<boolean>
+      conflictMessage: string
+      dialogError: string
+    }
 
-    await view.handleConflict(new ApiError(409, 'Version conflict'))
+    await view.handleConflict(new ApiError(409, 'Môn thường chỉ được phép có đúng một cột KTCK'))
 
+    expect(view.conflictMessage).toBe('Môn thường chỉ được phép có đúng một cột KTCK')
+    expect(view.dialogError).toBe('Môn thường chỉ được phép có đúng một cột KTCK')
     expect(mocks.fetchScorebook).toHaveBeenCalledWith('teacher-token', 12)
     expect(mocks.fetchScoreGrid.mock.calls.length).toBeGreaterThan(1)
   })
@@ -194,7 +200,7 @@ describe('ScorebookWorkspaceView', () => {
   it('requires confirmation before publish', async () => {
     const wrapper = mountView()
     await flushPromises()
-    ;(wrapper.vm as unknown as { confirmPublish: () => void }).confirmPublish()
+      ; (wrapper.vm as unknown as { confirmPublish: () => void }).confirmPublish()
 
     expect(mocks.confirmRequire).toHaveBeenCalledWith(expect.objectContaining({
       header: 'Xác nhận công bố sổ điểm',
@@ -215,8 +221,8 @@ describe('ScorebookWorkspaceView', () => {
       required: false,
       status: 'ACTIVE' as const,
     }
-    ;(wrapper.vm as unknown as { confirmDeactivateColumn: (value: typeof column) => void })
-      .confirmDeactivateColumn(column)
+      ; (wrapper.vm as unknown as { confirmDeactivateColumn: (value: typeof column) => void })
+        .confirmDeactivateColumn(column)
 
     expect(mocks.confirmRequire).toHaveBeenCalledWith(expect.objectContaining({
       header: 'Xác nhận vô hiệu hóa cột',

@@ -4,20 +4,23 @@ import { describe, expect, it } from 'vitest'
 import AssessmentColumnDialog from './AssessmentColumnDialog.vue'
 
 describe('AssessmentColumnDialog', () => {
-  it('requires a positive integer column number when creating', () => {
+  it('submits assessmentType and optional columnName without columnNo in create mode', () => {
     const wrapper = shallowMount(AssessmentColumnDialog, {
       props: { visible: true, mode: 'create', column: null },
     })
     const view = wrapper.vm as unknown as {
-      columnNo: number | null
+      type: string
+      columnName: string
       save: () => void
-      validationMessage: string
     }
-    view.columnNo = 1.5
+    view.type = 'KTĐK'
+    view.columnName = 'Giữa kỳ'
     view.save()
 
-    expect(view.validationMessage).toContain('số nguyên dương')
-    expect(wrapper.emitted('save')).toBeUndefined()
+    expect(wrapper.emitted('save')?.[0]).toEqual([{
+      assessmentType: 'KTĐK',
+      columnName: 'Giữa kỳ',
+    }])
   })
 
   it('updates only the column name in edit mode', () => {

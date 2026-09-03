@@ -3,6 +3,21 @@ export type AssessmentType = 'KTTT' | 'KTĐK' | 'KTCK'
 export type AssessmentColumnStatus = 'ACTIVE' | 'INACTIVE'
 export type ScoreStatus = 'SCORED' | 'ABSENT' | 'EXEMPTED' | 'CANCELLED'
 
+export const ASSESSMENT_TYPE_ORDER: Record<string, number> = {
+  KTTT: 1,
+  KTTX: 1,
+  'KTĐK': 2,
+  KTDK: 2,
+  KTCK: 3,
+}
+
+export function compareAssessmentColumns<T extends { assessmentType: AssessmentType; columnNo: number }>(a: T, b: T): number {
+  const orderA = ASSESSMENT_TYPE_ORDER[a.assessmentType] ?? 99
+  const orderB = ASSESSMENT_TYPE_ORDER[b.assessmentType] ?? 99
+  if (orderA !== orderB) return orderA - orderB
+  return a.columnNo - b.columnNo
+}
+
 export interface AssessmentColumn {
   id: number
   scorebookId: number
@@ -85,7 +100,7 @@ export interface CreateScorebookRequest {
 
 export interface CreateAssessmentColumnRequest {
   assessmentType: AssessmentType
-  columnNo: number
+  columnNo?: number
   columnName?: string | null
 }
 
