@@ -10,6 +10,7 @@ import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqUpdateAssess
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResAssessmentColumnDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.AssessmentColumn;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.AssessmentColumnStatus;
+import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.AssessmentType;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.Scorebook;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.AssessmentColumnRepository;
 import org.springframework.http.HttpStatus;
@@ -52,19 +53,14 @@ public class ScorebookColumnService {
         guard.assertCanManage(scorebook);
         validator.ensureWritable(scorebook);
         Subject subject = context.subjectFor(scorebook);
-        if (columnRepository.existsByScorebookIdAndAssessmentTypeAndColumnNo(
-                scorebookId, request.assessmentType(), request.columnNo())) {
-            throw conflict("Số thứ tự cột đã tồn tại trong sổ điểm");
-        }
-        if (subject.getSubjectType() == SubjectType.SKILL
-                && columnRepository.countByScorebookIdAndAssessmentTypeAndStatus(
-                        scorebookId, request.assessmentType(), AssessmentColumnStatus.ACTIVE) >= 1) {
-            throw conflict("Môn kỹ năng chỉ có một cột cho mỗi loại đánh giá");
-        }
+        long activeCount = columnRepository.countByScorebookIdAndAssessmentTypeAndStatus(
+                scorebookId, request.assessmentType(), AssessmentColumnStatus.ACTIVE);
+        validator.validateAddColumn(subject, request.assessmentType(), activeCount);
+        int resolvedColumnNo = resolveNextAvailableColumnNo(scorebookId, request.assessmentType(), request.columnNo());
         AssessmentColumn column = columnRepository.save(new AssessmentColumn(
                 scorebookId,
                 request.assessmentType(),
-                request.columnNo(),
+                resolvedColumnNo,
                 request.columnName(),
                 request.assessmentType().standardWeight(),
                 subject.getSubjectType() == SubjectType.SKILL || request.assessmentType().isRequiredByStructure()));
@@ -124,6 +120,16 @@ public class ScorebookColumnService {
         return columnRepository.findById(columnId)
                 .orElseThrow(() -> new com.JavaTraining.BaiTap_RS.common.error.AppException(
                         HttpStatus.NOT_FOUND, "Không tìm thấy cột điểm"));
+    }
+
+    private int resolveNextAvailableColumnNo(
+            Long scorebookId, AssessmentType assessmentType, Integer preferredColumnNo) {
+        int candidate = (preferredColumnNo != null && preferredColumnNo > 0) ? preferredColumnNo : 1;
+        while (columnRepository.existsByScorebookIdAndAssessmentTypeAndColumnNo(
+                scorebookId, assessmentType, candidate)) {
+            candidate++;
+        }
+        return candidate;
     }
 
     private com.JavaTraining.BaiTap_RS.common.error.AppException conflict(String message) {

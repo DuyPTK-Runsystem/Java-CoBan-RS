@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public record ReqCreateAssessmentColumnDTO(
-        @NotNull AssessmentType assessmentType,
-        @NotNull @Positive Integer columnNo,
-        @Size(max = 100) String columnName) {
+                @NotNull AssessmentType assessmentType,
+                @Positive Integer columnNo,
+                @Size(max = 100) String columnName) {
 }

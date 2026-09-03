@@ -45,12 +45,28 @@ public class ScorebookConfigurationValidator {
         }
     }
 
+    public void validateAddColumn(Subject subject, AssessmentType assessmentType, long currentActiveCount) {
+        int maxAllowed = assessmentType.maxAllowedActiveColumns(subject.getSubjectType());
+        if (currentActiveCount >= maxAllowed) {
+            if (subject.getSubjectType() == SubjectType.SKILL) {
+                throw conflict("Môn kỹ năng chỉ có một cột cho mỗi loại đánh giá");
+            }
+            if (assessmentType == AssessmentType.KTCK) {
+                throw conflict("Môn thường chỉ được phép có đúng một cột KTCK");
+            }
+            throw conflict("Số lượng cột " + assessmentType.code() + " đã đạt giới hạn tối đa");
+        }
+    }
+
     public void validateWeights(ReqUpsertSkillWeightConfigDTO request) {
         validateWeights(request.ktttWeightPercent(), request.ktdkWeightPercent(), request.ktckWeightPercent());
     }
 
     public void validateWeights(BigDecimal kttt, BigDecimal ktdk, BigDecimal ktck) {
-        if (hasInvalidPercent(kttt) || hasInvalidPercent(ktdk) || hasInvalidPercent(ktck)) {
+        boolean invalid = kttt == null || kttt.signum() < 0 || kttt.compareTo(ONE_HUNDRED) > 0
+                || ktdk == null || ktdk.signum() < 0 || ktdk.compareTo(ONE_HUNDRED) > 0
+                || ktck == null || ktck.signum() < 0 || ktck.compareTo(ONE_HUNDRED) > 0;
+        if (invalid) {
             throw conflict("Trọng số môn kỹ năng không hợp lệ");
         }
         BigDecimal total = kttt.add(ktdk).add(ktck);
@@ -61,10 +77,6 @@ public class ScorebookConfigurationValidator {
 
     private long count(List<AssessmentColumn> columns, AssessmentType type) {
         return columns.stream().filter(column -> column.getAssessmentType() == type).count();
-    }
-
-    private boolean hasInvalidPercent(BigDecimal value) {
-        return value == null || value.signum() < 0 || value.compareTo(ONE_HUNDRED) > 0;
     }
 
     private void ensureStatus(Scorebook scorebook, ScorebookStatus expected, String message) {
