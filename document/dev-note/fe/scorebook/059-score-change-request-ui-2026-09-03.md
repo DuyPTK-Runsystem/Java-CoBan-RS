@@ -17,6 +17,9 @@
 - UX amendment tiếp theo: bỏ input mã HS khỏi form tạo request; tại trang yêu cầu, GV chọn học sinh và cột điểm bằng dropdown từ score grid, rồi xem điểm hiện tại trước phần đề xuất.
 - UI alignment amendment: tách các trường detail thành card riêng có label/value rõ ràng; nhóm action trong detail căn phải và responsive; filter bar giữ chung baseline.
 - Date display amendment: thời gian gửi request ở list/detail được format thành `dd-mm-yyyy hh:mm:ss`; API value vẫn giữ nguyên.
+- Table alignment amendment: hàng danh sách căn giữa theo chiều dọc; ô học sinh dùng
+  hai block cố định cho mã và tên để các cột cùng hàng không bị lệch khi tên học sinh
+  chiếm dòng thứ hai.
 
 ## Files thay đổi thuộc Plan 059
 
@@ -43,7 +46,8 @@
 
 ## Validation
 
-Final validation after date-format amendment: lint PASS; test PASS (49 files/162 tests); production build PASS; Storybook build status from prior UI alignment PASS; browser visual QA NOT RUN vì chưa có browser session.
+Final validation after table-alignment amendment: lint/build và browser visual QA sẽ được
+ghi nhận theo kết quả thực tế bên dưới; các gate trước đó giữ nguyên lịch sử.
 
 - `git diff --check`: PASS.
 - `npm run lint`: PASS sau alignment.
@@ -52,6 +56,15 @@ Final validation after date-format amendment: lint PASS; test PASS (49 files/162
 - `npm run build`: PASS.
 - `npm run build-storybook`: PASS.
 - Browser visual QA: NOT RUN.
+
+### Table-alignment amendment validation (2026-09-03)
+
+- `npm run lint`: `PASS`.
+- `npm run build`: `PASS`.
+- `npm run test`: `PASS` — 50 files, 168 tests.
+- Browser visual QA: `PASS` — tại `/v2/score-change-requests`, hai hàng dữ liệu
+  có chiều cao `62px`; mọi ô trong mỗi hàng cùng `top`/`height` và computed
+  `vertical-align: middle`.
 
 ## Contract blocker / missing API
 

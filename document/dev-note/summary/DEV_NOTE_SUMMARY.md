@@ -88,10 +88,11 @@ NNN-short-topic-yyyy-mm-dd.md
 | 056.1 | BE/FE          | [Attendance Authorization and 403 Contract](../fe/attendance/056.1-attendance-authorization-and-403-2026-09-02.md) | Student history context/auto lookup amendment implemented; FE PASS; BE PMD baseline blocker | 2026-09-02 |
 | 058 | BE             | [JWT role claim](../be/user-auth/058-jwt-role-claim-2026-09-02.md) | Implemented; focused tests/Checkstyle PASS; PMD and full-suite baseline blockers | 2026-09-02 |
 | 057.2 | BE/FE          | [Scorebook KTCK Column Constraint and Column Order Resolution](../be/scorebook/057.2-ktck-limit-and-column-order-resolution-2026-09-03.md) | Completed; BE/FE validation PASS | 2026-09-03 |
+| 065 | BE/FE          | [Published Score Entry and Reopen](../be/scorebook/065-published-score-entry-and-reopen-2026-09-03.md) | Completed; BE/FE validation PASS; browser/live API QA not run | 2026-09-03 |
 
 Plan 057 PMD follow-up (2026-09-03): backend `test`, Checkstyle, PMD and `build` have been rerun after the approved refactor; PMD is PASS with 0 violations.
 
-Plan 059 (2026-09-03): Score Change Request UI implemented with Vietnamese UX/statuses and context-based flow; UX amended to open from score cell and select student/column from score grid without manual student-code entry; current score shown before proposal; detail cards/actions aligned; request time shown as dd-mm-yyyy hh:mm:ss; FE validation PASS; browser QA NOT RUN. Typography later amended to prioritize Roboto with system fallback.
+Plan 059 (2026-09-03): Score Change Request UI implemented with Vietnamese UX/statuses and context-based flow; UX amended to open from score cell and select student/column from score grid without manual student-code entry; current score shown before proposal; detail cards/actions and list-row vertical alignment corrected; request time shown as dd-mm-yyyy hh:mm:ss; FE validation PASS; browser QA PASS for table alignment. Typography later amended to prioritize Roboto with system fallback.
 
 Plan 060 (2026-09-03): Semester completeness, email notification, lock/reopen UI implemented without checkpoint or in-app UI; FE validation PASS; browser/live SMTP NOT RUN.
 
