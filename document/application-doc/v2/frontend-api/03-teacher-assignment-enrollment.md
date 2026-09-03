@@ -41,7 +41,8 @@ status
 
 ## Teaching Assignment API
 
-Current assignment mutation/query controller is office-only.
+Assignment mutations remain office-only. Assignment queries are available to `TEACHER`
+only for the linked teacher and assigned classes.
 
 Office:
 
@@ -53,7 +54,9 @@ ACADEMIC_OFFICE
 | Method | Path | Request | Response |
 |---|---|---|---|
 | `GET` | `/api/v2/assignments/classes/{classId}` | — | `ResHomeroomAssignmentDTO[]` |
-| `GET` | `/api/v2/assignments/teachers/{teacherId}` | — | `ResSubjectTeachingAssignmentDTO[]` |
+| `GET` | `/api/v2/assignments/classes/{classId}/subjects?semesterId={semesterId}` | Teacher chỉ với lớp được phân công; Office/Admin với mọi lớp | `ResSubjectTeachingAssignmentDTO[]` của toàn bộ GVBM trong lớp-học kỳ |
+| `GET` | `/api/v2/assignments/teachers/{teacherId}` | Office/Teacher (own linked teacher only) | — | `ResSubjectTeachingAssignmentDTO[]` |
+| `GET` | `/api/v2/assignments/teachers/{teacherId}/homeroom` | Office/Teacher (own linked teacher only) | — | `ResHomeroomAssignmentDTO[]` |
 | `POST` | `/api/v2/classes/{classId}/homeroom-assignments` | `{ teacherId, validFrom, validTo? }` | `201 ResHomeroomAssignmentDTO` |
 | `POST` | `/api/v2/homeroom-assignments/{assignmentId}/replace` | replace DTO | homeroom assignment |
 | `POST` | `/api/v2/homeroom-assignments/{assignmentId}/end` | `{ validTo }` | homeroom assignment |

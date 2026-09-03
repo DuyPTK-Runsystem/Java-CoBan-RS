@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequestMapping("/api/v2/grades")
-@PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')")
 // FR-GRADE-001..005 and BR-AUTH-005: grade metadata mutations are office-only.
 @SuppressWarnings("PMD.GuardLogStatement")
 public class GradeLevelController {
@@ -38,6 +37,7 @@ public class GradeLevelController {
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     @ApiMessage("Lấy danh sách khối")
     public List<ResGradeLevelDTO> listGradeLevels() {
         DeveloperTrace.trace(/* NOPMD GuardLogStatement */
@@ -47,6 +47,7 @@ public class GradeLevelController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')")
     @ApiMessage("Tạo khối")
     public ResponseEntity<ResGradeLevelDTO> createGradeLevel(
             @Valid @RequestBody ReqCreateGradeLevelDTO request) {
@@ -57,6 +58,7 @@ public class GradeLevelController {
     }
 
     @PutMapping("/{gradeId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')")
     @ApiMessage("Cập nhật khối")
     public ResGradeLevelDTO updateGradeLevel(
             @PathVariable("gradeId") @Positive Long gradeId,
@@ -68,6 +70,7 @@ public class GradeLevelController {
     }
 
     @DeleteMapping("/{gradeId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')")
     @ApiMessage("Xóa khối")
     public ResponseEntity<Void> deleteGradeLevel(@PathVariable("gradeId") @Positive Long gradeId) {
         DeveloperTrace.trace(/* NOPMD GuardLogStatement */

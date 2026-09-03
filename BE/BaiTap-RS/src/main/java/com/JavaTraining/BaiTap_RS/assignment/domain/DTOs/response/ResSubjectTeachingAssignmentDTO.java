@@ -11,5 +11,11 @@ public record ResSubjectTeachingAssignmentDTO(
         LocalDate validFrom,
         LocalDate validTo,
         AssignmentStatus status,
-        Long assignedBy) {
+        Long assignedBy,
+        Long classId,
+        String className,
+        String classCode,
+        Long subjectId,
+        String subjectName,
+        Long semesterId) {
 }

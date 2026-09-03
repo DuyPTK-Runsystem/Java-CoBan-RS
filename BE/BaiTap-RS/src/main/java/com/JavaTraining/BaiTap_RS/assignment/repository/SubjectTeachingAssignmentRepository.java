@@ -24,6 +24,31 @@ public interface SubjectTeachingAssignmentRepository extends JpaRepository<Subje
 
     List<SubjectTeachingAssignment> findAllByTeacherIdOrderByValidFromDesc(Long teacherId);
 
+    @Query("""
+            select assignment
+            from SubjectTeachingAssignment assignment
+            join ClassSubject classSubject on classSubject.id = assignment.classSubjectId
+            where classSubject.classId = :classId
+              and classSubject.semesterId = :semesterId
+            order by assignment.validFrom desc
+            """)
+    List<SubjectTeachingAssignment> findAllByClassIdAndSemesterIdOrderByValidFromDesc(
+            @Param("classId") Long classId,
+            @Param("semesterId") Long semesterId);
+
+    @Query("""
+            select count(assignment) > 0
+            from SubjectTeachingAssignment assignment
+            join ClassSubject classSubject on classSubject.id = assignment.classSubjectId
+            where classSubject.classId = :classId
+              and assignment.teacherId = :teacherId
+              and assignment.status = :status
+            """)
+    boolean existsByClassIdAndTeacherIdAndStatus(
+            @Param("classId") Long classId,
+            @Param("teacherId") Long teacherId,
+            @Param("status") AssignmentStatus status);
+
     List<SubjectTeachingAssignment> findAllByClassSubjectIdOrderByValidFromDesc(Long classSubjectId);
 
     @Query("""

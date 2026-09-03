@@ -9,6 +9,7 @@ import com.JavaTraining.BaiTap_RS.assignment.domain.DTOs.requests.ReqReplaceAssi
 import com.JavaTraining.BaiTap_RS.assignment.domain.DTOs.response.ResHomeroomAssignmentDTO;
 import com.JavaTraining.BaiTap_RS.assignment.domain.DTOs.response.ResSubjectTeachingAssignmentDTO;
 import com.JavaTraining.BaiTap_RS.assignment.service.HomeroomAssignmentService;
+import com.JavaTraining.BaiTap_RS.assignment.service.SubjectTeachingAssignmentAccessService;
 import com.JavaTraining.BaiTap_RS.assignment.service.SubjectTeachingAssignmentService;
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
 import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -32,38 +34,63 @@ import org.springframework.web.bind.annotation.RestController;
 public class AssignmentController {
 
     private static final String OFFICE_ROLES = "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')";
+    private static final String VIEW_ROLES = "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE', 'TEACHER')";
     private static final String ASSIGNMENT_ID = "assignmentId";
 
     private final HomeroomAssignmentService homeroomAssignmentService;
     private final SubjectTeachingAssignmentService subjectTeachingAssignmentService;
+    private final SubjectTeachingAssignmentAccessService subjectTeachingAssignmentAccessService;
 
     public AssignmentController(
             HomeroomAssignmentService homeroomAssignmentService,
-            SubjectTeachingAssignmentService subjectTeachingAssignmentService) {
+            SubjectTeachingAssignmentService subjectTeachingAssignmentService,
+            SubjectTeachingAssignmentAccessService subjectTeachingAssignmentAccessService) {
         this.homeroomAssignmentService = homeroomAssignmentService;
         this.subjectTeachingAssignmentService = subjectTeachingAssignmentService;
+        this.subjectTeachingAssignmentAccessService = subjectTeachingAssignmentAccessService;
     }
 
     @GetMapping("/assignments/classes/{classId}")
     @ApiMessage("Lấy phân công theo lớp")
-    @PreAuthorize(OFFICE_ROLES)
+    @PreAuthorize(VIEW_ROLES)
     public List<ResHomeroomAssignmentDTO> listHomeroomByClass(
             @PathVariable("classId") @Positive Long classId) {
                 DeveloperTrace.trace(/* NOPMD GuardLogStatement */
                         AssignmentController.class,
                         "AssignmentController.listHomeroomByClass");
+        subjectTeachingAssignmentAccessService.assertCanViewClass(classId);
         return homeroomAssignmentService.listHomeroomByClass(classId);
     }
 
     @GetMapping("/assignments/teachers/{teacherId}")
     @ApiMessage("Lấy phân công GVBM theo giáo viên")
-    @PreAuthorize(OFFICE_ROLES)
+    @PreAuthorize(VIEW_ROLES)
     public List<ResSubjectTeachingAssignmentDTO> listSubjectTeachingByTeacher(
             @PathVariable("teacherId") @Positive Long teacherId) {
                 DeveloperTrace.trace(/* NOPMD GuardLogStatement */
                         AssignmentController.class,
                         "AssignmentController.listSubjectTeachingByTeacher");
+        subjectTeachingAssignmentAccessService.assertCanViewAssignments(teacherId);
         return subjectTeachingAssignmentService.listSubjectTeachingByTeacher(teacherId);
+    }
+
+    @GetMapping("/assignments/classes/{classId}/subjects")
+    @ApiMessage("Lấy phân công GVBM theo lớp và học kỳ")
+    @PreAuthorize(VIEW_ROLES)
+    public List<ResSubjectTeachingAssignmentDTO> listSubjectTeachingByClassAndSemester(
+            @PathVariable("classId") @Positive Long classId,
+            @RequestParam("semesterId") @Positive Long semesterId) {
+        subjectTeachingAssignmentAccessService.assertCanViewClass(classId);
+        return subjectTeachingAssignmentService.listSubjectTeachingByClassAndSemester(classId, semesterId);
+    }
+
+    @GetMapping("/assignments/teachers/{teacherId}/homeroom")
+    @ApiMessage("Lấy phân công GVCN theo giáo viên")
+    @PreAuthorize(VIEW_ROLES)
+    public List<ResHomeroomAssignmentDTO> listHomeroomByTeacher(
+            @PathVariable("teacherId") @Positive Long teacherId) {
+        subjectTeachingAssignmentAccessService.assertCanViewAssignments(teacherId);
+        return homeroomAssignmentService.listHomeroomByTeacher(teacherId);
     }
 
     @PostMapping("/classes/{classId}/homeroom-assignments")

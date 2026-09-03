@@ -14,8 +14,16 @@ export function fetchHomeroomAssignmentsByClass(token: string, classId: number):
   return apiClient.get<HomeroomAssignment[]>(`/api/v2/assignments/classes/${classId}`, { token })
 }
 
+export function fetchHomeroomAssignmentsByTeacher(token: string, teacherId: number): Promise<HomeroomAssignment[]> {
+  return apiClient.get<HomeroomAssignment[]>(`/api/v2/assignments/teachers/${teacherId}/homeroom`, { token })
+}
+
 export function fetchSubjectAssignmentsByTeacher(token: string, teacherId: number): Promise<SubjectTeachingAssignment[]> {
   return apiClient.get<SubjectTeachingAssignment[]>(`/api/v2/assignments/teachers/${teacherId}`, { token })
+}
+
+export function fetchSubjectAssignmentsByClass(token: string, classId: number, semesterId: number): Promise<SubjectTeachingAssignment[]> {
+  return apiClient.get<SubjectTeachingAssignment[]>(`/api/v2/assignments/classes/${classId}/subjects?semesterId=${semesterId}`, { token })
 }
 
 export function createHomeroomAssignment(token: string, classId: number, request: CreateHomeroomAssignmentRequest): Promise<HomeroomAssignment> {

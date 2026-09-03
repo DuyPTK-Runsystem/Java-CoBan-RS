@@ -123,6 +123,14 @@ public class HomeroomAssignmentService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<ResHomeroomAssignmentDTO> listHomeroomByTeacher(Long teacherId) {
+        return homeroomRepository.findAllByTeacherIdOrderByValidFromDesc(teacherId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     private LocalDate endDate(LocalDate validTo) {
         return validTo == null ? OPEN_ENDED : validTo;
     }

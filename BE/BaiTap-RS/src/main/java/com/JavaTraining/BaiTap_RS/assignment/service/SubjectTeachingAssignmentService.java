@@ -4,6 +4,11 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.ClassSubject;
+import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClass;
+import com.JavaTraining.BaiTap_RS.academic.domain.entity.Subject;
+import com.JavaTraining.BaiTap_RS.academic.repository.ClassSubjectRepository;
+import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
+import com.JavaTraining.BaiTap_RS.academic.repository.SubjectRepository;
 import com.JavaTraining.BaiTap_RS.assignment.domain.DTOs.requests.ReqCreateSubjectTeachingAssignmentDTO;
 import com.JavaTraining.BaiTap_RS.assignment.domain.DTOs.requests.ReqEndAssignmentDTO;
 import com.JavaTraining.BaiTap_RS.assignment.domain.DTOs.requests.ReqReplaceAssignmentDTO;
@@ -18,7 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@SuppressWarnings("PMD.GuardLogStatement")
+@SuppressWarnings({"PMD.GuardLogStatement", "PMD.TooManyMethods"})
 public class SubjectTeachingAssignmentService {
 
     private static final LocalDate OPEN_ENDED = LocalDate.of(9999, 12, 31);
@@ -26,14 +31,23 @@ public class SubjectTeachingAssignmentService {
     private final SubjectTeachingAssignmentRepository subjectTeachingRepository;
     private final SubjectTeachingAssignmentGuard guard;
     private final AssignmentAuditService auditService;
+    private final ClassSubjectRepository classSubjectRepository;
+    private final SchoolClassRepository schoolClassRepository;
+    private final SubjectRepository subjectRepository;
 
     public SubjectTeachingAssignmentService(
             SubjectTeachingAssignmentRepository subjectTeachingRepository,
             SubjectTeachingAssignmentGuard guard,
-            AssignmentAuditService auditService) {
+            AssignmentAuditService auditService,
+            ClassSubjectRepository classSubjectRepository,
+            SchoolClassRepository schoolClassRepository,
+            SubjectRepository subjectRepository) {
         this.subjectTeachingRepository = subjectTeachingRepository;
         this.guard = guard;
         this.auditService = auditService;
+        this.classSubjectRepository = classSubjectRepository;
+        this.schoolClassRepository = schoolClassRepository;
+        this.subjectRepository = subjectRepository;
     }
 
     @Transactional(readOnly = true)
@@ -41,10 +55,18 @@ public class SubjectTeachingAssignmentService {
         DeveloperTrace.trace(/* NOPMD GuardLogStatement */
                 SubjectTeachingAssignmentService.class,
                 "SubjectTeachingAssignmentService.listSubjectTeachingByTeacher");
-        return subjectTeachingRepository.findAllByTeacherIdOrderByValidFromDesc(teacherId)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+        List<SubjectTeachingAssignment> assignments = subjectTeachingRepository
+                .findAllByTeacherIdOrderByValidFromDesc(teacherId);
+        return assignments.stream().map(this::toResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ResSubjectTeachingAssignmentDTO> listSubjectTeachingByClassAndSemester(
+            Long classId,
+            Long semesterId) {
+        List<SubjectTeachingAssignment> assignments = subjectTeachingRepository
+                .findAllByClassIdAndSemesterIdOrderByValidFromDesc(classId, semesterId);
+        return assignments.stream().map(this::toResponse).toList();
     }
 
     @Transactional
@@ -136,6 +158,12 @@ public class SubjectTeachingAssignmentService {
     }
 
     private ResSubjectTeachingAssignmentDTO toResponse(SubjectTeachingAssignment assignment) {
+        ClassSubject classSubject = classSubjectRepository.findById(assignment.getClassSubjectId()).orElse(null);
+        SchoolClass schoolClass = classSubject == null ? null
+                : schoolClassRepository.findById(classSubject.getClassId()).orElse(null);
+        Subject subject = classSubject == null
+                ? null
+                : subjectRepository.findById(classSubject.getSubjectId()).orElse(null);
         return new ResSubjectTeachingAssignmentDTO(
                 assignment.getId(),
                 assignment.getClassSubjectId(),
@@ -143,7 +171,37 @@ public class SubjectTeachingAssignmentService {
                 assignment.getValidFrom(),
                 assignment.getValidTo(),
                 assignment.getStatus(),
-                assignment.getAssignedBy());
+                assignment.getAssignedBy(),
+                classId(classSubject),
+                className(schoolClass),
+                classCode(schoolClass),
+                subjectId(classSubject),
+                subjectName(subject),
+                semesterId(classSubject));
+    }
+
+    private Long classId(ClassSubject classSubject) {
+        return classSubject == null ? null : classSubject.getClassId();
+    }
+
+    private String className(SchoolClass schoolClass) {
+        return schoolClass == null ? null : schoolClass.getClassName();
+    }
+
+    private String classCode(SchoolClass schoolClass) {
+        return schoolClass == null ? null : schoolClass.getClassCode();
+    }
+
+    private Long subjectId(ClassSubject classSubject) {
+        return classSubject == null ? null : classSubject.getSubjectId();
+    }
+
+    private String subjectName(Subject subject) {
+        return subject == null ? null : subject.getName();
+    }
+
+    private Long semesterId(ClassSubject classSubject) {
+        return classSubject == null ? null : classSubject.getSemesterId();
     }
 
 }

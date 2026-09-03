@@ -18,6 +18,12 @@ export interface SubjectTeachingAssignment {
   validTo: string | null
   status: AssignmentStatus
   assignedBy: number | null
+  classId?: number | null
+  className?: string | null
+  classCode?: string | null
+  subjectId?: number | null
+  subjectName?: string | null
+  semesterId?: number | null
 }
 
 export interface AssignmentDateValues {

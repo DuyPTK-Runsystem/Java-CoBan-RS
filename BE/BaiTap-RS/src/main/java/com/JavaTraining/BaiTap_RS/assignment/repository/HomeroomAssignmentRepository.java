@@ -22,6 +22,8 @@ public interface HomeroomAssignmentRepository extends JpaRepository<HomeroomAssi
 
     List<HomeroomAssignment> findAllByTeacherIdOrderByValidFromDesc(Long teacherId);
 
+    boolean existsByClassIdAndTeacherIdAndStatus(Long classId, Long teacherId, AssignmentStatus status);
+
     List<HomeroomAssignment> findAllByClassIdOrderByValidFromDesc(Long classId);
 
     @Query("""
