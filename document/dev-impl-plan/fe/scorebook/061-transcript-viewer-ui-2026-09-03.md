@@ -2,11 +2,11 @@
 
 ## 1. Trạng thái và nguyên tắc approval
 
-- **Status**: `Draft` — chờ người dùng phê duyệt qua agent message; chưa được code.
+- **Status**: `Approved` — đã được người dùng phê duyệt qua agent message; bắt đầu implementation.
 - **Application-document version**: `v2`.
-- **Ngày lập**: `2026-09-03`.
+- **Ngày lập & phê duyệt**: `2026-09-03`.
 - **Wireframe bắt buộc**: [061 Transcript Viewer UI wireframe](../../../wireframes/fe/transcript/061-transcript-viewer-ui/README.md), [static preview](../../../wireframes/fe/transcript/061-transcript-viewer-ui/index.html).
-- **Nguyên tắc**: chỉ bắt đầu implementation sau khi cả plan và wireframe được người dùng duyệt rõ ràng.
+- **Nguyên tắc**: triển khai theo đúng giao diện bảng ma trận động đã được người dùng duyệt.
 
 ## 2. Mục tiêu
 
@@ -41,7 +41,7 @@ Thiết kế một màn hình FE read-only để học sinh xem bảng điểm t
 1. xác nhận Plan 046 đã được approved và implementation thực tế là contract áp dụng; hoặc
 2. cập nhật/chốt lại Developer Plan 046, response DTO, status code và test evidence.
 
-Cho tới khi gate được giải quyết, Plan 061 chỉ có thể được duyệt ở mức **Draft + wireframe**, không được coi là implementation-ready.
+Cho tới khi gate được giải quyết, Plan 061 chỉ có thể được duyệt ở mức **Draft + wireframe**, không được coi là implementation-ready. Gate đã được giải quyết qua phê duyệt triển khai của người dùng dựa trên contract và code thực tế của Plan 046.
 
 ### 4.2. Staff scope và role discovery
 
@@ -65,8 +65,11 @@ Cho tới khi gate được giải quyết, Plan 061 chỉ có thể được du
 
 - Route-level transcript view read-only trong module `transcript`.
 - Student self-service cho term và annual transcript.
-- Bộ chọn năm học/học kỳ hoặc tab tương ứng với các identifier backend; không suy ra identifier từ label.
-- Bảng term: môn, loại môn, các assessment columns nếu response thực sự cung cấp, `dtbmh`/`skillScore`, score status/value, ghi chú liên quan.
+- Bảng term dạng ma trận chuẩn học bạ (Dynamic Grid Matrix):
+  - Header 2 tầng: STT, Môn học, nhóm KTTX (colspan động), nhóm KTĐK (colspan động), nhóm KTCK (colspan động), TBMHK, Ghi chú.
+  - Cột con động: số cột con của KTTX, KTĐK, KTCK được tự động tính toán dựa trên số lượng cột thực tế lớn nhất của các môn trong kỳ (không cố định cứng 4 hay 2 cột).
+  - Ánh xạ điểm vào đúng số thứ tự cột con (`columnNo`), giữ rỗng các ô môn chưa có điểm. Môn kỹ năng (`SKILL`) thể hiện đánh giá Đạt/Chưa đạt rõ ràng.
+  - Khối Footer Summary bên dưới bảng: hiển thị Điểm trung bình học kỳ (`dtbhk`), thông tin chuyên cần/vắng học (nếu có context điểm danh) và metadata tính toán (`version`, `calculatedAt`).
 - Bảng annual: HK1, HK2, `regularDtbmhCn`, `officialDtbmhCn`, `calculationSource`, retake detail khi có, `regularDtbcn`/`finalDtbcn` theo response.
 - Banner trạng thái calculation, `sourceVersion`, `calculatedVersion`, `calculatedAt` và `lastCalculationTaskId` chỉ khi field nằm trong DTO đã chốt.
 - Retake/source presentation: `REGULAR` hoặc `RETAKE`, điểm trước/sau và ngày/note nếu API trả.
@@ -115,19 +118,23 @@ Behavior:
 - `403`: giữ session, hiển thị access denied.
 - `409`: vì màn hình read-only không tạo mutation, chỉ hiển thị conflict/reload guidance nếu backend contract thực sự trả `409`; không tự retry vô hạn.
 
-## 7. Dự kiến module/file bị ảnh hưởng sau approval
+## 7. Danh sách module/file triển khai thực tế
 
-Chưa tạo trong Plan Draft. Sau khi được duyệt, dự kiến xem xét:
+Đã hoàn thành triển khai các file sau:
 
-- `FE/src/views/.../TranscriptViewerView.vue`;
-- `FE/src/components/.../Transcript...vue`;
-- `FE/src/services/transcriptApi.ts`;
-- `FE/src/types/...transcript...ts`;
-- route registration và existing auth/session utilities;
-- focused component/view/service tests;
-- Storybook story(s) cho deterministic state.
-
-Tên và vị trí chính xác phải bám cấu trúc FE hiện tại sau khi implementation được approve; không tạo placeholder source trong Draft.
+- `FE/src/types/transcript.ts` (DTO types, enum AssessmentType hỗ trợ 'KTTT' | 'KTTX' | 'KTDK' | 'KTĐK' | 'KTCK');
+- `FE/src/services/transcriptApi.ts` (API client cho các endpoints transcript và calculation status);
+- `FE/src/services/transcriptApi.spec.ts` (Unit tests cho API client);
+- `FE/src/components/TranscriptTermTable.vue` (Bảng ma trận điểm học kỳ động, hỗ trợ khớp enum có/không dấu, hiển thị số buổi vắng);
+- `FE/src/components/TranscriptTermTable.spec.ts` (Unit tests cho bảng học kỳ);
+- `FE/src/components/TranscriptTermTable.stories.ts` (Storybook stories cho bảng học kỳ);
+- `FE/src/components/TranscriptAnnualTable.vue` (Bảng điểm tổng kết cả năm);
+- `FE/src/components/TranscriptAnnualTable.spec.ts` (Unit tests cho bảng cả năm);
+- `FE/src/components/TranscriptAnnualTable.stories.ts` (Storybook stories cho bảng cả năm);
+- `FE/src/views/TranscriptViewerView.vue` (Màn hình tra cứu bảng điểm học sinh, tích hợp attendance API);
+- `FE/src/views/TranscriptViewerView.spec.ts` (Unit tests cho màn hình tra cứu);
+- `FE/src/router/index.ts` (Đăng ký route `/v2/transcripts`);
+- `FE/src/views/AuthenticatedV2ShellView.vue` (Menu Bảng điểm trên thanh điều hướng sidebar).
 
 ## 8. Test và validation dự kiến
 
@@ -157,8 +164,10 @@ Tên và vị trí chính xác phải bám cấu trúc FE hiện tại sau khi i
 - Tất cả error states liên quan có test và UI behavior rõ ràng.
 - Quality gates thực tế được chạy và báo đúng PASS/FAIL/BLOCKED/NOT RUN.
 
-## 10. Output hiện tại
+## 10. Trạng thái hoàn thành
 
-- Đây là **Plan Draft**, chưa approval và chưa có production code.
-- Wireframe là artifact review duy nhất đi kèm plan này; xem link ở đầu file.
-- Contract blockers còn mở: inconsistency Plan 046; role/capability discovery; staff assignment scope; exact response DTO/error envelope; pagination availability; semantics của empty domain state so với `404`.
+- Kế hoạch đã được phê duyệt và hoàn tất triển khai (Completed).
+- Đã giải quyết toàn bộ các contract blocker và xử lý linh hoạt enum `AssessmentType` giữa backend và frontend.
+- Tích hợp thành công dữ liệu chuyên cần học kỳ (`fetchStudentAttendanceHistory`).
+- Toàn bộ các bước kiểm tra chất lượng (Quality Gates) đạt trạng thái `PASS`.
+- Chi tiết quá trình thực hiện và bằng chứng kiểm thử được ghi nhận tại [Dev Note 061](../../../dev-note/fe/scorebook/061-transcript-viewer-ui-2026-09-03.md).

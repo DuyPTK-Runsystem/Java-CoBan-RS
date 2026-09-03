@@ -19,6 +19,7 @@ const navigation = computed(() => {
     { label: 'Hồ sơ giáo viên', to: '/v2/teachers', icon: 'pi pi-id-card' },
     { label: 'Phân công giảng dạy', to: '/v2/teaching-assignments', icon: 'pi pi-briefcase' },
     { label: 'Điểm danh', to: '/v2/attendance', icon: 'pi pi-calendar' },
+    { label: 'Bảng điểm', to: '/v2/transcripts', icon: 'pi pi-table' },
   ]
   const roles = session.value?.user.roles ?? []
   if (roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE' || role === 'TEACHER')) {

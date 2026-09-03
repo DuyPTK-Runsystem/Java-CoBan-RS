@@ -19,7 +19,13 @@ Mở `index.html` trực tiếp trong browser. Dùng dropdown **Demo state** đ�
 
 - Student self-service `/me` là flow mặc định.
 - Term/annual tabs.
-- Subject rows, assessment/term/annual result fields.
+- Bảng điểm dạng ma trận (Dynamic Grid Matrix) chuẩn học bạ:
+  - Header 2 tầng: STT, Môn học, KTTX, KTĐK, KTCK, TBMHK, Ghi chú.
+  - Số lượng cột con cho KTTX, KTĐK, KTCK được tự động tính toán sinh động dựa trên số cột thực tế của các môn học trong kỳ (không cố định cứng 4 hay 2 cột).
+  - Tự động map điểm vào đúng số thứ tự cột con (`columnNo`), các ô trống giữ nguyên ô rỗng.
+  - Môn kỹ năng (`SKILL`) thể hiện đánh giá Đạt/Chưa đạt rõ ràng.
+- Khối tổng kết (Footer Summary) bên dưới bảng: Điểm trung bình học kỳ, số buổi vắng có phép, số buổi vắng không phép.
+- Bảng điểm Cả năm (Annual Transcript): HK1, HK2, ĐTB cả năm ban đầu, điểm thi lại, điểm chính thức và ghi chú thi lại.
 - `REGULAR`/`RETAKE`, điểm trước/sau retake.
 - `IN_PROGRESS`/`FINISH`, source/calculated version và last calculated time.
 - Read-only styling, empty/error/permission states và responsive table.
