@@ -54,6 +54,7 @@
 | 035.1 | attendance         | [Academic Office Auto-Configure Calendar on Attendance Session](attendance/035.1-academic-office-auto-calendar-on-session-2026-09-02.md) | Completed; focused validation PASS; live API not run | 2026-09-02 |
 | 057 | scorebook          | [Scorebook lookup prerequisite for Amendment 57.1](../../fe/scorebook/057-scorebook-assessment-column-ui-2026-09-01.md) | Implemented; targeted tests/Checkstyle PASS; PMD/build blocked outside Plan 057 | 2026-09-02 |
 | 058 | user-auth          | [JWT role claim](user-auth/058-jwt-role-claim-2026-09-02.md) | Implemented; focused tests/Checkstyle PASS; PMD and full-suite baseline blockers | 2026-09-02 |
+| 057.2 | scorebook          | [Scorebook KTCK Column Constraint and Column Order Resolution](scorebook/057.2-ktck-limit-and-column-order-resolution-2026-09-03.md) | Completed; BE/FE validation PASS | 2026-09-03 |
 
 ## Module folders
 

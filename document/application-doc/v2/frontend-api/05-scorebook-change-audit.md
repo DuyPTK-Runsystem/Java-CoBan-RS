@@ -68,6 +68,27 @@ The canonical FE wire type is documented in
 
 Do not accidentally send `"KTDK"` unless the service adapter intentionally relies on backend compatibility.
 
+### Create assessment column
+
+```ts
+interface CreateAssessmentColumnRequest {
+  assessmentType: AssessmentType
+  columnNo?: number
+  columnName?: string | null
+}
+```
+
+Rules for create:
+
+- `columnNo` is optional. If omitted, backend starts from `1`; if the preferred
+  value is already used for the same assessment type, backend increments until
+  it finds the next available positive number.
+- Regular/academic subjects allow only one active `KTCK` column. Extra active
+  `KTCK` create requests return `409`.
+- Skill subjects allow one active column per assessment type.
+- FE displays columns by assessment order `KTTT`/`KTTX`, then `KTĐK`/`KTDK`,
+  then `KTCK`, and by `columnNo` inside each group.
+
 ### Score grid
 
 ```text
