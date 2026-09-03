@@ -12,6 +12,23 @@
 
 ---
 
+## Amendment 55.1 — Teacher chỉ xem phân công của mình
+
+- Trạng thái: `APPROVED - IMPLEMENTED` (amendment được duyệt qua agent message: “ukm, làm 55.1 đi”).
+- `TEACHER` được xem tab lịch dạy, chỉ với hồ sơ giáo viên liên kết tài khoản hiện tại.
+- Backend giữ các thao tác mutation và truy vấn theo lớp ở quyền `ADMIN`/`ACADEMIC_OFFICE`; truy vấn theo giáo viên được mở cho `TEACHER` với self-scope bắt buộc.
+- FE hiển thị chế độ `Lịch dạy của tôi`, ẩn bộ chọn giáo viên và không tải context/phân công theo lớp cho Teacher.
+- Validation và Dev Note được ghi nhận sau implementation.
+
+### Amendment 55.1 cập nhật lần 2
+
+- `ADMIN`/`ACADEMIC_OFFICE` thấy `Phân công theo lớp` và `Phân công theo GV`.
+- `TEACHER` có assignment `ACTIVE` thấy `Phân công theo lớp` và chỉ thấy các lớp có GVCN/GVBM của mình; nếu không có assignment chỉ thấy `Phân công của tôi`.
+- Teacher không được đổi giáo viên ở tab của mình; backend kiểm tra self-scope cho query theo teacher và class-scope cho query theo lớp.
+- Assignment response bổ sung metadata lớp/môn để ưu tiên hiển thị tên thay vì mã/ID.
+- Teacher được chọn Khối trong tập khối có ít nhất một lớp được phân công; danh sách Lớp luôn bị giới hạn theo assignment của Teacher.
+- Khi Teacher đã được phép xem một lớp, bảng lớp-học kỳ phải hiển thị toàn bộ GVCN/GVBM ACTIVE của lớp để Teacher biết đồng nghiệp phụ trách các môn khác; quyền ghi vẫn chỉ dành cho Admin/Academic Office.
+
 ## 1. Mục tiêu
 
 Đáp ứng 2 nội dung nghiệp vụ trong phân hệ Quản lý Giáo viên & Phân công Giảng dạy:
