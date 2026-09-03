@@ -27,8 +27,11 @@ public class ScorebookConfigurationValidator {
         ensureStatus(scorebook, ScorebookStatus.OPEN, "Chỉ sổ điểm OPEN mới được publish");
     }
 
-    public void ensureDraft(Scorebook scorebook) {
-        ensureStatus(scorebook, ScorebookStatus.DRAFT, "Chỉ sổ điểm DRAFT mới được mở");
+    public void ensureOpenable(Scorebook scorebook) {
+        if (scorebook.getStatus() != ScorebookStatus.DRAFT
+                && scorebook.getStatus() != ScorebookStatus.PUBLISHED) {
+            throw conflict("Chỉ sổ điểm DRAFT hoặc PUBLISHED mới được mở");
+        }
     }
 
     public void validatePublishColumns(Subject subject, List<AssessmentColumn> columns) {

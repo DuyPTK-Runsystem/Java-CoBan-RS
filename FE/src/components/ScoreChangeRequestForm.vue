@@ -15,6 +15,9 @@ export interface ScoreChangeRequestFormContext {
   columnName?: string | null
   currentStatus?: ScoreStatus
   currentValue?: number | null
+  proposedStatus?: ScoreStatus
+  proposedValue?: number | null
+  reason?: string
 }
 
 const props = defineProps<{
@@ -47,8 +50,9 @@ const currentScoreLabel = computed(() => {
 })
 
 function syncContext(): void {
-  status.value = props.context.currentStatus ?? 'SCORED'
-  value.value = null
+  status.value = props.context.proposedStatus ?? props.context.currentStatus ?? 'SCORED'
+  value.value = props.context.proposedStatus === 'SCORED' ? props.context.proposedValue ?? null : null
+  reason.value = props.context.reason ?? ''
 }
 
 watch(() => props.context, syncContext, { immediate: true })

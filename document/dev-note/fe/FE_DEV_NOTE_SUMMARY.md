@@ -24,6 +24,7 @@
 | 056.2 | Attendance | [Attendance Context Action Layout](attendance/056.2-attendance-context-action-layout-2026-09-03.md) | Completed; FE validation PASS; browser visual QA NOT RUN | 2026-09-03 |
 | 057 | Scorebook | [Scorebook & Assessment Column UI](scorebook/057-scorebook-assessment-column-ui-2026-09-01.md) | Amendment 57.1 plus score-input blur formatting and bulk spacing patch; FE/visual QA PASS; backend PMD/build blocked outside amendment scope | 2026-09-02 |
 | 056.1 | Attendance | [Attendance Authorization and 403 Contract](attendance/056.1-attendance-authorization-and-403-2026-09-02.md) | Student history context/auto lookup amendment implemented; FE PASS; BE PMD baseline blocker | 2026-09-02 |
+| 065 | Scorebook | [Published Score Entry and Reopen](../../be/scorebook/065-published-score-entry-and-reopen-2026-09-03.md) | Completed; PUBLISHED score entry and reopen lifecycle aligned; FE validation PASS | 2026-09-03 |
 
 Plan 057 PMD follow-up (2026-09-03): backend PMD baseline was remediated by responsibility/test refactors; `pmdMain` and `pmdTest` PASS with 0 violations.
 

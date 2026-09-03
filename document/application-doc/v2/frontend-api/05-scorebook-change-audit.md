@@ -35,6 +35,11 @@ TEACHER
 
 Backend service must still enforce actual assignment/scope. FE must not interpret the role list as permission to edit every scorebook.
 
+`POST /api/v2/scorebooks/{scorebookId}/open` accepts scorebooks in `DRAFT` or
+`PUBLISHED`; `CLOSED` remains unavailable. Score entry is available to the
+backend-authorized GVBM in `OPEN` and `PUBLISHED`; direct-edit validation,
+including assignment, time limit and semester state, remains backend-owned.
+
 Scorebook status uses the canonical wire enum in
 [`07-enums-and-known-drift.md`](07-enums-and-known-drift.md).
 
@@ -186,6 +191,11 @@ studentCode
 and requires at least one.
 
 ## Score Change Request API
+
+Trong popup `Nhập điểm`, nút **Yêu cầu sửa điểm** mở popup thứ hai **Tạo yêu
+cầu sửa điểm**. FE chuyển học sinh, cột điểm, điểm hiện tại và giá trị/lý do
+đang nhập sang form thứ hai; chỉ nút **Gửi yêu cầu** tại form đó gọi API tạo
+request. Người dùng vẫn có thể điều chỉnh lại đề xuất trước khi gửi.
 
 Base:
 

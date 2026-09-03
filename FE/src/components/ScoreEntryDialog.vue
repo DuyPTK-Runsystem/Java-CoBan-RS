@@ -11,6 +11,9 @@ import type { ScoreStatus, StudentScore, UpsertStudentScoreRequest } from '@/typ
 export interface ScoreChangeRequestContext {
   studentName: string
   score: StudentScore | null
+  proposedStatus: ScoreStatus
+  proposedValue: number | null
+  reason: string
 }
 
 const props = defineProps<{
@@ -85,6 +88,9 @@ function requestChange(): void {
   emit('request-change', {
     studentName: props.studentName ?? props.score?.studentName ?? 'Học sinh',
     score: props.score,
+    proposedStatus: status.value,
+    proposedValue: status.value === 'SCORED' ? value.value : null,
+    reason: note.value.trim(),
   })
 }
 </script>

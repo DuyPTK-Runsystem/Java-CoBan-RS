@@ -104,7 +104,7 @@ public class ScorebookLifecycleService {
                 "ScorebookLifecycleService.openScorebook");
         Scorebook scorebook = context.findScorebook(scorebookId);
         guard.assertCanManage(scorebook);
-        validator.ensureDraft(scorebook);
+        validator.ensureOpenable(scorebook);
         Map<String, Object> before = auditDataMapper.scorebookData(scorebook);
         scorebook.open();
         auditService.writeAudit(

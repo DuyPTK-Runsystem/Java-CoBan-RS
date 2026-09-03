@@ -28,6 +28,7 @@
 |   062 | [Retake Result UI](scorebook/062-retake-result-ui-2026-09-03.md)                                                                   | Retake list, detail, create/score/cancel and before/after result display | Draft; awaiting user approval; not implemented | 2026-09-03 |
 |   063 | [Calculation Task & Audit UI](scorebook/063-calculation-task-audit-ui-2026-09-03.md)                                               | Calculation task monitoring/retry and score audit log | Draft; awaiting user approval; not implemented | 2026-09-03 |
 |   064 | [FE E2E & Release Hardening](release/064-fe-e2e-release-hardening-2026-09-03.md)                                                  | FE v2 browser/E2E, permission, error, persistence, responsive/accessibility and release validation | Draft; awaiting user approval; not implemented | 2026-09-03 |
+|   065 | [Published Score Entry and Reopen](../../be/scorebook/065-published-score-entry-and-reopen-2026-09-03.md) | Published score entry, reopen lifecycle and closed read-only alignment | Completed; validation PASS | 2026-09-03 |
 
 ## Current FE notes
 

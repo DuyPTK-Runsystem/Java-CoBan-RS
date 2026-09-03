@@ -72,7 +72,7 @@ describe('ScoreEntryDialog', () => {
     expect(view.minFractionDigits()).toBe(1)
   })
 
-  it('emits the current score context when requesting a correction', () => {
+  it('emits the proposed score and note when opening a correction request', () => {
     const score = {
       scoreId: 1,
       assessmentColumnId: 7,
@@ -91,12 +91,22 @@ describe('ScoreEntryDialog', () => {
     const wrapper = shallowMount(ScoreEntryDialog, {
       props: { visible: true, studentName: score.studentName, score },
     })
+    const view = wrapper.vm as unknown as {
+      value: number | null
+      note: string
+      requestChange: () => void
+    }
+    view.value = 8
+    view.note = 'Điều chỉnh theo phiếu chấm.'
 
-    ;(wrapper.vm as unknown as { requestChange: () => void }).requestChange()
+    view.requestChange()
 
     expect(wrapper.emitted('request-change')?.[0]).toEqual([{
       studentName: 'Nguyễn Minh An',
       score,
+      proposedStatus: 'SCORED',
+      proposedValue: 8,
+      reason: 'Điều chỉnh theo phiếu chấm.',
     }])
     expect(wrapper.emitted('save')).toBeUndefined()
   })

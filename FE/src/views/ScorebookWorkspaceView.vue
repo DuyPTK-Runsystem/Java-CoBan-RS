@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import Button from 'primevue/button'
 import ConfirmDialog from 'primevue/confirmdialog'
+import Dialog from 'primevue/dialog'
 import { useConfirm } from 'primevue/useconfirm'
 import { useRouter } from 'vue-router'
 
@@ -46,6 +47,7 @@ import type {
   CreateAssessmentColumnRequest,
   ScoreGridColumn,
   Scorebook,
+  ScoreStatus,
   StudentScore,
   StudentScoreGrid,
   StudentScoreGridRow,
@@ -458,9 +460,16 @@ function openBulkDialog(column: ScoreGridColumn): void {
   bulkDialogVisible.value = true
 }
 
-function openScoreChangeRequest(context: { studentName: string; score: StudentScore | null }): void {
+async function openScoreChangeRequest(context: {
+  studentName: string
+  score: StudentScore | null
+  proposedStatus: ScoreStatus
+  proposedValue: number | null
+  reason: string
+}): Promise<void> {
   if (!selectedStudent.value || !selectedGridColumn.value) return
   scoreDialogVisible.value = false
+  await nextTick()
   scoreChangeRequestContext.value = {
     studentCode: selectedStudent.value.studentCode,
     studentName: selectedStudent.value.studentName || context.studentName,
@@ -468,6 +477,9 @@ function openScoreChangeRequest(context: { studentName: string; score: StudentSc
     columnName: selectedGridColumn.value.columnName,
     currentStatus: context.score?.scoreStatus,
     currentValue: context.score?.scoreValue ?? null,
+    proposedStatus: context.proposedStatus,
+    proposedValue: context.proposedValue,
+    reason: context.reason,
   }
   scoreChangeRequestDialogVisible.value = true
 }
@@ -630,7 +642,7 @@ onMounted(() => { void load() })
         v-if="activeTab === 'grid'"
         :grid="grid"
         :loading="gridLoading"
-        :read-only="scorebook.status !== 'OPEN'"
+        :read-only="scorebook.status === 'CLOSED'"
         @edit="openScoreDialog"
         @bulk-edit="openBulkDialog"
         @page-change="changePage"
@@ -668,7 +680,7 @@ onMounted(() => { void load() })
     v-model:visible="scoreDialogVisible"
     :student-name="selectedStudent?.studentName"
     :score="selectedScore"
-    :read-only="scorebook?.status !== 'OPEN'"
+    :read-only="scorebook?.status === 'CLOSED'"
     :saving="saving"
     :error-message="dialogError"
     @save="saveScore"

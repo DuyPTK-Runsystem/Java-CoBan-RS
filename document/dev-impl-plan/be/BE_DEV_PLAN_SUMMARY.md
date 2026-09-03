@@ -40,6 +40,7 @@
 |   047 | [BE Operational Closure](scorebook/047-be-operational-closure-2026-08-26.md)                                                       | Audit log điểm, failed calculation task/retry, trạng thái tính tổng kết, security matrix và Postman flow vận hành                          | Completed | 2026-08-26 |
 |   048 | [BE Demo Data Bootstrap](bootstrap/048-be-demo-data-bootstrap-2026-08-26.md)                                                   | Seed admin bắt buộc và demo fixture cho identity, academic catalog, enrollment và teaching assignment                                  | Completed | 2026-08-26 |
 | 053.1 | [Subject Applicability Management & Dialog Layout](../fe/academic/053.1-subject-applicability-management-and-dialog-layout-2026-08-28.md) | BE applicability GET/full guarded PUT/soft DELETE contract, with paired FE management and Dialog margin correction | Completed; validation PASS | 2026-08-28 |
+|   065 | [Published Score Entry and Reopen](scorebook/065-published-score-entry-and-reopen-2026-09-03.md) | `PUBLISHED -> OPEN`, score entry remains backend-authoritative after publish, FE lifecycle alignment | Completed; validation PASS | 2026-09-03 |
 
 ## Module folders
 

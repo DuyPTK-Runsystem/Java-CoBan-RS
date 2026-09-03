@@ -56,6 +56,7 @@
 | 058 | user-auth          | [JWT role claim](user-auth/058-jwt-role-claim-2026-09-02.md) | Implemented; focused tests/Checkstyle PASS; PMD and full-suite baseline blockers | 2026-09-02 |
 | 057.2 | scorebook          | [Scorebook KTCK Column Constraint and Column Order Resolution](scorebook/057.2-ktck-limit-and-column-order-resolution-2026-09-03.md) | Completed; BE/FE validation PASS | 2026-09-03 |
 | 055.1 | academic           | [Teacher assignment self-view amendment](../fe/teacher/055-teacher-profile-and-teaching-assignment-ui-2026-08-28.md) | Completed; backend validation PASS | 2026-09-03 |
+| 065 | scorebook          | [Published Score Entry and Reopen](scorebook/065-published-score-entry-and-reopen-2026-09-03.md) | Completed; BE/FE validation PASS | 2026-09-03 |
 
 ## Module folders
 

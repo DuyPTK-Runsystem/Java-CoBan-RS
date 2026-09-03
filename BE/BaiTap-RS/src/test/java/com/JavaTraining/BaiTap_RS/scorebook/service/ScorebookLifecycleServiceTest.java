@@ -163,6 +163,29 @@ class ScorebookLifecycleServiceTest {
                 "valid columns should publish the scorebook");
     }
 
+    @Test
+    void openPublishedScorebookReturnsItToOpen() {
+        Scorebook scorebook = ScorebookTestFixtures.scorebook(ScorebookStatus.PUBLISHED);
+        Mockito.when(scorebookRepository.findById(90L)).thenReturn(Optional.of(scorebook));
+        Mockito.when(columnRepository.findAllByScorebookIdOrderByAssessmentTypeAscColumnNoAsc(90L))
+                .thenReturn(List.of());
+        Mockito.when(weightRepository.findByScorebookId(90L)).thenReturn(Optional.empty());
+
+        com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResScorebookDTO response =
+                lifecycleService.openScorebook(90L);
+
+        Assertions.assertEquals(ScorebookStatus.OPEN, response.status(),
+                "published scorebook should be reopenable");
+    }
+
+    @Test
+    void openClosedScorebookIsRejected() {
+        Scorebook scorebook = ScorebookTestFixtures.scorebook(ScorebookStatus.CLOSED);
+        Mockito.when(scorebookRepository.findById(90L)).thenReturn(Optional.of(scorebook));
+
+        assertConflict(() -> lifecycleService.openScorebook(90L));
+    }
+
     private void assertConflict(Runnable action) {
         com.JavaTraining.BaiTap_RS.common.error.AppException exception = Assertions.assertThrows(
                 com.JavaTraining.BaiTap_RS.common.error.AppException.class,

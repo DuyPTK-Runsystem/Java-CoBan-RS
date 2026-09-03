@@ -63,6 +63,8 @@ const scorebook = { id: 12, classSubjectId: 20, status: 'OPEN' as const, publish
 const grid = { scorebookId: 12, classSubjectId: 20, scorebookStatus: 'OPEN' as const, columns: [], page: 0, size: 10, totalElements: 21, totalPages: 3, students: [] }
 
 const simpleStub = { template: '<div><slot /></div>' }
+const scoreGridStub = { props: ['readOnly'], template: '<div data-test="score-grid" :data-read-only="String(readOnly)" />' }
+const scoreEntryDialogStub = { props: ['readOnly'], template: '<div data-test="score-entry-dialog" :data-read-only="String(readOnly)" />' }
 const buttonStub = { props: ['label'], template: '<button @click="$emit(\'click\')">{{ label }}</button>' }
 
 function mountView() {
@@ -79,9 +81,9 @@ function mountView() {
         FormAlert: { props: ['message'], template: '<div>{{ message }}</div>' },
         ScorebookContextPanel: simpleStub,
         ScorebookStatusHeader: simpleStub,
-        ScoreEntryDialog: simpleStub,
+        ScoreEntryDialog: scoreEntryDialogStub,
         ScoreChangeRequestForm: simpleStub,
-        ScoreGrid: simpleStub,
+        ScoreGrid: scoreGridStub,
         SkillWeightPanel: simpleStub,
       },
     },
@@ -212,6 +214,54 @@ describe('ScorebookWorkspaceView', () => {
       header: 'Xác nhận công bố sổ điểm',
       accept: expect.any(Function),
     }))
+  })
+
+  it('keeps published score entry editable while configuration remains separate', async () => {
+    mocks.fetchScorebookByClassSubject.mockResolvedValue({ ...scorebook, status: 'PUBLISHED' })
+    mocks.fetchScorebook.mockResolvedValue({ ...scorebook, status: 'PUBLISHED' })
+    mocks.fetchScoreGrid.mockResolvedValue({ ...grid, scorebookStatus: 'PUBLISHED' })
+    const wrapper = mountView()
+    await flushPromises()
+
+    expect(wrapper.get('[data-test="score-grid"]').attributes('data-read-only')).toBe('false')
+    expect(wrapper.get('[data-test="score-entry-dialog"]').attributes('data-read-only')).toBe('false')
+  })
+
+  it('opens the correction-request dialog with the score-entry proposal', async () => {
+    const wrapper = mountView()
+    await flushPromises()
+    const selectedStudent = { studentId: 11, studentCode: 'HS-001', studentName: 'Nguyễn Minh An', scores: {} }
+    const selectedColumn = { columnId: 7, assessmentType: 'KTTT' as const, columnNo: 1, columnName: 'Thường xuyên 1' }
+    const selectedScore = {
+      scoreId: 1, assessmentColumnId: 7, studentId: 11, studentCode: 'HS-001', studentName: 'Nguyễn Minh An',
+      scoreStatus: 'SCORED' as const, scoreValue: 6.5, note: null, enteredBy: 5, enteredAt: '2026-09-02T08:00:00', updatedBy: null, updatedAt: null, version: 3,
+    }
+    const view = wrapper.vm as unknown as {
+      selectedStudent: typeof selectedStudent
+      selectedGridColumn: typeof selectedColumn
+      scoreChangeRequestDialogVisible: boolean
+      scoreChangeRequestContext: Record<string, unknown> | null
+      openScoreChangeRequest: (context: { studentName: string; score: typeof selectedScore; proposedStatus: 'SCORED'; proposedValue: number; reason: string }) => Promise<void>
+    }
+    view.selectedStudent = selectedStudent
+    view.selectedGridColumn = selectedColumn
+
+    await view.openScoreChangeRequest({
+      studentName: selectedStudent.studentName,
+      score: selectedScore,
+      proposedStatus: 'SCORED',
+      proposedValue: 8,
+      reason: 'Điều chỉnh theo phiếu chấm.',
+    })
+
+    expect(view.scoreChangeRequestDialogVisible).toBe(true)
+    expect(view.scoreChangeRequestContext).toMatchObject({
+      studentCode: 'HS-001',
+      columnId: 7,
+      proposedStatus: 'SCORED',
+      proposedValue: 8,
+      reason: 'Điều chỉnh theo phiếu chấm.',
+    })
   })
 
   it('requires confirmation before deactivating a column', async () => {

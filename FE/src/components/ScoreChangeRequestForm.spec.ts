@@ -51,6 +51,21 @@ describe('ScoreChangeRequestForm', () => {
     expect(wrapper.find('#score-change-column').exists()).toBe(false)
   })
 
+  it('prefills the proposal received from score entry', () => {
+    const wrapper = mountForm({
+      studentCode: 'HS-001',
+      columnId: 4,
+      currentStatus: 'SCORED',
+      currentValue: 6.5,
+      proposedStatus: 'SCORED',
+      proposedValue: 8,
+      reason: 'Điều chỉnh theo phiếu chấm.',
+    })
+
+    expect(wrapper.get('#score-change-value').attributes('value')).toBe('8')
+    expect(wrapper.get('#score-change-reason').element.value).toBe('Điều chỉnh theo phiếu chấm.')
+  })
+
   it('requires a reason when the proposed value is present', async () => {
     const wrapper = mountForm({ studentCode: 'HS-001', columnId: 4, columnName: 'Thường xuyên 1', currentStatus: 'SCORED', currentValue: 6.5 })
 
