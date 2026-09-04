@@ -46,7 +46,7 @@ describe('ScoreEntryDialog', () => {
       },
     })
     await wrapper.setProps({ visible: true })
-    ;(wrapper.vm as unknown as { save: () => void }).save()
+      ; (wrapper.vm as unknown as { save: () => void }).save()
 
     expect(wrapper.emitted('save')?.[0]).toEqual([{
       scoreStatus: 'SCORED',
@@ -70,6 +70,23 @@ describe('ScoreEntryDialog', () => {
 
     view.scoreFocused = false
     expect(view.minFractionDigits()).toBe(1)
+  })
+
+  it('rounds score to one decimal on blur', () => {
+    const wrapper = shallowMount(ScoreEntryDialog, {
+      props: { visible: true, score: null },
+    })
+    const view = wrapper.vm as unknown as {
+      value: number | null
+      scoreFocused: boolean
+      handleScoreBlur: () => void
+    }
+
+    view.scoreFocused = true
+    view.value = 8.47
+    view.handleScoreBlur()
+    expect(view.scoreFocused).toBe(false)
+    expect(view.value).toBe(8.5)
   })
 
   it('emits the proposed score and note when opening a correction request', () => {

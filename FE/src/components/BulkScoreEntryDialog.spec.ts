@@ -93,4 +93,57 @@ describe('BulkScoreEntryDialog', () => {
     view.focusedStudentId = null
     expect(view.minFractionDigits(view.rows[0])).toBe(1)
   })
+
+  it('rounds score to one decimal on blur and when saving', async () => {
+    const wrapper = shallowMount(BulkScoreEntryDialog, {
+      props: { visible: true, column, students },
+    })
+    const view = wrapper.vm as unknown as {
+      rows: Array<{ scoreStatus: string; scoreValue: number | null }>
+      handleScoreBlur: (row: { scoreStatus: string; scoreValue: number | null }) => void
+      save: () => void
+      validationMessage: string
+    }
+
+    view.rows[0].scoreValue = 8.47
+    view.handleScoreBlur(view.rows[0])
+    expect(view.rows[0].scoreValue).toBe(8.5)
+
+    view.save()
+    expect(view.validationMessage).toBe('')
+    expect(wrapper.emitted('save')?.[0]).toEqual([{
+      items: [{
+        studentId: 11,
+        scoreStatus: 'SCORED',
+        scoreValue: 8.5,
+        note: null,
+        expectedVersion: 3,
+      }],
+    }])
+  })
+
+  it('rounds score to one decimal when saving without blur and submits successfully', async () => {
+    const wrapper = shallowMount(BulkScoreEntryDialog, {
+      props: { visible: true, column, students },
+    })
+    const view = wrapper.vm as unknown as {
+      rows: Array<{ scoreStatus: string; scoreValue: number | null }>
+      save: () => void
+      validationMessage: string
+    }
+
+    view.rows[0].scoreValue = 0.47
+    view.save()
+    expect(view.validationMessage).toBe('')
+    expect(wrapper.emitted('save')?.[0]).toEqual([{
+      items: [{
+        studentId: 11,
+        scoreStatus: 'SCORED',
+        scoreValue: 0.5,
+        note: null,
+        expectedVersion: 3,
+      }],
+    }])
+  })
 })
+

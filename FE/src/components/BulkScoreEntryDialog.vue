@@ -74,6 +74,11 @@ watch(() => props.visible, (visible) => {
   if (visible) initialize()
 }, { immediate: true })
 
+function roundScore(value: number | null | undefined): number | null {
+  if (value === null || value === undefined || Number.isNaN(value)) return null
+  return Math.round(value * 10) / 10
+}
+
 function hasAtMostOneDecimal(input: number): boolean {
   return Math.abs(input * 10 - Math.round(input * 10)) < Number.EPSILON * 100
 }
@@ -82,11 +87,18 @@ function minFractionDigits(row: EditableScoreRow): 0 | 1 {
   return focusedStudentId.value === row.studentId ? 0 : 1
 }
 
+function handleScoreBlur(row: EditableScoreRow): void {
+  focusedStudentId.value = null
+  if (row.scoreStatus === 'SCORED' && row.scoreValue !== null && row.scoreValue !== undefined) {
+    row.scoreValue = roundScore(row.scoreValue)
+  }
+}
+
 function toRequest(row: EditableScoreRow): BulkScoreItem {
   return {
     studentId: row.studentId,
     scoreStatus: row.scoreStatus,
-    scoreValue: row.scoreStatus === 'SCORED' ? row.scoreValue : null,
+    scoreValue: row.scoreStatus === 'SCORED' ? roundScore(row.scoreValue) : null,
     note: row.note.trim() || null,
     expectedVersion: row.expectedVersion,
   }
@@ -94,6 +106,11 @@ function toRequest(row: EditableScoreRow): BulkScoreItem {
 
 function save(): void {
   validationMessage.value = ''
+  for (const row of rows.value) {
+    if (row.scoreStatus === 'SCORED' && row.scoreValue !== null && row.scoreValue !== undefined) {
+      row.scoreValue = roundScore(row.scoreValue)
+    }
+  }
   const changed = rows.value.filter((row) => initialSignatures.value[row.studentId] !== signature(row))
   if (changed.length === 0) {
     validationMessage.value = 'Chưa có thay đổi để lưu.'
@@ -134,7 +151,7 @@ function save(): void {
             inputmode="decimal"
             placeholder="Điểm"
             @focus="focusedStudentId = row.studentId"
-            @blur="focusedStudentId = null"
+            @blur="handleScoreBlur(row)"
           />
           <span v-else class="field-hint">Không có điểm số</span>
           <InputText v-model="row.note" maxlength="500" placeholder="Ghi chú" aria-label="Ghi chú" />

@@ -51,12 +51,24 @@ watch(() => props.visible, (visible) => {
   validationMessage.value = ''
 })
 
+function roundScore(value: number | null | undefined): number | null {
+  if (value === null || value === undefined || Number.isNaN(value)) return null
+  return Math.round(value * 10) / 10
+}
+
 function hasAtMostOneDecimal(input: number): boolean {
   return Math.abs(input * 10 - Math.round(input * 10)) < Number.EPSILON * 100
 }
 
 function minFractionDigits(): 0 | 1 {
   return scoreFocused.value ? 0 : 1
+}
+
+function handleScoreBlur(): void {
+  scoreFocused.value = false
+  if (status.value === 'SCORED' && value.value !== null && value.value !== undefined) {
+    value.value = roundScore(value.value)
+  }
 }
 
 function save(): void {
@@ -85,11 +97,12 @@ function save(): void {
 }
 
 function requestChange(): void {
+  const resolvedValue = status.value === 'SCORED' && value.value !== null ? roundScore(value.value) : null
   emit('request-change', {
     studentName: props.studentName ?? props.score?.studentName ?? 'Học sinh',
     score: props.score,
     proposedStatus: status.value,
-    proposedValue: status.value === 'SCORED' ? value.value : null,
+    proposedValue: resolvedValue,
     reason: note.value.trim(),
   })
 }
@@ -118,7 +131,7 @@ function requestChange(): void {
           fluid
           :disabled="props.readOnly"
           @focus="scoreFocused = true"
-          @blur="scoreFocused = false"
+          @blur="handleScoreBlur"
         />
       </div>
       <div class="field-group">
