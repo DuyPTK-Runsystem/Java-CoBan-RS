@@ -39,7 +39,22 @@ public class AttendanceHistoryService {
                 "AttendanceHistoryService.getHistory");
         validateRange(query);
         Student student = findCurrentStudent();
-        List<ResStudentAttendanceHistoryDTO.Item> items = itemCollector.collectItems(student.getId(), query);
+        return collectAndPage(student.getId(), query);
+    }
+
+    @Transactional(readOnly = true)
+    public ResStudentAttendanceHistoryDTO getStudentHistory(Long studentId, ReqAttendanceHistoryQuery query) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                AttendanceHistoryService.class,
+                "AttendanceHistoryService.getStudentHistory");
+        validateRange(query);
+        studentRepository.findById(studentId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy hồ sơ học sinh"));
+        return collectAndPage(studentId, query);
+    }
+
+    private ResStudentAttendanceHistoryDTO collectAndPage(Long studentId, ReqAttendanceHistoryQuery query) {
+        List<ResStudentAttendanceHistoryDTO.Item> items = itemCollector.collectItems(studentId, query);
         if (items.isEmpty()) {
             return responseMapper.emptyResponse(query);
         }

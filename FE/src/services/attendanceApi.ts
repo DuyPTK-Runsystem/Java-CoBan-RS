@@ -78,6 +78,19 @@ export function fetchStudentAttendanceHistory(token: string, query: StudentAtten
   return apiClient.get<StudentAttendanceHistoryResponse>('/api/v2/attendance/students/me/history', { token, query: params })
 }
 
+export function fetchStudentAttendanceHistoryById(
+  token: string,
+  studentId: number,
+  query: StudentAttendanceHistoryQuery,
+): Promise<StudentAttendanceHistoryResponse> {
+  const params = new URLSearchParams({ page: String(query.page), size: String(query.size) })
+  if (query.academicYearId !== undefined && query.academicYearId !== null) params.set('academicYearId', String(query.academicYearId))
+  if (query.semesterId !== undefined && query.semesterId !== null) params.set('semesterId', String(query.semesterId))
+  if (query.from) params.set('from', query.from)
+  if (query.to) params.set('to', query.to)
+  return apiClient.get<StudentAttendanceHistoryResponse>(`/api/v2/attendance/students/${studentId}/history`, { token, query: params })
+}
+
 export function fetchClassAttendanceSummary(token: string, classId: number, query: ClassAttendanceSummaryQuery): Promise<ClassAttendanceSummaryResponse> {
   return apiClient.get<ClassAttendanceSummaryResponse>(`/api/v2/attendance/classes/${classId}/summary`, {
     token,

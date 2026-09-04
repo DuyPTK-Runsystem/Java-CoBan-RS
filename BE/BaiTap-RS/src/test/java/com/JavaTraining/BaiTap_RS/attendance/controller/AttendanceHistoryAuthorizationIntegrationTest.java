@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 class AttendanceHistoryAuthorizationIntegrationTest {
 
         private static final String HISTORY_ENDPOINT = "/api/v2/attendance/students/me/history";
+        private static final String STUDENT_ID_HISTORY_ENDPOINT = "/api/v2/attendance/students/1/history";
 
         @Autowired
         private MockMvc mockMvc;
@@ -51,6 +52,60 @@ class AttendanceHistoryAuthorizationIntegrationTest {
         @Test
         void anonymousCannotAccessStudentHistory() throws Exception {
                 int status = mockMvc.perform(MockMvcRequestBuilders.get(HISTORY_ENDPOINT))
+                                .andReturn()
+                                .getResponse()
+                                .getStatus();
+
+                Assertions.assertEquals(401, status, "anonymous request should be unauthorized");
+        }
+
+        @Test
+        @WithMockUser(roles = "ACADEMIC_OFFICE")
+        void academicOfficeCanAccessStudentIdHistory() throws Exception {
+                int status = mockMvc.perform(MockMvcRequestBuilders.get(STUDENT_ID_HISTORY_ENDPOINT))
+                                .andReturn()
+                                .getResponse()
+                                .getStatus();
+
+                Assertions.assertNotEquals(403, status, "academic office should have access to student-id history");
+        }
+
+        @Test
+        @WithMockUser(roles = "TEACHER")
+        void teacherCanAccessStudentIdHistory() throws Exception {
+                int status = mockMvc.perform(MockMvcRequestBuilders.get(STUDENT_ID_HISTORY_ENDPOINT))
+                                .andReturn()
+                                .getResponse()
+                                .getStatus();
+
+                Assertions.assertNotEquals(403, status, "teacher should have access to student-id history");
+        }
+
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        void adminCanAccessStudentIdHistory() throws Exception {
+                int status = mockMvc.perform(MockMvcRequestBuilders.get(STUDENT_ID_HISTORY_ENDPOINT))
+                                .andReturn()
+                                .getResponse()
+                                .getStatus();
+
+                Assertions.assertNotEquals(403, status, "admin should have access to student-id history");
+        }
+
+        @Test
+        @WithMockUser(roles = "STUDENT")
+        void studentCannotAccessStudentIdHistory() throws Exception {
+                int status = mockMvc.perform(MockMvcRequestBuilders.get(STUDENT_ID_HISTORY_ENDPOINT))
+                                .andReturn()
+                                .getResponse()
+                                .getStatus();
+
+                Assertions.assertEquals(403, status, "student should not access staff-only history endpoint");
+        }
+
+        @Test
+        void anonymousCannotAccessStudentIdHistory() throws Exception {
+                int status = mockMvc.perform(MockMvcRequestBuilders.get(STUDENT_ID_HISTORY_ENDPOINT))
                                 .andReturn()
                                 .getResponse()
                                 .getStatus();

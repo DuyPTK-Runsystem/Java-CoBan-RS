@@ -9,7 +9,10 @@ import FormAlert from '@/components/FormAlert.vue'
 import TranscriptAnnualTable from '@/components/TranscriptAnnualTable.vue'
 import TranscriptTermTable from '@/components/TranscriptTermTable.vue'
 import { fetchAcademicYears, fetchSemesters } from '@/services/academicApi'
-import { fetchStudentAttendanceHistory } from '@/services/attendanceApi'
+import {
+  fetchStudentAttendanceHistory,
+  fetchStudentAttendanceHistoryById,
+} from '@/services/attendanceApi'
 import { getAuthSession } from '@/services/authSession'
 import {
   fetchMyAnnualStatus,
@@ -167,14 +170,20 @@ async function loadTranscript() {
         ? fetchStudentTermTranscript(token.value, studentIdParam, selectedSemesterId.value)
         : fetchMyTermTranscript(token.value, selectedSemesterId.value)
 
+      const attendanceQuery = {
+        academicYearId: selectedAcademicYearId.value,
+        semesterId: selectedSemesterId.value,
+        page: 0,
+        size: 1,
+      }
+
+      const attendancePromise = studentIdParam
+        ? fetchStudentAttendanceHistoryById(token.value, studentIdParam, attendanceQuery).catch(() => null)
+        : fetchStudentAttendanceHistory(token.value, attendanceQuery).catch(() => null)
+
       const [termData, attendanceRes] = await Promise.all([
         termPromise,
-        fetchStudentAttendanceHistory(token.value, {
-          academicYearId: selectedAcademicYearId.value,
-          semesterId: selectedSemesterId.value,
-          page: 0,
-          size: 1,
-        }).catch(() => null),
+        attendancePromise,
       ])
       termTranscript.value = termData
       if (attendanceRes?.summary) {

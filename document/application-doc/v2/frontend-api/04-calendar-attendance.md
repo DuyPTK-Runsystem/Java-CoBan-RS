@@ -76,15 +76,15 @@ Accepted base aliases:
 
 Authorization: `TEACHER`.
 
-| Method | Path suffix | Request | Response |
-|---|---|---|---|
-| `POST` | base | create session DTO | `201 ResAttendanceSessionDTO` |
-| `GET` | base | `classId`, `semesterId`, `attendanceDate`, `sessionPeriod` query | `ResAttendanceSessionDTO` or `404` when not created |
-| `GET` | `/{sessionId}/students` | — | `ResAttendanceStudentDTO[]` |
-| `PUT` | `/{sessionId}/exceptions/{studentId}` | exception DTO | `ResAttendanceExceptionDTO` |
-| `PUT` | `/{sessionId}/exceptions/by-code/{studentCode}` | exception DTO | `ResAttendanceExceptionDTO` |
-| `DELETE` | `/{sessionId}/exceptions/{studentId}` | — | `204` |
-| `DELETE` | `/{sessionId}/exceptions/by-code/{studentCode}` | — | `204` |
+| Method   | Path suffix                                     | Request                                                          | Response                                            |
+| -------- | ----------------------------------------------- | ---------------------------------------------------------------- | --------------------------------------------------- |
+| `POST`   | base                                            | create session DTO                                               | `201 ResAttendanceSessionDTO`                       |
+| `GET`    | base                                            | `classId`, `semesterId`, `attendanceDate`, `sessionPeriod` query | `ResAttendanceSessionDTO` or `404` when not created |
+| `GET`    | `/{sessionId}/students`                         | —                                                                | `ResAttendanceStudentDTO[]`                         |
+| `PUT`    | `/{sessionId}/exceptions/{studentId}`           | exception DTO                                                    | `ResAttendanceExceptionDTO`                         |
+| `PUT`    | `/{sessionId}/exceptions/by-code/{studentCode}` | exception DTO                                                    | `ResAttendanceExceptionDTO`                         |
+| `DELETE` | `/{sessionId}/exceptions/{studentId}`           | —                                                                | `204`                                               |
+| `DELETE` | `/{sessionId}/exceptions/by-code/{studentCode}` | —                                                                | `204`                                               |
 
 Create:
 
@@ -189,6 +189,27 @@ unexcusedAbsenceCount
 lateCount
 earlyLeaveCount
 ```
+
+### Student attendance history by studentId
+
+```text
+GET /api/v2/attendance/students/{studentId}/history
+```
+
+Authorization: `ADMIN`, `ACADEMIC_OFFICE`, `TEACHER`.
+
+Query:
+
+```text
+academicYearId?
+semesterId?
+from?
+to?
+page?       default 0
+size?       default 10
+```
+
+Response schema and summary identical to `/api/v2/attendance/students/me/history`.
 
 ### Class attendance summary
 

@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   fetchMyTermStatus: vi.fn(),
   fetchMyAnnualStatus: vi.fn(),
   fetchStudentAttendanceHistory: vi.fn(),
+  fetchStudentAttendanceHistoryById: vi.fn(),
   push: vi.fn(),
   query: {} as Record<string, string>,
 }))
@@ -31,6 +32,7 @@ vi.mock('@/services/academicApi', () => ({
 
 vi.mock('@/services/attendanceApi', () => ({
   fetchStudentAttendanceHistory: mocks.fetchStudentAttendanceHistory,
+  fetchStudentAttendanceHistoryById: mocks.fetchStudentAttendanceHistoryById,
 }))
 
 vi.mock('@/services/transcriptApi', () => ({
@@ -155,6 +157,21 @@ describe('TranscriptViewerView.vue', () => {
       totalElements: 20,
       totalPages: 1,
     })
+    mocks.fetchStudentAttendanceHistoryById.mockResolvedValue({
+      items: [],
+      summary: {
+        validSessionCount: 20,
+        presentCount: 17,
+        excusedAbsenceCount: 2,
+        unexcusedAbsenceCount: 1,
+        lateCount: 0,
+        earlyLeaveCount: 0,
+      },
+      page: 0,
+      size: 1,
+      totalElements: 20,
+      totalPages: 1,
+    })
   })
 
   afterEach(() => {
@@ -174,6 +191,7 @@ describe('TranscriptViewerView.vue', () => {
       page: 0,
       size: 1,
     })
+    expect(mocks.fetchStudentAttendanceHistoryById).not.toHaveBeenCalled()
 
     expect(wrapper.text()).toContain('Bảng Điểm Học Sinh')
     expect(wrapper.text()).toContain('Toán học')
@@ -315,6 +333,15 @@ describe('TranscriptViewerView.vue', () => {
     expect(wrapper.text()).toContain('Bảng Điểm Học Sinh: Nguyễn Văn A (HS001)')
     expect(wrapper.text()).toContain('Quay lại Bảng điểm theo lớp')
     expect(wrapper.text()).toContain('👨‍🏫 Giáo viên (teacher1)')
+
+    expect(mocks.fetchStudentTermTranscript).toHaveBeenCalledWith('token-tea', 101, 11)
+    expect(mocks.fetchStudentAttendanceHistoryById).toHaveBeenCalledWith('token-tea', 101, {
+      academicYearId: 1,
+      semesterId: 11,
+      page: 0,
+      size: 1,
+    })
+    expect(mocks.fetchStudentAttendanceHistory).not.toHaveBeenCalled()
 
     const backButton = wrapper.find('.back-btn')
     expect(backButton.exists()).toBe(true)

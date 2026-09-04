@@ -7,6 +7,7 @@ import {
   fetchAttendanceSessionStudents,
   fetchClassAttendanceSummary,
   fetchStudentAttendanceHistory,
+  fetchStudentAttendanceHistoryById,
   upsertAttendanceException,
 } from './attendanceApi'
 
@@ -64,5 +65,21 @@ describe('attendanceApi', () => {
       'http://localhost:8081/api/v2/attendance/students/me/history?page=1&size=20&academicYearId=1&semesterId=2&from=2026-09-01&to=2026-09-30',
       'http://localhost:8081/api/v2/attendance/classes/3/summary?semesterId=2&from=2026-09-01&to=2026-09-30&page=2&size=50',
     ])
+  })
+
+  it('serializes student attendance history by id request', async () => {
+    fetchMock.mockImplementation(() => Promise.resolve(new Response(JSON.stringify({ data: { items: [], summary: {} } }), { status: 200 })))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await fetchStudentAttendanceHistoryById('token', 101, { academicYearId: 1, semesterId: 2, page: 0, size: 1 })
+
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      'http://localhost:8081/api/v2/attendance/students/101/history?page=0&size=1&academicYearId=1&semesterId=2',
+    )
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({
+      headers: {
+        Authorization: 'Bearer token',
+      },
+    })
   })
 })
