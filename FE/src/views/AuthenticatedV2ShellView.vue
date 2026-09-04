@@ -43,6 +43,7 @@ const navigation = computed<NavigationItem[]>(() => {
   }
   if (!roles.length || roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE')) {
     items.push({ label: 'Kết quả thi lại', to: '/v2/retake-exams', icon: 'pi pi-check-square' })
+    items.push({ label: 'Vận hành tính điểm', to: '/v2/scorebooks/operations', icon: 'pi pi-cog' })
   }
   return items
 })

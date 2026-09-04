@@ -68,3 +68,25 @@ export function fetchStudentAnnualTranscript(
     { token },
   )
 }
+
+export function fetchStudentTermStatus(
+  token: string,
+  studentId: number,
+  semesterId: number,
+): Promise<ResTranscriptCalculationStatusDTO> {
+  return apiClient.get<ResTranscriptCalculationStatusDTO>(
+    `${basePath}/${studentId}/semesters/${semesterId}/status`,
+    { token },
+  )
+}
+
+export function fetchStudentAnnualStatus(
+  token: string,
+  studentId: number,
+  academicYearId: number,
+): Promise<ResTranscriptCalculationStatusDTO> {
+  return apiClient.get<ResTranscriptCalculationStatusDTO>(
+    `${basePath}/${studentId}/academic-years/${academicYearId}/status`,
+    { token },
+  )
+}

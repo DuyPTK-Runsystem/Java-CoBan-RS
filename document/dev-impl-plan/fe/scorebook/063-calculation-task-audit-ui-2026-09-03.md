@@ -2,11 +2,12 @@
 
 ## 1. Trạng thái
 
-- **Approval gate:** `Draft — chờ User approval qua agent message`.
+- **Approval gate:** `Approved qua agent message và đã hoàn thành implementation (Dev Note 063, validation PASS)`.
 - **Ngày lập:** `2026-09-03`.
+- **Ngày hoàn thành:** `2026-09-04`.
 - **Module:** FE `scorebook` / `calculation operations` / `audit`.
 - **Wireframe bắt buộc:** [063 Calculation Task & Audit UI](../../../wireframes/fe/scorebook/063-calculation-task-audit-ui/README.md).
-- **Giới hạn:** chỉ lập plan và wireframe tĩnh; chưa code production, chưa sửa FE summary dùng chung.
+- **Trạng thái:** Đã hoàn thành toàn bộ implementation, tests, Storybook và Dev Note; validation PASS.
 
 ## 2. Mục tiêu
 

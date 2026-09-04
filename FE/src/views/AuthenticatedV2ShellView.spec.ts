@@ -146,4 +146,54 @@ describe('AuthenticatedV2ShellView.vue', () => {
     expect(classTransItem.exists()).toBe(true)
     expect(classTransItem.attributes('data-active')).toBe('true')
   })
+
+  it('shows Calculation Operations tab for ADMIN and ACADEMIC_OFFICE roles', () => {
+    saveAuthSession({
+      accessToken: 'token-office',
+      user: {
+        id: 4,
+        username: 'office1',
+        roles: ['ACADEMIC_OFFICE'],
+      },
+    })
+
+    const wrapper = mount(AuthenticatedV2ShellView, {
+      global: {
+        stubs: {
+          RouterView: true,
+          AuthenticatedLayout: {
+            props: ['navigation'],
+            template: '<div class="mock-layout"><span v-for="item in navigation" :key="item.to" :data-to="item.to">{{ item.label }}</span></div>',
+          },
+        },
+      },
+    })
+
+    expect(wrapper.find('[data-to="/v2/scorebooks/operations"]').exists()).toBe(true)
+  })
+
+  it('hides Calculation Operations tab for STUDENT and TEACHER roles', () => {
+    saveAuthSession({
+      accessToken: 'token-teacher',
+      user: {
+        id: 5,
+        username: 'teacher1',
+        roles: ['TEACHER'],
+      },
+    })
+
+    const wrapper = mount(AuthenticatedV2ShellView, {
+      global: {
+        stubs: {
+          RouterView: true,
+          AuthenticatedLayout: {
+            props: ['navigation'],
+            template: '<div class="mock-layout"><span v-for="item in navigation" :key="item.to" :data-to="item.to">{{ item.label }}</span></div>',
+          },
+        },
+      },
+    })
+
+    expect(wrapper.find('[data-to="/v2/scorebooks/operations"]').exists()).toBe(false)
+  })
 })

@@ -6,7 +6,9 @@ import {
   fetchMyAnnualTranscript,
   fetchMyTermStatus,
   fetchMyTermTranscript,
+  fetchStudentAnnualStatus,
   fetchStudentAnnualTranscript,
+  fetchStudentTermStatus,
   fetchStudentTermTranscript,
 } from './transcriptApi'
 
@@ -53,6 +55,8 @@ describe('transcriptApi', () => {
     vi.mocked(apiClient.get).mockResolvedValue({})
     await fetchStudentTermTranscript('token-789', 101, 5)
     await fetchStudentAnnualTranscript('token-789', 101, 2)
+    await fetchStudentTermStatus('token-789', 101, 5)
+    await fetchStudentAnnualStatus('token-789', 101, 2)
 
     expect(apiClient.get).toHaveBeenNthCalledWith(
       1,
@@ -62,6 +66,16 @@ describe('transcriptApi', () => {
     expect(apiClient.get).toHaveBeenNthCalledWith(
       2,
       '/api/v2/transcripts/students/101/academic-years/2',
+      { token: 'token-789' },
+    )
+    expect(apiClient.get).toHaveBeenNthCalledWith(
+      3,
+      '/api/v2/transcripts/students/101/semesters/5/status',
+      { token: 'token-789' },
+    )
+    expect(apiClient.get).toHaveBeenNthCalledWith(
+      4,
+      '/api/v2/transcripts/students/101/academic-years/2/status',
       { token: 'token-789' },
     )
   })

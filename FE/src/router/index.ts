@@ -135,6 +135,11 @@ const router = createRouter({
           component: () => import('@/views/RetakeResultView.vue'),
         },
         {
+          path: 'scorebooks/operations',
+          name: 'v2-scorebook-operations',
+          component: () => import('@/views/CalculationOperationsView.vue'),
+        },
+        {
           // Business routes must be registered before this neutral outlet.
           path: ':pathMatch(.*)*',
           name: 'v2-outlet',

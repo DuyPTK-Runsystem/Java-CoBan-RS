@@ -83,11 +83,16 @@ export interface ResStudentAnnualTranscriptDTO {
 
 export interface ResTranscriptCalculationStatusDTO {
   studentId: number
-  targetType: 'SEMESTER' | 'ACADEMIC_YEAR'
-  targetId: number
+  studentCode?: string
+  academicYearId?: number
+  semesterId?: number | null
+  targetType?: 'SEMESTER' | 'ACADEMIC_YEAR'
+  targetId?: number
   calculationStatus: CalculationStatus
   sourceVersion: number | null
   calculatedVersion: number | null
+  isUpToDate?: boolean
   calculatedAt: string | null
-  lastTaskId: number | null
+  lastError?: string | null
+  lastTaskId?: number | null
 }

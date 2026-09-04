@@ -11,11 +11,10 @@ Note này ghi lại các hạng mục FE còn lại theo roadmap hiện tại. T
 
 ## Danh sách hạng mục chưa hoàn thành
 
-| Ưu tiên | Hạng mục                               | Phạm vi chính                                                                       | Trạng thái hiện tại                                           | Plan liên quan                                                                    |
-| ------: | -------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-|       1 | Plan 053 — Academic Catalog Phase 6    | Báo cáo thống kê sĩ số/điểm trung bình/cảnh báo                                     | **Bị block** bởi backend chưa có read contract phù hợp        | [FE Plan 053](../fe/academic/053-grade-class-subject-management-ui-2026-08-27.md) |
-|       2 | Plan 063 — Calculation Task & Audit UI | Theo dõi task lỗi, retry, audit log, trạng thái tính toán                           | **Đã có plan, chưa implementation; đang Draft, chờ approval** | [Plan 063](../fe/scorebook/063-calculation-task-audit-ui-2026-09-03.md)           |
-|       3 | Plan 064 — FE E2E & Release Hardening  | E2E flow, responsive, accessibility, permission regression, build/deploy validation | **Đã có plan, chưa implementation; đang Draft, chờ approval** | [Plan 064](../fe/release/064-fe-e2e-release-hardening-2026-09-03.md)              |
+| Ưu tiên | Hạng mục                              | Phạm vi chính                                                                       | Trạng thái hiện tại                                           | Plan liên quan                                                                    |
+| ------: | ------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+|       1 | Plan 053 — Academic Catalog Phase 6   | Báo cáo thống kê sĩ số/điểm trung bình/cảnh báo                                     | **Bị block** bởi backend chưa có read contract phù hợp        | [FE Plan 053](../fe/academic/053-grade-class-subject-management-ui-2026-08-27.md) |
+|       2 | Plan 064 — FE E2E & Release Hardening | E2E flow, responsive, accessibility, permission regression, build/deploy validation | **Đã có plan, chưa implementation; đang Draft, chờ approval** | [Plan 064](../fe/release/064-fe-e2e-release-hardening-2026-09-03.md)              |
 
 ## Các hạng mục đã hoàn thành, không còn là remaining plan
 
@@ -30,6 +29,8 @@ Note này ghi lại các hạng mục FE còn lại theo roadmap hiện tại. T
 | Published Score Entry and Reopen | **Đã hoàn thành trong Plan 065**            | Đã hỗ trợ nhập điểm trực tiếp khi `PUBLISHED` và vòng đời reopen                                                                                                   | [BE Plan 065](../../be/scorebook/065-published-score-entry-and-reopen-2026-09-03.md)                                                                        |
 | Transcript Viewer UI             | **Đã hoàn thành trong Plan 061**            | Đã hoàn thành bảng điểm học kỳ ma trận động 2 tầng header, bảng cả năm, footer summary, routing v2 và validation PASS                                              | [FE Plan 061](../fe/scorebook/061-transcript-viewer-ui-2026-09-03.md)                                                                                       |
 | Retake Result UI                 | **Đã hoàn thành trong Plan 062**            | Đã có màn hình tra cứu, tạo record PLANNED, nhập/sửa điểm thi lại, hủy record, before/after score, calculation status, Storybook stories và validation PASS        | [FE Plan 062](../fe/scorebook/062-retake-result-ui-2026-09-03.md)                                                                                           |
+| Class Transcript Viewer UI       | **Đã hoàn thành trong Plan 062.1**          | Đã có 4 chế độ bảng điểm lớp (1A, 1B, 2A, 2B), phân quyền GVCN/Admin, drill-down học sinh, BE query APIs và FE tests PASS                                          | [Plan 062.1](../fe/scorebook/062.1-class-transcript-viewer-ui-2026-09-04.md)                                                                                |
+| Calculation Task & Audit UI      | **Đã hoàn thành trong Plan 063**            | Đã có monitoring task tính toán, retry xác nhận với 409 recovery, score audit trail read-only, student transcript status card, Storybook và validation PASS        | [FE Plan 063](../fe/scorebook/063-calculation-task-audit-ui-2026-09-03.md)                                                                                  |
 
 ## Trạng thái cần lưu ý
 
@@ -45,12 +46,13 @@ Note này ghi lại các hạng mục FE còn lại theo roadmap hiện tại. T
 - Backend Plan 038 còn e2e persistence test pending; đây là backend follow-up,
   không nên trộn vào scope FE nếu chưa được approve.
 - Plan 062 (Retake Result UI) đã hoàn thành và tích hợp đầy đủ kiểm thử, Storybook, route và validation PASS.
+- Plan 062.1 (Class Transcript & Homeroom Student Transcript Viewer UI) đã hoàn thành trọn vẹn với 4 chế độ bảng điểm lớp, API bảo mật theo GVCN/Admin và drill-down sang bảng điểm cá nhân; toàn bộ kiểm thử BE/FE và quality gates đều PASS.
+- Plan 063 (Calculation Task & Audit UI) đã hoàn thành trọn vẹn với monitoring danh sách task, modal chi tiết JSON payload/error, retry confirmation xử lý 409 conflict, tra cứu audit trail bất biến và thẻ trạng thái đồng bộ bảng điểm; toàn bộ kiểm thử FE (310 tests) và build/storybook đều PASS.
 
 ## Thứ tự đề xuất
 
-1. Phê duyệt và triển khai Plan 063 — Calculation Task & Audit UI.
-2. Xử lý blocker Plan 053 Phase 6 nếu cần đầy đủ academic catalog.
-3. Phê duyệt và thực hiện Plan 064 — FE E2E & Release Hardening.
+1. Xử lý blocker Plan 053 Phase 6 nếu cần đầy đủ academic catalog.
+2. Phê duyệt và thực hiện Plan 064 — FE E2E & Release Hardening.
 
 ## Definition of Done chung cho mỗi FE plan
   và responsive behavior.
