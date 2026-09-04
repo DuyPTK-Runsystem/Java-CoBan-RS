@@ -1,7 +1,15 @@
+import { defineComponent, h } from 'vue'
 import { createRouter, createWebHistory, RouterView } from 'vue-router'
 
 import { configureApiClient } from '@/services/apiClient'
 import { hasAuthenticatedSession } from '@/services/authSession'
+
+const StudentDetailPlaceholder = defineComponent({
+  name: 'StudentDetailPlaceholder',
+  setup() {
+    return () => h('div', { class: 'student-detail-placeholder' })
+  },
+})
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -33,21 +41,15 @@ const router = createRouter({
     },
     {
       path: '/students',
-      name: 'students',
-      component: () => import('@/views/StudentListView.vue'),
-      meta: { requiresAuth: true },
+      redirect: '/v2/students',
     },
     {
       path: '/students/new',
-      name: 'student-create',
-      component: () => import('@/views/StudentFormView.vue'),
-      meta: { requiresAuth: true },
+      redirect: '/v2/students/new',
     },
     {
       path: '/students/:studentId/edit',
-      name: 'student-edit',
-      component: () => import('@/views/StudentFormView.vue'),
-      meta: { requiresAuth: true },
+      redirect: (to) => `/v2/students/${to.params.studentId}/edit`,
     },
     {
       path: '/v2',
@@ -58,6 +60,26 @@ const router = createRouter({
           path: '',
           name: 'v2-shell',
           component: RouterView,
+        },
+        {
+          path: 'students',
+          name: 'v2-students',
+          component: () => import('@/views/StudentListView.vue'),
+        },
+        {
+          path: 'students/new',
+          name: 'v2-student-create',
+          component: () => import('@/views/StudentFormView.vue'),
+        },
+        {
+          path: 'students/:studentId',
+          name: 'v2-student-detail',
+          component: StudentDetailPlaceholder,
+        },
+        {
+          path: 'students/:studentId/edit',
+          name: 'v2-student-edit',
+          component: () => import('@/views/StudentFormView.vue'),
         },
         {
           path: 'academic-years',
@@ -157,7 +179,7 @@ router.beforeEach((to) => {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
   if (to.meta.guestOnly && authenticated) {
-    return { name: 'students' }
+    return '/v2'
   }
   return true
 })

@@ -14,13 +14,13 @@ const submitting = ref(false)
 const popupVisible = ref(false)
 const popupStatus = ref<'success' | 'failure'>('success')
 const popupMessage = ref('')
-const successRedirect = ref('/students')
+const successRedirect = ref('/v2')
 
 function safeRedirect(): string {
   const redirect = router.currentRoute.value.query.redirect
   return typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')
     ? redirect
-    : '/students'
+    : '/v2'
 }
 
 async function handleSubmit(values: LoginValues): Promise<void> {

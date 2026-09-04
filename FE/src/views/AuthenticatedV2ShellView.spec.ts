@@ -196,4 +196,127 @@ describe('AuthenticatedV2ShellView.vue', () => {
 
     expect(wrapper.find('[data-to="/v2/scorebooks/operations"]').exists()).toBe(false)
   })
+
+  it.each(['ADMIN', 'ACADEMIC_OFFICE', 'TEACHER'] as const)(
+    'shows Student Profile tab with icon pi pi-user for %s role',
+    (role) => {
+      saveAuthSession({
+        accessToken: `token-${role}`,
+        user: {
+          id: 10,
+          username: `user_${role}`,
+          roles: [role],
+        },
+      })
+
+      const wrapper = mount(AuthenticatedV2ShellView, {
+        global: {
+          stubs: {
+            RouterView: true,
+            AuthenticatedLayout: {
+              props: ['navigation'],
+              template:
+                '<div class="mock-layout"><span v-for="item in navigation" :key="item.to" :data-to="item.to" :data-icon="item.icon" :data-active="String(item.active)">{{ item.label }}</span></div>',
+            },
+          },
+        },
+      })
+
+      const studentItem = wrapper.find('[data-to="/v2/students"]')
+      expect(studentItem.exists()).toBe(true)
+      expect(studentItem.text()).toBe('Hồ sơ học sinh')
+      expect(studentItem.attributes('data-icon')).toBe('pi pi-user')
+    },
+  )
+
+  it('hides Student Profile tab for STUDENT role', () => {
+    saveAuthSession({
+      accessToken: 'token-stu-profile',
+      user: {
+        id: 11,
+        username: 'student_only',
+        roles: ['STUDENT'],
+      },
+    })
+
+    const wrapper = mount(AuthenticatedV2ShellView, {
+      global: {
+        stubs: {
+          RouterView: true,
+          AuthenticatedLayout: {
+            props: ['navigation'],
+            template:
+              '<div class="mock-layout"><span v-for="item in navigation" :key="item.to" :data-to="item.to">{{ item.label }}</span></div>',
+          },
+        },
+      },
+    })
+
+    expect(wrapper.find('[data-to="/v2/students"]').exists()).toBe(false)
+  })
+
+  it.each([
+    '/v2/students',
+    '/v2/students/new',
+    '/v2/students/101',
+    '/v2/students/101/edit',
+  ])('sets Student Profile tab active when route is %s', (path) => {
+    mocks.currentPath = path
+
+    saveAuthSession({
+      accessToken: 'token-teacher-active',
+      user: {
+        id: 12,
+        username: 'teacher_active',
+        roles: ['TEACHER'],
+      },
+    })
+
+    const wrapper = mount(AuthenticatedV2ShellView, {
+      global: {
+        stubs: {
+          RouterView: true,
+          AuthenticatedLayout: {
+            props: ['navigation'],
+            template:
+              '<div class="mock-layout"><span v-for="item in navigation" :key="item.to" :data-to="item.to" :data-active="String(item.active)">{{ item.label }}</span></div>',
+          },
+        },
+      },
+    })
+
+    const studentItem = wrapper.find('[data-to="/v2/students"]')
+    expect(studentItem.exists()).toBe(true)
+    expect(studentItem.attributes('data-active')).toBe('true')
+  })
+
+  it('sets Student Profile tab inactive when route is not under /v2/students', () => {
+    mocks.currentPath = '/v2/academic-years'
+
+    saveAuthSession({
+      accessToken: 'token-admin-inactive',
+      user: {
+        id: 13,
+        username: 'admin_inactive',
+        roles: ['ADMIN'],
+      },
+    })
+
+    const wrapper = mount(AuthenticatedV2ShellView, {
+      global: {
+        stubs: {
+          RouterView: true,
+          AuthenticatedLayout: {
+            props: ['navigation'],
+            template:
+              '<div class="mock-layout"><span v-for="item in navigation" :key="item.to" :data-to="item.to" :data-active="String(item.active)">{{ item.label }}</span></div>',
+          },
+        },
+      },
+    })
+
+    const studentItem = wrapper.find('[data-to="/v2/students"]')
+    expect(studentItem.exists()).toBe(true)
+    expect(studentItem.attributes('data-active')).toBe('false')
+  })
 })

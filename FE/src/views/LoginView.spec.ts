@@ -61,7 +61,8 @@ describe('LoginView status popup', () => {
     clearAuthSession()
   })
 
-  it('stores the session, shows success, and redirects only after Close', async () => {
+  it('stores the session, shows success, and redirects to intended path only after Close', async () => {
+    await router.push('/login?redirect=/v2/students/new')
     loginMock.mockResolvedValue({
       accessToken: 'jwt-token',
       user: { id: 1, username: 'student01' },
@@ -77,7 +78,43 @@ describe('LoginView status popup', () => {
 
     await (wrapper.vm as unknown as { closePopup: () => Promise<void> }).closePopup()
 
-    expect(router.currentRoute.value.fullPath).toBe('/students/new')
+    expect(router.currentRoute.value.fullPath).toBe('/v2/students/new')
+  })
+
+  it('stores the session and redirects to /v2 fallback when no redirect query is provided', async () => {
+    await router.push('/login')
+    loginMock.mockResolvedValue({
+      accessToken: 'jwt-token',
+      user: { id: 1, username: 'student01' },
+    })
+    const wrapper = mountView()
+
+    await wrapper.get('[data-testid="login-submit"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.get('[data-testid="status-popup"]').text()).toContain('Login successful')
+
+    await (wrapper.vm as unknown as { closePopup: () => Promise<void> }).closePopup()
+
+    expect(router.currentRoute.value.fullPath).toBe('/v2')
+  })
+
+  it('falls back to /v2 when redirect query is an unsafe open redirect', async () => {
+    await router.push('/login?redirect=//malicious-site.com')
+    loginMock.mockResolvedValue({
+      accessToken: 'jwt-token',
+      user: { id: 1, username: 'student01' },
+    })
+    const wrapper = mountView()
+
+    await wrapper.get('[data-testid="login-submit"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.get('[data-testid="status-popup"]').text()).toContain('Login successful')
+
+    await (wrapper.vm as unknown as { closePopup: () => Promise<void> }).closePopup()
+
+    expect(router.currentRoute.value.fullPath).toBe('/v2')
   })
 
   it('shows a failure popup without saving a session or redirecting', async () => {

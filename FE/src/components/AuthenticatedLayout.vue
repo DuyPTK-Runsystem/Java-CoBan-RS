@@ -24,7 +24,7 @@ const defaultNavigation: NavigationItem[] = [
 <template>
   <div class="app-shell">
     <header class="app-header">
-      <RouterLink class="brand" to="/students">
+      <RouterLink class="brand" to="/v2">
         <span class="brand-mark" aria-hidden="true">AC</span>
         <span>Academic Core</span>
       </RouterLink>

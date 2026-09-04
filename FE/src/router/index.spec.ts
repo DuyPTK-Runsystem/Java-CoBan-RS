@@ -13,18 +13,46 @@ describe('router authentication guard', () => {
   })
 
   it('redirects a guest from a protected route to login with its intended path', async () => {
-    await router.push('/students/4/edit')
+    await router.push('/v2/students/4/edit')
 
     expect(router.currentRoute.value.name).toBe('login')
-    expect(router.currentRoute.value.query.redirect).toBe('/students/4/edit')
+    expect(router.currentRoute.value.query.redirect).toBe('/v2/students/4/edit')
   })
 
-  it('redirects an authenticated user away from guest-only routes', async () => {
+  it('redirects an authenticated user away from guest-only routes to /v2', async () => {
     saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01' } })
 
     await router.push('/register')
 
-    expect(router.currentRoute.value.name).toBe('students')
+    expect(router.currentRoute.value.path).toBe('/v2')
+    expect(router.currentRoute.value.name).toBe('v2-shell')
+  })
+
+  it('redirects legacy /students path to /v2/students for authenticated user', async () => {
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01' } })
+
+    await router.push('/students')
+
+    expect(router.currentRoute.value.path).toBe('/v2/students')
+    expect(router.currentRoute.value.name).toBe('v2-students')
+  })
+
+  it('redirects legacy /students/new path to /v2/students/new for authenticated user', async () => {
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01' } })
+
+    await router.push('/students/new')
+
+    expect(router.currentRoute.value.path).toBe('/v2/students/new')
+    expect(router.currentRoute.value.name).toBe('v2-student-create')
+  })
+
+  it('redirects legacy /students/:studentId/edit path to /v2/students/:studentId/edit for authenticated user', async () => {
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01' } })
+
+    await router.push('/students/4/edit')
+
+    expect(router.currentRoute.value.path).toBe('/v2/students/4/edit')
+    expect(router.currentRoute.value.name).toBe('v2-student-edit')
   })
 
   it('marks the v2 shell as authenticated and module-neutral', () => {
@@ -66,12 +94,30 @@ describe('router authentication guard', () => {
     expect(wrapper.get('[data-testid="nested-route-outlet"]').exists()).toBe(true)
   })
 
+  it('renders nested v2 students child through authenticated layout', async () => {
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01' } })
+
+    await router.push('/v2/students')
+
+    expect(router.currentRoute.value.name).toBe('v2-students')
+    expect(router.currentRoute.value.matched.map((record) => record.path)).toEqual([
+      '/v2',
+      '/v2/students',
+    ])
+    expect(router.currentRoute.value.meta).toMatchObject({
+      requiresAuth: true,
+      module: 'v2',
+      shell: 'authenticated',
+    })
+  })
+
   it.each([
     ['/login', 'login'],
     ['/register', 'register'],
-    ['/students', 'students'],
-    ['/students/new', 'student-create'],
-    ['/students/4/edit', 'student-edit'],
+    ['/v2/students', 'v2-students'],
+    ['/v2/students/new', 'v2-student-create'],
+    ['/v2/students/4', 'v2-student-detail'],
+    ['/v2/students/4/edit', 'v2-student-edit'],
     ['/v2/academic-years', 'v2-academic-years'],
     ['/v2/academic-years/1/semesters', 'v2-semesters'],
     ['/v2/academic-catalog/grades', 'v2-academic-grades'],

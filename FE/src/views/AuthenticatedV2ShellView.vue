@@ -30,6 +30,20 @@ const navigation = computed<NavigationItem[]>(() => {
   }
 
   if (isNonStudent) {
+    const isStudentActive = Boolean(route?.path?.startsWith('/v2/students'))
+    const enrollmentsIndex = items.findIndex((item) => item.to === '/v2/enrollments')
+    const studentItem: NavigationItem = {
+      label: 'Hồ sơ học sinh',
+      to: '/v2/students',
+      icon: 'pi pi-user',
+      active: isStudentActive,
+    }
+    if (enrollmentsIndex >= 0) {
+      items.splice(enrollmentsIndex + 1, 0, studentItem)
+    } else {
+      items.push(studentItem)
+    }
+
     // Khi admin/giáo vụ/teacher xem bảng điểm học sinh (/v2/transcripts), tab này vẫn sáng để đánh lừa thị giác
     const isClassTranscriptActive = route?.path === '/v2/class-transcripts' || route?.path === '/v2/transcripts'
     items.push({
