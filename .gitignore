@@ -1,1 +1,8 @@
 /docker/.env
+build/
+bin/
+.gradle/
+node_modules/
+dist/
+storybook-static/
+coverage/

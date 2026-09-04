@@ -1,6 +1,8 @@
 package com.JavaTraining.BaiTap_RS.user.domain.entity;
 
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import com.JavaTraining.BaiTap_RS.common.util.AuditUtil;
 import jakarta.persistence.Column;
@@ -8,6 +10,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -20,8 +25,8 @@ import lombok.Setter;
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @Entity
 @Table(
-        name = "user",
-        uniqueConstraints = @UniqueConstraint(name = "uk_user_user_name", columnNames = "user_name"))
+        name = "app_user",
+        uniqueConstraints = @UniqueConstraint(name = "uk_app_user_user_name", columnNames = "user_name"))
 public class User {
 
     @Id
@@ -36,6 +41,14 @@ public class User {
     @Column(name = "password", nullable = false, length = 255)
     @Setter(lombok.AccessLevel.PACKAGE)
     private String password;
+
+    @ManyToMany(fetch = jakarta.persistence.FetchType.EAGER)
+    @JoinTable(
+            name = "user_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @Setter(lombok.AccessLevel.PACKAGE)
+    private Set<Role> roles = new LinkedHashSet<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -52,6 +65,10 @@ public class User {
     public User(String username, String password) {
         this.username = username;
         this.password = password;
+    }
+
+    public void addRole(Role role) {
+        roles.add(role);
     }
 
     @PrePersist

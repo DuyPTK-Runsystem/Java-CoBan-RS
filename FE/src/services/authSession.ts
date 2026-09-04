@@ -9,7 +9,10 @@ function isUserSummary(value: unknown): value is UserSummary {
   }
 
   const user = value as Partial<UserSummary>
-  return typeof user.id === 'number' && typeof user.username === 'string' && user.username.length > 0
+  return typeof user.id === 'number'
+    && typeof user.username === 'string'
+    && user.username.length > 0
+    && (user.roles === undefined || (Array.isArray(user.roles) && user.roles.every((role) => typeof role === 'string')))
 }
 
 export function getAuthSession(): AuthSession | null {

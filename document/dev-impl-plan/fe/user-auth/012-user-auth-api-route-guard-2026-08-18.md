@@ -12,11 +12,11 @@
 
 ## 2. Requirement và nguồn tham chiếu
 
-- `document/application-doc/ApplicationContext.md`:
+- `document/application-doc/v1/ApplicationContext.md`:
   - Sau login lưu access token và user summary trong `sessionStorage`.
   - Logout hoặc API trả `401 Unauthorized` phải xóa auth state và về Login.
   - `403 Forbidden` giữ auth state và hiển thị access-denied message.
-- `document/application-doc/modules/UserModule.md`:
+- `document/application-doc/v1/modules/UserModule.md`:
   - Login/Register validation phía client vẫn tồn tại; backend là authoritative.
   - Login thành công điều hướng đến Student List.
   - Logout gọi endpoint stateless trả `204 No Content`, sau đó frontend xóa state.

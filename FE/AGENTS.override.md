@@ -1,137 +1,105 @@
 # AGENTS.override.md
 
-## Scope
+## Purpose
 
-Applies to all work under `FE/`.
-Follow this file together with `.codex/AGENTS.md` and `.codex/AGENTS_DETAIL.md`.
+This file is the **frontend routing file** for work under `FE/`.
 
-## Source of truth
+Do not load every frontend rule file for every task. Read the mandatory base, then route to only the rule files relevant to the current work.
 
-Before frontend work, read the relevant files:
+This file applies together with:
 
-- `document/application-doc/ApplicationContext.md`
-- `document/application-doc/modules/UserModule.md`
-- `document/application-doc/modules/StudentModule.md`
-- `document/application-doc/DataStructure.md` when data constraints matter
-- the approved Developer Plan, if any
+- `.codex/AGENTS.md`
+- `.codex/AGENTS_DETAIL.md`
 
-Do not invent behavior for requirements marked `TBD`.
+When older frontend guidance conflicts with Application Documentation v2, this routing structure wins.
 
-## Stack
+## Mandatory source order
 
-Use:
+For new frontend work, **Application Documentation v2 is the business source of truth**.
 
-- Vue 3 + Vite + TypeScript
-- PrimeVue for student-management UI
-- Vue Router
-- Storybook for `LoginForm` and `RegisterForm`
+Read in this order:
 
-Do not add Pinia/Vuex, Axios, Bootstrap, Tailwind, another UI framework, or other major dependencies unless required and approved.
+1. `document/application-doc/v2/ApplicationContext.md`
+2. `document/application-doc/v2/RequirementBaseline.md`
+3. the relevant module under `document/application-doc/v2/modules/`
+4. relevant approved CRs under `document/application-doc/v2/change-request/`
+5. `document/application-doc/v2/FrontendApiGuide.md`
+6. the relevant data-model file when identifiers, persistence, lifecycle, status, or calculation matter
+7. the approved FE Developer Plan for the current task, if one exists
 
-Prefer Vue/browser APIs and existing dependencies.
+Do **not** use `document/application-doc/v1/**` to fill gaps in v2. Read v1 only when the task explicitly concerns legacy compatibility.
 
-## Structure
+## Rule routing
 
-Default structure:
+### Always read before FE implementation
+
+- [`agent-rules/00-foundation.md`](agent-rules/00-foundation.md)
+
+This defines source precedence, contract discipline, stack, structure, module boundaries, and anti-overengineering rules.
+
+### Read by task
+
+| Task touches | Read |
+|---|---|
+| Login, session, account, authorization UX, router, sidebar/menu visibility | [`agent-rules/01-auth-routing-security.md`](agent-rules/01-auth-routing-security.md) |
+| Existing Student profile CRUD/search/sort/page/form UI using v1 | [`agent-rules/05-legacy-student-ui.md`](agent-rules/05-legacy-student-ui.md) |
+| Student, academic structure, teacher, assignment, attendance, scorebook, transcript, retake/calculation behavior | [`agent-rules/02-domain-rules.md`](agent-rules/02-domain-rules.md) |
+| API DTOs, enums, dates, pagination, validation/error handling, transport mapping | [`agent-rules/03-api-data-boundaries.md`](agent-rules/03-api-data-boundaries.md) |
+| Tests, coverage, build, Storybook, Dev Note, documentation updates, completion reporting | [`agent-rules/04-quality-documentation.md`](agent-rules/04-quality-documentation.md) |
+
+A task may require more than one routed file. Read only the files whose scope materially affects the task.
+
+## Critical blockers that must not be guessed
+
+### Role discovery
+
+The current login/account response and JWT do **not** expose frontend roles.
+
+Until an approved backend contract exposes roles/capabilities:
+
+- do not infer `ADMIN`, `ACADEMIC_OFFICE`, `TEACHER`, or `STUDENT`;
+- do not infer GVCN/GVBM from account role strings;
+- do not implement authoritative role-aware navigation from guessed data.
+
+Backend authorization remains authoritative.
+
+### Missing v2 contract
+
+Requirement v2 does not authorize the frontend to invent:
+
+- endpoints;
+- DTO fields;
+- enum values;
+- lifecycle mutations;
+- role claims;
+- calculation behavior.
+
+If a required contract does not exist, follow the approved plan/CR that resolves it or report the task as blocked.
+
+## Completion routing
+
+Before reporting FE source work complete, always read:
+
+- [`agent-rules/04-quality-documentation.md`](agent-rules/04-quality-documentation.md)
+
+and run the mandatory configured quality gates.
+
+## Routing principle
 
 ```text
-src/
-├── components/
-├── views/
-├── services/
-├── router/
-├── types/
-└── utils/
+AGENTS.override.md
+        ↓
+00-foundation                     always
+        ↓
+task-specific rule file(s)        only when relevant
+        ↓
+Requirement module / CR
+        ↓
+FrontendApiGuide router
+        ↓
+relevant API contract file(s)
+        ↓
+approved FE Dev Plan
 ```
 
-Keep:
-
-- page orchestration in `views`;
-- reusable UI in `components`;
-- backend calls in `services`;
-- request/response models explicitly typed.
-
-Do not put raw API calls throughout presentation components.
-
-For new Vue code, prefer `<script setup lang="ts">`, Composition API, explicit props/emits types, and avoid `any`.
-
-## Functional rules
-
-Required flow:
-
-```text
-Register -> Login -> Student List -> Add/Edit Student
-                    |
-                    +-> Logout -> Login
-```
-
-Frontend validation must follow documented rules, but backend validation remains authoritative.
-
-Student List must support search, server-side sorting, server-side pagination, add, edit, delete confirmation, and default page size `10`.
-
-Use PrimeVue for student screens, especially DataTable, form controls, buttons, pagination, and delete confirmation.
-
-Student Form:
-
-- Add: hide Student Id; Student Code read-only; Generate Code enabled.
-- Edit: Student Id and Student Code read-only; Generate Code disabled.
-- Back returns without saving.
-- Generated code starts with `STU`.
-
-Do not invent unresolved rules such as:
-
-- auth mechanism;
-- exact API paths if backend has not established them;
-- student-code numeric format or uniqueness;
-- `averageScore` range.
-
-## Storybook
-
-Maintain stories for:
-
-- `LoginForm`: Default, Filled, ValidationError
-- `RegisterForm`: Default, Filled, PasswordMismatch, ValidationError
-
-Stories must not require a live backend.
-
-## UX and security
-
-Handle loading, empty, success, validation, and API-error states intentionally.
-
-Do not:
-
-- log/store plaintext passwords unnecessarily;
-- embed secrets in frontend code;
-- rely on client validation or route guards as security enforcement;
-- expose backend secrets through `VITE_*`.
-
-Use Vite environment variables for configurable public frontend values such as API base URL.
-
-## Validation before completion
-
-Inspect `FE/package.json` and run the relevant existing scripts.
-
-The following are mandatory quality gates before reporting frontend work as complete:
-
-```bash
-npm run lint
-npm run test
-npm run test:coverage
-npm run build
-```
-
-- Use the exact test and coverage script names configured by `FE/package.json`; do not invent commands.
-- If a test or coverage script is missing, the frontend task is blocked and must not be reported as complete.
-- Also run relevant type checks and Storybook validation when configured.
-- Read test/coverage reports and command output as evidence. Do not manually create, edit, rewrite, delete, or patch report artifacts.
-- A failed, skipped, or unrun mandatory gate must be reported as `FAIL` or `BLOCKED`, never as success.
-
-Do not claim completion if required checks fail.
-
-## Keep it simple
-
-This is a training project. Do not over-engineer it.
-
-Avoid speculative layers, generic design systems, micro-frontends, SSR/Nuxt, unnecessary stores, or abstractions without a concrete need.
-
-Prefer small, readable changes that match the approved plan and existing project documentation.
+The goal is to keep agent context small without weakening source-of-truth discipline.

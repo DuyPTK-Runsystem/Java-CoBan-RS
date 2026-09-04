@@ -1,6 +1,6 @@
 ---
 name: module-impl
-description: Define, scaffold, implement, or review a feature-first Spring Boot module with controller, service, repository, domain/entity, and domain/DTOs/requests and response packages. Use for requests to create a backend module, add a CRUD feature, standardize package architecture, list required module files, or verify that a module follows the DoAn1_BhpWebsite style.
+description: Define, scaffold, implement, or review a feature-first Spring Boot module with controller, service, repository, domain/entity, and domain/DTOs/requests and response packages. Use for requests to create a backend module, add a CRUD feature, standardize package architecture, list required module files.
 ---
 
 # Implement a Spring Boot module
@@ -53,7 +53,7 @@ Example: `ExamController.java`, `ExamService.java`, `ExamRepository.java`, `Exam
 - Model database structure and persistence invariants in entities. Do not put controller/service behavior in entities.
 - Split `Req...DTO` and `Res...DTO` contracts. Never accept or expose a JPA entity as an API contract.
 - Add `@Transactional` to writes and `@Transactional(readOnly = true)` to reads that require a persistence context.
-- Use pagination for growing collections; use the project default (20 in Exam Service) unless requirements differ.
+- Use pagination for growing collections; use the project default (20) unless requirements differ.
 - Reuse global exception and response formatting. Do not catch broad exceptions in each controller.
 - Prefer constructor injection with `final` dependencies.
 - Prefer Lombok `@RequiredArgsConstructor` for service/controller dependencies when Lombok is available; avoid `@Data` on JPA entities.

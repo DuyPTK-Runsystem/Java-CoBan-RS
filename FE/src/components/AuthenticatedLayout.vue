@@ -1,8 +1,24 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 
-defineProps<{ userName: string }>()
+export interface NavigationItem {
+  label: string
+  to: string
+  icon: string
+  active?: boolean
+}
+
+const props = withDefaults(defineProps<{
+  userName: string
+  navigation?: NavigationItem[]
+}>(), {
+  navigation: undefined,
+})
 const emit = defineEmits<{ logout: [] }>()
+const defaultNavigation: NavigationItem[] = [
+  { label: 'Students', to: '/students', icon: 'pi pi-users' },
+  { label: 'Add student', to: '/students/new', icon: 'pi pi-user-plus' },
+]
 </script>
 
 <template>
@@ -19,9 +35,17 @@ const emit = defineEmits<{ logout: [] }>()
     </header>
     <div class="app-body">
       <aside class="sidebar" aria-label="Main navigation">
-        <nav>
-          <RouterLink to="/students"><i class="pi pi-users" aria-hidden="true" />Students</RouterLink>
-          <RouterLink to="/students/new"><i class="pi pi-user-plus" aria-hidden="true" />Add student</RouterLink>
+        <nav aria-label="Workspace navigation">
+          <slot name="navigation">
+            <RouterLink
+              v-for="item in props.navigation ?? defaultNavigation"
+              :key="item.to"
+              :to="item.to"
+              :class="{ 'router-link-active': item.active }"
+            >
+              <i :class="item.icon" aria-hidden="true" />{{ item.label }}
+            </RouterLink>
+          </slot>
         </nav>
       </aside>
       <main class="page-content">

@@ -1,6 +1,6 @@
 ---
 name: service-impl
-description: Create, update, or review Spring Boot application service files with business rules, transaction boundaries, repository orchestration, DTO mapping, pagination, and domain errors. Use when implementing an EntityService.java, CRUD use cases, or moving logic out of controllers in a DoAn1_BhpWebsite-style backend.
+description: Create, update, or review Spring Boot application service files with business rules, transaction boundaries, repository orchestration, DTO mapping, pagination, and domain errors. Use when implementing an EntityService.java, CRUD use cases, or moving logic out of controllers.
 ---
 
 # Implement a Spring service

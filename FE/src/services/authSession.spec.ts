@@ -10,12 +10,12 @@ describe('authSession', () => {
   it('stores and restores only the access token and UI-safe user summary', () => {
     saveAuthSession({
       accessToken: 'access-token',
-      user: { id: 7, username: 'student01' },
+      user: { id: 7, username: 'student01', roles: ['STUDENT'] },
     })
 
     expect(getAuthSession()).toEqual({
       accessToken: 'access-token',
-      user: { id: 7, username: 'student01' },
+      user: { id: 7, username: 'student01', roles: ['STUDENT'] },
     })
     expect(hasAuthenticatedSession()).toBe(true)
   })

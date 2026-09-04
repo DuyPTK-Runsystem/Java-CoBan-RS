@@ -12,9 +12,12 @@ export type FieldErrors<T extends string> = Partial<Record<T, string>>
 export type LoginField = keyof LoginValues
 export type RegisterField = keyof RegisterValues
 
+export type UserRole = 'ADMIN' | 'ACADEMIC_OFFICE' | 'TEACHER' | 'STUDENT'
+
 export interface UserSummary {
   id: number
   username: string
+  roles?: UserRole[]
   created_at?: string
   updated_at?: string
   created_by?: string
@@ -31,9 +34,4 @@ export interface AuthSession {
   user: UserSummary
 }
 
-export interface RestResponse<T> {
-  statusCode: number
-  error?: string
-  message?: string | string[]
-  data: T
-}
+export type { ApiResponse as RestResponse } from '@/types/api'

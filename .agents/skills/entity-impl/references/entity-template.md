@@ -6,6 +6,7 @@ package <base-package>.<module>.domain.entity;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(
         name = "exam",

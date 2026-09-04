@@ -53,8 +53,8 @@
 - `BE/BaiTap-RS/build.gradle.kts`
 - `BE/BaiTap-RS/src/main/resources/application.properties`
 - `BE/BaiTap-RS/.gitignore`
-- `document/application-doc/DataStructure.md`
-- `document/application-doc/modules/UserModule.md`
+- `document/application-doc/v1/DataStructure.md`
+- `document/application-doc/v1/modules/UserModule.md`
 
 ### Tests
 

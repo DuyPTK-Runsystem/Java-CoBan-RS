@@ -9,10 +9,10 @@
 
 ## 2. Tài liệu và implementation liên quan
 
-- `document/application-doc/ApplicationContext.md`.
-- `document/application-doc/modules/UserModule.md`.
-- `document/application-doc/modules/StudentModule.md`.
-- `document/application-doc/DataStructure.md`.
+- `document/application-doc/v1/ApplicationContext.md`.
+- `document/application-doc/v1/modules/UserModule.md`.
+- `document/application-doc/v1/modules/StudentModule.md`.
+- `document/application-doc/v1/DataStructure.md`.
 - `document/dev-impl-plan/be/user-auth/001-base-boilerplate-user-auth-2026-08-17.md`.
 - `document/dev-impl-plan/be/student/005-student-module-backend-2026-08-17.md`.
 - `document/dev-impl-plan/be/student/007-student-integration-test-2026-08-18.md`.
@@ -112,17 +112,17 @@ Nếu người dùng/trainer chưa xác nhận các mục này, plan implementat
 
 ### Có thể cập nhật
 
-- `document/application-doc/ApplicationContext.md`.
-- `document/application-doc/modules/UserModule.md`.
-- `document/application-doc/modules/StudentModule.md`.
-- `document/application-doc/DataStructure.md`.
+- `document/application-doc/v1/ApplicationContext.md`.
+- `document/application-doc/v1/modules/UserModule.md`.
+- `document/application-doc/v1/modules/StudentModule.md`.
+- `document/application-doc/v1/DataStructure.md`.
 - `document/dev-impl-plan/be/BE_DEV_PLAN_SUMMARY.md`.
 - `document/dev-impl-plan/summary/DEV_PLAN_SUMMARY.md`.
 - Backend controller/DTO/error handler chỉ khi đối chiếu contract hoặc test chứng minh cần thiết.
 
 ### Có thể tạo mới
 
-- Tài liệu API contract trong `document/application-doc/` nếu contract hiện tại chưa có nơi phù hợp.
+- Tài liệu API contract trong `document/application-doc/v1/` nếu contract hiện tại chưa có nơi phù hợp.
 - Test backend contract trong package test tương ứng nếu coverage boundary còn thiếu.
 - `document/dev-note/be/010-api-contract-and-tbd-resolution-2026-08-18.md` sau implementation.
 

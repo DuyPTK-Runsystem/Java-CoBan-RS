@@ -24,7 +24,7 @@
 - `BE/BaiTap-RS/src/main/java/com/JavaTraining/BaiTap_RS/common/util/FormatRestResponse.java`: bypass response `byte[]`.
 - `BE/BaiTap-RS/src/main/resources/application.properties`: tắt auto-run job lúc khởi động và bật tạo schema batch metadata.
 - `BE/BaiTap-RS/src/test/java/com/JavaTraining/BaiTap_RS/batch/studentcsv/StudentCsvExportItemProcessorTest.java` và `student/controller/StudentCsvExportControllerIntegrationTest.java`: unit/integration tests cho processor và API export.
-- `document/application-doc/DataStructure.md`, `document/application-doc/ApplicationContext.md`: đồng bộ contract batch và policy persistence.
+- `document/application-doc/v1/DataStructure.md`, `document/application-doc/v1/ApplicationContext.md`: đồng bộ contract batch và policy persistence.
 - `document/postman/Java-CoBan-Batch-Test-Data.postman_collection.json`: collection v2.1 tạo dữ liệu test cho batch export.
 
 ## Quyết định thực thi

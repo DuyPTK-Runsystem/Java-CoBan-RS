@@ -9,7 +9,7 @@
 
 ## 2. Requirement và nguồn tham chiếu
 
-- `document/application-doc/modules/UserModule.md`: Login có User Name/Password;
+- `document/application-doc/v1/modules/UserModule.md`: Login có User Name/Password;
   Register có User Name/Password/Confirm Password. Cả input phải sẵn sàng cho người
   dùng thao tác.
 - `FE/AGENTS.override.md`: dùng Vue 3/PrimeVue, duy trì LoginForm và RegisterForm

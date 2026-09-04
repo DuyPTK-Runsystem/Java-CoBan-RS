@@ -47,10 +47,10 @@
 
 ### Application documentation
 
-- `document/application-doc/ApplicationContext.md`
-- `document/application-doc/modules/UserModule.md`
-- `document/application-doc/modules/StudentModule.md`
-- `document/application-doc/DataStructure.md`
+- `document/application-doc/v1/ApplicationContext.md`
+- `document/application-doc/v1/modules/UserModule.md`
+- `document/application-doc/v1/modules/StudentModule.md`
+- `document/application-doc/v1/DataStructure.md`
   - Đồng bộ endpoint, response wrapper, auth state, status behavior, student-code uniqueness, id type và date format.
 
 ### Plan tracking

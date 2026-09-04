@@ -76,8 +76,8 @@ HTTP input
 | `BE/BaiTap-RS/src/main/java/.../common/error/ValidationExceptionHandler.java` | Tạo | Chuẩn hoá validation error body/query/path/date thành envelope 400. |
 | `BE/BaiTap-RS/src/test/java/.../student/controller/StudentControllerIntegrationTest.java` | Sửa | Create/Update score boundaries, invalid body, positive path validation. |
 | `BE/BaiTap-RS/src/test/java/.../student/controller/StudentFetchValidationIntegrationTest.java` | Tạo nếu cần | Query validation and envelope contract. |
-| `document/application-doc/modules/StudentModule.md` | Sửa | Chốt range Average score `0–10` là source of truth. |
-| `document/application-doc/ApplicationContext.md` | Sửa | Bỏ range Average score khỏi open decisions đã được xác nhận. |
+| `document/application-doc/v1/modules/StudentModule.md` | Sửa | Chốt range Average score `0–10` là source of truth. |
+| `document/application-doc/v1/ApplicationContext.md` | Sửa | Bỏ range Average score khỏi open decisions đã được xác nhận. |
 | `document/dev-note/be/student/017-student-input-validation-2026-08-19.md` | Tạo sau implementation | Ghi thay đổi và evidence validation thực tế. |
 | Các Dev Plan/Dev Note summary | Sửa | Đồng bộ approval/completion. |
 
