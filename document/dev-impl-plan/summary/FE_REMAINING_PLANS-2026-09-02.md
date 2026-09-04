@@ -31,6 +31,7 @@ Note này ghi lại các hạng mục FE còn lại theo roadmap hiện tại. T
 | Retake Result UI                                | **Đã hoàn thành trong Plan 062**            | Đã có màn hình tra cứu, tạo record PLANNED, nhập/sửa điểm thi lại, hủy record, before/after score, calculation status, Storybook stories và validation PASS        | [FE Plan 062](../fe/scorebook/062-retake-result-ui-2026-09-03.md)                                                                                           |
 | Class Transcript Viewer UI                      | **Đã hoàn thành trong Plan 062.1**          | Đã có 4 chế độ bảng điểm lớp (1A, 1B, 2A, 2B), phân quyền GVCN/Admin, drill-down học sinh, BE query APIs và FE tests PASS                                          | [Plan 062.1](../fe/scorebook/062.1-class-transcript-viewer-ui-2026-09-04.md)                                                                                |
 | Calculation Task & Audit UI                     | **Đã hoàn thành trong Plan 063**            | Đã có monitoring task tính toán, retry xác nhận với 409 recovery, score audit trail read-only, student transcript status card, Storybook và validation PASS        | [FE Plan 063](../fe/scorebook/063-calculation-task-audit-ui-2026-09-03.md)                                                                                  |
+| Student Attendance History by ID & Transcript Integration | **Đã hoàn thành trong Plan 066**            | Đã tích hợp API tra cứu chuyên cần học sinh theo studentId (`/api/v2/attendance/students/{studentId}/history`) vào `TranscriptViewerView.vue` khi xem bảng điểm chi tiết (staff drill-down), sửa lỗi 403 cho Giáo vụ và hiển thị đầy đủ số buổi vắng | [Plan 066](../../be/attendance/066-student-attendance-history-by-id-and-transcript-integration-2026-09-04.md)                                              |
 
 ## Trạng thái cần lưu ý
 
@@ -47,14 +48,15 @@ Note này ghi lại các hạng mục FE còn lại theo roadmap hiện tại. T
 - Plan 062 (Retake Result UI) đã hoàn thành và tích hợp đầy đủ kiểm thử, Storybook, route và validation PASS.
 - Plan 062.1 (Class Transcript & Homeroom Student Transcript Viewer UI) đã hoàn thành trọn vẹn với 4 chế độ bảng điểm lớp, API bảo mật theo GVCN/Admin và drill-down sang bảng điểm cá nhân; toàn bộ kiểm thử BE/FE và quality gates đều PASS.
 - Plan 063 (Calculation Task & Audit UI) đã hoàn thành trọn vẹn với monitoring danh sách task, modal chi tiết JSON payload/error, retry confirmation xử lý 409 conflict, tra cứu audit trail bất biến và thẻ trạng thái đồng bộ bảng điểm; toàn bộ kiểm thử FE (310 tests) và build/storybook đều PASS.
-- Plan 053.2 (Academic Catalog Statistics & Capacity Warning) đã hoàn thành cung cấp API thống kê năm học, cảnh báo lệch sĩ số 20% và giao diện hiển thị sĩ số thực tế/banner cảnh báo; toàn bộ kiểm thử BE/FE (319 tests) và quality gates đều PASS.
+- Plan 066 (Student Attendance History by Student ID and Transcript Integration) đã hoàn thành cung cấp API tra cứu chuyên cần theo studentId cho cán bộ/giáo viên và tích hợp vào màn hình bảng điểm cá nhân chi tiết khi drill-down; toàn bộ kiểm thử BE/FE và quality gates đều PASS.
 
 ## Thứ tự đề xuất
 
 1. Phê duyệt và thực hiện Plan 064 — FE E2E & Release Hardening (hạng mục FE duy nhất còn lại trên roadmap).
 
 ## Definition of Done chung cho mỗi FE plan
-  và responsive behavior.
+
+- Đầy đủ luồng giao diện theo spec, xử lý các trạng thái loading, error, empty và responsive behavior.
 - Có unit/component tests; có Storybook deterministic states để review khi
   module có UI tương tác.
 - Có E2E hoặc browser walkthrough cho các role `ADMIN`, `ACADEMIC_OFFICE`,

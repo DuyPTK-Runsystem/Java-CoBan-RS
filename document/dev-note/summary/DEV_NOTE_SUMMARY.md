@@ -98,6 +98,7 @@ NNN-short-topic-yyyy-mm-dd.md
 |   063 | FE             | [Calculation Task & Audit UI](../fe/scorebook/063-calculation-task-audit-ui-2026-09-04.md)                                                                            | Completed; 3-tab operational view, task retry mutation, transcript status tracking, read-only audit log; validation PASS                     | 2026-09-04 |
 | 057.3 | FE             | [Bulk Score Entry Decimal Rounding Fix](../fe/scorebook/057.3-bulk-score-entry-rounding-fix-2026-09-04.md)                                                            | Completed; round score to 1 decimal on blur and save in BulkScoreEntryDialog & ScoreEntryDialog; validation PASS                             | 2026-09-04 |
 |   066 | BE/FE          | [Student Attendance History by Student ID and Transcript Integration](../be/attendance/066-student-attendance-history-by-id-and-transcript-integration-2026-09-04.md) | Completed; GET attendance history by studentId for Admin/Office/Teacher; transcript viewer absence integration; validation PASS              | 2026-09-04 |
+|   067 | BE/FE/Doc      | [Actual Permission Matrix and FE Remaining Plans Audit](../be/workflow-skill/067-actual-permission-matrix-and-fe-remaining-plans-audit-2026-09-04.md)                 | Completed; documentation audit PASS                                                                                                          | 2026-09-04 |
 
 Plan 057 PMD follow-up (2026-09-03): backend `test`, Checkstyle, PMD and `build` have been rerun after the approved refactor; PMD is PASS with 0 violations.
 
@@ -116,4 +117,7 @@ Plan 063 (2026-09-04): Calculation Task & Audit UI implemented with 3-tab operat
 Plan 053.2 (2026-09-04): Academic Catalog Statistics & Capacity Warning Display — Completed (unblocks Plan 053 Phase 6); unified backend read contract `GET /api/v2/academic/years/{academicYearId}/statistics` returning active class/student counts per grade and class capacity warnings (>20% threshold via `EnrollmentCapacityService`); FE displays real student count `${active} / ${capacity}` and capacity deviation warning badges on SchoolClassTable, activates CapacityWarningBanner, provides academic-year filter and class/student totals on GradeTable; BE tests/Checkstyle/PMD PASS, FE tests (75 test files, 319 tests passed), lint, build and storybook-build PASS.
 
 Plan 057.3 (2026-09-04): Bulk Score Entry Decimal Rounding Fix — Completed; fixed issue where entering scores with multiple decimals (.47 / 8.47) rounded on UI (.5 / 8.5) but retained raw value in model/request; added rounding on blur and pre-save/toRequest in `BulkScoreEntryDialog.vue` and `ScoreEntryDialog.vue`; FE tests (75 test files, 322 tests passed), lint, and build PASS.
+
+Plan/Audit 067 (2026-09-04): Actual Permission Matrix và FE Remaining Plans được kiểm toán và đồng bộ 100% dựa trên mã nguồn thực tế (27 RestControllers, 132 endpoints, chuẩn hóa 132 URL liên kết Linux, cập nhật router/sidebar v2, phân loại khoảng cách tồn tại và khoảng cách đã giải quyết, xác nhận duy nhất Plan 064 còn lại trên FE roadmap).
+
 
