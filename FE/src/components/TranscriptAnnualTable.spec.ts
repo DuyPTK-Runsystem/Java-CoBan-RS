@@ -60,10 +60,11 @@ describe('TranscriptAnnualTable.vue', () => {
     expect(firstRow.text()).toContain('4.3')
     expect(firstRow.text()).toContain('6.0')
 
-    // Second subject is regular
+    // Second subject is regular (no REGULAR badge displayed)
     const secondRow = rows[1]
     expect(secondRow.text()).toContain('Vật lí')
-    expect(secondRow.text()).toContain('REGULAR')
+    expect(secondRow.text()).not.toContain('REGULAR')
+    expect(secondRow.text()).toContain('—')
   })
 
   it('renders footer summary with regular and final annual GPA', () => {

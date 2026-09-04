@@ -272,9 +272,9 @@ const isFromClassTranscript = computed(() => {
 const userRoleBadge = computed(() => {
   const roles = session.value?.user.roles ?? []
   const username = session.value?.user.username ?? ''
-  if (roles.includes('ADMIN')) return `🛡️ Quản trị viên (${username})`
-  if (roles.includes('ACADEMIC_OFFICE')) return `🏛️ Giáo vụ (${username})`
-  if (roles.includes('TEACHER')) return `👨‍🏫 Giáo viên (${username})`
+  if (roles.includes('ADMIN')) return `Quản trị viên (${username})`
+  if (roles.includes('ACADEMIC_OFFICE')) return `Giáo vụ (${username})`
+  if (roles.includes('TEACHER')) return `Giáo viên (${username})`
   return `👤 ${username}`
 })
 
@@ -410,24 +410,24 @@ onMounted(async () => {
 
     <!-- TAB CONTROLS -->
     <div class="tab-strip" role="tablist">
-      <button
+      <Button
+        label="Bảng điểm Học kỳ"
+        :severity="activeTab === 'term' ? 'primary' : 'secondary'"
+        :outlined="activeTab !== 'term'"
         class="tab-btn"
-        :class="{ active: activeTab === 'term' }"
         role="tab"
         :aria-selected="activeTab === 'term'"
         @click="activeTab = 'term'"
-      >
-        Bảng điểm Học kỳ
-      </button>
-      <button
+      />
+      <Button
+        label="Bảng điểm Cả năm"
+        :severity="activeTab === 'annual' ? 'primary' : 'secondary'"
+        :outlined="activeTab !== 'annual'"
         class="tab-btn"
-        :class="{ active: activeTab === 'annual' }"
         role="tab"
         :aria-selected="activeTab === 'annual'"
         @click="activeTab = 'annual'"
-      >
-        Bảng điểm Cả năm
-      </button>
+      />
     </div>
 
     <!-- CALCULATION STATUS BANNERS -->
@@ -627,35 +627,6 @@ onMounted(async () => {
 
 .action-item {
   margin-left: auto;
-}
-
-.tab-strip {
-  display: flex;
-  gap: 8px;
-  border-bottom: 2px solid #cbd5e1;
-  margin-top: 4px;
-}
-
-.tab-btn {
-  border: 0;
-  background: transparent;
-  color: #64748b;
-  padding: 10px 20px;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 14px;
-  transition: all 0.15s;
-}
-
-.tab-btn:hover {
-  color: #1e293b;
-}
-
-.tab-btn.active {
-  color: #1d4ed8;
-  border-bottom-color: #1d4ed8;
 }
 
 .notice {

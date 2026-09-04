@@ -72,6 +72,12 @@ const mockClassTermData = {
   ],
 }
 
+const buttonStub = {
+  props: ['label'],
+  emits: ['click'],
+  template: '<button v-bind="$attrs" @click="$emit(\'click\')">{{ label }}<slot /></button>',
+}
+
 describe('ClassTranscriptViewerView.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -99,7 +105,7 @@ describe('ClassTranscriptViewerView.vue', () => {
       global: {
         stubs: {
           Select: true,
-          Button: true,
+          Button: buttonStub,
         },
       },
     })
@@ -111,7 +117,7 @@ describe('ClassTranscriptViewerView.vue', () => {
     expect(mocks.fetchAccessibleClasses).toHaveBeenCalledWith('test-token', 1)
     expect(mocks.fetchClassTermTranscript).toHaveBeenCalledWith('test-token', 10, 11)
 
-    expect(wrapper.text()).toContain('Bảng Điểm Lớp Học')
+    expect(wrapper.text()).toContain('Bảng điểm lớp học')
     expect(wrapper.text()).toContain('Nguyễn Văn A')
   })
 
@@ -120,7 +126,7 @@ describe('ClassTranscriptViewerView.vue', () => {
       global: {
         stubs: {
           Select: true,
-          Button: true,
+          Button: buttonStub,
         },
       },
     })
@@ -138,7 +144,7 @@ describe('ClassTranscriptViewerView.vue', () => {
       global: {
         stubs: {
           Select: true,
-          Button: true,
+          Button: buttonStub,
         },
       },
     })
@@ -160,6 +166,36 @@ describe('ClassTranscriptViewerView.vue', () => {
         from: 'class-transcripts',
       },
     })
+  })
+
+  it('renders mini tabs and period tabs without icons or parentheses', async () => {
+    const wrapper = mount(ClassTranscriptViewerView, {
+      global: {
+        stubs: {
+          Select: true,
+          Button: buttonStub,
+        },
+      },
+    })
+
+    await flushPromises()
+
+    const scopeBtns = wrapper.findAll('.scope-btn')
+    expect(scopeBtns).toHaveLength(2)
+    expect(scopeBtns[0].text()).toBe('BẢNG ĐIỂM THEO MÔN')
+    expect(scopeBtns[1].text()).toBe('BẢNG ĐIỂM TỔNG KẾT')
+
+    const tabBtns = wrapper.findAll('.tab-btn')
+    expect(tabBtns).toHaveLength(2)
+    expect(tabBtns[0].text()).toBe('Bảng điểm Học kỳ')
+    expect(tabBtns[1].text()).toBe('Bảng điểm Cả năm')
+
+    expect(wrapper.text()).not.toContain('📖')
+    expect(wrapper.text()).not.toContain('📊')
+    expect(wrapper.text()).not.toContain('📌')
+    expect(wrapper.text()).not.toContain('🏆')
+    expect(wrapper.text()).not.toContain('Mỗi bảng là một môn')
+    expect(wrapper.text()).not.toContain('Tổng hợp toàn bộ các môn')
   })
 })
 

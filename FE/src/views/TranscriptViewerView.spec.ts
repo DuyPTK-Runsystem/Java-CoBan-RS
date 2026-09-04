@@ -332,7 +332,7 @@ describe('TranscriptViewerView.vue', () => {
     expect(wrapper.text()).toContain('Bảng điểm theo lớp · Chi tiết bảng điểm học sinh')
     expect(wrapper.text()).toContain('Bảng Điểm Học Sinh: Nguyễn Văn A (HS001)')
     expect(wrapper.text()).toContain('Quay lại Bảng điểm theo lớp')
-    expect(wrapper.text()).toContain('👨‍🏫 Giáo viên (teacher1)')
+    expect(wrapper.text()).toContain('Giáo viên (teacher1)')
 
     expect(mocks.fetchStudentTermTranscript).toHaveBeenCalledWith('token-tea', 101, 11)
     expect(mocks.fetchStudentAttendanceHistoryById).toHaveBeenCalledWith('token-tea', 101, {

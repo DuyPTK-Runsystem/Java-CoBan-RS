@@ -75,8 +75,7 @@ const formattedFinalDtb = computed(() => formatScore(props.finalDtbcn))
                 <span class="retake-detail">Đã lên lịch thi lại</span>
               </template>
               <template v-else>
-                <span class="badge regular-badge">REGULAR</span>
-                <span class="retake-detail">Đạt chuẩn</span>
+                <span class="cell-empty">—</span>
               </template>
             </td>
           </tr>

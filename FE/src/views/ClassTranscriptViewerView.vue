@@ -61,9 +61,9 @@ const token = computed(() => session.value?.accessToken ?? '')
 const userRoleBadge = computed(() => {
   const roles = session.value?.user.roles ?? []
   const username = session.value?.user.username ?? ''
-  if (roles.includes('ADMIN')) return `🛡️ Quản trị viên (${username})`
-  if (roles.includes('ACADEMIC_OFFICE')) return `🏛️ Giáo vụ (${username})`
-  if (roles.includes('TEACHER')) return `👨‍🏫 Giáo viên (${username})`
+  if (roles.includes('ADMIN')) return `Quản trị viên (${username})`
+  if (roles.includes('ACADEMIC_OFFICE')) return `Giáo vụ (${username})`
+  if (roles.includes('TEACHER')) return `Giáo viên (${username})`
   return `👤 ${username}`
 })
 
@@ -253,7 +253,7 @@ onMounted(async () => {
     <div class="view-header">
       <div>
         <p class="eyebrow">Tra cứu bảng điểm · Phân hệ Lớp học & Giáo viên chủ nhiệm</p>
-        <h1 class="page-title">Bảng Điểm Lớp Học</h1>
+        <h1 class="page-title">Bảng điểm lớp học</h1>
         <p class="page-caption">
           Xem bảng điểm theo từng môn học và bảng điểm tổng kết lớp (Học kỳ & Cả năm).
         </p>
@@ -331,44 +331,50 @@ onMounted(async () => {
       </div>
     </section>
 
-    <!-- NAVIGATION LEVEL 1: SCOPE -->
-    <div class="nav-level-1">
-      <button
-        type="button"
+    <!-- NAVIGATION LEVEL 1: SCOPE (2 MINI TABS) -->
+    <div class="tab-strip nav-level-1" role="tablist">
+      <Button
+        label="BẢNG ĐIỂM THEO MÔN"
+        :severity="activeScope === 'SUBJECT' ? 'primary' : 'secondary'"
+        :outlined="true"
+        size="small"
         class="scope-btn"
-        :class="{ active: activeScope === 'SUBJECT' }"
+        role="tab"
+        :aria-selected="activeScope === 'SUBJECT'"
         @click="activeScope = 'SUBJECT'"
-      >
-        📖 1. BẢNG ĐIỂM THEO MÔN (Mỗi bảng là một môn)
-      </button>
-      <button
-        type="button"
+      />
+      <Button
+        label="BẢNG ĐIỂM TỔNG KẾT"
+        :severity="activeScope === 'SUMMARY' ? 'primary' : 'secondary'"
+        :outlined="true"
+        size="small"
         class="scope-btn"
-        :class="{ active: activeScope === 'SUMMARY' }"
+        role="tab"
+        :aria-selected="activeScope === 'SUMMARY'"
         @click="activeScope = 'SUMMARY'"
-      >
-        📊 2. BẢNG ĐIỂM TỔNG KẾT (Tổng hợp toàn bộ các môn)
-      </button>
+      />
     </div>
 
-    <!-- NAVIGATION LEVEL 2: PERIOD -->
-    <div class="nav-level-2">
-      <button
-        type="button"
-        class="tab-item"
-        :class="{ active: activePeriod === 'TERM' }"
+    <!-- NAVIGATION LEVEL 2: PERIOD (TAB BẢNG ĐIỂM) -->
+    <div class="tab-strip nav-level-2" role="tablist">
+      <Button
+        label="Bảng điểm Học kỳ"
+        :severity="activePeriod === 'TERM' ? 'primary' : 'secondary'"
+        :outlined="activePeriod !== 'TERM'"
+        class="tab-btn tab-item"
+        role="tab"
+        :aria-selected="activePeriod === 'TERM'"
         @click="activePeriod = 'TERM'"
-      >
-        📌 Bảng điểm Học kỳ
-      </button>
-      <button
-        type="button"
-        class="tab-item"
-        :class="{ active: activePeriod === 'ANNUAL' }"
+      />
+      <Button
+        label="Bảng điểm Cả năm"
+        :severity="activePeriod === 'ANNUAL' ? 'primary' : 'secondary'"
+        :outlined="activePeriod !== 'ANNUAL'"
+        class="tab-btn tab-item"
+        role="tab"
+        :aria-selected="activePeriod === 'ANNUAL'"
         @click="activePeriod = 'ANNUAL'"
-      >
-        🏆 Bảng điểm Cả năm
-      </button>
+      />
     </div>
 
     <!-- ALERT ERROR -->
@@ -440,25 +446,29 @@ onMounted(async () => {
 }
 
 .eyebrow {
-  margin: 0 0 4px;
+  margin: 0 0 6px;
   font-size: 12px;
   font-weight: 700;
-  color: #1d4ed8;
+  color: var(--primary-strong, #3525ce);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
+  font-family: inherit;
 }
 
 .page-title {
   margin: 0 0 6px;
-  font-size: 26px;
-  font-weight: 900;
-  color: #0f172a;
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 700;
+  color: #1e293b;
+  font-family: inherit;
 }
 
 .page-caption {
   margin: 0;
   color: #64748b;
   font-size: 14px;
+  font-family: inherit;
 }
 
 .role-badge {
@@ -509,62 +519,50 @@ onMounted(async () => {
 
 .nav-level-1 {
   display: flex;
-  gap: 12px;
-  border-bottom: 2px solid #e2e8f0;
-  padding-bottom: 8px;
-}
-
-.scope-btn {
-  background: #ffffff;
-  border: 2px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 10px 18px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #475569;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.scope-btn:hover {
-  border-color: #1d4ed8;
-  color: #1d4ed8;
-}
-
-.scope-btn.active {
-  background: #eff6ff;
-  border-color: #1d4ed8;
-  color: #1d4ed8;
-  box-shadow: 0 2px 4px rgba(29, 78, 216, 0.1);
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
 .nav-level-2 {
   display: flex;
   gap: 10px;
+  align-items: center;
+  margin-bottom: 18px;
 }
 
-.tab-item {
-  background: none;
-  border: 1px solid #cbd5e1;
-  background-color: #f8fafc;
-  padding: 8px 16px;
-  border-radius: 6px;
+.scope-btn {
+  font-family: inherit;
   font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+/* Nền trong suốt, viền chữ xanh cho mini button ở trên khi active */
+.scope-btn.p-button-outlined.p-button-primary {
+  background: transparent !important;
+  color: var(--p-primary-color, #10b981) !important;
+  border-color: var(--p-primary-color, #10b981) !important;
   font-weight: 600;
-  color: #64748b;
-  cursor: pointer;
-  transition: all 0.15s ease;
 }
 
-.tab-item:hover {
-  background-color: #e2e8f0;
-  color: #1e293b;
+/* Nền trong suốt, viền chữ xám cho mini button ở trên khi inactive */
+.scope-btn.p-button-outlined.p-button-secondary {
+  background: transparent !important;
+  color: #64748b !important;
+  border-color: #cbd5e1 !important;
+  font-weight: 500;
 }
 
-.tab-item.active {
-  background-color: #1d4ed8;
-  border-color: #1d4ed8;
-  color: #ffffff;
+.scope-btn.p-button-outlined.p-button-secondary:hover {
+  color: #334155 !important;
+  border-color: #94a3b8 !important;
+  background: rgba(0, 0, 0, 0.02) !important;
+}
+
+.tab-btn {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .loading-state {
@@ -579,7 +577,7 @@ onMounted(async () => {
 
 .spinner-icon {
   font-size: 20px;
-  color: #1d4ed8;
+  color: var(--p-primary-color, #10b981);
 }
 
 .content-body {
