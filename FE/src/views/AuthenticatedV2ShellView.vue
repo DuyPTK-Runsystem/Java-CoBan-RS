@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
-import AuthenticatedLayout from '@/components/AuthenticatedLayout.vue'
+import AuthenticatedLayout, { type NavigationItem } from '@/components/AuthenticatedLayout.vue'
 import { clearAuthSession, getAuthSession } from '@/services/authSession'
 import { logout as logoutApi } from '@/services/userApi'
 
 const router = useRouter()
+const route = useRoute()
 const session = computed(() => getAuthSession())
-const navigation = computed(() => {
-  const items = [
+const navigation = computed<NavigationItem[]>(() => {
+  const items: NavigationItem[] = [
     { label: 'Năm học & học kỳ', to: '/v2/academic-years', icon: 'pi pi-calendar' },
     { label: 'Khối', to: '/v2/academic-catalog/grades', icon: 'pi pi-sitemap' },
     { label: 'Lớp', to: '/v2/academic-catalog/classes', icon: 'pi pi-building' },
@@ -19,10 +20,24 @@ const navigation = computed(() => {
     { label: 'Hồ sơ giáo viên', to: '/v2/teachers', icon: 'pi pi-id-card' },
     { label: 'Phân công giảng dạy', to: '/v2/teaching-assignments', icon: 'pi pi-briefcase' },
     { label: 'Điểm danh', to: '/v2/attendance', icon: 'pi pi-calendar' },
-    { label: 'Bảng điểm', to: '/v2/transcripts', icon: 'pi pi-table' },
   ]
   const roles = session.value?.user.roles ?? []
-  if (roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE' || role === 'TEACHER')) {
+  const isNonStudent = roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE' || role === 'TEACHER')
+
+  // Tab Bảng điểm chỉ hiển thị cho học sinh, ẩn hoàn toàn đối với non-student user
+  if (!isNonStudent) {
+    items.push({ label: 'Bảng điểm', to: '/v2/transcripts', icon: 'pi pi-table' })
+  }
+
+  if (isNonStudent) {
+    // Khi admin/giáo vụ/teacher xem bảng điểm học sinh (/v2/transcripts), tab này vẫn sáng để đánh lừa thị giác
+    const isClassTranscriptActive = route?.path === '/v2/class-transcripts' || route?.path === '/v2/transcripts'
+    items.push({
+      label: 'Bảng điểm theo lớp',
+      to: '/v2/class-transcripts',
+      icon: 'pi pi-list',
+      active: isClassTranscriptActive,
+    })
     items.push({ label: 'Sổ điểm', to: '/v2/scorebooks', icon: 'pi pi-book' })
     items.push({ label: 'Yêu cầu sửa điểm', to: '/v2/score-change-requests', icon: 'pi pi-file-edit' })
   }

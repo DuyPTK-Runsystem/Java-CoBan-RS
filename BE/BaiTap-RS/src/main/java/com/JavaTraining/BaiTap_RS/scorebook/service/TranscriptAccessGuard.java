@@ -67,6 +67,31 @@ public class TranscriptAccessGuard {
         }
     }
 
+    public void assertCanReadClass(Long classId, Long academicYearId, List<Semester> semesters) {
+        if (hasAnyRole("ADMIN", "ACADEMIC_OFFICE")) {
+            return;
+        }
+
+        if (!hasAnyRole("TEACHER")) {
+            throw new AccessDeniedException("Không có quyền xem bảng điểm của lớp");
+        }
+
+        Long currentUserId = com.JavaTraining.BaiTap_RS.common.audit.AuditContext.currentUserId();
+        Teacher teacher = teacherRepository.findByUserId(currentUserId)
+                .orElseThrow(() -> new AccessDeniedException("Không tìm thấy hồ sơ giáo viên"));
+
+        boolean isHomeroom = semesters.stream()
+                .anyMatch(semester -> homeroomAssignmentRepository.existsActiveHomeroomBetween(
+                        classId, teacher.getId(), AssignmentStatus.ACTIVE, semester.getStartDate(),
+                        semester.getEndDate()))
+                || homeroomAssignmentRepository.existsByClassIdAndTeacherIdAndStatus(
+                        classId, teacher.getId(), AssignmentStatus.ACTIVE);
+
+        if (!isHomeroom) {
+            throw new AccessDeniedException("Chỉ giáo viên chủ nhiệm mới có quyền xem bảng điểm của lớp này");
+        }
+    }
+
     private List<ClassSubject> resolveCurrentClassSubjects(
             Long studentId, Long academicYearId, List<Semester> semesters) {
         StudentYearEnrollment enrollment = enrollmentRepository

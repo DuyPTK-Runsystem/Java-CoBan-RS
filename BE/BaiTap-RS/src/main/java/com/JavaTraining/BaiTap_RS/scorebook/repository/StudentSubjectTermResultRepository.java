@@ -15,4 +15,7 @@ public interface StudentSubjectTermResultRepository extends JpaRepository<Studen
     List<StudentSubjectTermResult> findAllBySubjectIdOrderByTermTranscriptIdAsc(Long subjectId);
 
     Optional<StudentSubjectTermResult> findByTermTranscriptIdAndSubjectId(Long termTranscriptId, Long subjectId);
+
+    List<StudentSubjectTermResult> findAllByTermTranscriptIdInOrderBySubjectIdAsc(
+            java.util.Collection<Long> termTranscriptIds);
 }

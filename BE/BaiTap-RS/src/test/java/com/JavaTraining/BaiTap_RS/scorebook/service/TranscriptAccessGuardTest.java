@@ -99,9 +99,47 @@ class TranscriptAccessGuardTest {
                 () -> guard.assertCanRead(100L, 200L, List.of(semester()), List.of(classSubject())));
     }
 
+    @Test
+    void academicOfficeCanReadClassWithoutTeacherLookup() {
+        authenticate("ACADEMIC_OFFICE", null);
+
+        Assertions.assertDoesNotThrow(() -> guard.assertCanReadClass(CLASS_ID, 200L, List.of()));
+        Mockito.verifyNoInteractions(teacherRepository);
+    }
+
+    @Test
+    void homeroomTeacherCanReadClassTranscript() {
+        authenticate("TEACHER", TEACHER_USER_ID);
+        Teacher teacher = Mockito.mock(Teacher.class);
+        Mockito.when(teacher.getId()).thenReturn(TEACHER_ID);
+        Mockito.when(teacherRepository.findByUserId(TEACHER_USER_ID)).thenReturn(Optional.of(teacher));
+        Mockito.when(homeroomAssignmentRepository.existsActiveHomeroomBetween(
+                CLASS_ID, TEACHER_ID, AssignmentStatus.ACTIVE, LocalDate.of(2026, 8, 1),
+                LocalDate.of(2026, 12, 31))).thenReturn(true);
+
+        Assertions.assertDoesNotThrow(
+                () -> guard.assertCanReadClass(CLASS_ID, 200L, List.of(semester())));
+    }
+
+    @Test
+    void nonHomeroomTeacherCannotReadClassTranscript() {
+        authenticate("TEACHER", TEACHER_USER_ID);
+        Teacher teacher = Mockito.mock(Teacher.class);
+        Mockito.when(teacher.getId()).thenReturn(TEACHER_ID);
+        Mockito.when(teacherRepository.findByUserId(TEACHER_USER_ID)).thenReturn(Optional.of(teacher));
+        Mockito.when(homeroomAssignmentRepository.existsActiveHomeroomBetween(
+                CLASS_ID, TEACHER_ID, AssignmentStatus.ACTIVE, LocalDate.of(2026, 8, 1),
+                LocalDate.of(2026, 12, 31))).thenReturn(false);
+        Mockito.when(homeroomAssignmentRepository.existsByClassIdAndTeacherIdAndStatus(
+                CLASS_ID, TEACHER_ID, AssignmentStatus.ACTIVE)).thenReturn(false);
+
+        Assertions.assertThrows(AccessDeniedException.class,
+                () -> guard.assertCanReadClass(CLASS_ID, 200L, List.of(semester())));
+    }
+
     private static Semester semester() {
         Semester semester = Mockito.mock(Semester.class);
-        Mockito.when(semester.getId()).thenReturn(15L);
+        Mockito.lenient().when(semester.getId()).thenReturn(15L);
         Mockito.when(semester.getStartDate()).thenReturn(LocalDate.of(2026, 8, 1));
         Mockito.when(semester.getEndDate()).thenReturn(LocalDate.of(2026, 12, 31));
         return semester;

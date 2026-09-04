@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import Select from 'primevue/select'
 
@@ -15,6 +16,8 @@ import {
   fetchMyAnnualTranscript,
   fetchMyTermStatus,
   fetchMyTermTranscript,
+  fetchStudentAnnualTranscript,
+  fetchStudentTermTranscript,
 } from '@/services/transcriptApi'
 import type { AcademicYear, Semester } from '@/types/academic'
 import { isApiError } from '@/types/api'
@@ -22,6 +25,23 @@ import type {
   ResStudentAnnualTranscriptDTO,
   ResStudentTermTranscriptDTO,
 } from '@/types/transcript'
+
+const router = (() => {
+  try {
+    return useRouter()
+  } catch {
+    return undefined
+  }
+})()
+
+const route = (() => {
+  try {
+    return useRoute()
+  } catch {
+    return undefined
+  }
+})()
+const routeQuery = computed(() => route?.query ?? {})
 
 type TranscriptTab = 'term' | 'annual'
 
@@ -87,7 +107,9 @@ async function loadContext() {
     const years = await fetchAcademicYears(token.value)
     academicYears.value = years
     if (years.length > 0) {
-      const activeYear = years.find((y) => y.status === 'ACTIVE') ?? years[0]
+      const qYearId = routeQuery.value.academicYearId ? Number(routeQuery.value.academicYearId) : null
+      const matchedYear = qYearId ? years.find((y) => y.id === qYearId) : null
+      const activeYear = matchedYear ?? years.find((y) => y.status === 'ACTIVE') ?? years[0]
       selectedAcademicYearId.value = activeYear.id
     }
   } catch (err: unknown) {
@@ -107,7 +129,9 @@ async function loadSemesters(academicYearId: number) {
     const sems = await fetchSemesters(token.value, academicYearId)
     semesters.value = sems
     if (sems.length > 0) {
-      const activeSem = sems.find((s) => s.status === 'ACTIVE') ?? sems[0]
+      const qSemId = routeQuery.value.semesterId ? Number(routeQuery.value.semesterId) : null
+      const matchedSem = qSemId ? sems.find((s) => s.id === qSemId) : null
+      const activeSem = matchedSem ?? sems.find((s) => s.status === 'ACTIVE') ?? sems[0]
       selectedSemesterId.value = activeSem.id
     } else {
       selectedSemesterId.value = null
@@ -129,6 +153,8 @@ async function loadTranscript() {
   isNotFound.value = false
   transcriptLoading.value = true
 
+  const studentIdParam = routeQuery.value.studentId ? Number(routeQuery.value.studentId) : null
+
   try {
     if (activeTab.value === 'term') {
       if (!selectedSemesterId.value) {
@@ -137,8 +163,12 @@ async function loadTranscript() {
         unexcusedAbsences.value = null
         return
       }
+      const termPromise = studentIdParam
+        ? fetchStudentTermTranscript(token.value, studentIdParam, selectedSemesterId.value)
+        : fetchMyTermTranscript(token.value, selectedSemesterId.value)
+
       const [termData, attendanceRes] = await Promise.all([
-        fetchMyTermTranscript(token.value, selectedSemesterId.value),
+        termPromise,
         fetchStudentAttendanceHistory(token.value, {
           academicYearId: selectedAcademicYearId.value,
           semesterId: selectedSemesterId.value,
@@ -159,7 +189,9 @@ async function loadTranscript() {
         annualTranscript.value = null
         return
       }
-      const data = await fetchMyAnnualTranscript(token.value, selectedAcademicYearId.value)
+      const data = studentIdParam
+        ? await fetchStudentAnnualTranscript(token.value, studentIdParam, selectedAcademicYearId.value)
+        : await fetchMyAnnualTranscript(token.value, selectedAcademicYearId.value)
       annualTranscript.value = data
     }
   } catch (err: unknown) {
@@ -216,6 +248,60 @@ async function checkCalculationStatus() {
   }
 }
 
+const userRoles = computed(() => session.value?.user.roles ?? [])
+const isNonStudent = computed(() =>
+  userRoles.value.some((r) => ['ADMIN', 'ACADEMIC_OFFICE', 'TEACHER'].includes(r))
+)
+const isFromClassTranscript = computed(() => {
+  return (
+    isNonStudent.value ||
+    Boolean(routeQuery.value.studentId) ||
+    routeQuery.value.from === 'class-transcripts'
+  )
+})
+
+const userRoleBadge = computed(() => {
+  const roles = session.value?.user.roles ?? []
+  const username = session.value?.user.username ?? ''
+  if (roles.includes('ADMIN')) return `🛡️ Quản trị viên (${username})`
+  if (roles.includes('ACADEMIC_OFFICE')) return `🏛️ Giáo vụ (${username})`
+  if (roles.includes('TEACHER')) return `👨‍🏫 Giáo viên (${username})`
+  return `👤 ${username}`
+})
+
+const targetStudentName = computed(() => {
+  if (routeQuery.value.studentName) return String(routeQuery.value.studentName)
+  return ''
+})
+
+const targetStudentCode = computed(() => {
+  if (routeQuery.value.studentCode) return String(routeQuery.value.studentCode)
+  return ''
+})
+
+const studentDisplayName = computed(() => {
+  if (targetStudentName.value && targetStudentCode.value) {
+    return `${targetStudentName.value} (${targetStudentCode.value})`
+  }
+  if (targetStudentName.value) return targetStudentName.value
+  if (routeQuery.value.studentId) return `Mã HS #${routeQuery.value.studentId}`
+  return ''
+})
+
+function goBackToClassTranscripts() {
+  const query: Record<string, string> = {}
+  if (routeQuery.value.classId) query.classId = String(routeQuery.value.classId)
+  if (selectedAcademicYearId.value) query.academicYearId = String(selectedAcademicYearId.value)
+  if (selectedSemesterId.value) query.semesterId = String(selectedSemesterId.value)
+
+  if (router) {
+    router.push({
+      path: '/v2/class-transcripts',
+      query,
+    })
+  }
+}
+
 watch(selectedAcademicYearId, async (newYearId) => {
   if (newYearId) {
     await loadSemesters(newYearId)
@@ -243,12 +329,32 @@ onMounted(async () => {
 <template>
   <div class="transcript-view-container">
     <div class="view-header">
-      <div>
-        <p class="eyebrow">Tra cứu bảng điểm · Read-only</p>
-        <h1 class="page-title">Bảng Điểm Học Sinh</h1>
-        <p class="page-caption">
-          Dữ liệu kết quả học tập chính thức từ hệ thống tính toán điểm trung bình.
+      <div class="header-main">
+        <div v-if="isFromClassTranscript" class="back-action-container">
+          <Button
+            label="Quay lại Bảng điểm theo lớp"
+            icon="pi pi-arrow-left"
+            severity="secondary"
+            outlined
+            size="small"
+            class="back-btn"
+            @click="goBackToClassTranscripts"
+          />
+        </div>
+        <p class="eyebrow">
+          {{ isFromClassTranscript ? 'Bảng điểm theo lớp · Chi tiết bảng điểm học sinh' : 'Tra cứu bảng điểm · Read-only' }}
         </p>
+        <h1 class="page-title">
+          {{ studentDisplayName ? `Bảng Điểm Học Sinh: ${studentDisplayName}` : 'Bảng Điểm Học Sinh' }}
+        </h1>
+        <p class="page-caption">
+          {{ isFromClassTranscript ? 'Xem kết quả học tập chi tiết của học sinh theo từng học kỳ và cả năm học.' : 'Dữ liệu kết quả học tập chính thức từ hệ thống tính toán điểm trung bình.' }}
+        </p>
+      </div>
+      <div v-if="isFromClassTranscript">
+        <div class="role-badge">
+          <span>{{ userRoleBadge }}</span>
+        </div>
       </div>
     </div>
 
@@ -423,6 +529,37 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 16px;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 16px;
+}
+
+.header-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.back-action-container {
+  margin-bottom: 8px;
+}
+
+.back-btn {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid #bae6fd;
+  white-space: nowrap;
 }
 
 .eyebrow {

@@ -5,6 +5,7 @@ export interface NavigationItem {
   label: string
   to: string
   icon: string
+  active?: boolean
 }
 
 const props = withDefaults(defineProps<{
@@ -40,6 +41,7 @@ const defaultNavigation: NavigationItem[] = [
               v-for="item in props.navigation ?? defaultNavigation"
               :key="item.to"
               :to="item.to"
+              :class="{ 'router-link-active': item.active }"
             >
               <i :class="item.icon" aria-hidden="true" />{{ item.label }}
             </RouterLink>

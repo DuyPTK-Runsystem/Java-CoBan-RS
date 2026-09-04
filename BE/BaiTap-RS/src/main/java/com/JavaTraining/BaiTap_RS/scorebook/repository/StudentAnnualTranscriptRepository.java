@@ -24,4 +24,7 @@ public interface StudentAnnualTranscriptRepository extends JpaRepository<Student
         Optional<StudentAnnualTranscript> findForUpdate(
                         @Param("studentId") Long studentId,
                         @Param("academicYearId") Long academicYearId);
+
+        java.util.List<StudentAnnualTranscript> findAllByAcademicYearIdAndStudentIdIn(
+                        Long academicYearId, java.util.Collection<Long> studentIds);
 }

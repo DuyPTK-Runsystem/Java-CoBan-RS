@@ -1,5 +1,6 @@
 package com.JavaTraining.BaiTap_RS.academic.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,27 +16,32 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> {
 
-    boolean existsByAcademicYearId(Long academicYearId);
+        boolean existsByAcademicYearId(Long academicYearId);
 
-    boolean existsByGradeLevelId(Long gradeLevelId);
+        boolean existsByGradeLevelId(Long gradeLevelId);
 
-    boolean existsByAcademicYearIdAndClassCode(Long academicYearId, String classCode);
+        boolean existsByAcademicYearIdAndClassCode(Long academicYearId, String classCode);
 
-    boolean existsByAcademicYearIdAndClassCodeAndIdNot(Long academicYearId, String classCode, Long id);
+        boolean existsByAcademicYearIdAndClassCodeAndIdNot(Long academicYearId, String classCode, Long id);
 
-    List<SchoolClass> findAllByAcademicYearIdOrderByClassCodeAsc(Long academicYearId);
+        List<SchoolClass> findAllByAcademicYearIdOrderByClassCodeAsc(Long academicYearId);
 
-    long countByAcademicYearIdAndGradeLevelIdAndStatus(
-            Long academicYearId,
-            Long gradeLevelId,
-            SchoolClassStatus status);
+        List<SchoolClass> findAllByIdInOrderByClassCodeAsc(Collection<Long> ids);
 
-    boolean existsByAcademicYearIdAndStatusAndIdNot(
-            Long academicYearId,
-            SchoolClassStatus status,
-            Long id);
+        List<SchoolClass> findAllByIdInAndAcademicYearIdOrderByClassCodeAsc(
+                        Collection<Long> ids, Long academicYearId);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select schoolClass from SchoolClass schoolClass where schoolClass.id = :id")
-    Optional<SchoolClass> findByIdForUpdate(@Param("id") Long id);
+        long countByAcademicYearIdAndGradeLevelIdAndStatus(
+                        Long academicYearId,
+                        Long gradeLevelId,
+                        SchoolClassStatus status);
+
+        boolean existsByAcademicYearIdAndStatusAndIdNot(
+                        Long academicYearId,
+                        SchoolClassStatus status,
+                        Long id);
+
+        @Lock(LockModeType.PESSIMISTIC_WRITE)
+        @Query("select schoolClass from SchoolClass schoolClass where schoolClass.id = :id")
+        Optional<SchoolClass> findByIdForUpdate(@Param("id") Long id);
 }

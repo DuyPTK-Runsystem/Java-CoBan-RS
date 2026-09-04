@@ -10,10 +10,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StudentTermTranscriptRepository extends JpaRepository<StudentTermTranscript, Long> {
 
-    Optional<StudentTermTranscript> findByAnnualTranscriptIdAndSemesterId(
-            Long annualTranscriptId, Long semesterId);
+        Optional<StudentTermTranscript> findByAnnualTranscriptIdAndSemesterId(
+                        Long annualTranscriptId, Long semesterId);
 
-    Optional<StudentTermTranscript> findByStudentIdAndSemesterId(Long studentId, Long semesterId);
+        Optional<StudentTermTranscript> findByStudentIdAndSemesterId(Long studentId, Long semesterId);
 
-    List<StudentTermTranscript> findAllByAnnualTranscriptId(Long annualTranscriptId);
+        List<StudentTermTranscript> findAllByAnnualTranscriptId(Long annualTranscriptId);
+
+        List<StudentTermTranscript> findAllBySemesterIdAndStudentIdIn(
+                        Long semesterId, java.util.Collection<Long> studentIds);
 }

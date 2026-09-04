@@ -50,6 +50,17 @@ public class SchoolClassController {
         return schoolClassService.listSchoolClasses(academicYearId);
     }
 
+    @GetMapping("/accessible-for-transcript")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE', 'TEACHER')")
+    @ApiMessage("Lấy danh sách lớp được phép xem bảng điểm")
+    public List<ResSchoolClassDTO> listAccessibleClassesForTranscript(
+            @RequestParam(value = "academicYearId", required = false) @Positive Long academicYearId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SchoolClassController.class,
+                "SchoolClassController.listAccessibleClassesForTranscript");
+        return schoolClassService.listAccessibleClassesForTranscript(academicYearId);
+    }
+
     @PostMapping
     @PreAuthorize(OFFICE_ROLES)
     @ApiMessage("Tạo lớp")

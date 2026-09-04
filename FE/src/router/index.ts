@@ -125,6 +125,11 @@ const router = createRouter({
           component: () => import('@/views/TranscriptViewerView.vue'),
         },
         {
+          path: 'class-transcripts',
+          name: 'v2-class-transcripts',
+          component: () => import('@/views/ClassTranscriptViewerView.vue'),
+        },
+        {
           path: 'retake-exams',
           name: 'v2-retake-exams',
           component: () => import('@/views/RetakeResultView.vue'),

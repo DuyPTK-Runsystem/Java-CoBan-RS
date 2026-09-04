@@ -10,9 +10,18 @@ const mocks = vi.hoisted(() => ({
   fetchSemesters: vi.fn(),
   fetchMyTermTranscript: vi.fn(),
   fetchMyAnnualTranscript: vi.fn(),
+  fetchStudentTermTranscript: vi.fn(),
+  fetchStudentAnnualTranscript: vi.fn(),
   fetchMyTermStatus: vi.fn(),
   fetchMyAnnualStatus: vi.fn(),
   fetchStudentAttendanceHistory: vi.fn(),
+  push: vi.fn(),
+  query: {} as Record<string, string>,
+}))
+
+vi.mock('vue-router', () => ({
+  useRouter: () => ({ push: mocks.push }),
+  useRoute: () => ({ query: mocks.query }),
 }))
 
 vi.mock('@/services/academicApi', () => ({
@@ -27,6 +36,8 @@ vi.mock('@/services/attendanceApi', () => ({
 vi.mock('@/services/transcriptApi', () => ({
   fetchMyTermTranscript: mocks.fetchMyTermTranscript,
   fetchMyAnnualTranscript: mocks.fetchMyAnnualTranscript,
+  fetchStudentTermTranscript: mocks.fetchStudentTermTranscript,
+  fetchStudentAnnualTranscript: mocks.fetchStudentAnnualTranscript,
   fetchMyTermStatus: mocks.fetchMyTermStatus,
   fetchMyAnnualStatus: mocks.fetchMyAnnualStatus,
 }))
@@ -120,6 +131,7 @@ function mountView() {
 describe('TranscriptViewerView.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mocks.query = {}
     saveAuthSession({
       accessToken: 'token-abc',
       user: { id: 101, username: 'student1', email: 's1@test.com', roles: ['STUDENT'] },
@@ -278,6 +290,44 @@ describe('TranscriptViewerView.vue', () => {
     expect(mocks.fetchMyTermStatus).toHaveBeenCalledWith('token-abc', 11)
     expect(wrapper.text()).toContain('Phiên bản:')
     expect(wrapper.text()).toContain('v2')
+  })
+
+  it('displays class transcript context and back button when accessed by teacher with student query', async () => {
+    mocks.query = {
+      studentId: '101',
+      studentName: 'Nguyễn Văn A',
+      studentCode: 'HS001',
+      classId: '10',
+      academicYearId: '1',
+      semesterId: '11',
+      from: 'class-transcripts',
+    }
+    saveAuthSession({
+      accessToken: 'token-tea',
+      user: { id: 2, username: 'teacher1', email: 't1@test.com', roles: ['TEACHER'] },
+    })
+    mocks.fetchStudentTermTranscript.mockResolvedValue(mockTermTranscript)
+
+    const wrapper = mountView()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Bảng điểm theo lớp · Chi tiết bảng điểm học sinh')
+    expect(wrapper.text()).toContain('Bảng Điểm Học Sinh: Nguyễn Văn A (HS001)')
+    expect(wrapper.text()).toContain('Quay lại Bảng điểm theo lớp')
+    expect(wrapper.text()).toContain('👨‍🏫 Giáo viên (teacher1)')
+
+    const backButton = wrapper.find('.back-btn')
+    expect(backButton.exists()).toBe(true)
+    await backButton.trigger('click')
+
+    expect(mocks.push).toHaveBeenCalledWith({
+      path: '/v2/class-transcripts',
+      query: {
+        classId: '10',
+        academicYearId: '1',
+        semesterId: '11',
+      },
+    })
   })
 })
 

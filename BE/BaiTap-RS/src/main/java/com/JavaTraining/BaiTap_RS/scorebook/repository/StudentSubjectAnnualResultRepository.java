@@ -15,4 +15,7 @@ public interface StudentSubjectAnnualResultRepository extends JpaRepository<Stud
     List<StudentSubjectAnnualResult> findAllBySubjectIdOrderByAnnualTranscriptIdAsc(Long subjectId);
 
     Optional<StudentSubjectAnnualResult> findByAnnualTranscriptIdAndSubjectId(Long annualTranscriptId, Long subjectId);
+
+    List<StudentSubjectAnnualResult> findAllByAnnualTranscriptIdInOrderBySubjectIdAsc(
+            java.util.Collection<Long> annualTranscriptIds);
 }
