@@ -10,6 +10,13 @@ const grades: GradeLevel[] = [
   { id: 4, code: 'GRADE_9', name: 'Khối 9', gradeLevel: 9, displayOrder: 4, nextGradeId: null, active: true, description: null },
 ]
 
+const gradeStatistics = {
+  1: { gradeLevelId: 1, activeClassCount: 4, activeStudentCount: 142 },
+  2: { gradeLevelId: 2, activeClassCount: 4, activeStudentCount: 138 },
+  3: { gradeLevelId: 3, activeClassCount: 0, activeStudentCount: 0 },
+  4: { gradeLevelId: 4, activeClassCount: 3, activeStudentCount: 105 },
+}
+
 const meta = {
   title: 'AcademicCatalog/GradeTable',
   component: GradeTable,
@@ -22,5 +29,6 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const LifecycleAndStatsUnavailable: Story = {}
+export const WithStatistics: Story = { args: { gradeStatistics } }
 export const Loading: Story = { args: { loading: true } }
 export const Empty: Story = { args: { grades: [] } }

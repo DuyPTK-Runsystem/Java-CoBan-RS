@@ -269,3 +269,27 @@ export interface CreateClassSubjectRequest {
 export interface UpdateClassSubjectRequest {
   status: ClassSubjectStatus
 }
+
+export interface GradeStatistic {
+  gradeLevelId: number
+  activeClassCount: number
+  activeStudentCount: number
+}
+
+export interface ClassStatistic {
+  classId: number
+  classCode: string
+  className: string | null
+  gradeLevelId: number
+  capacity: number | null
+  activeStudentCount: number
+  gradeAverage: number | null
+  warning: import('@/types/enrollment').CapacityWarning | null
+}
+
+export interface AcademicYearStatistics {
+  academicYearId: number
+  gradeStatistics: GradeStatistic[]
+  classStatistics: ClassStatistic[]
+  totalWarnings: number
+}

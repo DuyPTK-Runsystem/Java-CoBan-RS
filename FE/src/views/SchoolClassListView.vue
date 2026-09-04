@@ -7,14 +7,15 @@ import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import { useRouter } from 'vue-router'
 
+import CapacityWarningBanner from '@/components/CapacityWarningBanner.vue'
 import SchoolClassDialog from '@/components/SchoolClassDialog.vue'
 import SchoolClassTable from '@/components/SchoolClassTable.vue'
 import FormAlert from '@/components/FormAlert.vue'
 import PageState from '@/components/PageState.vue'
 import { clearAuthSession, getAuthSession } from '@/services/authSession'
-import { closeSchoolClass, createSchoolClass, deleteSchoolClass, fetchAcademicYears, fetchGrades, fetchSchoolClasses, updateSchoolClass } from '@/services/academicApi'
+import { closeSchoolClass, createSchoolClass, deleteSchoolClass, fetchAcademicYears, fetchAcademicYearStatistics, fetchGrades, fetchSchoolClasses, updateSchoolClass } from '@/services/academicApi'
 import { isApiError } from '@/types/api'
-import type { AcademicYear, GradeLevel, SchoolClass, SchoolClassFormValues, SchoolClassStatus } from '@/types/academic'
+import type { AcademicYear, AcademicYearStatistics, ClassStatistic, GradeLevel, SchoolClass, SchoolClassFormValues, SchoolClassStatus } from '@/types/academic'
 import type { LoadingState } from '@/types/ui'
 
 type StatusFilter = 'ALL' | SchoolClassStatus
@@ -61,6 +62,21 @@ const filteredClasses = computed(() => {
 })
 const pageState = computed<LoadingState>(() => loadingState.value === 'success' && filteredClasses.value.length === 0 ? 'empty' : loadingState.value)
 const selectedAcademicYear = computed(() => academicYears.value.find((year) => year.id === selectedAcademicYearId.value) ?? null)
+const yearStatistics = ref<AcademicYearStatistics | null>(null)
+
+const classStatisticsMap = computed<Record<number, ClassStatistic>>(() => {
+  const map: Record<number, ClassStatistic> = {}
+  for (const item of yearStatistics.value?.classStatistics ?? []) {
+    map[item.classId] = item
+  }
+  return map
+})
+
+const activeWarnings = computed(() => {
+  return (yearStatistics.value?.classStatistics ?? [])
+    .map((item) => item.warning)
+    .filter((warning): warning is NonNullable<typeof warning> => Boolean(warning))
+})
 
 function token(): string | null {
   const session = getAuthSession()
@@ -78,6 +94,7 @@ async function loadClasses(): Promise<void> {
   const accessToken = token()
   if (!accessToken || selectedAcademicYearId.value === null) {
     schoolClasses.value = []
+    yearStatistics.value = null
     loadingState.value = 'success'
     return
   }
@@ -85,7 +102,12 @@ async function loadClasses(): Promise<void> {
   forbidden.value = false
   errorMessage.value = ''
   try {
-    schoolClasses.value = await fetchSchoolClasses(accessToken, selectedAcademicYearId.value)
+    const [classes, stats] = await Promise.all([
+      fetchSchoolClasses(accessToken, selectedAcademicYearId.value),
+      fetchAcademicYearStatistics(accessToken, selectedAcademicYearId.value).catch(() => null),
+    ])
+    schoolClasses.value = classes
+    yearStatistics.value = stats
     loadingState.value = 'success'
   } catch (error) {
     if (isApiError(error, 401)) return
@@ -234,7 +256,7 @@ onMounted(() => { void loadContext() })
     <div>
       <p class="eyebrow">Academic structure</p>
       <h1>Lớp học</h1>
-      <p v-if="selectedAcademicYear">Năm học {{ selectedAcademicYear.code }} · sĩ số và cảnh báo sẽ hiển thị khi backend cung cấp contract thống kê.</p>
+      <p v-if="selectedAcademicYear">Năm học {{ selectedAcademicYear.code }} · quản lý danh sách lớp và theo dõi cảnh báo sĩ số.</p>
       <p v-else>Chọn năm học để tải danh sách lớp.</p>
     </div>
     <div class="page-heading-actions">
@@ -242,6 +264,13 @@ onMounted(() => { void loadContext() })
       <Button label="Tạo lớp" icon="pi pi-plus" :disabled="!selectedAcademicYearId" @click="openCreate" />
     </div>
   </div>
+  <CapacityWarningBanner
+    v-if="selectedAcademicYearId"
+    :available="yearStatistics !== null"
+    :warning-count="yearStatistics?.totalWarnings ?? 0"
+    :warnings="activeWarnings"
+    :classes="schoolClasses"
+  />
   <FormAlert v-if="statusMessage" tone="success" :message="statusMessage" />
   <FormAlert v-if="errorMessage && !forbidden" tone="error" :message="errorMessage" />
   <section class="content-surface">
@@ -262,7 +291,14 @@ onMounted(() => { void loadContext() })
       empty-message="Năm học hoặc bộ lọc hiện tại chưa có lớp nào."
       @retry="loadClasses"
     >
-      <SchoolClassTable :school-classes="filteredClasses" :grades="grades" @edit="openEdit" @close="confirmClose" @delete="confirmDelete" />
+      <SchoolClassTable
+        :school-classes="filteredClasses"
+        :grades="grades"
+        :class-statistics="classStatisticsMap"
+        @edit="openEdit"
+        @close="confirmClose"
+        @delete="confirmDelete"
+      />
     </PageState>
   </section>
   <SchoolClassDialog v-model:visible="dialogVisible" :mode="dialogMode" :initial-value="selectedClass" :academic-years="academicYears" :grades="grades" :saving="saving" :error-message="dialogErrorMessage" @save="save" @cancel="closeDialog" />

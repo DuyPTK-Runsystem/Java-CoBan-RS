@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useConfirm } from 'primevue/useconfirm'
 import Button from 'primevue/button'
 import ConfirmDialog from 'primevue/confirmdialog'
+import Select from 'primevue/select'
 import { useRouter } from 'vue-router'
 
 import GradeDialog from '@/components/GradeDialog.vue'
@@ -10,14 +11,17 @@ import GradeTable from '@/components/GradeTable.vue'
 import FormAlert from '@/components/FormAlert.vue'
 import PageState from '@/components/PageState.vue'
 import { clearAuthSession, getAuthSession } from '@/services/authSession'
-import { createGrade, deleteGrade, fetchGrades, updateGrade } from '@/services/academicApi'
+import { createGrade, deleteGrade, fetchAcademicYears, fetchAcademicYearStatistics, fetchGrades, updateGrade } from '@/services/academicApi'
 import { isApiError } from '@/types/api'
-import type { GradeLevel, GradeLevelFormValues, GradeLevelRequest } from '@/types/academic'
+import type { AcademicYear, AcademicYearStatistics, GradeLevel, GradeLevelFormValues, GradeLevelRequest, GradeStatistic } from '@/types/academic'
 import type { LoadingState } from '@/types/ui'
 
 const router = useRouter()
 const confirm = useConfirm()
 const grades = ref<GradeLevel[]>([])
+const academicYears = ref<AcademicYear[]>([])
+const selectedAcademicYearId = ref<number | null>(null)
+const yearStatistics = ref<AcademicYearStatistics | null>(null)
 const loadingState = ref<LoadingState>('loading')
 const forbidden = ref(false)
 const errorMessage = ref('')
@@ -29,6 +33,13 @@ const saving = ref(false)
 const dialogErrorMessage = ref('')
 
 const pageState = computed<LoadingState>(() => loadingState.value === 'success' && grades.value.length === 0 ? 'empty' : loadingState.value)
+const gradeStatisticsMap = computed<Record<number, GradeStatistic>>(() => {
+  const map: Record<number, GradeStatistic> = {}
+  for (const item of yearStatistics.value?.gradeStatistics ?? []) {
+    map[item.gradeLevelId] = item
+  }
+  return map
+})
 
 function token(): string | null {
   const session = getAuthSession()
@@ -49,7 +60,16 @@ async function load(): Promise<void> {
   forbidden.value = false
   errorMessage.value = ''
   try {
-    grades.value = await fetchGrades(accessToken)
+    const [gradesData, yearsData] = await Promise.all([
+      fetchGrades(accessToken),
+      fetchAcademicYears(accessToken).catch(() => []),
+    ])
+    grades.value = gradesData
+    academicYears.value = yearsData
+    if (selectedAcademicYearId.value === null && yearsData.length > 0) {
+      selectedAcademicYearId.value = yearsData.find((y) => y.status === 'ACTIVE')?.id ?? yearsData[0].id
+    }
+    await loadStatistics()
     loadingState.value = 'success'
   } catch (error) {
     if (isApiError(error, 401)) return
@@ -58,6 +78,21 @@ async function load(): Promise<void> {
     loadingState.value = 'error'
   }
 }
+
+async function loadStatistics(): Promise<void> {
+  const accessToken = token()
+  if (!accessToken || !selectedAcademicYearId.value) {
+    yearStatistics.value = null
+    return
+  }
+  try {
+    yearStatistics.value = await fetchAcademicYearStatistics(accessToken, selectedAcademicYearId.value)
+  } catch {
+    yearStatistics.value = null
+  }
+}
+
+watch(selectedAcademicYearId, () => { void loadStatistics() })
 
 function openCreate(): void {
   selectedGrade.value = null
@@ -196,6 +231,22 @@ onMounted(() => { void load() })
   <FormAlert v-if="statusMessage" tone="success" :message="statusMessage" />
   <FormAlert v-if="errorMessage && !forbidden" tone="error" :message="errorMessage" />
   <section class="content-surface">
+    <div class="search-grid" style="grid-template-columns: minmax(240px, 320px);">
+      <div class="field-group">
+        <label for="grade-year-select">Năm học thống kê</label>
+        <Select
+          id="grade-year-select"
+          v-model="selectedAcademicYearId"
+          :options="academicYears"
+          option-label="code"
+          option-value="id"
+          placeholder="Chọn năm học"
+          fluid
+        />
+      </div>
+    </div>
+  </section>
+  <section class="content-surface">
     <PageState
       :state="pageState"
       :forbidden="forbidden"
@@ -205,7 +256,13 @@ onMounted(() => { void load() })
       empty-message="Hãy tạo metadata khối đầu tiên để bắt đầu quản lý lớp."
       @retry="load"
     >
-      <GradeTable :grades="grades" @edit="openEdit" @toggle-active="confirmToggle" @delete="confirmDelete" />
+      <GradeTable
+        :grades="grades"
+        :grade-statistics="gradeStatisticsMap"
+        @edit="openEdit"
+        @toggle-active="confirmToggle"
+        @delete="confirmDelete"
+      />
     </PageState>
   </section>
   <GradeDialog v-model:visible="dialogVisible" :mode="dialogMode" :initial-value="selectedGrade" :grades="grades" :saving="saving" :error-message="dialogErrorMessage" @save="save" @cancel="closeDialog" />

@@ -24,6 +24,7 @@ import type {
   UpdateSchoolClassRequest,
   UpdateSubjectApplicabilityRequest,
   UpdateSemesterRequest,
+  AcademicYearStatistics,
 } from '@/types/academic'
 
 const academicYearsPath = '/api/v2/academic-years'
@@ -221,3 +222,8 @@ export async function retryFailedSemesterNotifications(token: string, semesterId
 export function reopenSemester(token: string, semesterId: number, request: ReopenSemesterRequest): Promise<Semester> {
   return apiClient.post<Semester>(`${semestersPath}/${semesterId}/reopen`, request, { token })
 }
+
+export function fetchAcademicYearStatistics(token: string, academicYearId: number): Promise<AcademicYearStatistics> {
+  return apiClient.get<AcademicYearStatistics>(`/api/v2/academic/years/${academicYearId}/statistics`, { token })
+}
+

@@ -13,10 +13,51 @@ const schoolClasses: SchoolClass[] = [
   { id: 109, academicYearId: 1, gradeLevelId: 4, classCode: '9A4', className: null, capacity: null, status: 'CLOSED' },
 ]
 
+const classStatistics: Record<number, ClassStatistic> = {
+  101: {
+    classId: 101,
+    classCode: '6A1',
+    className: 'Lớp chọn A',
+    gradeLevelId: 1,
+    capacity: 35,
+    activeStudentCount: 32,
+    gradeAverage: 35.5,
+    warning: null,
+  },
+  102: {
+    classId: 102,
+    classCode: '6A2',
+    className: null,
+    gradeLevelId: 1,
+    capacity: 40,
+    activeStudentCount: 44,
+    gradeAverage: 35.5,
+    warning: {
+      classId: 102,
+      academicYearId: 1,
+      gradeLevelId: 1,
+      activeStudentCount: 44,
+      gradeAverage: 35.5,
+      message: 'Lớp 6A2 lệch +24% so với trung bình khối (35.5 học sinh)',
+    },
+  },
+  109: {
+    classId: 109,
+    classCode: '9A4',
+    className: null,
+    gradeLevelId: 4,
+    capacity: null,
+    activeStudentCount: 0,
+    gradeAverage: null,
+    warning: null,
+  },
+}
+
 const meta = { title: 'AcademicCatalog/SchoolClassTable', component: SchoolClassTable, tags: ['autodocs'], args: { schoolClasses, grades }, parameters: { layout: 'padded' } } satisfies Meta<typeof SchoolClassTable>
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const StatusAndStatsUnavailable: Story = {}
+export const WithStatisticsAndWarnings: Story = { args: { classStatistics } }
 export const Loading: Story = { args: { loading: true } }
 export const Empty: Story = { args: { schoolClasses: [] } }

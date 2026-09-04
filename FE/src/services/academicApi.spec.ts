@@ -16,6 +16,7 @@ import {
   deleteSchoolClass,
   fetchClassSubjects,
   fetchAcademicYears,
+  fetchAcademicYearStatistics,
   fetchGrades,
   fetchSchoolClasses,
   fetchSemesters,
@@ -51,6 +52,17 @@ describe('academicApi', () => {
     await fetchAcademicYears('token')
 
     expect(fetchMock).toHaveBeenCalledWith('http://localhost:8081/api/v2/academic-years', expect.objectContaining({ headers: { Accept: 'application/json', Authorization: 'Bearer token' } }))
+  })
+
+  it('fetches academic year statistics with token and year id', async () => {
+    const stats = { academicYearId: 5, gradeStatistics: [], classStatistics: [], totalWarnings: 0 }
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ data: stats }), { status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await fetchAcademicYearStatistics('token', 5)
+
+    expect(result).toEqual(stats)
+    expect(fetchMock).toHaveBeenCalledWith('http://localhost:8081/api/v2/academic/years/5/statistics', expect.objectContaining({ headers: { Accept: 'application/json', Authorization: 'Bearer token' } }))
   })
 
   it('serializes academic year create and update requests without changing date-only values', async () => {

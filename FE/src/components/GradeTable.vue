@@ -4,13 +4,15 @@ import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 
 import StatusTag from '@/components/StatusTag.vue'
-import type { GradeLevel } from '@/types/academic'
+import type { GradeLevel, GradeStatistic } from '@/types/academic'
 
 const props = withDefaults(defineProps<{
   grades?: GradeLevel[]
+  gradeStatistics?: Record<number, GradeStatistic>
   loading?: boolean
 }>(), {
   grades: () => [],
+  gradeStatistics: () => ({}),
   loading: false,
 })
 
@@ -42,7 +44,14 @@ function nextGradeName(grade: GradeLevel): string {
       <Column field="code" header="Mã" />
       <Column field="gradeLevel" header="Cấp" />
       <Column header="Khối tiếp theo"><template #body="slotProps">{{ nextGradeName(slotProps.data) }}</template></Column>
-      <Column header="Thống kê theo năm học"><template #body><span class="table-action-note">Chưa có dữ liệu thống kê</span></template></Column>
+      <Column header="Thống kê theo năm học">
+        <template #body="slotProps">
+          <span v-if="props.gradeStatistics[slotProps.data.id]">
+            {{ props.gradeStatistics[slotProps.data.id].activeClassCount }} lớp · {{ props.gradeStatistics[slotProps.data.id].activeStudentCount }} học sinh
+          </span>
+          <span v-else class="table-action-note">Chưa có dữ liệu thống kê</span>
+        </template>
+      </Column>
       <Column header="Trạng thái">
         <template #body="slotProps"><StatusTag :label="slotProps.data.active ? 'Đang dùng' : 'Ngừng dùng'" :severity="slotProps.data.active ? 'success' : 'secondary'" /></template>
       </Column>
