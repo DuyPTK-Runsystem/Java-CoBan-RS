@@ -65,7 +65,7 @@ describe('LoginView status popup', () => {
     await router.push('/login?redirect=/v2/students/new')
     loginMock.mockResolvedValue({
       accessToken: 'jwt-token',
-      user: { id: 1, username: 'student01' },
+      user: { id: 1, username: 'student01', roles: ['ADMIN'] },
     })
     const wrapper = mountView()
 

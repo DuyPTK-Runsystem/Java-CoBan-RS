@@ -1,12 +1,13 @@
 <script setup lang="ts">
-defineProps<{ modelValue?: string }>()
-const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
+defineProps<{ modelValue?: string | number | boolean | null }>()
+const emit = defineEmits<{ 'update:modelValue': [value: string | boolean] }>()
 
 function updateValue(event: Event): void {
-  emit('update:modelValue', (event.target as HTMLInputElement).value)
+  const target = event.target as HTMLInputElement
+  emit('update:modelValue', target.type === 'checkbox' ? target.checked : target.value)
 }
 </script>
 
 <template>
-  <input :value="modelValue ?? ''" @input="updateValue">
+  <input :value="typeof modelValue === 'boolean' ? undefined : (modelValue ?? '')" :checked="typeof modelValue === 'boolean' ? modelValue : undefined" @input="updateValue" @change="updateValue">
 </template>

@@ -1,15 +1,9 @@
-import { defineComponent, h } from 'vue'
 import { createRouter, createWebHistory, RouterView } from 'vue-router'
 
 import { configureApiClient } from '@/services/apiClient'
 import { hasAuthenticatedSession } from '@/services/authSession'
-
-const StudentDetailPlaceholder = defineComponent({
-  name: 'StudentDetailPlaceholder',
-  setup() {
-    return () => h('div', { class: 'student-detail-placeholder' })
-  },
-})
+import { getAuthSession } from '@/services/authSession'
+import type { UserRole } from '@/types/user'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -17,6 +11,7 @@ declare module 'vue-router' {
     requiresAuth?: boolean
     module?: string
     shell?: 'authenticated'
+    allowedRoles?: UserRole[]
   }
 }
 
@@ -65,21 +60,25 @@ const router = createRouter({
           path: 'students',
           name: 'v2-students',
           component: () => import('@/views/StudentListView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE', 'TEACHER'] },
         },
         {
           path: 'students/new',
           name: 'v2-student-create',
           component: () => import('@/views/StudentFormView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
         },
         {
           path: 'students/:studentId',
           name: 'v2-student-detail',
-          component: StudentDetailPlaceholder,
+          component: () => import('@/views/StudentDetailView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE', 'TEACHER'] },
         },
         {
           path: 'students/:studentId/edit',
           name: 'v2-student-edit',
           component: () => import('@/views/StudentFormView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
         },
         {
           path: 'academic-years',
@@ -180,6 +179,12 @@ router.beforeEach((to) => {
   }
   if (to.meta.guestOnly && authenticated) {
     return '/v2'
+  }
+  if (to.meta.allowedRoles) {
+    const roles = getAuthSession()?.user.roles ?? []
+    if (!roles.some((role) => to.meta.allowedRoles?.includes(role))) {
+      return { name: 'v2-shell' }
+    }
   }
   return true
 })

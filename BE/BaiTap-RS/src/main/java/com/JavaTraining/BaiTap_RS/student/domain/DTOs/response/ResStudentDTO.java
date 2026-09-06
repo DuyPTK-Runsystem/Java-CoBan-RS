@@ -2,6 +2,7 @@ package com.JavaTraining.BaiTap_RS.student.domain.DTOs.response;
 
 import java.time.LocalDate;
 
+import com.JavaTraining.BaiTap_RS.student.domain.entity.StudentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,4 +25,13 @@ public class ResStudentDTO {
     private String address;
 
     private Double averageScore;
+
+    private StudentStatus status;
+
+    private String currentClassCode;
+
+    public ResStudentDTO(Long studentId, String studentCode, String studentName,
+            LocalDate dateOfBirth, String address, Double averageScore) {
+        this(studentId, studentCode, studentName, dateOfBirth, address, averageScore, null, null);
+    }
 }

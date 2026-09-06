@@ -99,6 +99,7 @@ NNN-short-topic-yyyy-mm-dd.md
 | 057.3 | FE             | [Bulk Score Entry Decimal Rounding Fix](../fe/scorebook/057.3-bulk-score-entry-rounding-fix-2026-09-04.md)                                                            | Completed; round score to 1 decimal on blur and save in BulkScoreEntryDialog & ScoreEntryDialog; validation PASS                             | 2026-09-04 |
 |   066 | BE/FE          | [Student Attendance History by Student ID and Transcript Integration](../be/attendance/066-student-attendance-history-by-id-and-transcript-integration-2026-09-04.md) | Completed; GET attendance history by studentId for Admin/Office/Teacher; transcript viewer absence integration; validation PASS              | 2026-09-04 |
 |   067 | BE/FE/Doc      | [Actual Permission Matrix and FE Remaining Plans Audit](../be/workflow-skill/067-actual-permission-matrix-and-fe-remaining-plans-audit-2026-09-04.md)                 | Completed; documentation audit PASS                                                                                                          | 2026-09-04 |
+|   068 | BE/FE          | [Student legacy to V2 remediation](../fe/student/068-student-v2-migration-workspace-2026-09-05.md)                                         | Amendment removed Student Gender and teacher Gender/User display; FE + browser QA PASS; BE PMD/build remains outside-scope baseline        | 2026-09-06 |
 
 Plan 057 PMD follow-up (2026-09-03): backend `test`, Checkstyle, PMD and `build` have been rerun after the approved refactor; PMD is PASS with 0 violations.
 

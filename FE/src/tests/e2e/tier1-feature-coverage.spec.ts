@@ -172,7 +172,7 @@ describe('Tier 1: Feature Coverage Tests (Category-Partition)', () => {
   // Feature 3: Thêm mới Học sinh kèm Cấp tài khoản Đăng nhập (Student V3) (R3)
   // =========================================================================
   describe('Feature 3: Student Creation & V3 Account Provisioning', () => {
-    it('TC-F3-01: Create student V3 payload auto-generates compliant username and default password', () => {
+    it('TC-F3-01: V3 account request does not assume default credentials or a credential-delivery flow', () => {
       const studentCode = 'STU0000001'
       const studentName = 'Nguyễn Văn An'
       const generatedUsername = generateStudentUsername(studentName, studentCode)
@@ -264,7 +264,6 @@ describe('Tier 1: Feature Coverage Tests (Category-Partition)', () => {
         studentCode: 'STU0000001',
         studentName: 'Nguyễn Văn An',
         dateOfBirth: '2010-05-15',
-        gender: 'MALE',
         status: 'ACTIVE',
         account: {
           userId: 10,

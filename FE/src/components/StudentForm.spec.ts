@@ -6,7 +6,7 @@ import { primeVueStubs } from '@/test/stubs'
 
 const inputNumberStub = { template: '<input />' }
 
-function mountForm(mode: 'add' | 'edit' = 'add', averageScore = 6.7) {
+function mountForm(mode: 'add' | 'edit' = 'add') {
   return mount(StudentForm, {
     props: {
       mode,
@@ -15,7 +15,6 @@ function mountForm(mode: 'add' | 'edit' = 'add', averageScore = 6.7) {
         studentName: 'John Doe',
         dateOfBirth: new Date(2000, 7, 19),
         address: 'Ho Chi Minh City',
-        averageScore,
       },
     },
     global: {
@@ -64,8 +63,8 @@ describe('StudentForm', () => {
     expect(wrapper.get('button').attributes('disabled')).toBeDefined()
   })
 
-  it.each([0, 10])('emits Save for the Average score boundary %s', async (averageScore) => {
-    const wrapper = mountForm('add', averageScore)
+  it('emits Save without legacy average score input', async () => {
+    const wrapper = mountForm('add')
 
     await wrapper.get('#student-code').setValue('STU1234567')
     await wrapper.get('form').trigger('submit')
@@ -73,12 +72,9 @@ describe('StudentForm', () => {
     expect(wrapper.emitted('save')).toHaveLength(1)
   })
 
-  it.each([-0.01, 10.01])('rejects an out-of-range Average score %s', async (averageScore) => {
-    const wrapper = mountForm('add', averageScore)
+  it('does not render the legacy average score input', () => {
+    const wrapper = mountForm('add')
 
-    await wrapper.get('form').trigger('submit')
-
-    expect(wrapper.text()).toContain('Average score must be between 0 and 10.')
-    expect(wrapper.emitted('save')).toBeUndefined()
+    expect(wrapper.find('#student-score').exists()).toBe(false)
   })
 })

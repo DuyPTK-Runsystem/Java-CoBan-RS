@@ -20,7 +20,7 @@ describe('router authentication guard', () => {
   })
 
   it('redirects an authenticated user away from guest-only routes to /v2', async () => {
-    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01' } })
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01', roles: ['ADMIN'] } })
 
     await router.push('/register')
 
@@ -29,7 +29,7 @@ describe('router authentication guard', () => {
   })
 
   it('redirects legacy /students path to /v2/students for authenticated user', async () => {
-    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01' } })
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01', roles: ['ADMIN'] } })
 
     await router.push('/students')
 
@@ -38,7 +38,7 @@ describe('router authentication guard', () => {
   })
 
   it('redirects legacy /students/new path to /v2/students/new for authenticated user', async () => {
-    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01' } })
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01', roles: ['ADMIN'] } })
 
     await router.push('/students/new')
 
@@ -47,7 +47,7 @@ describe('router authentication guard', () => {
   })
 
   it('redirects legacy /students/:studentId/edit path to /v2/students/:studentId/edit for authenticated user', async () => {
-    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01' } })
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01', roles: ['ADMIN'] } })
 
     await router.push('/students/4/edit')
 
@@ -60,6 +60,14 @@ describe('router authentication guard', () => {
 
     expect(route.name).toBe('v2-shell')
     expect(route.meta).toMatchObject({ requiresAuth: true, module: 'v2', shell: 'authenticated' })
+  })
+
+  it('redirects a STUDENT away from the staff-only student profile workspace', async () => {
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01', roles: ['STUDENT'] } })
+
+    await router.push('/v2/students')
+
+    expect(router.currentRoute.value.name).toBe('v2-shell')
   })
 
   it('renders a nested v2 child through the authenticated layout outlet', async () => {
@@ -95,7 +103,7 @@ describe('router authentication guard', () => {
   })
 
   it('renders nested v2 students child through authenticated layout', async () => {
-    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01' } })
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01', roles: ['ADMIN'] } })
 
     await router.push('/v2/students')
 

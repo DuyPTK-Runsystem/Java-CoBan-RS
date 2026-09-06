@@ -7,7 +7,12 @@ import { primeVueStubs } from '@/test/stubs'
 describe('StudentSearchForm', () => {
   it('emits deterministic search criteria', async () => {
     const wrapper = mount(StudentSearchForm, {
-      global: { stubs: primeVueStubs },
+      global: {
+        stubs: {
+          ...primeVueStubs,
+          InputNumber: { template: '<input />' },
+        },
+      },
     })
 
     await wrapper.get('#search-student-code').setValue('STU0000001')
@@ -18,6 +23,7 @@ describe('StudentSearchForm', () => {
       studentCode: 'STU0000001',
       studentName: 'Nguyen Van A',
       dateOfBirth: null,
+      classId: null,
     }]])
   })
 })
