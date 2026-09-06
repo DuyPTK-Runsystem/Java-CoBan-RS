@@ -11,21 +11,26 @@ const mocks = vi.hoisted(() => ({
   fetchAcademicYears: vi.fn(),
   fetchGrades: vi.fn(),
   fetchSchoolClasses: vi.fn(),
+  fetchSemesters: vi.fn(),
   fetchUnassignedStudents: vi.fn(),
   fetchClassStudents: vi.fn(),
   createBulkEnrollment: vi.fn(),
   createEnrollment: vi.fn(),
   transferEnrollment: vi.fn(),
+  fetchTransferScoreAssist: vi.fn(),
+  transferWithScores: vi.fn(),
   fetchStudentEnrollmentHistory: vi.fn(),
 }))
 
-vi.mock('@/services/academicApi', () => ({ fetchAcademicYears: mocks.fetchAcademicYears, fetchGrades: mocks.fetchGrades, fetchSchoolClasses: mocks.fetchSchoolClasses }))
+vi.mock('@/services/academicApi', () => ({ fetchAcademicYears: mocks.fetchAcademicYears, fetchGrades: mocks.fetchGrades, fetchSchoolClasses: mocks.fetchSchoolClasses, fetchSemesters: mocks.fetchSemesters }))
 vi.mock('@/services/enrollmentApi', () => ({
   fetchUnassignedStudents: mocks.fetchUnassignedStudents,
   fetchClassStudents: mocks.fetchClassStudents,
   createBulkEnrollment: mocks.createBulkEnrollment,
   createEnrollment: mocks.createEnrollment,
   transferEnrollment: mocks.transferEnrollment,
+  fetchTransferScoreAssist: mocks.fetchTransferScoreAssist,
+  transferWithScores: mocks.transferWithScores,
   fetchStudentEnrollmentHistory: mocks.fetchStudentEnrollmentHistory,
 }))
 
@@ -35,6 +40,7 @@ const classes = [
   { id: 101, academicYearId: 1, gradeLevelId: 1, classCode: '6A1', className: 'Lớp 6A1', capacity: 35, status: 'ACTIVE' as const },
   { id: 102, academicYearId: 1, gradeLevelId: 1, classCode: '6A2', className: 'Lớp 6A2', capacity: 35, status: 'ACTIVE' as const },
 ]
+const semesters = [{ id: 7, academicYearId: 1, name: 'Học kỳ 1', startDate: '2026-09-01', endDate: '2027-01-15', status: 'ACTIVE' as const, notes: null }]
 const students = [{ studentId: 11, studentCode: 'HS011', studentName: 'Nguyễn An' }, { studentId: 12, studentCode: 'HS012', studentName: 'Trần Bình' }]
 
 const buttonStub = { props: ['label', 'disabled'], emits: ['click'], template: '<button :disabled="disabled" @click="$emit(\'click\')">{{ label }}</button>' }
@@ -46,6 +52,7 @@ const unassignedStub = { emits: ['update:selected-students', 'place', 'history']
 const rosterStub = { template: '<div data-testid="roster-table" />' }
 const mutationStub = { emits: ['submit'], template: '<div data-testid="mutation-dialog" />' }
 const transferStub = { template: '<div data-testid="transfer-dialog" />' }
+const transferScoreAssistStub = { template: '<div data-testid="transfer-score-assist-dialog" />' }
 const historyStub = { template: '<div data-testid="history-dialog" />' }
 
 function mountView() {
@@ -62,6 +69,7 @@ function mountView() {
         PageState: pageStateStub,
         StudentEnrollmentHistoryDialog: historyStub,
         TransferEnrollmentDialog: transferStub,
+        TransferScoreAssistDialog: transferScoreAssistStub,
         UnassignedStudentTable: unassignedStub,
       },
     },
@@ -75,11 +83,14 @@ describe('EnrollmentListView', () => {
     mocks.fetchAcademicYears.mockReset().mockResolvedValue(academicYears)
     mocks.fetchGrades.mockReset().mockResolvedValue(grades)
     mocks.fetchSchoolClasses.mockReset().mockResolvedValue(classes)
+    mocks.fetchSemesters.mockReset().mockResolvedValue(semesters)
     mocks.fetchUnassignedStudents.mockReset().mockResolvedValue(students)
     mocks.fetchClassStudents.mockReset().mockResolvedValue([{ studentId: 21, studentCode: 'HS021', studentName: 'Lê Chi', enrollmentId: 701 }])
     mocks.createBulkEnrollment.mockReset().mockResolvedValue({ enrollments: [], warnings: [] })
     mocks.createEnrollment.mockReset()
     mocks.transferEnrollment.mockReset().mockResolvedValue({ enrollments: [], warnings: [] })
+    mocks.fetchTransferScoreAssist.mockReset()
+    mocks.transferWithScores.mockReset().mockResolvedValue({ transfer: { enrollments: [], warnings: [] }, scores: [] })
     mocks.fetchStudentEnrollmentHistory.mockReset()
     await router.push({ name: 'v2-enrollments' })
   })
@@ -123,13 +134,16 @@ describe('EnrollmentListView', () => {
     await flushPromises()
     const view = wrapper.vm as unknown as {
       openTransfer: (student: { studentId: number; studentCode: string; studentName: string; enrollmentId: number }) => void
-      submitTransfer: (values: { targetClassId: number; effectiveAt: string; reason: string }) => Promise<void>
+      openTransferScoreAssist: (values: { targetClassId: number; effectiveAt: string; reason: string }) => Promise<void>
+      submitTransferWithScores: (values: { targetClassId: number; semesterId: number; effectiveAt: string; reason: string | null; scores: never[] }) => Promise<void>
     }
 
     view.openTransfer({ studentId: 21, studentCode: 'STU2600001', studentName: 'Lê Chi', enrollmentId: 701 })
-    await view.submitTransfer({ targetClassId: 102, effectiveAt: '2026-08-28T09:00:00', reason: '' })
+    mocks.fetchTransferScoreAssist.mockResolvedValue({ enrollmentId: 701, studentId: 21, studentCode: 'STU2600001', studentName: 'Lê Chi', academicYearId: 1, semesterId: 7, sourceClass: { id: 101, academicYearId: 1, classCode: '6A1', className: 'Lớp 6A1' }, targetClass: { id: 102, academicYearId: 1, classCode: '6A2', className: 'Lớp 6A2' }, hasExistingScores: false, subjects: [], warnings: [] })
+    await view.openTransferScoreAssist({ targetClassId: 102, effectiveAt: '2026-08-28T09:00:00', reason: '' })
+    await view.submitTransferWithScores({ targetClassId: 102, semesterId: 7, effectiveAt: '2026-08-28T09:00:00', reason: null, scores: [] })
     await flushPromises()
 
-    expect(wrapper.text()).toContain('Đã chuyển STU2600001-Lê Chi từ lớp Lớp 6A1 sang Lớp 6A2.')
+    expect(wrapper.text()).toContain('Đã chuyển STU2600001-Lê Chi từ lớp Lớp 6A1 sang Lớp 6A2 và lưu điểm lớp mới.')
   })
 })

@@ -146,3 +146,81 @@ reason?
 ```
 
 `effectiveAt` must not be future according to current validation.
+
+### Mid-semester transfer score assistance (Plan 069)
+
+The score-assistance flow is office-only and supports one active enrollment per request.
+The backend owns source/target scope and does not move or delete source score rows.
+
+```text
+GET /api/v2/enrollments/{enrollmentId}/transfer-score-assist
+    ?targetClassId={targetClassId}&semesterId={semesterId}
+```
+
+The response is `ResTransferScoreAssistDTO` inside the standard success envelope:
+
+```ts
+interface TransferScoreAssistSnapshot {
+  enrollmentId: number
+  studentId: number
+  studentCode: string
+  studentName: string
+  academicYearId: number
+  semesterId: number
+  hasExistingScores: boolean
+  sourceClass: TransferClass
+  targetClass: TransferClass
+  subjects: TransferScoreSubject[]
+  warnings: string[]
+}
+
+interface TransferScoreSubject {
+  subjectId: number
+  subjectCode?: string
+  subjectName?: string
+  sourceEvidence: TransferSourceScore[]
+  targetColumns: TransferTargetColumn[]
+}
+```
+
+`sourceEvidence` is read-only evidence. A missing source row has null
+`scoreStatus`, `scoreValue`, `note`, and `version`; it is not `0.0` and does
+not use a `NOT_ENTERED` enum. `targetColumns.suggestedSourceColumnId` is only a
+backend mapping suggestion keyed by `subjectId + assessmentType + columnNo`.
+Null means that no equivalent source column was found.
+
+```text
+POST /api/v2/enrollments/{enrollmentId}/transfer-with-scores
+```
+
+Request:
+
+```ts
+interface TransferWithScoresRequest {
+  targetClassId: number
+  semesterId: number
+  effectiveAt: string
+  reason?: string | null
+  scores: TransferTargetScore[]
+}
+
+interface TransferTargetScore {
+  assessmentColumnId: number
+  scoreStatus: 'SCORED' | 'ABSENT' | 'EXEMPTED' | 'CANCELLED'
+  scoreValue?: number | null
+  note?: string | null
+  expectedVersion?: number | null
+}
+```
+
+`scores` may be empty when the user leaves all target cells blank. A new target
+row must omit `expectedVersion`; an existing target row must provide its
+snapshot version and is rejected with `409 CONFLICT` when stale. `SCORED` values
+are limited to `0.0..10.0` with at most one decimal; non-`SCORED` statuses must
+not carry a value.
+
+Transfer history/audit, target score writes, transcript state changes, and the
+recalculation task are committed in one transaction. A failure rolls back the
+whole mutation. Source score rows and class-transfer history are preserved.
+Target scorebooks must be `OPEN` or `PUBLISHED`, the semester must be writable,
+and only `ADMIN`/`ACADEMIC_OFFICE` may call these two endpoints.

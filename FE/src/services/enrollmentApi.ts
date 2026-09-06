@@ -6,6 +6,9 @@ import type {
   EnrollmentMutation,
   StudentEnrollmentHistory,
   TransferEnrollmentRequest,
+  TransferScoreAssistSnapshot,
+  TransferWithScoresResponse,
+  TransferWithScoresRequest,
   UnassignedStudent,
 } from '@/types/enrollment'
 
@@ -32,6 +35,17 @@ export function createBulkEnrollment(token: string, request: BulkCreateEnrollmen
 
 export function transferEnrollment(token: string, enrollmentId: number, request: TransferEnrollmentRequest): Promise<EnrollmentMutation> {
   return apiClient.post<EnrollmentMutation>(`${enrollmentPath}/${enrollmentId}/transfer`, request, { token })
+}
+
+export function fetchTransferScoreAssist(token: string, enrollmentId: number, targetClassId: number, semesterId: number): Promise<TransferScoreAssistSnapshot> {
+  return apiClient.get<TransferScoreAssistSnapshot>(`${enrollmentPath}/${enrollmentId}/transfer-score-assist`, {
+    token,
+    query: new URLSearchParams({ targetClassId: String(targetClassId), semesterId: String(semesterId) }),
+  })
+}
+
+export function transferWithScores(token: string, enrollmentId: number, request: TransferWithScoresRequest): Promise<TransferWithScoresResponse> {
+  return apiClient.post<TransferWithScoresResponse>(`${enrollmentPath}/${enrollmentId}/transfer-with-scores`, request, { token })
 }
 
 export function fetchStudentEnrollmentHistory(token: string, studentId: number): Promise<StudentEnrollmentHistory[]> {

@@ -29,6 +29,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   'update:visible': [visible: boolean]
   submit: [values: TransferEnrollmentFormValues]
+  'continue-score-assist': [values: TransferEnrollmentFormValues]
   cancel: []
 }>()
 
@@ -65,7 +66,7 @@ function submit(): void {
   else if (effectiveAt.value.getTime() > Date.now()) errors.value.effectiveAt = 'Ngày hiệu lực không được ở tương lai.'
   if (reason.value.length > 500) errors.value.reason = 'Lý do tối đa 500 ký tự.'
   if (Object.keys(errors.value).length > 0 || !targetClassId.value || !effectiveAt.value) return
-  emit('submit', { targetClassId: targetClassId.value, effectiveAt: formatLocalDateTime(effectiveAt.value), reason: reason.value.trim() })
+  emit('continue-score-assist', { targetClassId: targetClassId.value, effectiveAt: formatLocalDateTime(effectiveAt.value), reason: reason.value.trim() })
 }
 </script>
 
@@ -90,7 +91,7 @@ function submit(): void {
         <Textarea id="transfer-reason" v-model="reason" rows="4" maxlength="500" auto-resize :disabled="props.saving" :invalid="Boolean(errors.reason)" />
         <small v-if="errors.reason" class="field-error">{{ errors.reason }}</small>
       </div>
-      <div class="form-actions"><Button type="button" label="Hủy" icon="pi pi-times" severity="secondary" outlined :disabled="props.saving" @click="close" /><Button type="submit" label="Chuyển lớp" icon="pi pi-arrow-right-arrow-left" :loading="props.saving" /></div>
+      <div class="form-actions"><Button type="button" label="Hủy" icon="pi pi-times" severity="secondary" outlined :disabled="props.saving" @click="close" /><Button type="submit" label="Tiếp tục xem hỗ trợ điểm" icon="pi pi-arrow-right" :loading="props.saving" /></div>
     </form>
   </Dialog>
 </template>
