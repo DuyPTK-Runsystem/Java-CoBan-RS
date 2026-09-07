@@ -50,7 +50,6 @@ function save(): void { if (!isClosed.value && validate()) emit('save', { ...val
 
 <template>
   <Dialog :visible="props.visible" modal :header="heading" :style="{ width: 'min(100% - 2rem, 640px)' }" :closable="!props.saving" @update:visible="emit('update:visible', $event)">
-    <p class="dialog-caption">Lớp thuộc đúng một năm học và một khối.</p>
     <FormAlert v-if="props.errorMessage" tone="error" :message="props.errorMessage" />
     <div v-if="isClosed" class="catalog-readonly-note"><i class="pi pi-lock" aria-hidden="true" /><span>Lớp đã đóng, dữ liệu chỉ được xem.</span><StatusTag label="Đã đóng" severity="contrast" /></div>
     <form class="form-stack" novalidate @submit.prevent="save">

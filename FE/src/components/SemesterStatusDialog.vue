@@ -87,7 +87,6 @@ const canReopen = computed(() => props.semester?.status === 'LOCKED')
     <div v-if="props.semester" class="status-dialog-content">
       <div class="status-dialog-heading">
         <div>
-          <p class="eyebrow">Academic structure</p>
           <h2>{{ props.semester.name }} <span class="muted-code">· {{ props.semester.code }}</span></h2>
           <p class="section-caption">Thông tin và trạng thái học kỳ</p>
         </div>
@@ -105,12 +104,12 @@ const canReopen = computed(() => props.semester?.status === 'LOCKED')
         <div class="detail-item detail-item-wide"><span>Lý do khóa</span><strong>{{ props.semester.lockReason || '-' }}</strong></div>
       </div>
       <div class="timeline-block">
-        <div class="section-heading"><div><h3>Vòng đời học kỳ</h3><p class="section-caption">Trạng thái lịch sử lấy từ dữ liệu backend.</p></div></div>
+        <div class="section-heading"><div><h3>Trạng thái học kỳ</h3></div></div>
         <ol class="lifecycle-timeline">
-          <li class="timeline-step timeline-step-complete"><span class="timeline-dot"><i class="pi pi-check" aria-hidden="true" /></span><div><strong>Nháp</strong><span>Đã tạo metadata học kỳ</span></div></li>
-          <li :class="['timeline-step', props.semester.status !== 'DRAFT' ? 'timeline-step-complete' : 'timeline-step-pending']"><span class="timeline-dot"><i :class="props.semester.status !== 'DRAFT' ? 'pi pi-check' : 'pi pi-minus'" aria-hidden="true" /></span><div><strong>Đang hoạt động</strong><span>{{ props.semester.status !== 'DRAFT' ? 'Đã kích hoạt' : 'Chưa kích hoạt' }}</span></div></li>
-          <li :class="['timeline-step', props.semester.status === 'LOCKED' || props.semester.status === 'CLOSED' ? 'timeline-step-complete' : 'timeline-step-pending']"><span class="timeline-dot"><i :class="props.semester.status === 'LOCKED' || props.semester.status === 'CLOSED' ? 'pi pi-check' : 'pi pi-minus'" aria-hidden="true" /></span><div><strong>Đã khóa</strong><span>{{ props.semester.lockedAt ? formatAcademicDateTime(props.semester.lockedAt) : 'Chưa khóa' }}</span></div></li>
-          <li :class="['timeline-step', props.semester.status === 'CLOSED' ? 'timeline-step-complete' : 'timeline-step-pending']"><span class="timeline-dot"><i :class="props.semester.status === 'CLOSED' ? 'pi pi-check' : 'pi pi-minus'" aria-hidden="true" /></span><div><strong>Đã đóng</strong><span>{{ props.semester.status === 'CLOSED' ? 'Dữ liệu lịch sử' : 'Không áp dụng trong UI hiện tại' }}</span></div></li>
+          <li class="timeline-step timeline-step-complete"><span class="timeline-dot"><i class="pi pi-check" aria-hidden="true" /></span><div><strong>Nháp</strong></div></li>
+          <li :class="['timeline-step', props.semester.status !== 'DRAFT' ? 'timeline-step-complete' : 'timeline-step-pending']"><span class="timeline-dot"><i :class="props.semester.status !== 'DRAFT' ? 'pi pi-check' : 'pi pi-minus'" aria-hidden="true" /></span><div><strong>Đang hoạt động</strong></div></li>
+          <li :class="['timeline-step', props.semester.status === 'LOCKED' || props.semester.status === 'CLOSED' ? 'timeline-step-complete' : 'timeline-step-pending']"><span class="timeline-dot"><i :class="props.semester.status === 'LOCKED' || props.semester.status === 'CLOSED' ? 'pi pi-check' : 'pi pi-minus'" aria-hidden="true" /></span><div><strong>Đã khóa</strong></div></li>
+          <li :class="['timeline-step', props.semester.status === 'CLOSED' ? 'timeline-step-complete' : 'timeline-step-pending']"><span class="timeline-dot"><i :class="props.semester.status === 'CLOSED' ? 'pi pi-check' : 'pi pi-minus'" aria-hidden="true" /></span><div><strong>Đã đóng</strong></div></li>
         </ol>
       </div>
       <div class="report-block">

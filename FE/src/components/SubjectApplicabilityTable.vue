@@ -51,7 +51,7 @@ function targetLabel(applicability: SubjectApplicability): string {
         <h2>Cấu hình hiện tại</h2>
         <p class="section-caption">Các phạm vi áp dụng đã lưu cho môn học này.</p>
       </div>
-      <Button label="Thêm cấu hình" icon="pi pi-plus" size="small" @click="emit('create')" />
+      <Button label="Thiết lập phạm vi" icon="pi pi-plus" size="small" @click="emit('create')" />
     </div>
     <DataTable :value="props.applicabilities" :loading="props.loading" class="catalog-table applicability-table" responsive-layout="scroll" striped-rows>
       <template #empty>Chưa có cấu hình phạm vi áp dụng.</template>

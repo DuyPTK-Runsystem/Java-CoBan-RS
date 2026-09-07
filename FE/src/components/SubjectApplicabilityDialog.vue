@@ -57,7 +57,7 @@ const targetValue = computed<number | null>({
   set: (value) => { if (values.scopeType === 'GRADE') values.gradeLevelId = value; else values.classId = value },
 })
 const heading = computed(() => props.mode === 'edit' ? 'Sửa cấu hình phạm vi áp dụng' : 'Cấu hình phạm vi áp dụng')
-const formHeading = computed(() => props.mode === 'edit' ? 'Chỉnh sửa cấu hình' : 'Thêm cấu hình')
+const formHeading = computed(() => props.mode === 'edit' ? 'Chỉnh sửa cấu hình' : 'Thiết lập phạm vi áp dụng')
 let syncing = false
 
 function syncValues(): void {

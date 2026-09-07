@@ -257,7 +257,7 @@ async function loadCalendar(): Promise<void> {
       calendarMessage.value = 'Ngày và buổi học hợp lệ để mở buổi điểm danh.'
     } else {
       calendarStatus.value = 'UNKNOWN'
-      calendarMessage.value = 'Chưa có cấu hình lịch cho ngày/buổi này; backend sẽ kiểm tra lần cuối.'
+      calendarMessage.value = 'Chưa có cấu hình lịch cho ngày/buổi này'
     }
   } catch (error) {
     if (isApiError(error, 401)) return

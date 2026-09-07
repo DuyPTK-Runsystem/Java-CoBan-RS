@@ -15,6 +15,13 @@ Ngày: 07/09/2026
 - Xóa eyebrow và mô tả phụ tại tiêu đề của các workspace học vụ; giữ `h1`, hành động, trạng thái và dữ liệu ngữ cảnh cần thiết. Trang Học kỳ vẫn giữ thông tin năm học/khoảng ngày động.
 - Xóa hai mô tả kỹ thuật ở lịch sử chuyên cần của Student.
 - Xóa mô tả “Tìm theo mã năm học và lọc trên danh sách hiện tại.” tại danh sách Năm học.
+- Xóa caption create/edit và hint trạng thái trong popup tạo/chỉnh sửa năm học; giữ thông báo riêng cho năm học đã đóng ở chế độ chỉ xem.
+- Trong popup trạng thái học kỳ, xóa eyebrow `Academic structure`, đổi “Vòng đời học kỳ” thành “Trạng thái học kỳ” và bỏ caption cùng các note phụ dưới từng mốc trạng thái.
+- Trong popup tạo học kỳ, xóa note về trạng thái Nháp và các action lifecycle riêng.
+- Trong popup tạo khối và popup tạo/sửa lớp, xóa các mô tả metadata/phạm vi dùng chung.
+- Trong màn hình điểm danh, rút gọn thông báo lịch từ “Chưa có cấu hình lịch cho ngày/buổi này; backend sẽ kiểm tra lần cuối.” thành “Chưa có cấu hình lịch cho ngày/buổi này”.
+- Trong màn hình cấu hình phạm vi áp dụng môn học, đổi “Thêm cấu hình” thành “Thiết lập phạm vi áp dụng” ở heading form và “Thiết lập phạm vi” ở nút mở form.
+- Trong màn hình sổ điểm, rút gọn hướng dẫn chọn môn học bằng cách bỏ cụm “khi được cấp quyền”.
 
 ### Menu và route Student
 
@@ -85,6 +92,13 @@ Ngày: 07/09/2026
 - Menu/route: `FE/src/services/studentNavigation.ts`, `FE/src/router/index.ts`, `FE/src/router/index.spec.ts`, `FE/src/views/AuthenticatedV2ShellView.vue`, `FE/src/views/AuthenticatedV2ShellView.spec.ts`, `FE/src/views/LoginView.vue`, `FE/src/views/LoginView.spec.ts`.
 - Workspace học sinh và thành phần dùng chung: `FE/src/views/Student*.vue`, `FE/src/components/Student*.vue`, các test tương ứng, `FE/src/utils/studentUiMessage.ts`, `FE/src/locales/vi.ts`, `FE/src/main.ts`, `FE/.storybook/preview.ts`, `AuthenticatedLayout`, `EmptyState`, `TranscriptStatusCard`, `TranscriptAnnualTable`.
 - Nội dung giao diện: `AttendanceHistoryPanel.vue`, các view academic/enrollment/attendance/scorebook/transcript liên quan.
+- Popup năm học: `FE/src/components/AcademicYearDialog.vue`.
+- Popup trạng thái học kỳ: `FE/src/components/SemesterStatusDialog.vue`.
+- Popup tạo học kỳ: `FE/src/components/SemesterDialog.vue`.
+- Popup khối/lớp: `FE/src/components/GradeDialog.vue`, `FE/src/components/SchoolClassDialog.vue`.
+- Màn hình điểm danh: `FE/src/views/AttendanceWorkspaceView.vue`.
+- Cấu hình phạm vi áp dụng môn học: `FE/src/components/SubjectApplicabilityDialog.vue`, `FE/src/components/SubjectApplicabilityTable.vue`.
+- Header trạng thái sổ điểm: `FE/src/components/ScorebookStatusHeader.vue`.
 - Chuyển lớp: `TransferScoreAssistDialog.vue`, `.spec.ts`, `.stories.ts`, `EnrollmentListView.vue`, `.spec.ts`.
 - Teacher read-only: `AuthenticatedV2ShellView.vue`, router, các view/table Lớp, Môn học, Quản lí môn học các lớp và test liên quan.
 - Copy bổ sung: `TeacherDetailDialog.vue`, `ClassSubjectDialog.vue`.
@@ -121,6 +135,21 @@ Ngày: 07/09/2026
 | Focused Vitest điểm danh; `npm run lint` | PASS, 8/8 tests |
 | Focused Vitest `LoginView` + router | PASS, 61/61 tests |
 | `npm run build` (FE) | PASS |
+| Focused Vitest `AcademicYearDialog.spec.ts` | PASS, 2/2 tests |
+| `npm run lint` và `npm run build` sau amendment popup năm học | PASS |
+| Kiểm tra ba chuỗi copy được yêu cầu xóa trong `AcademicYearDialog.vue` | PASS; không còn kết quả |
+| `npm run build-storybook` sau amendment popup trạng thái học kỳ | PASS; có cảnh báo bundle/package |
+| Kiểm tra các copy cũ trong `SemesterStatusDialog.vue` | PASS; không còn kết quả |
+| `npm run lint` và `npm run build` sau amendment popup tạo học kỳ | PASS |
+| Kiểm tra note lifecycle trong `SemesterDialog.vue` | PASS; không còn kết quả |
+| Focused test `SemesterDialog` | NOT RUN; chưa có spec riêng |
+| Focused Vitest `AttendanceWorkspaceView.spec.ts` | PASS, 8/8 tests |
+| Kiểm tra ba copy mới trong các popup khối/lớp và màn hình điểm danh | PASS; không còn kết quả |
+| Focused Vitest `SubjectApplicabilityDialog.spec.ts` | PASS, 2/2 tests |
+| `npm run lint`, `npm run build` và `npm run build-storybook` sau amendment copy phạm vi áp dụng | PASS; Storybook có cảnh báo bundle/package |
+| Focused Vitest `ScorebookStatusHeader.spec.ts` | PASS, 2/2 tests |
+| `npm run lint` và `npm run build` sau amendment copy sổ điểm | PASS |
+| Focused Vitest `SemesterListView.spec.ts` | FAIL, 2/2 tests; baseline `SemesterListView`/mock không thuộc amendment |
 | Backend focused Gradle test cho hai dịch vụ cấu hình | PASS |
 | `./gradlew test checkstyleMain pmdMain build` | FAIL tại PMD baseline: 75 violations test và sau khi tách dịch vụ còn 5 violations main; focused test backend PASS |
 | Browser visual QA và live mutation | NOT RUN |
