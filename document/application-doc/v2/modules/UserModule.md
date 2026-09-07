@@ -13,7 +13,7 @@ GET  /api/v1/auth/account
 POST /api/v1/auth/logout
 ```
 
-Authentication dùng JWT stateless. Frontend lưu access token và UI-safe user summary trong `sessionStorage`, không lưu password/password hash.
+Authentication dùng JWT stateless. Frontend lưu access token và UI-safe user summary trong `localStorage` để dùng chung giữa các tab cùng origin, không lưu password/password hash. Phiên cũ trong `sessionStorage` được chuyển khi đọc lần đầu; logout ngăn khôi phục phiên cũ. Thay đổi phiên từ tab khác làm tab hiện tại tải lại. Phiên có thể tồn tại sau khi đóng trình duyệt; backend kiểm tra hiệu lực JWT. Login chỉ yêu cầu mật khẩu không rỗng, không giới hạn 6–15 ký tự ở FE; validation đăng ký giữ nguyên.
 
 ## Quy tắc xử lý phiên
 

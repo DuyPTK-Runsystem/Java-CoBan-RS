@@ -101,6 +101,7 @@ NNN-short-topic-yyyy-mm-dd.md
 |   067 | BE/FE/Doc      | [Actual Permission Matrix and FE Remaining Plans Audit](../be/workflow-skill/067-actual-permission-matrix-and-fe-remaining-plans-audit-2026-09-04.md)                 | Completed; documentation audit PASS                                                                                                          | 2026-09-04 |
 |   068 | BE/FE          | [Student legacy to V2 remediation](../fe/student/068-student-v2-migration-workspace-2026-09-05.md)                                         | Amendment removed Student Gender and teacher Gender/User display; FE + browser QA PASS; BE PMD/build remains outside-scope baseline        | 2026-09-06 |
 |   069 | BE/FE          | [Mid-semester transfer score assist](../fe/enrollment/069-mid-semester-transfer-score-assist-ui-2026-09-07.md)                                | Fixed `hasExistingScores` FE/BE contract mismatch; regression test, lint, build and Storybook build PASS                                    | 2026-09-07 |
+|   070 | FE | [Login Password & Shared Session](../fe/user-auth/070-login-password-shared-session-2026-09-07.md) | Implemented; lint/build/Storybook PASS; tests/coverage NOT RUN theo yêu cầu; browser QA NOT RUN | 2026-09-07 |
 
 Plan 057 PMD follow-up (2026-09-03): backend `test`, Checkstyle, PMD and `build` have been rerun after the approved refactor; PMD is PASS with 0 violations.
 
@@ -121,5 +122,3 @@ Plan 053.2 (2026-09-04): Academic Catalog Statistics & Capacity Warning Display 
 Plan 057.3 (2026-09-04): Bulk Score Entry Decimal Rounding Fix — Completed; fixed issue where entering scores with multiple decimals (.47 / 8.47) rounded on UI (.5 / 8.5) but retained raw value in model/request; added rounding on blur and pre-save/toRequest in `BulkScoreEntryDialog.vue` and `ScoreEntryDialog.vue`; FE tests (75 test files, 322 tests passed), lint, and build PASS.
 
 Plan/Audit 067 (2026-09-04): Actual Permission Matrix và FE Remaining Plans được kiểm toán và đồng bộ 100% dựa trên mã nguồn thực tế (27 RestControllers, 132 endpoints, chuẩn hóa 132 URL liên kết Linux, cập nhật router/sidebar v2, phân loại khoảng cách tồn tại và khoảng cách đã giải quyết, xác nhận duy nhất Plan 064 còn lại trên FE roadmap).
-
-

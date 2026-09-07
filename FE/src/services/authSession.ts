@@ -15,17 +15,40 @@ function isUserSummary(value: unknown): value is UserSummary {
     && (user.roles === undefined || (Array.isArray(user.roles) && user.roles.every((role) => typeof role === 'string')))
 }
 
-export function getAuthSession(): AuthSession | null {
-  const accessToken = sessionStorage.getItem(ACCESS_TOKEN_KEY)
-  const serializedUser = sessionStorage.getItem(USER_KEY)
-  if (!accessToken || !serializedUser) {
-    return null
-  }
+// A single record keeps token and account changes atomic across tabs.
+export const AUTH_SESSION_KEY = 'student-management.auth-session'
 
+function clearLegacySession(): void {
+  sessionStorage.removeItem(ACCESS_TOKEN_KEY)
+  sessionStorage.removeItem(USER_KEY)
+}
+
+export function getAuthSession(): AuthSession | null {
+  const serializedSession = localStorage.getItem(AUTH_SESSION_KEY)
   try {
-    const user: unknown = JSON.parse(serializedUser)
-    if (isUserSummary(user)) {
-      return { accessToken, user }
+    if (serializedSession !== null) {
+      clearLegacySession()
+      const session: unknown = JSON.parse(serializedSession)
+      if (session === null) return null
+      if (typeof session === 'object' && session !== null
+        && 'accessToken' in session && typeof session.accessToken === 'string' && session.accessToken
+        && 'user' in session && isUserSummary(session.user)) {
+        return { accessToken: session.accessToken, user: session.user }
+      }
+    } else {
+      const accessToken = sessionStorage.getItem(ACCESS_TOKEN_KEY)
+      const serializedUser = sessionStorage.getItem(USER_KEY)
+      if (accessToken && serializedUser) {
+        const user: unknown = JSON.parse(serializedUser)
+        if (isUserSummary(user)) {
+          const session = { accessToken, user }
+          saveAuthSession(session)
+          return session
+        }
+      } else {
+        clearLegacySession()
+        return null
+      }
     }
   } catch {
     // Treat corrupted browser state as signed out.
@@ -36,13 +59,21 @@ export function getAuthSession(): AuthSession | null {
 }
 
 export function saveAuthSession(session: AuthSession): void {
-  sessionStorage.setItem(ACCESS_TOKEN_KEY, session.accessToken)
-  sessionStorage.setItem(USER_KEY, JSON.stringify(session.user))
+  localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session))
+  clearLegacySession()
 }
 
 export function clearAuthSession(): void {
-  sessionStorage.removeItem(ACCESS_TOKEN_KEY)
-  sessionStorage.removeItem(USER_KEY)
+  // Keep a signed-out marker so an old tab cannot restore its legacy session.
+  localStorage.setItem(AUTH_SESSION_KEY, 'null')
+  clearLegacySession()
+}
+
+export function syncAuthSession(event: StorageEvent): boolean {
+  if (event.storageArea !== localStorage
+    || (event.key !== AUTH_SESSION_KEY && event.key !== null)) return false
+  clearLegacySession()
+  return true
 }
 
 export function hasAuthenticatedSession(): boolean {

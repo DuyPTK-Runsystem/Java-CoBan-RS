@@ -33,9 +33,6 @@ function validate(): boolean {
     errors.userName = 'User name must be 20 characters or fewer.'
   }
   errors.password = values.password ? undefined : 'Password is required.'
-  if (!errors.password && (values.password.length < 6 || values.password.length > 15)) {
-    errors.password = 'Password must be between 6 and 15 characters.'
-  }
   return !errors.userName && !errors.password
 }
 

@@ -5,8 +5,13 @@ import Aura from '@primevue/themes/aura'
 
 import App from './App.vue'
 import router from './router'
+import { syncAuthSession } from './services/authSession'
 import './styles.css'
 import 'primeicons/primeicons.css'
+
+window.addEventListener('storage', (event) => {
+  if (syncAuthSession(event)) window.location.reload()
+})
 
 const app = createApp(App)
 

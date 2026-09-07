@@ -33,7 +33,7 @@ export const ValidationError: Story = {
     errorMessage: 'Please review the highlighted login fields.',
     initialValues: {
       userName: '',
-      password: 'short',
+      password: '',
     },
   },
 }
