@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dev Note"
+  short_description: "Write implementation notes after approved work."
+  default_prompt: "Create or update the Dev Note for this project task."

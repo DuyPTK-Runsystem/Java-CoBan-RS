@@ -1,0 +1,4 @@
+interface:
+  display_name: "Postman Collection"
+  short_description: "Create or update Postman collections."
+  default_prompt: "Create or update the Postman collection for this project."

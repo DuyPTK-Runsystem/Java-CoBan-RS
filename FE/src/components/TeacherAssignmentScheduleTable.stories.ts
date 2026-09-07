@@ -1,0 +1,2 @@
+import type { Meta, StoryObj } from '@storybook/vue3'; import TeacherAssignmentScheduleTable from './TeacherAssignmentScheduleTable.vue'
+const meta = { title: 'Assignment/TeacherAssignmentScheduleTable', component: TeacherAssignmentScheduleTable, args: { assignments: [] } } satisfies Meta<typeof TeacherAssignmentScheduleTable>; export default meta; type Story = StoryObj<typeof meta>; export const Empty: Story = {}

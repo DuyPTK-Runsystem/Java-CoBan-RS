@@ -1,0 +1,4 @@
+interface:
+  display_name: "Before Backend Report"
+  short_description: "Verify backend checks before reporting"
+  default_prompt: "Use $before-backend-report to verify the backend before reporting."

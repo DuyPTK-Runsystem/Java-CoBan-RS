@@ -1,0 +1,4 @@
+interface:
+  display_name: "Unit Test Implementation"
+  short_description: "Implement tests and measure coverage"
+  default_prompt: "Use $unit-test-immpl to implement backend unit tests and coverage."

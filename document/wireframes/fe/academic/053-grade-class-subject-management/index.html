@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plan 053 — Khối, lớp, môn học & lớp-môn</title>
+  <style>
+    :root {
+      --bg: #f7f9fc;
+      --surface: #ffffff;
+      --surface-soft: #f0f4fa;
+      --text: #162033;
+      --muted: #64748b;
+      --line: #dbe3ef;
+      --primary: #4f46e5;
+      --primary-soft: #eef2ff;
+      --success: #087f5b;
+      --success-soft: #e6f7ef;
+      --warning: #a16207;
+      --warning-soft: #fff7df;
+      --danger: #b42318;
+      --danger-soft: #fff0ee;
+      --shadow: 0 12px 30px rgb(15 23 42 / 7%);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      min-width: 320px;
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      font: 14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 64px;
+      padding: 0 28px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .brand-mark {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: 10px;
+      color: #fff;
+      background: var(--primary);
+      font-size: 12px;
+    }
+    .header-actions { display: flex; align-items: center; gap: 16px; color: var(--muted); }
+    .body { display: flex; min-height: calc(100vh - 64px); }
+    .sidebar {
+      width: 252px;
+      flex: 0 0 252px;
+      padding: 24px 16px;
+      border-right: 1px solid var(--line);
+      background: var(--surface);
+    }
+    .sidebar-title { margin: 0 12px 12px; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    .nav { display: grid; gap: 6px; }
+    .nav button, .screen-tabs button, .subtabs button {
+      border: 0;
+      color: inherit;
+      background: transparent;
+      text-align: left;
+    }
+    .nav button {
+      padding: 11px 12px;
+      border-radius: 8px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .nav button.active { color: var(--primary); background: var(--primary-soft); }
+    .content { width: min(100%, 1320px); margin: 0 auto; padding: 30px; }
+    .eyebrow { margin: 0 0 4px; color: var(--primary); font-size: 12px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+    .heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: 28px; line-height: 1.2; }
+    h2 { font-size: 18px; line-height: 1.3; }
+    h3 { font-size: 15px; }
+    .muted { color: var(--muted); }
+    .heading-actions, .toolbar, .action-row, .inline-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .button {
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--text);
+      background: var(--surface);
+      font-weight: 600;
+    }
+    .button.primary { border-color: var(--primary); color: #fff; background: var(--primary); }
+    .button.text { border-color: transparent; color: var(--primary); background: transparent; }
+    .button.danger { color: var(--danger); background: var(--danger-soft); }
+    .surface { margin-bottom: 18px; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow); }
+    .screen-tabs { display: flex; gap: 4px; margin-bottom: 18px; padding: 4px; border-radius: 10px; background: var(--surface-soft); }
+    .screen-tabs button { padding: 10px 14px; border-radius: 8px; color: var(--muted); font-weight: 600; }
+    .screen-tabs button.active { color: var(--primary); background: var(--surface); box-shadow: 0 2px 8px rgb(15 23 42 / 8%); }
+    .subtabs { display: flex; gap: 18px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
+    .subtabs button { padding: 0 0 10px; color: var(--muted); font-weight: 600; }
+    .subtabs button.active { border-bottom: 2px solid var(--primary); color: var(--primary); }
+    .filters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; gap: 12px; align-items: end; }
+    .field { display: grid; gap: 5px; }
+    .field label { color: var(--muted); font-size: 12px; font-weight: 700; }
+    input, select, textarea { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 7px; color: var(--text); background: var(--surface); }
+    textarea { min-height: 74px; resize: vertical; }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .stat { padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-soft); }
+    .stat span { display: block; color: var(--muted); font-size: 12px; }
+    .stat strong { display: block; margin-top: 4px; font-size: 24px; }
+    .warning { display: flex; gap: 10px; margin-bottom: 18px; padding: 12px 14px; border-left: 3px solid #eab308; color: var(--warning); background: var(--warning-soft); }
+    .warning strong { display: block; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; min-width: 760px; border-collapse: collapse; }
+    th, td { padding: 12px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+    th { color: var(--muted); font-size: 12px; font-weight: 700; }
+    .primary-cell { display: grid; gap: 2px; }
+    .primary-cell small { color: var(--muted); }
+    .tag { display: inline-flex; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .tag.success { color: var(--success); background: var(--success-soft); }
+    .tag.warning { display: inline-flex; margin: 0; padding: 4px 8px; border: 0; color: var(--warning); background: var(--warning-soft); }
+    .tag.neutral { color: var(--muted); background: var(--surface-soft); }
+    .tag.danger { color: var(--danger); background: var(--danger-soft); }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .note { margin-top: 14px; color: var(--muted); font-size: 12px; }
+    .modal-backdrop { display: none; position: fixed; inset: 0; z-index: 5; place-items: center; padding: 20px; background: rgb(15 23 42 / 40%); }
+    .modal-backdrop.open { display: grid; }
+    .modal { width: min(100%, 620px); max-height: calc(100vh - 40px); overflow: auto; padding: 22px; border-radius: 14px; background: var(--surface); box-shadow: 0 20px 60px rgb(15 23 42 / 24%); }
+    .modal.large { width: min(100%, 760px); }
+    .modal-head, .modal-foot { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .modal-head { margin-bottom: 18px; }
+    .modal-foot { justify-content: flex-end; margin-top: 20px; }
+    .close { border: 0; color: var(--muted); background: transparent; font-size: 20px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .wide { grid-column: 1 / -1; }
+    .selection-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 12px; border-radius: 8px; background: var(--primary-soft); }
+    .selection-strip span { display: block; color: var(--muted); font-size: 12px; }
+    .selection-strip strong { display: block; margin-top: 2px; }
+    @media (max-width: 980px) {
+      .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 700px) {
+      .header { padding: 0 16px; }
+      .header-actions span { display: none; }
+      .body { display: block; }
+      .sidebar { width: 100%; padding: 10px 16px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .sidebar-title { display: none; }
+      .nav { display: flex; overflow-x: auto; }
+      .nav button { white-space: nowrap; }
+      .content { padding: 22px 16px; }
+      .heading { display: grid; }
+      .heading-actions { justify-content: stretch; }
+      .heading-actions .button { flex: 1; }
+      .filters, .form-grid, .selection-strip { grid-template-columns: 1fr; }
+      .wide { grid-column: auto; }
+      .screen-tabs { overflow-x: auto; }
+      .screen-tabs button { white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="brand"><span class="brand-mark">AC</span><span>Academic Core</span></div>
+      <div class="header-actions"><span>Đăng nhập: office.demo</span><button class="button text" type="button">Đăng xuất</button></div>
+    </header>
+    <div class="body">
+      <aside class="sidebar" aria-label="Điều hướng">
+        <p class="sidebar-title">Workspace</p>
+        <nav class="nav">
+          <button type="button">Năm học & học kỳ</button>
+          <button class="active" type="button">Khối, lớp & môn học</button>
+          <button type="button">Học sinh</button>
+        </nav>
+      </aside>
+      <main class="content">
+        <p class="eyebrow">Academic catalog · Plan 053</p>
+        <div class="heading">
+          <div><h1>Khối, lớp & môn học</h1><p class="muted">Quản lý cấu trúc học vụ và gán môn theo lớp/học kỳ</p></div>
+          <div class="heading-actions"><button class="button primary" type="button" data-open="grade">+ Thêm khối</button><button class="button" type="button" data-open="subject">+ Thêm môn</button></div>
+        </div>
+
+        <div class="screen-tabs" role="tablist" aria-label="Nhóm màn hình">
+          <button class="active" type="button" data-screen="grades">Khối & lớp</button>
+          <button type="button" data-screen="subjects">Môn học</button>
+          <button type="button" data-screen="class-subjects">Gán môn cho lớp</button>
+        </div>
+
+        <section class="screen active" data-panel="grades">
+          <div class="stats">
+            <div class="stat"><span>Khối đang dùng</span><strong>4</strong></div>
+            <div class="stat"><span>Lớp active</span><strong>16</strong></div>
+            <div class="stat"><span>HS active</span><strong>612</strong></div>
+            <div class="stat"><span>Cảnh báo sĩ số</span><strong>2</strong></div>
+          </div>
+          <div class="surface">
+            <div class="subtabs"><button class="active" type="button" data-subtab="grade-table">Khối</button><button type="button" data-subtab="class-table">Lớp</button></div>
+            <div data-subpanel="grade-table">
+              <div class="toolbar" style="justify-content: space-between; margin-bottom: 14px"><div><h2>Danh sách khối</h2><p class="muted">Metadata dùng chung, không suy luận từ tên lớp</p></div><button class="button primary" type="button" data-open="grade">+ Thêm khối</button></div>
+              <div class="table-wrap"><table><thead><tr><th>Khối</th><th>Mã</th><th>Khối tiếp theo</th><th>Thống kê theo năm học</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+                <tr><td><div class="primary-cell"><strong>Khối 6</strong><small>Cấp 6 · thứ tự 1</small></div></td><td>GRADE_6</td><td>Khối 7</td><td>4 lớp · 154 HS</td><td><span class="tag success">Đang dùng</span></td><td><button class="button text" type="button" data-open="grade">Sửa</button></td></tr>
+                <tr><td><div class="primary-cell"><strong>Khối 7</strong><small>Cấp 7 · thứ tự 2</small></div></td><td>GRADE_7</td><td>Khối 8</td><td>4 lớp · 150 HS</td><td><span class="tag success">Đang dùng</span></td><td><button class="button text" type="button" data-open="grade">Sửa</button></td></tr>
+                <tr><td><div class="primary-cell"><strong>Khối 9</strong><small>Cấp 9 · thứ tự 4</small></div></td><td>GRADE_9</td><td>—</td><td>4 lớp · 152 HS</td><td><span class="tag success">Đang dùng</span></td><td><button class="button text" type="button" data-open="grade">Sửa</button></td></tr>
+              </tbody></table></div>
+              <p class="note">* Số lớp/sĩ số trong wireframe là dữ liệu minh họa; cần backend contract thống kê trước khi triển khai thật.</p>
+            </div>
+            <div data-subpanel="class-table" hidden>
+              <div class="toolbar" style="justify-content: space-between; margin-bottom: 14px"><div><h2>Danh sách lớp</h2><p class="muted">Lọc theo năm học, khối và trạng thái</p></div><button class="button primary" type="button" data-open="class">+ Thêm lớp</button></div>
+              <div class="filters" style="margin-bottom: 18px"><div class="field"><label>Năm học</label><select><option>2026–2027</option></select></div><div class="field"><label>Khối</label><select><option>Tất cả khối</option></select></div><div class="field"><label>Trạng thái</label><select><option>Tất cả</option></select></div><div class="field"><label>Tìm lớp</label><input placeholder="Mã hoặc tên lớp"></div><button class="button" type="button">Lọc</button></div>
+              <div class="warning"><span aria-hidden="true">⚠</span><div><strong>2 lớp lệch sĩ số quá 20% so với trung bình khối</strong><span> Cảnh báo không chặn thao tác. Xem chi tiết ở cột sĩ số.</span></div></div>
+              <div class="table-wrap"><table><thead><tr><th>Lớp</th><th>Khối</th><th>Sĩ số / sức chứa</th><th>So với TB khối</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+                <tr><td><div class="primary-cell"><strong>6A1</strong><small>Lớp chọn A</small></div></td><td>Khối 6</td><td>41 / 35</td><td><span class="tag warning">+26% · Cảnh báo</span></td><td><span class="tag success">ACTIVE</span></td><td><button class="button text" type="button" data-open="class">Sửa</button></td></tr>
+                <tr><td><div class="primary-cell"><strong>6A2</strong><small>—</small></div></td><td>Khối 6</td><td>38 / 40</td><td><span class="tag success">Trong ngưỡng</span></td><td><span class="tag success">ACTIVE</span></td><td><button class="button text" type="button" data-open="class">Sửa</button></td></tr>
+                <tr><td><div class="primary-cell"><strong>9A4</strong><small>—</small></div></td><td>Khối 9</td><td>25 / 40</td><td><span class="tag warning">−24% · Cảnh báo</span></td><td><span class="tag neutral">PLANNED</span></td><td><button class="button text" type="button" data-open="class">Sửa</button></td></tr>
+              </tbody></table></div>
+              <p class="note">Lớp CLOSED chuyển sang chế độ chỉ xem. Warning sĩ số không phải lỗi validation.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" data-panel="subjects">
+          <div class="surface">
+            <div class="toolbar" style="justify-content: space-between; margin-bottom: 14px"><div><h2>Danh sách môn học</h2><p class="muted">Loại môn và phạm vi áp dụng được lưu theo wire contract</p></div><button class="button primary" type="button" data-open="subject">+ Thêm môn</button></div>
+            <div class="filters" style="margin-bottom: 18px"><div class="field"><label>Tìm môn</label><input placeholder="Mã hoặc tên môn"></div><div class="field"><label>Loại môn</label><select><option>Tất cả</option><option>ACADEMIC</option><option>SKILL</option></select></div><div class="field"><label>Phạm vi</label><select><option>Tất cả</option><option>GRADE</option><option>CLASS</option></select></div><div class="field"><label>Trạng thái</label><select><option>Tất cả</option><option>ACTIVE</option><option>INACTIVE</option></select></div><button class="button" type="button">Lọc</button></div>
+            <div class="table-wrap"><table><thead><tr><th>Môn học</th><th>Loại</th><th>Phạm vi áp dụng</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+              <tr><td><div class="primary-cell"><strong>Toán</strong><small>MAT · Môn chính khóa</small></div></td><td><span class="tag success">ACADEMIC</span></td><td>GRADE · Khối</td><td><span class="tag success">ACTIVE</span></td><td><div class="action-row"><button class="button text" type="button" data-open="subject">Sửa</button><button class="button text" type="button" data-open="applicability">Cấu hình áp dụng</button></div></td></tr>
+              <tr><td><div class="primary-cell"><strong>Kỹ năng sống</strong><small>SKL · Optional</small></div></td><td><span class="tag neutral">SKILL</span></td><td>CLASS · Lớp</td><td><span class="tag success">ACTIVE</span></td><td><div class="action-row"><button class="button text" type="button" data-open="subject">Sửa</button><button class="button text" type="button" data-open="applicability">Cấu hình áp dụng</button></div></td></tr>
+              <tr><td><div class="primary-cell"><strong>Âm nhạc</strong><small>MUS · Đã ngừng dùng</small></div></td><td><span class="tag success">ACADEMIC</span></td><td>GRADE · Khối</td><td><span class="tag danger">INACTIVE</span></td><td><button class="button text" type="button" data-open="subject">Xem</button></td></tr>
+            </tbody></table></div>
+            <p class="note">Không dùng `NORMAL`; wire value của subject type là `ACADEMIC` hoặc `SKILL`.</p>
+          </div>
+        </section>
+
+        <section class="screen" data-panel="class-subjects">
+          <div class="surface">
+            <div class="toolbar" style="justify-content: space-between; margin-bottom: 14px"><div><h2>Môn học của lớp</h2><p class="muted">Chọn đủ năm học, lớp và học kỳ trước khi tải dữ liệu</p></div><button class="button primary" type="button" data-open="class-subject">+ Thêm môn cho lớp</button></div>
+            <div class="selection-strip" style="margin-bottom: 18px"><div><span>Năm học</span><strong>2026–2027</strong></div><div><span>Lớp</span><strong>6A1 · Khối 6</strong></div><div><span>Học kỳ</span><strong>HK1 · ACTIVE</strong></div></div>
+            <div class="table-wrap"><table><thead><tr><th>Môn học</th><th>Loại</th><th>Học kỳ</th><th>Trạng thái lớp-môn</th><th></th></tr></thead><tbody>
+              <tr><td><div class="primary-cell"><strong>Toán</strong><small>MAT · subjectId 101</small></div></td><td><span class="tag success">ACADEMIC</span></td><td>HK1</td><td><span class="tag success">ACTIVE</span></td><td><button class="button text" type="button" data-open="class-subject">Đổi trạng thái</button></td></tr>
+              <tr><td><div class="primary-cell"><strong>Kỹ năng sống</strong><small>SKL · subjectId 108</small></div></td><td><span class="tag neutral">SKILL</span></td><td>HK1</td><td><span class="tag neutral">INACTIVE</span></td><td><button class="button text" type="button" data-open="class-subject">Đổi trạng thái</button></td></tr>
+            </tbody></table></div>
+            <p class="note">Nếu môn chưa có applicability cho lớp/khối + học kỳ, backend trả `409`; UI giữ context và hướng về cấu hình applicability.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" data-modal="grade" role="dialog" aria-modal="true" aria-labelledby="grade-title">
+    <div class="modal"><div class="modal-head"><div><h2 id="grade-title">Chỉnh sửa khối</h2><p class="muted">Metadata khối dùng chung</p></div><button class="close" type="button" data-close aria-label="Đóng">×</button></div><div class="form-grid"><div class="field"><label for="grade-code">Mã khối</label><input id="grade-code" value="GRADE_6"></div><div class="field"><label for="grade-level">Cấp</label><select id="grade-level"><option>6</option><option>7</option><option>8</option><option>9</option></select></div><div class="field"><label for="grade-name">Tên khối</label><input id="grade-name" value="Khối 6"></div><div class="field"><label for="grade-order">Thứ tự hiển thị</label><input id="grade-order" type="number" value="1"></div><div class="field"><label for="next-grade">Khối tiếp theo</label><select id="next-grade"><option>Khối 7</option><option>Không có</option></select></div><div class="field"><label for="grade-active">Trạng thái</label><select id="grade-active"><option>active=true · Đang dùng</option><option>active=false · Ngừng dùng</option></select></div><div class="field wide"><label for="grade-description">Mô tả</label><textarea id="grade-description">Khối đầu cấp THCS</textarea></div></div><div class="modal-foot"><button class="button" type="button" data-close>Hủy</button><button class="button primary" type="button" data-close>Lưu khối</button></div></div>
+  </div>
+
+  <div class="modal-backdrop" data-modal="class" role="dialog" aria-modal="true" aria-labelledby="class-title">
+    <div class="modal"><div class="modal-head"><div><h2 id="class-title">Tạo lớp học</h2><p class="muted">Lớp thuộc đúng một năm học và một khối</p></div><button class="close" type="button" data-close aria-label="Đóng">×</button></div><div class="form-grid"><div class="field"><label>Năm học</label><select><option>2026–2027</option></select></div><div class="field"><label>Khối</label><select><option>Khối 6</option></select></div><div class="field"><label>Mã lớp</label><input value="6A1"></div><div class="field"><label>Tên lớp</label><input value="Lớp chọn A"></div><div class="field"><label>Sức chứa dự kiến</label><input type="number" value="35"></div><div class="field"><label>Trạng thái</label><select><option>PLANNED</option><option>ACTIVE</option></select></div></div><div class="modal-foot"><button class="button" type="button" data-close>Hủy</button><button class="button primary" type="button" data-close>Lưu lớp</button></div></div>
+  </div>
+
+  <div class="modal-backdrop" data-modal="subject" role="dialog" aria-modal="true" aria-labelledby="subject-title">
+    <div class="modal"><div class="modal-head"><div><h2 id="subject-title">Chỉnh sửa môn học</h2><p class="muted">Loại môn quyết định cách domain tính điểm; FE không tự tính kết quả</p></div><button class="close" type="button" data-close aria-label="Đóng">×</button></div><div class="form-grid"><div class="field"><label>Mã môn</label><input value="MAT"></div><div class="field"><label>Tên môn</label><input value="Toán"></div><div class="field"><label>Loại môn</label><select><option>ACADEMIC</option><option>SKILL</option></select></div><div class="field"><label>Phạm vi áp dụng</label><select><option>GRADE</option><option>CLASS</option></select></div><div class="field"><label>Trạng thái</label><select><option>ACTIVE</option><option>INACTIVE</option></select></div></div><div class="modal-foot"><button class="button" type="button" data-close>Hủy</button><button class="button primary" type="button" data-close>Lưu môn</button></div></div>
+  </div>
+
+  <div class="modal-backdrop" data-modal="applicability" role="dialog" aria-modal="true" aria-labelledby="applicability-title">
+    <div class="modal"><div class="modal-head"><div><h2 id="applicability-title">Cấu hình phạm vi áp dụng</h2><p class="muted">Toán · `applicationScope = GRADE`</p></div><button class="close" type="button" data-close aria-label="Đóng">×</button></div><div class="form-grid"><div class="field wide"><label>Học kỳ</label><select><option>HK1 · 2026–2027</option><option>HK2 · 2026–2027</option></select></div><div class="field"><label>Scope type</label><select><option>GRADE</option><option>CLASS</option></select></div><div class="field"><label>Khối áp dụng</label><select><option>Khối 6</option><option>Khối 7</option></select></div></div><div class="warning" style="margin-top: 16px"><span aria-hidden="true">ⓘ</span><div><strong>Chưa có API tải lại danh sách applicability</strong><span> Sau khi lưu, chỉ hiển thị kết quả create từ backend.</span></div></div><div class="modal-foot"><button class="button" type="button" data-close>Hủy</button><button class="button primary" type="button" data-close>Lưu cấu hình</button></div></div>
+  </div>
+
+  <div class="modal-backdrop" data-modal="class-subject" role="dialog" aria-modal="true" aria-labelledby="class-subject-title">
+    <div class="modal"><div class="modal-head"><div><h2 id="class-subject-title">Gán môn cho lớp</h2><p class="muted">6A1 · HK1 · 2026–2027</p></div><button class="close" type="button" data-close aria-label="Đóng">×</button></div><div class="field"><label>Môn học ACTIVE đã được áp dụng</label><select><option>Toán · MAT · ACADEMIC</option><option>Kỹ năng sống · SKL · SKILL</option></select></div><div class="field" style="margin-top: 14px"><label>Trạng thái lớp-môn</label><select><option>ACTIVE</option></select></div><p class="note">Nếu chưa cấu hình applicability, thao tác sẽ nhận `409` và giữ nguyên màn hình để sửa context.</p><div class="modal-foot"><button class="button" type="button" data-close>Hủy</button><button class="button primary" type="button" data-close>Lưu lớp-môn</button></div></div>
+  </div>
+
+  <script>
+    const tabButtons = document.querySelectorAll('[data-screen]')
+    const panels = document.querySelectorAll('[data-panel]')
+    tabButtons.forEach((button) => button.addEventListener('click', () => {
+      tabButtons.forEach((item) => item.classList.toggle('active', item === button))
+      panels.forEach((panel) => panel.classList.toggle('active', panel.dataset.panel === button.dataset.screen))
+    }))
+
+    const subButtons = document.querySelectorAll('[data-subtab]')
+    const subPanels = document.querySelectorAll('[data-subpanel]')
+    subButtons.forEach((button) => button.addEventListener('click', () => {
+      subButtons.forEach((item) => item.classList.toggle('active', item === button))
+      subPanels.forEach((panel) => { panel.hidden = panel.dataset.subpanel !== button.dataset.subtab })
+    }))
+
+    const closeAll = () => document.querySelectorAll('.modal-backdrop.open').forEach((modal) => modal.classList.remove('open'))
+    document.querySelectorAll('[data-open]').forEach((button) => button.addEventListener('click', () => {
+      closeAll()
+      document.querySelector(`[data-modal="${button.dataset.open}"]`).classList.add('open')
+    }))
+    document.querySelectorAll('[data-close]').forEach((button) => button.addEventListener('click', closeAll))
+    document.querySelectorAll('.modal-backdrop').forEach((modal) => modal.addEventListener('click', (event) => {
+      if (event.target === modal) modal.classList.remove('open')
+    }))
+  </script>
+</body>
+</html>

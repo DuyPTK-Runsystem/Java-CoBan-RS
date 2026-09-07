@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lombok Usage"
+  short_description: "Guide Lombok annotations in Spring Boot code."
+  default_prompt: "Apply the project Lombok annotation guidance."

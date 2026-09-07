@@ -1,0 +1,114 @@
+# Handoff Report - Milestone 1: Navigation, Routing & Shell V2 Integration
+
+**Agent**: worker_m1_1  
+**Milestone**: Milestone 1 (Navigation, Routing & Shell V2 Integration)  
+**Date**: 2026-09-04T09:57:00Z  
+**Type**: Hard Handoff (Task Completed)  
+
+---
+
+## 1. Observation
+
+- **`FE/src/views/LoginView.vue`**:
+  - Initial state:
+    - Line 17: `const successRedirect = ref('/students')`
+    - Line 23: Fallback in `safeRedirect()` was `'/students'`
+  - Modified state:
+    - Line 17: `const successRedirect = ref('/v2')`
+    - Line 23: Fallback in `safeRedirect()` is `'/v2'`
+- **`FE/src/router/index.ts`**:
+  - Initial state:
+    - Top-level `/students`, `/students/new`, `/students/:studentId/edit` registered directly with standalone components.
+    - `/v2` children did not have student subroutes.
+    - Line 160: Guard `if (to.meta.guestOnly && authenticated) { return { name: 'students' } }`
+  - Modified state:
+    - Registered child routes under `/v2` (`AuthenticatedV2ShellView`):
+      - `/v2/students` (`v2-students`) -> `StudentListView.vue`
+      - `/v2/students/new` (`v2-student-create`) -> `StudentFormView.vue`
+      - `/v2/students/:studentId` (`v2-student-detail`) -> `StudentDetailPlaceholder`
+      - `/v2/students/:studentId/edit` (`v2-student-edit`) -> `StudentFormView.vue`
+    - Legacy route paths (`/students`, `/students/new`, `/students/:studentId/edit`) redirect to corresponding `/v2/students*` routes.
+    - Guard `router.beforeEach`: `if (to.meta.guestOnly && authenticated) { return '/v2' }`.
+- **`FE/src/views/AuthenticatedV2ShellView.vue`**:
+  - Initial state: Sidebar menu did not include student profile item.
+  - Modified state:
+    - Added "Hồ sơ học sinh" with icon `pi pi-user`, `to: '/v2/students'` placed immediately after "Xếp lớp" (`/v2/enrollments`).
+    - Visible exclusively for `isNonStudent` (`ADMIN`, `ACADEMIC_OFFICE`, `TEACHER`), hidden for `STUDENT`.
+    - Active state: `active: Boolean(route?.path?.startsWith('/v2/students'))`.
+- **`FE/src/components/AuthenticatedLayout.vue`**:
+  - Line 27: Updated brand logo link from `to="/students"` to `to="/v2"`.
+- **Unit & Integration Test Execution**:
+  - `npm --prefix FE run test -- --run`:
+    - Output: `Test Files 79 passed (79)`, `Tests 401 passed (401)`, duration: `26.76s`, 100% PASS.
+  - `npm --prefix FE run build`:
+    - Output: `vue-tsc --noEmit && vite build` exited with code 0 in 4.24s, 0 TypeScript errors.
+  - ESLint verification on all modified files:
+    - Output: `npx eslint src/views/LoginView.vue src/views/LoginView.spec.ts src/router/index.ts src/router/index.spec.ts src/views/AuthenticatedV2ShellView.vue src/views/AuthenticatedV2ShellView.spec.ts src/components/AuthenticatedLayout.vue` exited with code 0 (0 errors, 0 warnings).
+
+---
+
+## 2. Logic Chain
+
+1. **Post-login Redirect**:
+   - `LoginView.vue` initializes `successRedirect` with `ref('/v2')` and falls back to `'/v2'` in `safeRedirect()`.
+   - `router.beforeEach` prevents authenticated users from landing on guest routes (`/login`, `/register`) by returning `'/v2'`.
+   - Result: Users always land in the V2 unified workspace at `/v2` rather than legacy `/students`.
+2. **Student Subtree Integration**:
+   - Registering `students`, `students/new`, `students/:studentId`, and `students/:studentId/edit` inside the children of `/v2` ensures they are rendered inside `AuthenticatedV2ShellView` and inherit auth guards (`requiresAuth: true`, `module: 'v2'`, `shell: 'authenticated'`).
+   - Legacy URLs `/students`, `/students/new`, and `/students/:studentId/edit` are preserved via redirection to their `/v2` equivalents, preventing 404s for bookmarked URLs while transitioning the frontend to V2.
+   - `StudentDetailPlaceholder` provides a valid Vue component placeholder for `/v2/students/:studentId` so TypeScript builds pass cleanly prior to Milestone 4 implementing `StudentDetailView.vue`.
+3. **Sidebar V2 Integration & Role Scoping**:
+   - "Hồ sơ học sinh" (`pi pi-user`, `/v2/students`) is injected into the navigation items when `isNonStudent` evaluates to true (`ADMIN`, `ACADEMIC_OFFICE`, `TEACHER`).
+   - When a user with only `STUDENT` role logs in, `isNonStudent` is false, and the item is omitted from the sidebar.
+   - `active: Boolean(route?.path?.startsWith('/v2/students'))` ensures the item highlights correctly when on `/v2/students` or any of its subpaths (`/v2/students/new`, `/v2/students/:studentId`, `/v2/students/:studentId/edit`).
+4. **Header Brand Navigation**:
+   - The logo brand link in `AuthenticatedLayout.vue` routes users to `/v2`, aligning header home navigation with the V2 shell.
+
+---
+
+## 3. Caveats
+
+- `FE/src/views/StudentDetailView.vue` is scheduled for Milestone 4 (Student Detail 4-Tab Workspace). In Milestone 1, route `/v2/students/:studentId` connects to `StudentDetailPlaceholder` so that routing and shell integration are functional and testable without premature M4 view code.
+- 2 ESLint unused-variable warnings exist in test files generated by the parallel track (`tier3-cross-feature-combinations.spec.ts`, `tier4-real-world-scenarios.spec.ts`), which are outside Milestone 1 write boundaries. All Milestone 1 files have 0 lint violations.
+
+---
+
+## 4. Conclusion
+
+All requirements for Milestone 1 (Navigation, Routing & Shell V2 Integration) are fully and genuinely implemented:
+1. Login redirects default and fallback to `/v2`.
+2. Router `guestOnly` guard redirects authenticated users to `/v2`.
+3. All student routes are registered under `/v2` with redirects from legacy paths.
+4. "Hồ sơ học sinh" with icon `pi pi-user` is integrated in Shell V2 navigation for `ADMIN`, `ACADEMIC_OFFICE`, and `TEACHER`, hidden from `STUDENT`, with active state synchronization.
+5. Brand logo link points to `/v2`.
+6. 100% of unit and integration tests pass (401/401 tests across 79 test files). TypeScript compilation and production build succeed cleanly.
+
+---
+
+## 5. Verification Method
+
+To independently verify the implementation:
+
+1. **Run Full Vitest Suite**:
+   ```bash
+   npm --prefix FE run test -- --run
+   ```
+   *Expected result*: 79/79 test files pass, 401/401 tests pass.
+
+2. **Run Milestone 1 Specific Tests**:
+   ```bash
+   npm --prefix FE run test -- src/views/LoginView.spec.ts src/router/index.spec.ts src/views/AuthenticatedV2ShellView.spec.ts src/components/AuthenticatedLayout.spec.ts
+   ```
+   *Expected result*: All 4 test files pass (46/46 tests).
+
+3. **Run TypeScript Check & Build**:
+   ```bash
+   npm --prefix FE run build
+   ```
+   *Expected result*: Exit code 0, 0 TypeScript errors.
+
+4. **Verify ESLint on Milestone 1 Files**:
+   ```bash
+   npx --prefix FE eslint src/views/LoginView.vue src/views/LoginView.spec.ts src/router/index.ts src/router/index.spec.ts src/views/AuthenticatedV2ShellView.vue src/views/AuthenticatedV2ShellView.spec.ts src/components/AuthenticatedLayout.vue
+   ```
+   *Expected result*: Exit code 0, 0 errors, 0 warnings.

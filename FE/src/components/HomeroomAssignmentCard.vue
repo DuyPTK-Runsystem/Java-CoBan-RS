@@ -1,0 +1,10 @@
+<script setup lang="ts">
+import Button from 'primevue/button'
+import StatusTag from '@/components/StatusTag.vue'
+import type { HomeroomAssignment } from '@/types/assignment'
+import type { Teacher } from '@/types/teacher'
+const props = withDefaults(defineProps<{ assignment?: HomeroomAssignment | null; teachers?: Teacher[]; readOnly?: boolean }>(), { assignment: null, teachers: () => [], readOnly: false })
+const emit = defineEmits<{ assign: []; replace: [assignment: HomeroomAssignment]; end: [assignment: HomeroomAssignment]; history: [] }>()
+function teacherName(id: number): string { const teacher = props.teachers.find((item) => item.id === id); return teacher ? `${teacher.teacherCode} - ${teacher.teacherName}` : `Giáo viên #${id}` }
+</script>
+<template><section class="content-surface assignment-card"><div class="section-heading"><div><h2>Phân công giáo viên chủ nhiệm</h2><p class="section-caption">Một lớp chỉ có một GVCN đang hoạt động tại một thời điểm.</p></div><StatusTag v-if="props.assignment" label="ACTIVE" severity="success" /></div><div v-if="props.assignment" class="assignment-current"><div><strong>{{ teacherName(props.assignment.teacherId) }}</strong><span>Hiệu lực từ {{ props.assignment.validFrom.split('-').reverse().join('/') }}{{ props.assignment.validTo ? ` đến ${props.assignment.validTo.split('-').reverse().join('/')}` : '' }}</span></div><div class="table-actions"><Button icon="pi pi-history" text rounded aria-label="Xem lịch sử GVCN" title="Xem lịch sử" @click="emit('history')" /><Button v-if="!props.readOnly" icon="pi pi-sync" text rounded severity="warn" aria-label="Thay đổi GVCN" title="Thay đổi GVCN" @click="emit('replace', props.assignment)" /><Button v-if="!props.readOnly" icon="pi pi-stop" text rounded severity="danger" aria-label="Kết thúc phân công GVCN" title="Kết thúc phân công" @click="emit('end', props.assignment)" /></div></div><div v-else class="assignment-empty"><span>Chưa có GVCN đang hoạt động.</span><Button v-if="!props.readOnly" label="Phân công GVCN" icon="pi pi-plus" @click="emit('assign')" /></div></section></template>

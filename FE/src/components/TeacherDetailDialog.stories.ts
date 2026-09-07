@@ -1,0 +1,2 @@
+import type { Meta, StoryObj } from '@storybook/vue3'; import TeacherDetailDialog from './TeacherDetailDialog.vue'
+const meta = { title: 'Teacher/TeacherDetailDialog', component: TeacherDetailDialog, args: { visible: true, teacher: { id: 1, userId: null, teacherCode: 'GV001', teacherName: 'Nguyễn Văn An', dateOfBirth: '1985-05-15', gender: 'Nam', phone: null, email: null, department: 'Toán', joinDate: null, status: 'ACTIVE' as const } } } satisfies Meta<typeof TeacherDetailDialog>; export default meta; type Story = StoryObj<typeof meta>; export const Details: Story = {}

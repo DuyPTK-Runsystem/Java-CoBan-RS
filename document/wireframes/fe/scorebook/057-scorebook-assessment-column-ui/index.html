@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wireframe Plan 057 — Scorebook & Assessment Column UI</title>
+  <style>
+    :root {
+      --ink: #182230;
+      --muted: #667085;
+      --line: #dfe4ea;
+      --surface: #ffffff;
+      --canvas: #f4f6f8;
+      --nav: #17212b;
+      --nav-soft: #263443;
+      --primary: #176b87;
+      --primary-soft: #e6f4f8;
+      --success: #18794e;
+      --success-soft: #e9f7ef;
+      --warning: #9a6700;
+      --warning-soft: #fff7d6;
+      --danger: #b42318;
+      --danger-soft: #ffefed;
+      --violet: #6941c6;
+      --shadow: 0 8px 24px rgba(20, 32, 50, .08);
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--canvas); font: 14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    button, select, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; display: grid; grid-template-columns: 236px minmax(0, 1fr); }
+    .sidebar { padding: 24px 16px; color: #eef4f8; background: var(--nav); }
+    .brand { display: flex; gap: 11px; align-items: center; padding: 0 10px 24px; font-weight: 800; }
+    .brand-mark { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: white; background: var(--primary); }
+    .nav-label { margin: 20px 10px 8px; color: #8fa2b5; font-size: 11px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+    .nav-item { display: flex; gap: 10px; align-items: center; padding: 11px 12px; margin: 3px 0; border-radius: 9px; color: #c8d4df; }
+    .nav-item.active { color: white; background: var(--nav-soft); box-shadow: inset 3px 0 var(--primary); }
+    .main { min-width: 0; }
+    .topbar { height: 64px; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; background: var(--surface); border-bottom: 1px solid var(--line); }
+    .breadcrumb { color: var(--muted); font-size: 13px; }
+    .user { display: flex; align-items: center; gap: 9px; }
+    .avatar { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--violet); font-weight: 800; }
+    .page { max-width: 1540px; margin: 0 auto; padding: 28px; }
+    .heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 20px; }
+    .eyebrow { margin: 0 0 5px; color: var(--primary); font-weight: 800; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: 27px; letter-spacing: -.02em; }
+    h2 { margin: 0; font-size: 17px; }
+    p { margin: 4px 0 0; }
+    .caption { color: var(--muted); }
+    .demo-control { display: flex; gap: 9px; align-items: end; }
+    .field { display: grid; gap: 6px; min-width: 155px; }
+    label { font-size: 12px; font-weight: 700; color: #475467; }
+    select, input, textarea { width: 100%; padding: 9px 10px; border: 1px solid #cfd7df; border-radius: 8px; background: white; color: var(--ink); }
+    textarea { min-height: 80px; resize: vertical; }
+    .surface { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .context { padding: 18px; margin-bottom: 18px; }
+    .section-head { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; margin-bottom: 15px; }
+    .context-grid { display: grid; grid-template-columns: repeat(4, minmax(150px, 1fr)) auto; gap: 12px; align-items: end; }
+    .btn { border: 1px solid transparent; border-radius: 8px; padding: 9px 13px; font-weight: 750; background: var(--primary); color: white; }
+    .btn.secondary { color: #344054; background: white; border-color: #cfd7df; }
+    .btn.ghost { color: var(--primary); background: var(--primary-soft); }
+    .btn.danger { color: var(--danger); background: white; border-color: #f3b7b1; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .scorebook-head { display: flex; justify-content: space-between; gap: 20px; align-items: center; padding: 17px 18px; margin-bottom: 18px; }
+    .identity { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 5px 9px; font-size: 12px; font-weight: 800; }
+    .badge.open { color: var(--success); background: var(--success-soft); }
+    .badge.draft { color: var(--warning); background: var(--warning-soft); }
+    .badge.neutral { color: #475467; background: #eef1f4; }
+    .actions { display: flex; gap: 9px; flex-wrap: wrap; }
+    .tabs { display: flex; gap: 5px; padding: 5px; width: fit-content; margin-bottom: 14px; background: #e9edf1; border-radius: 10px; }
+    .tab { padding: 9px 14px; border: 0; border-radius: 7px; color: #475467; background: transparent; font-weight: 750; }
+    .tab.active { color: var(--primary); background: white; box-shadow: 0 2px 8px rgba(20, 32, 50, .09); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .notice { padding: 12px 14px; margin-bottom: 14px; display: flex; gap: 10px; border-radius: 9px; border: 1px solid; }
+    .notice.warning { color: #6f4a00; background: var(--warning-soft); border-color: #efd98d; }
+    .notice.error { color: #8f1d14; background: var(--danger-soft); border-color: #f5b8b2; }
+    .notice.info { color: #17556b; background: var(--primary-soft); border-color: #a8d6e3; }
+    .grid-shell { overflow: hidden; }
+    .grid-toolbar { padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; min-width: 1040px; border-collapse: collapse; }
+    th, td { padding: 11px 12px; border-bottom: 1px solid #e7ebef; text-align: left; white-space: nowrap; }
+    th { color: #475467; background: #f8fafb; font-size: 12px; }
+    th.group { text-align: center; border-left: 1px solid var(--line); }
+    td.sticky, th.sticky { position: sticky; left: 0; z-index: 2; background: white; }
+    th.sticky { background: #f8fafb; }
+    td.student { min-width: 220px; }
+    .student-code { color: var(--muted); font-size: 12px; }
+    .cell-btn { width: 100%; min-width: 72px; padding: 8px 9px; border: 1px solid #d5dce3; border-radius: 7px; background: white; color: var(--ink); font-weight: 750; }
+    .cell-btn:hover { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(23,107,135,.1); }
+    .cell-btn.missing { color: #98a2b3; font-weight: 650; border-style: dashed; }
+    .cell-btn.absent { color: var(--danger); background: var(--danger-soft); border-color: #f3c1bc; }
+    .cell-btn.exempt { color: var(--violet); background: #f0ebff; border-color: #d9cdfc; }
+    .cell-btn.cancelled { color: #667085; background: #eef1f4; text-decoration: line-through; }
+    .paging { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; color: var(--muted); }
+    .pager-buttons { display: flex; gap: 6px; }
+    .pager-buttons button { width: 34px; height: 34px; border: 1px solid #cfd7df; border-radius: 7px; background: white; }
+    .pager-buttons button.active { color: white; background: var(--primary); border-color: var(--primary); }
+    .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .card { padding: 15px; }
+    .card .value { margin-top: 5px; font-size: 22px; font-weight: 850; }
+    .column-panel { overflow: hidden; }
+    .column-panel .section-head { padding: 17px 18px 0; }
+    .column-actions { display: flex; gap: 7px; }
+    .link-btn { border: 0; background: transparent; color: var(--primary); font-weight: 750; padding: 5px; }
+    .link-btn.danger-link { color: var(--danger); }
+    .state { display: none; padding: 48px 24px; text-align: center; }
+    .state.visible { display: block; }
+    .state-icon { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; background: #eef1f4; font-size: 21px; }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 20; display: none; place-items: center; padding: 20px; background: rgba(12, 20, 30, .55); }
+    .modal-backdrop.open { display: grid; }
+    .modal { width: min(560px, 100%); max-height: calc(100vh - 40px); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; border-radius: 14px; background: white; box-shadow: 0 24px 72px rgba(0,0,0,.26); }
+    .modal.wide { width: min(760px, 100%); }
+    .modal-head, .modal-foot { padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .modal-head { border-bottom: 1px solid var(--line); }
+    .modal-foot { border-top: 1px solid var(--line); justify-content: flex-end; }
+    .modal-body { padding: 18px; overflow-y: auto; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .wide-field { grid-column: 1 / -1; }
+    .close { width: 34px; height: 34px; border: 0; border-radius: 50%; background: #eef1f4; font-size: 20px; }
+    .hint { color: var(--muted); font-size: 12px; }
+    .bulk-table { min-width: 0; }
+    .bulk-table input, .bulk-table select { padding: 7px 8px; }
+    .conflict-box { display: none; }
+    body.demo-conflict .conflict-box { display: flex; }
+    body.demo-empty .normal-content, body.demo-forbidden .normal-content { display: none; }
+    body.demo-empty .empty-state, body.demo-forbidden .forbidden-state { display: block; }
+    @media (max-width: 1050px) {
+      .app { grid-template-columns: 76px minmax(0, 1fr); }
+      .sidebar { padding: 20px 10px; }
+      .brand span:last-child, .nav-item span:last-child, .nav-label { display: none; }
+      .brand, .nav-item { justify-content: center; }
+      .context-grid { grid-template-columns: repeat(2, minmax(150px, 1fr)); }
+      .context-grid .btn { min-height: 39px; }
+    }
+    @media (max-width: 700px) {
+      .app { display: block; }
+      .sidebar { display: none; }
+      .topbar { padding: 0 16px; }
+      .page { padding: 18px 14px; }
+      .heading, .scorebook-head, .grid-toolbar { align-items: stretch; flex-direction: column; }
+      .demo-control { align-items: stretch; }
+      .context-grid, .cards, .form-grid { grid-template-columns: 1fr; }
+      .wide-field { grid-column: auto; }
+      .tabs { width: 100%; overflow-x: auto; }
+      .tab { flex: 1 0 auto; }
+      .paging { align-items: flex-start; gap: 12px; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">S</span><span>School Admin</span></div>
+      <div class="nav-label">Học vụ</div>
+      <div class="nav-item"><span>▦</span><span>Năm học & học kỳ</span></div>
+      <div class="nav-item"><span>◎</span><span>Lớp & môn học</span></div>
+      <div class="nav-item"><span>♙</span><span>Phân công</span></div>
+      <div class="nav-item"><span>✓</span><span>Điểm danh</span></div>
+      <div class="nav-item active"><span>▤</span><span>Sổ điểm</span></div>
+      <div class="nav-label">Báo cáo</div>
+      <div class="nav-item"><span>◫</span><span>Bảng điểm</span></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="breadcrumb">Học vụ / Sổ điểm / Toán 8A1</div>
+        <div class="user"><span class="caption">nguyen.van.a</span><span class="avatar">NA</span></div>
+      </header>
+
+      <div class="page">
+        <div class="heading">
+          <div>
+            <p class="eyebrow">Scorebook workspace</p>
+            <h1>Sổ điểm & cột đánh giá</h1>
+            <p class="caption">Quản lý cấu trúc cột và nhập điểm theo đúng lớp, môn và học kỳ.</p>
+          </div>
+          <div class="demo-control">
+            <div class="field">
+              <label for="demo-state">Trạng thái demo</label>
+              <select id="demo-state">
+                <option value="normal">Bình thường</option>
+                <option value="empty">Chưa có scorebook</option>
+                <option value="forbidden">403 — Không đủ quyền</option>
+                <option value="conflict">409 — Version conflict</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <section class="surface context">
+          <div class="section-head">
+            <div><h2>Context sổ điểm</h2><p class="caption">Chọn đủ context trước khi tải hoặc tạo scorebook.</p></div>
+            <span class="badge neutral">classSubjectId: 721</span>
+          </div>
+          <div class="context-grid">
+            <div class="field"><label>Năm học</label><select><option>2026–2027</option></select></div>
+            <div class="field"><label>Học kỳ</label><select><option>Học kỳ I</option></select></div>
+            <div class="field"><label>Lớp</label><select><option>8A1</option><option>8A2</option></select></div>
+            <div class="field"><label>Môn / lớp</label><select><option>Toán · ACADEMIC</option><option>Tin học · SKILL</option></select></div>
+            <button class="btn">Tải sổ điểm</button>
+          </div>
+        </section>
+
+        <div class="notice error conflict-box"><strong>409:</strong><span>Điểm đã được người khác cập nhật. Dữ liệu mới nhất đã được tải lại; vui lòng kiểm tra trước khi lưu tiếp.</span></div>
+
+        <section class="surface scorebook-head normal-content">
+          <div class="identity">
+            <div><h2>Toán · Lớp 8A1</h2><p class="caption">Scorebook #125 · HK I · 2026–2027</p></div>
+            <span class="badge open">● OPEN</span>
+            <span class="badge neutral">6 cột active</span>
+          </div>
+          <div class="actions">
+            <button class="btn secondary" disabled>Mở sổ</button>
+            <button class="btn" data-open="publish-modal">Công bố điểm</button>
+          </div>
+        </section>
+
+        <section class="surface state empty-state">
+          <div class="state-icon">▤</div><h2>Chưa có scorebook cho context này</h2>
+          <p class="caption">Giáo vụ có thể tạo scorebook từ class-subject đã chọn.</p>
+          <button class="btn" style="margin-top:14px">Tạo scorebook</button>
+        </section>
+        <section class="surface state forbidden-state">
+          <div class="state-icon">!</div><h2>Bạn không có quyền truy cập sổ điểm này</h2>
+          <p class="caption">Phiên đăng nhập vẫn được giữ. Backend assignment scope là nguồn quyết định cuối cùng.</p>
+          <button class="btn secondary" style="margin-top:14px">Chọn context khác</button>
+        </section>
+
+        <div class="normal-content">
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-tab="scores">Bảng điểm</button>
+            <button class="tab" data-tab="columns">Cấu hình cột <span class="badge draft" style="margin-left:5px">1 cảnh báo</span></button>
+          </div>
+
+          <section id="scores" class="panel active">
+            <div class="notice info"><strong>Quy ước:</strong><span>Ô “Chưa nhập” không phải điểm 0. Điểm 0.0 là dữ liệu hợp lệ. FE không tính điểm trung bình chính thức.</span></div>
+            <div class="surface grid-shell">
+              <div class="grid-toolbar">
+                <div><h2>Danh sách điểm học sinh</h2><p class="caption">Trang 1/4 · 10 trên 36 học sinh</p></div>
+                <div class="actions"><button class="btn secondary">Làm mới</button><button class="btn" data-open="bulk-modal">Nhập hàng loạt</button></div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr><th class="sticky" rowspan="2">Học sinh</th><th class="group" colspan="3">KTTT · hệ số 1</th><th class="group" colspan="2">KTĐK · hệ số 2</th><th class="group" colspan="1">KTCK · hệ số 3</th></tr>
+                    <tr><th>Miệng 1</th><th>15 phút</th><th>KTTT 3</th><th>Giữa kỳ</th><th>Dự án</th><th>Cuối kỳ</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td class="sticky student"><strong>Nguyễn Minh An</strong><div class="student-code">HS0001</div></td><td><button class="cell-btn" data-open="score-modal">8.0</button></td><td><button class="cell-btn">0.0</button></td><td><button class="cell-btn missing">Chưa nhập</button></td><td><button class="cell-btn">7.5</button></td><td><button class="cell-btn exempt">Miễn</button></td><td><button class="cell-btn missing">Chưa nhập</button></td></tr>
+                    <tr><td class="sticky student"><strong>Trần Gia Bảo</strong><div class="student-code">HS0002</div></td><td><button class="cell-btn">9.0</button></td><td><button class="cell-btn">8.5</button></td><td><button class="cell-btn">7.0</button></td><td><button class="cell-btn absent">Vắng</button></td><td><button class="cell-btn">8.0</button></td><td><button class="cell-btn missing">Chưa nhập</button></td></tr>
+                    <tr><td class="sticky student"><strong>Lê Hoàng Chi</strong><div class="student-code">HS0003</div></td><td><button class="cell-btn">6.5</button></td><td><button class="cell-btn missing">Chưa nhập</button></td><td><button class="cell-btn cancelled">Hủy</button></td><td><button class="cell-btn">7.0</button></td><td><button class="cell-btn">8.0</button></td><td><button class="cell-btn missing">Chưa nhập</button></td></tr>
+                    <tr><td class="sticky student"><strong>Phạm Anh Dũng</strong><div class="student-code">HS0004</div></td><td><button class="cell-btn">7.0</button></td><td><button class="cell-btn">7.5</button></td><td><button class="cell-btn missing">Chưa nhập</button></td><td><button class="cell-btn">6.5</button></td><td><button class="cell-btn">7.0</button></td><td><button class="cell-btn missing">Chưa nhập</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="paging"><span>Hiển thị 1–10 trong 36 học sinh · 10 hàng/trang</span><div class="pager-buttons"><button>‹</button><button class="active">1</button><button>2</button><button>3</button><button>4</button><button>›</button></div></div>
+            </div>
+          </section>
+
+          <section id="columns" class="panel">
+            <div class="notice warning"><strong>Cấu trúc chưa hoàn chỉnh:</strong><span>KTCK đã đủ 1 cột; KTĐK đã đủ tối thiểu 1 cột. Một cột KTTT đang chờ đặt tên. Backend sẽ kiểm tra lần cuối khi publish.</span></div>
+            <div class="cards">
+              <div class="surface card"><span class="caption">KTTT · hệ số 1</span><div class="value">3 cột</div><span class="badge open">Không giới hạn</span></div>
+              <div class="surface card"><span class="caption">KTĐK · hệ số 2</span><div class="value">2 cột</div><span class="badge open">Đạt tối thiểu</span></div>
+              <div class="surface card"><span class="caption">KTCK · hệ số 3</span><div class="value">1 cột</div><span class="badge open">Đúng cấu trúc</span></div>
+            </div>
+            <div class="surface column-panel">
+              <div class="section-head"><div><h2>Assessment columns</h2><p class="caption">Thứ tự và loại cột do backend response quyết định.</p></div><button class="btn" data-open="column-modal">+ Thêm cột</button></div>
+              <div class="table-wrap"><table>
+                <thead><tr><th>Loại</th><th>STT cột</th><th>Tên hiển thị</th><th>Hệ số</th><th>Bắt buộc</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="badge neutral">KTTT</span></td><td>1</td><td>Miệng 1</td><td>1</td><td>Không</td><td><span class="badge open">ACTIVE</span></td><td class="column-actions"><button class="link-btn" data-open="column-modal">Sửa</button><button class="link-btn danger-link" data-open="deactivate-modal">Vô hiệu hóa</button></td></tr>
+                  <tr><td><span class="badge neutral">KTTT</span></td><td>2</td><td>15 phút</td><td>1</td><td>Không</td><td><span class="badge open">ACTIVE</span></td><td class="column-actions"><button class="link-btn" data-open="column-modal">Sửa</button><button class="link-btn danger-link">Vô hiệu hóa</button></td></tr>
+                  <tr><td><span class="badge neutral">KTTT</span></td><td>3</td><td><span class="caption">Chưa đặt tên</span></td><td>1</td><td>Không</td><td><span class="badge open">ACTIVE</span></td><td class="column-actions"><button class="link-btn" data-open="column-modal">Sửa</button><button class="link-btn danger-link">Vô hiệu hóa</button></td></tr>
+                  <tr><td><span class="badge neutral">KTĐK</span></td><td>1</td><td>Giữa kỳ</td><td>2</td><td>Có</td><td><span class="badge open">ACTIVE</span></td><td class="column-actions"><button class="link-btn">Sửa</button><button class="link-btn danger-link">Vô hiệu hóa</button></td></tr>
+                  <tr><td><span class="badge neutral">KTCK</span></td><td>1</td><td>Cuối kỳ</td><td>3</td><td>Có</td><td><span class="badge open">ACTIVE</span></td><td class="column-actions"><button class="link-btn">Sửa</button><button class="link-btn danger-link">Vô hiệu hóa</button></td></tr>
+                </tbody>
+              </table></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="score-modal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="score-title">
+      <div class="modal-head"><div><h2 id="score-title">Cập nhật điểm</h2><p class="caption">Nguyễn Minh An · HS0001 · Miệng 1</p></div><button class="close" data-close>×</button></div>
+      <div class="modal-body"><div class="form-grid">
+        <div class="field"><label>Trạng thái</label><select id="score-status"><option>SCORED</option><option>ABSENT</option><option>EXEMPTED</option><option>CANCELLED</option></select></div>
+        <div class="field"><label>Điểm (0–10)</label><input type="number" value="8.0" min="0" max="10" step="0.1"></div>
+        <div class="field wide-field"><label>Ghi chú</label><textarea maxlength="500" placeholder="Tối đa 500 ký tự"></textarea></div>
+        <div class="notice info wide-field" style="margin:0"><span>expectedVersion: <strong>4</strong>. Nếu version đã đổi, API trả 409 và UI tải lại cell.</span></div>
+      </div></div>
+      <div class="modal-foot"><button class="btn secondary" data-close>Hủy</button><button class="btn">Lưu điểm</button></div>
+    </div>
+  </div>
+
+  <div id="bulk-modal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="bulk-title">
+      <div class="modal-head"><div><h2 id="bulk-title">Nhập điểm hàng loạt</h2><p class="caption">Cột: KTTT 3 · 4 học sinh trên trang hiện tại</p></div><button class="close" data-close>×</button></div>
+      <div class="modal-body"><div class="notice warning"><span>Bulk request chỉ gửi các dòng đã thay đổi; không giả định page hiện tại là toàn bộ lớp.</span></div><div class="table-wrap"><table class="bulk-table"><thead><tr><th>Học sinh</th><th>Trạng thái</th><th>Điểm</th><th>Ghi chú</th></tr></thead><tbody>
+        <tr><td>HS0001 · Nguyễn Minh An</td><td><select><option>SCORED</option><option>ABSENT</option></select></td><td><input type="number" min="0" max="10" step="0.1" placeholder="0–10"></td><td><input placeholder="Tùy chọn"></td></tr>
+        <tr><td>HS0002 · Trần Gia Bảo</td><td><select><option>SCORED</option><option>EXEMPTED</option></select></td><td><input type="number" value="7.0"></td><td><input placeholder="Tùy chọn"></td></tr>
+        <tr><td>HS0003 · Lê Hoàng Chi</td><td><select><option>SCORED</option><option>CANCELLED</option></select></td><td><input type="number" value="0.0"></td><td><input value="Điểm 0 hợp lệ"></td></tr>
+      </tbody></table></div></div>
+      <div class="modal-foot"><button class="btn secondary" data-close>Hủy</button><button class="btn">Lưu 3 dòng</button></div>
+    </div>
+  </div>
+
+  <div id="column-modal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="column-title">
+      <div class="modal-head"><div><h2 id="column-title">Thêm cột đánh giá</h2><p class="caption">Scorebook #125 · Toán 8A1</p></div><button class="close" data-close>×</button></div>
+      <div class="modal-body"><div class="form-grid">
+        <div class="field"><label>Loại đánh giá *</label><select><option>KTTT</option><option>KTĐK</option><option>KTCK</option></select><span class="hint">Canonical wire value</span></div>
+        <div class="field"><label>STT cột *</label><input type="number" min="1" value="4"></div>
+        <div class="field wide-field"><label>Tên cột</label><input maxlength="100" placeholder="Ví dụ: Miệng 2"><span class="hint">Tối đa 100 ký tự</span></div>
+      </div></div>
+      <div class="modal-foot"><button class="btn secondary" data-close>Hủy</button><button class="btn">Tạo cột</button></div>
+    </div>
+  </div>
+
+  <div id="deactivate-modal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true"><div class="modal-head"><div><h2>Vô hiệu hóa cột “Miệng 1”?</h2><p class="caption">Cột sẽ không nhận điểm mới. Dữ liệu lịch sử không bị xóa.</p></div><button class="close" data-close>×</button></div><div class="modal-body"><div class="notice warning" style="margin:0"><span>Backend sẽ từ chối nếu lifecycle hoặc dữ liệu hiện tại không cho phép thao tác này.</span></div></div><div class="modal-foot"><button class="btn secondary" data-close>Hủy</button><button class="btn danger">Vô hiệu hóa</button></div></div>
+  </div>
+
+  <div id="publish-modal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true"><div class="modal-head"><div><h2>Công bố sổ điểm?</h2><p class="caption">Toán · 8A1 · Học kỳ I</p></div><button class="close" data-close>×</button></div><div class="modal-body"><div class="notice warning"><span>Backend sẽ kiểm tra cấu trúc cột và điều kiện publish. Ô chưa nhập không được đổi thành 0.</span></div><p>Sau khi công bố, UI chuyển sang read-only theo lifecycle response mới nhất.</p></div><div class="modal-foot"><button class="btn secondary" data-close>Kiểm tra lại</button><button class="btn">Công bố</button></div></div>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll('[data-tab]');
+    tabs.forEach((tab) => tab.addEventListener('click', () => {
+      tabs.forEach((item) => item.classList.toggle('active', item === tab));
+      document.querySelectorAll('.panel').forEach((panel) => panel.classList.toggle('active', panel.id === tab.dataset.tab));
+    }));
+
+    document.querySelectorAll('[data-open]').forEach((trigger) => trigger.addEventListener('click', () => {
+      const modal = document.getElementById(trigger.dataset.open);
+      if (modal) { modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); }
+    }));
+    document.querySelectorAll('[data-close]').forEach((trigger) => trigger.addEventListener('click', () => {
+      const modal = trigger.closest('.modal-backdrop');
+      if (modal) { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); }
+    }));
+    document.querySelectorAll('.modal-backdrop').forEach((backdrop) => backdrop.addEventListener('click', (event) => {
+      if (event.target === backdrop) { backdrop.classList.remove('open'); backdrop.setAttribute('aria-hidden', 'true'); }
+    }));
+
+    document.getElementById('demo-state').addEventListener('change', (event) => {
+      document.body.classList.remove('demo-empty', 'demo-forbidden', 'demo-conflict');
+      if (event.target.value !== 'normal') document.body.classList.add(`demo-${event.target.value}`);
+    });
+  </script>
+</body>
+</html>

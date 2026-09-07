@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty name="logDirectory" source="app.logging.directory" defaultValue="build/logs" scope="context" />
+    <timestamp key="runTimestamp" datePattern="yyyyMMdd-HHmmss-SSS" timeReference="contextBirth" />
+
+    <property name="logPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [%X{requestId:-}] %logger{36} - %msg%n%ex" />
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${logPattern}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="PER_RUN_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${logDirectory}/backend-${runTimestamp}-${PID:-unknown}.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>${logPattern}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="PER_RUN_FILE" />
+    </root>
+</configuration>

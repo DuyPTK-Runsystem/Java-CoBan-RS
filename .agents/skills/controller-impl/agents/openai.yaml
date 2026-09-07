@@ -1,0 +1,14 @@
+interface:
+  display_name: Controller Implementation
+  short_description: Create thin Spring REST controllers
+  default_prompt: Use @controller-impl to create or review a Spring REST controller
+    for this module.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

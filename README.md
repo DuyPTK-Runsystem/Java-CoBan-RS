@@ -1,93 +1,77 @@
-# Java Kaizen
+# Java CoBan
 
+Môi trường Docker bên dưới chạy backend Spring Boot và MySQL. Frontend vẫn được quản lý độc lập trong thư mục `FE/`.
 
+## Điều kiện cần
 
-## Getting started
+- Docker Engine và Docker Compose.
+- Port `3307` còn trống trên máy host. API dùng `8081` mặc định và có thể đổi qua `API_HOST_PORT` trong `docker/.env` khi port này đang được dùng.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Clone và chạy từ Git
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+Clone repository, rồi chuyển vào thư mục vừa clone:
 
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://devops.runsystem.info/virtualgroup/hcm_branch/java-kaizen.git
-git branch -M main
-git push -uf origin main
+```bash
+git clone https://github.com/DuyPTK-Runsystem/Java-CoBan-RS.git
+cd Java-CoBan-RS
 ```
 
-## Integrate with your tools
+## Khởi động bằng Docker
 
-- [ ] [Set up project integrations](http://devops.runsystem.info/virtualgroup/hcm_branch/java-kaizen/-/settings/integrations)
+Tạo file cấu hình local, rồi thay password mẫu bằng một giá trị chỉ dùng tại máy của bạn:
 
-## Collaborate with your team
+```bash
+cp docker/.env.example docker/.env
+```
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+Khởi động backend và MySQL:
 
-## Test and Deploy
+```bash
+docker compose --env-file docker/.env up -d --build
+```
 
-Use the built-in continuous integration in GitLab.
+Kiểm tra health của backend:
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+```bash
+curl http://localhost:8081/actuator/health
+```
 
-***
+Backend được mở tại `http://localhost:${API_HOST_PORT}` (`8081` mặc định). MySQL được map từ port host `3307` tới port `3306` trong container (`3307:3306`), nên kết nối từ máy host dùng:
 
-# Editing this README
+```text
+jdbc:mysql://localhost:3307/java_coban
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+Các container kết nối nội bộ qua `db:3306`; không dùng `localhost:3307` từ container backend.
 
-## Suggestions for a good README
+Mỗi lần `api` khởi động, entrypoint script kiểm tra kết nối MySQL và chạy `CREATE DATABASE IF NOT EXISTS java_coban` trước khi chạy Spring Boot. Vì vậy Docker volume cũ chưa có database này vẫn có thể khởi động, miễn credential trong `docker/.env` hợp lệ.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+## Nạp dữ liệu test batch
 
-## Name
-Choose a self-explaining name for your project.
+Script dưới đây chờ API healthy rồi chạy `document/postman/Java-CoBan-Batch-Test-Data.postman_collection.json` bằng Newman. Collection tạo một test user và 500 Student qua REST API, không insert SQL trực tiếp.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```bash
+./scripts/load-batch-test-data.sh
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Mỗi lần chạy thành công sẽ thêm 500 Student mới. Script không xoá hoặc reset database.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## Theo dõi và dừng môi trường
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+```bash
+docker compose --env-file docker/.env logs -f api db
+docker compose --env-file docker/.env down
+```
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+`down` thông thường vẫn giữ named volume MySQL. Chỉ xoá volume khi bạn chủ động muốn xoá toàn bộ dữ liệu Docker của project:
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+```bash
+docker compose --env-file docker/.env down -v
+```
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+## Xử lý sự cố nhanh
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+- Nếu port `3307` đã được dùng, giải phóng port đó; Docker configuration cố ý không dùng `3306` trên host để tránh xung đột MySQL local.
+- Nếu `8081` đã được dùng, đổi `API_HOST_PORT` trong `docker/.env` (ví dụ `8082`) rồi chạy lại Compose.
+- Nếu API chưa healthy, xem log bằng lệnh `docker compose --env-file docker/.env logs api db`.
+- Không commit `docker/.env`: file này chứa password local.

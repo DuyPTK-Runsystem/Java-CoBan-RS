@@ -1,0 +1,219 @@
+{
+  "info": {
+    "name": "Java CoBan - Batch Export Test Data",
+    "description": "Run this collection with Postman Collection Runner in order: Register, Login, then Add 500 Students (Runner). The last request loops until 500 students are created.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081",
+      "type": "string"
+    },
+    {
+      "key": "testUsername",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testPassword",
+      "value": "BatchPass1",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentTotal",
+      "value": "500",
+      "type": "string"
+    },
+    {
+      "key": "studentStartIndex",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentSequence",
+      "value": "0",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Batch export test-data setup",
+      "description": "Run this folder with Collection Runner. Do not run Add 500 Students manually: request sequencing is handled by postman.setNextRequest.",
+      "item": [
+        {
+          "name": "1. Register test user",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const timestamp = Date.now().toString();",
+                  "pm.collectionVariables.set('testUsername', `batch${timestamp.slice(-12)}`);",
+                  "pm.collectionVariables.set('studentStartIndex', String((Number(timestamp) % 9999500) + 1));",
+                  "pm.collectionVariables.set('studentSequence', '0');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Register returns 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{testUsername}}\",\n  \"password\": \"{{testPassword}}\",\n  \"confirmPassword\": \"{{testPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/v1/auth/register"
+          }
+        },
+        {
+          "name": "2. Login test user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login returns 200', () => pm.response.to.have.status(200));",
+                  "const response = pm.response.json();",
+                  "pm.expect(response.data.access_token).to.be.a('string').and.not.empty;",
+                  "pm.collectionVariables.set('accessToken', response.data.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{testUsername}}\",\n  \"password\": \"{{testPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          }
+        },
+        {
+          "name": "3. Add 500 Students (Runner)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const sequence = Number(pm.collectionVariables.get('studentSequence') || 0);",
+                  "const startIndex = Number(pm.collectionVariables.get('studentStartIndex'));",
+                  "const studentNumber = startIndex + sequence;",
+                  "pm.variables.set('studentCode', `STU${String(studentNumber).padStart(7, '0')}`);",
+                  "pm.variables.set('studentName', `Batch Student ${sequence + 1}`);",
+                  "pm.variables.set('studentAddress', `Batch test address ${sequence + 1}`);",
+                  "pm.variables.set('averageScore', ((sequence % 101) / 10).toFixed(1));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Create student returns 201', () => pm.response.to.have.status(201));",
+                  "const total = Number(pm.collectionVariables.get('studentTotal') || 500);",
+                  "const sequence = Number(pm.collectionVariables.get('studentSequence') || 0);",
+                  "if (sequence + 1 < total) {",
+                  "  pm.collectionVariables.set('studentSequence', String(sequence + 1));",
+                  "  postman.setNextRequest('3. Add 500 Students (Runner)');",
+                  "} else {",
+                  "  pm.collectionVariables.set('studentSequence', String(total));",
+                  "  postman.setNextRequest(null);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentCode\": \"{{studentCode}}\",\n  \"studentName\": \"{{studentName}}\",\n  \"dateOfBirth\": \"2000-01-01\",\n  \"address\": \"{{studentAddress}}\",\n  \"averageScore\": {{averageScore}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/v1/students",
+            "description": "Uses a unique STUxxxxxxx range for this run. The test script schedules this request again until `studentTotal` (default 500) is reached."
+          }
+        }
+      ]
+    }
+  ]
+}

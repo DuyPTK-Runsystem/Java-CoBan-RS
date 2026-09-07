@@ -1,0 +1,4 @@
+interface:
+  display_name: "Unit Test Plan"
+  short_description: "Plan focused backend unit tests"
+  default_prompt: "Use $unit-test-plan to plan tests before backend coding."

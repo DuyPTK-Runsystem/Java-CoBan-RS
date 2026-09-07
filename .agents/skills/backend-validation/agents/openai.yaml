@@ -1,0 +1,4 @@
+interface:
+  display_name: "Backend Validation"
+  short_description: "Run backend quality checks to green"
+  default_prompt: "Use $backend-validation to validate backend changes."
