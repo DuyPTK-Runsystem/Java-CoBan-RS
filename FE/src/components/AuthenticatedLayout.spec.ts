@@ -16,13 +16,13 @@ describe('AuthenticatedLayout', () => {
       },
       slots: { default: '<p>Page content</p>' },
     })
-    expect(wrapper.text()).toContain('Students')
-    expect(wrapper.text()).toContain('Add student')
+    expect(wrapper.text()).toContain('Hồ sơ học sinh')
+    expect(wrapper.text()).toContain('Thêm học sinh')
     expect(wrapper.text()).toContain('Page content')
 
     await wrapper.setProps({ navigation: [{ label: 'Academic years', to: '/v2/academic-years', icon: 'pi pi-calendar' }] })
     expect(wrapper.text()).toContain('Academic years')
-    expect(wrapper.text()).not.toContain('Add student')
+    expect(wrapper.text()).not.toContain('Thêm học sinh')
   })
 
   it('emits logout from the shell action', async () => {

@@ -102,6 +102,7 @@ NNN-short-topic-yyyy-mm-dd.md
 |   068 | BE/FE          | [Student legacy to V2 remediation](../fe/student/068-student-v2-migration-workspace-2026-09-05.md)                                         | Amendment removed Student Gender and teacher Gender/User display; FE + browser QA PASS; BE PMD/build remains outside-scope baseline        | 2026-09-06 |
 |   069 | BE/FE          | [Mid-semester transfer score assist](../fe/enrollment/069-mid-semester-transfer-score-assist-ui-2026-09-07.md)                                | Fixed `hasExistingScores` FE/BE contract mismatch; regression test, lint, build and Storybook build PASS                                    | 2026-09-07 |
 |   070 | FE | [Login Password & Shared Session](../fe/user-auth/070-login-password-shared-session-2026-09-07.md) | Implemented; lint/build/Storybook PASS; tests/coverage NOT RUN theo yêu cầu; browser QA NOT RUN | 2026-09-07 |
+|   071 | BE/FE | [Tinh chỉnh phần mềm](../fe/071-frontend-software-refinements-2026-09-07.md) | UI copy, Student/Teacher authorization UX, chuyển lớp fallback và tự tạo lớp-môn theo Khối; focused tests PASS, full FE/backend baseline failures recorded | 2026-09-07 |
 
 Plan 057 PMD follow-up (2026-09-03): backend `test`, Checkstyle, PMD and `build` have been rerun after the approved refactor; PMD is PASS with 0 violations.
 

@@ -252,11 +252,7 @@ onMounted(async () => {
     <!-- VIEW HEADER -->
     <div class="view-header">
       <div>
-        <p class="eyebrow">Tra cứu bảng điểm · Phân hệ Lớp học & Giáo viên chủ nhiệm</p>
         <h1 class="page-title">Bảng điểm lớp học</h1>
-        <p class="page-caption">
-          Xem bảng điểm theo từng môn học và bảng điểm tổng kết lớp (Học kỳ & Cả năm).
-        </p>
       </div>
       <div>
         <div class="role-badge">
@@ -337,7 +333,7 @@ onMounted(async () => {
         label="BẢNG ĐIỂM THEO MÔN"
         :severity="activeScope === 'SUBJECT' ? 'primary' : 'secondary'"
         :outlined="true"
-        size="small"
+        size="large"
         class="scope-btn"
         role="tab"
         :aria-selected="activeScope === 'SUBJECT'"
@@ -347,7 +343,7 @@ onMounted(async () => {
         label="BẢNG ĐIỂM TỔNG KẾT"
         :severity="activeScope === 'SUMMARY' ? 'primary' : 'secondary'"
         :outlined="true"
-        size="small"
+        size="large"
         class="scope-btn"
         role="tab"
         :aria-selected="activeScope === 'SUMMARY'"
@@ -533,7 +529,7 @@ onMounted(async () => {
 
 .scope-btn {
   font-family: inherit;
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 0.02em;
 }
 
@@ -586,4 +582,3 @@ onMounted(async () => {
   gap: 16px;
 }
 </style>
-

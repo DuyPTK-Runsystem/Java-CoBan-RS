@@ -67,6 +67,11 @@ function mountView() {
     global: {
       stubs: {
         StudentForm: studentFormStub,
+        Dialog: {
+          props: ['visible', 'header'],
+          template: '<section v-if="visible"><h2>{{ header }}</h2><slot /><slot name="footer" /></section>',
+        },
+        Button: { template: '<button><slot /></button>' },
       },
     },
   })
@@ -117,7 +122,7 @@ describe('StudentFormView.vue', () => {
     expect(mocks.push).toHaveBeenCalledWith('/v2/students')
   })
 
-  it('calls createStudentV3 and redirects to /v2/students when provisionAccount is true', async () => {
+  it('shows the returned username after creating a student account', async () => {
     const wrapper = mountView()
     await flushPromises()
 
@@ -134,7 +139,9 @@ describe('StudentFormView.vue', () => {
         password: null,
       }),
     )
-    expect(mocks.push).toHaveBeenCalledWith('/v2/students')
+    expect(wrapper.text()).toContain('Đã cấp tài khoản học sinh')
+    expect(wrapper.text()).toContain('Username: nguyenvanan01')
+    expect(mocks.push).not.toHaveBeenCalledWith('/v2/students')
   })
 
   it('loads student and calls updateStudent when in edit mode', async () => {

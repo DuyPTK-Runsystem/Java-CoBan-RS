@@ -2,7 +2,6 @@
 import { computed, onMounted, ref } from 'vue'
 import Button from 'primevue/button'
 import Select from 'primevue/select'
-import Tag from 'primevue/tag'
 
 import EmptyState from '@/components/EmptyState.vue'
 import FormAlert from '@/components/FormAlert.vue'
@@ -41,9 +40,9 @@ const filterStatus = ref<RetakeExamStatus | undefined>(undefined)
 
 const statusOptions: Array<{ label: string; value: RetakeExamStatus | undefined }> = [
   { label: 'Tất cả trạng thái', value: undefined },
-  { label: 'PLANNED', value: 'PLANNED' },
-  { label: 'SCORED', value: 'SCORED' },
-  { label: 'CANCELLED', value: 'CANCELLED' },
+  { label: 'Chờ nhập điểm', value: 'PLANNED' },
+  { label: 'Đã có điểm', value: 'SCORED' },
+  { label: 'Đã hủy', value: 'CANCELLED' },
 ]
 
 // Pagination & Data states
@@ -78,12 +77,6 @@ const countScored = computed(() =>
 )
 const countCancelled = computed(() =>
   rawItems.value.filter((item) => item.status === 'CANCELLED').length,
-)
-const hasInProgressCalculation = computed(() =>
-  enrichedRows.value.some((row) => row.calculationStatus === 'IN_PROGRESS'),
-)
-const hasFinishedCalculation = computed(() =>
-  enrichedRows.value.some((row) => row.calculationStatus === 'FINISH'),
 )
 
 const studentDropdownOptions = computed(() => [
@@ -331,7 +324,7 @@ async function handleDialogCreate(payload: ReqCreateRetakeExamDTO): Promise<void
     if (isApiError(error, 409)) {
       dialogError.value = extractApiError(
         error,
-        '409 Conflict: Record cùng student/year/subject đã tồn tại hoặc lifecycle không cho phép thao tác.',
+        'Học sinh đã có kỳ thi lại cho năm học và môn học này, hoặc trạng thái hiện tại không cho phép thao tác.',
       )
     } else {
       dialogError.value = extractApiError(error, 'Không thể tạo kỳ thi lại.')
@@ -356,7 +349,7 @@ async function handleDialogScore(
     if (isApiError(error, 409)) {
       dialogError.value = extractApiError(
         error,
-        '409 Conflict: Dữ liệu đã thay đổi hoặc lifecycle không cho phép cập nhật điểm.',
+        'Dữ liệu đã thay đổi hoặc trạng thái hiện tại không cho phép cập nhật điểm.',
       )
     } else {
       dialogError.value = extractApiError(error, 'Không thể lưu điểm thi lại.')
@@ -378,7 +371,7 @@ async function handleDialogCancel(retakeId: number): Promise<void> {
     if (isApiError(error, 409)) {
       dialogError.value = extractApiError(
         error,
-        '409 Conflict: Record đã bị hủy hoặc không được phép hủy ở trạng thái hiện tại.',
+        'Kỳ thi lại đã bị hủy hoặc không thể hủy ở trạng thái hiện tại.',
       )
     } else {
       dialogError.value = extractApiError(error, 'Không thể hủy kỳ thi lại.')
@@ -398,15 +391,11 @@ onMounted(async () => {
   <main class="page content-page" data-testid="retake-view">
     <div class="heading page-heading">
       <div>
-        <div class="eyebrow">Retake result workspace · v2</div>
         <h1>Kết quả thi lại</h1>
-        <p class="caption">
-          Tra cứu, ghi nhận và theo dõi tác động của điểm thi lại lên bảng điểm năm học.
-        </p>
       </div>
       <div class="page-heading-actions">
         <Button
-          label="+ Tạo kỳ thi lại"
+          label="Tạo kỳ thi lại"
           :disabled="pageState === 'forbidden'"
           data-testid="btn-open-create"
           @click="openCreateDialog"
@@ -428,7 +417,6 @@ onMounted(async () => {
       <div class="section-head">
         <div>
           <h2>Bộ lọc</h2>
-          <p class="caption">Filter gửi server-side; mặc định 10 dòng/trang.</p>
         </div>
       </div>
       <div class="context-grid">
@@ -486,14 +474,14 @@ onMounted(async () => {
         </div>
         <div class="filter-actions">
           <Button
-            label="Lọc"
+            label="Tìm kiếm"
             severity="secondary"
             :loading="loading"
             data-testid="btn-filter"
             @click="handleFilter"
           />
           <Button
-            label="Làm mới"
+            label="Xóa bộ lọc"
             severity="secondary"
             icon="pi pi-refresh"
             :loading="loading"
@@ -507,29 +495,21 @@ onMounted(async () => {
     <!-- Summary metrics -->
     <div class="summary-grid">
       <div class="surface metric">
-        <div class="label">Tổng record</div>
+        <div class="label">Tổng số</div>
         <div class="value" data-testid="metric-total">{{ totalElements }}</div>
       </div>
       <div class="surface metric">
-        <div class="label">PLANNED</div>
+        <div class="label">Chờ nhập điểm</div>
         <div class="value" data-testid="metric-planned">{{ countPlanned }}</div>
       </div>
       <div class="surface metric">
-        <div class="label">SCORED</div>
+        <div class="label">Đã có điểm</div>
         <div class="value" data-testid="metric-scored">{{ countScored }}</div>
       </div>
       <div class="surface metric">
-        <div class="label">CANCELLED</div>
+        <div class="label">Đã hủy</div>
         <div class="value" data-testid="metric-cancelled">{{ countCancelled }}</div>
       </div>
-    </div>
-
-    <!-- Contract info note -->
-    <div class="notice info">
-      <strong>Contract:</strong>
-      <span>
-        Tên học sinh/môn trong bảng là display fixture/lookup; API hiện trả numeric IDs. Official after-score đọc từ Transcript API.
-      </span>
     </div>
 
     <!-- List panel -->
@@ -590,7 +570,7 @@ onMounted(async () => {
         <div>
           <h2>Danh sách kỳ thi lại</h2>
           <p class="caption">
-            Trang {{ page + 1 }}/{{ Math.max(totalPages, 1) }} · {{ totalElements }} record.
+            Trang {{ page + 1 }}/{{ Math.max(totalPages, 1) }} · {{ totalElements }} kết quả.
           </p>
         </div>
       </div>
@@ -610,47 +590,6 @@ onMounted(async () => {
         data-testid="retake-pagination"
         @page-change="handlePageChange"
       />
-    </section>
-
-    <!-- Calculation Notes Section -->
-    <section class="surface pad content-surface calculation-section">
-      <div class="section-head">
-        <div>
-          <h2>Ghi chú calculation</h2>
-          <p class="caption">Thông tin minh họa từ Transcript API, không tính tại FE.</p>
-        </div>
-        <Tag
-          v-if="hasInProgressCalculation"
-          value="IN_PROGRESS"
-          severity="warn"
-          data-testid="tag-calculation-progress"
-        />
-        <Tag
-          v-else-if="hasFinishedCalculation"
-          value="FINISH"
-          severity="success"
-          data-testid="tag-calculation-finish"
-        />
-        <Tag
-          v-else
-          value="—"
-          severity="secondary"
-          data-testid="tag-calculation-none"
-        />
-      </div>
-      <div v-if="hasInProgressCalculation" class="notice warn" data-testid="notice-calculation-in-progress">
-        <strong>Đang xử lý:</strong>
-        <span>
-          Kết quả cũ không được đánh dấu là official mới nhất cho tới khi worker hoàn tất. UI có thể refresh status theo read API.
-        </span>
-      </div>
-      <div v-else-if="hasFinishedCalculation" class="notice info" data-testid="notice-calculation-finish">
-        <strong>Hoàn tất:</strong>
-        <span>Điểm chính thức đã được đồng bộ từ bảng điểm cả năm.</span>
-      </div>
-      <div v-else class="notice info">
-        <span>Chưa có tác vụ tính toán nào được ghi nhận cho danh sách hiện tại.</span>
-      </div>
     </section>
 
     <!-- Unified Dialog -->

@@ -6,6 +6,7 @@ import Dialog from 'primevue/dialog'
 
 import LoginForm from '@/components/LoginForm.vue'
 import { clearAuthSession, saveAuthSession } from '@/services/authSession'
+import { firstPermittedWorkspacePath } from '@/services/studentNavigation'
 import { isApiError, login } from '@/services/userApi'
 import type { LoginValues } from '@/types/user'
 
@@ -14,21 +15,16 @@ const submitting = ref(false)
 const popupVisible = ref(false)
 const popupStatus = ref<'success' | 'failure'>('success')
 const popupMessage = ref('')
-const successRedirect = ref('/v2')
-
-function safeRedirect(): string {
-  const redirect = router.currentRoute.value.query.redirect
-  return typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')
-    ? redirect
-    : '/v2'
-}
+const successRedirect = ref('/v2/attendance')
 
 async function handleSubmit(values: LoginValues): Promise<void> {
   submitting.value = true
   try {
     const session = await login(values)
     saveAuthSession(session)
-    successRedirect.value = safeRedirect()
+    // Start each session at the first tab available to its roles. The router
+    // remains the authority for guarding direct URL navigation afterwards.
+    successRedirect.value = firstPermittedWorkspacePath(session.user.roles ?? [])
     popupStatus.value = 'success'
     popupMessage.value = 'Login completed successfully.'
     popupVisible.value = true

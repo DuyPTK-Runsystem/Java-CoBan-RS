@@ -144,6 +144,12 @@ describe('EnrollmentListView', () => {
     await view.submitTransferWithScores({ targetClassId: 102, semesterId: 7, effectiveAt: '2026-08-28T09:00:00', reason: null, scores: [] })
     await flushPromises()
 
-    expect(wrapper.text()).toContain('Đã chuyển STU2600001-Lê Chi từ lớp Lớp 6A1 sang Lớp 6A2 và lưu điểm lớp mới.')
+    expect(mocks.transferEnrollment).toHaveBeenCalledWith('jwt-token', 701, {
+      targetClassId: 102,
+      effectiveAt: '2026-08-28T09:00:00',
+      reason: null,
+    })
+    expect(mocks.transferWithScores).not.toHaveBeenCalled()
+    expect(wrapper.text()).toContain('Đã chuyển STU2600001-Lê Chi từ lớp Lớp 6A1 sang Lớp 6A2.')
   })
 })

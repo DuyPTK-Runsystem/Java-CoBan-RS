@@ -134,7 +134,7 @@ describe('ClassSummaryTranscriptTable.vue', () => {
     expect(wrapper.text()).toContain('2.8')
     expect(wrapper.text()).toContain('(Thi lại: 5.5)')
     expect(wrapper.text()).toContain('6.2') // TBCN
-    expect(wrapper.text()).toContain('Lên lớp sau thi lại')
+    expect(wrapper.text()).not.toContain('Lên lớp sau thi lại')
 
     const btn = wrapper.find('.student-link-btn')
     await btn.trigger('click')
@@ -151,4 +151,3 @@ describe('ClassSummaryTranscriptTable.vue', () => {
     expect(wrapper.text()).toContain('Chưa có dữ liệu học sinh trong lớp')
   })
 })
-

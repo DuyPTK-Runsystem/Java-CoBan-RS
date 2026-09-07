@@ -61,7 +61,7 @@ describe('LoginView status popup', () => {
     clearAuthSession()
   })
 
-  it('stores the session, shows success, and redirects to intended path only after Close', async () => {
+  it('stores the session and redirects to the first permitted tab after Close', async () => {
     await router.push('/login?redirect=/v2/students/new')
     loginMock.mockResolvedValue({
       accessToken: 'jwt-token',
@@ -78,10 +78,10 @@ describe('LoginView status popup', () => {
 
     await (wrapper.vm as unknown as { closePopup: () => Promise<void> }).closePopup()
 
-    expect(router.currentRoute.value.fullPath).toBe('/v2/students/new')
+    expect(router.currentRoute.value.fullPath).toBe('/v2/academic-years')
   })
 
-  it('stores the session and redirects to /v2 fallback when no redirect query is provided', async () => {
+  it('routes a student to the first student tab when no redirect query is provided', async () => {
     await router.push('/login')
     loginMock.mockResolvedValue({
       accessToken: 'jwt-token',
@@ -96,10 +96,10 @@ describe('LoginView status popup', () => {
 
     await (wrapper.vm as unknown as { closePopup: () => Promise<void> }).closePopup()
 
-    expect(router.currentRoute.value.fullPath).toBe('/v2')
+    expect(router.currentRoute.value.fullPath).toBe('/v2/attendance')
   })
 
-  it('falls back to /v2 when redirect query is an unsafe open redirect', async () => {
+  it('still routes to the first permitted tab for an unsafe redirect query', async () => {
     await router.push('/login?redirect=//malicious-site.com')
     loginMock.mockResolvedValue({
       accessToken: 'jwt-token',
@@ -114,7 +114,7 @@ describe('LoginView status popup', () => {
 
     await (wrapper.vm as unknown as { closePopup: () => Promise<void> }).closePopup()
 
-    expect(router.currentRoute.value.fullPath).toBe('/v2')
+    expect(router.currentRoute.value.fullPath).toBe('/v2/attendance')
   })
 
   it('shows a failure popup without saving a session or redirecting', async () => {

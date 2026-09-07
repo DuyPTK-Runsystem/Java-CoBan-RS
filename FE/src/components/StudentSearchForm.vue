@@ -13,9 +13,9 @@ const emit = defineEmits<{ search: [values: StudentSearchValues] }>()
 
 const statusOptions = [
   { label: 'Tất cả trạng thái', value: '' },
-  { label: 'Đang học (ACTIVE)', value: 'ACTIVE' },
-  { label: 'Ngừng học (INACTIVE)', value: 'INACTIVE' },
-  { label: 'Tốt nghiệp (GRADUATED)', value: 'GRADUATED' },
+  { label: 'Đang học', value: 'ACTIVE' },
+  { label: 'Ngừng học', value: 'INACTIVE' },
+  { label: 'Tốt nghiệp', value: 'GRADUATED' },
 ]
 
 const values = reactive<{
@@ -58,15 +58,15 @@ function reset(): void {
 <template>
   <form class="search-grid" @submit.prevent="submit">
     <div class="field-group">
-      <label for="search-student-code">Student code</label>
-      <InputText id="search-student-code" v-model="values.studentCode" maxlength="10" placeholder="Example: STU1234567" />
+      <label for="search-student-code">Mã học sinh</label>
+      <InputText id="search-student-code" v-model="values.studentCode" maxlength="10" placeholder="Ví dụ: STU1234567" />
     </div>
     <div class="field-group">
-      <label for="search-student-name">Student name</label>
-      <InputText id="search-student-name" v-model="values.studentName" maxlength="35" placeholder="Example: John Doe" />
+      <label for="search-student-name">Họ và tên</label>
+      <InputText id="search-student-name" v-model="values.studentName" maxlength="35" placeholder="Ví dụ: Nguyễn Văn An" />
     </div>
     <div class="field-group">
-      <label for="search-date-of-birth">Birthday</label>
+      <label for="search-date-of-birth">Ngày sinh</label>
       <DatePicker id="search-date-of-birth" v-model="values.dateOfBirth" date-format="dd-mm-yy" placeholder="dd-mm-yyyy" show-icon fluid />
     </div>
     <div class="field-group">
@@ -93,8 +93,8 @@ function reset(): void {
       />
     </div>
     <div class="search-actions">
-      <Button class="search-action" type="submit" label="Search" icon="pi pi-search" :loading="loading" />
-      <Button type="button" label="Reset" icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading" @click="reset" />
+      <Button class="search-action" type="submit" label="Tìm kiếm" icon="pi pi-search" :loading="loading" />
+      <Button type="button" label="Đặt lại" icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading" @click="reset" />
     </div>
   </form>
 </template>

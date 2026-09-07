@@ -37,7 +37,7 @@ describe('AuthenticatedV2ShellView.vue', () => {
     clearAuthSession()
   })
 
-  it('shows Transcript tab and hides Class Transcript tab for STUDENT role', () => {
+  it('shows exactly Attendance and Transcript tabs for STUDENT role', () => {
     saveAuthSession({
       accessToken: 'token-stu',
       user: {
@@ -59,6 +59,10 @@ describe('AuthenticatedV2ShellView.vue', () => {
       },
     })
 
+    expect(wrapper.findAll('[data-to]').map((item) => [item.attributes('data-to'), item.text()])).toEqual([
+      ['/v2/attendance', 'Điểm danh'],
+      ['/v2/transcripts', 'Bảng điểm'],
+    ])
     expect(wrapper.find('[data-to="/v2/transcripts"]').exists()).toBe(true)
     expect(wrapper.find('[data-to="/v2/class-transcripts"]').exists()).toBe(false)
   })
@@ -87,6 +91,12 @@ describe('AuthenticatedV2ShellView.vue', () => {
 
     expect(wrapper.find('[data-to="/v2/transcripts"]').exists()).toBe(false)
     expect(wrapper.find('[data-to="/v2/class-transcripts"]').exists()).toBe(true)
+    expect(wrapper.find('[data-to="/v2/academic-years"]').exists()).toBe(false)
+    expect(wrapper.find('[data-to="/v2/academic-catalog/grades"]').exists()).toBe(false)
+    expect(wrapper.find('[data-to="/v2/enrollments"]').exists()).toBe(false)
+    expect(wrapper.find('[data-to="/v2/academic-catalog/classes"]').exists()).toBe(true)
+    expect(wrapper.find('[data-to="/v2/academic-catalog/subjects"]').exists()).toBe(true)
+    expect(wrapper.find('[data-to="/v2/academic-catalog/class-subjects"]').exists()).toBe(true)
   })
 
   it('sets Class Transcript tab active when teacher navigates to /v2/transcripts for visual disguise', () => {

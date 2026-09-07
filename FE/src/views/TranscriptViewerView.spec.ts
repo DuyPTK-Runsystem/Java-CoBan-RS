@@ -329,7 +329,7 @@ describe('TranscriptViewerView.vue', () => {
     const wrapper = mountView()
     await flushPromises()
 
-    expect(wrapper.text()).toContain('Bảng điểm theo lớp · Chi tiết bảng điểm học sinh')
+    expect(wrapper.text()).not.toContain('Bảng điểm theo lớp · Chi tiết bảng điểm học sinh')
     expect(wrapper.text()).toContain('Bảng Điểm Học Sinh: Nguyễn Văn A (HS001)')
     expect(wrapper.text()).toContain('Quay lại Bảng điểm theo lớp')
     expect(wrapper.text()).toContain('Giáo viên (teacher1)')

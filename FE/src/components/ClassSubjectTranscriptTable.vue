@@ -142,13 +142,6 @@ const stats = computed(() => {
       <div class="table-top-bar">
         <div>
           <h2 class="table-heading">{{ props.title || `Bảng điểm Môn ${props.subjectName}` }}</h2>
-          <p class="table-subtitle">
-            {{
-              props.mode === 'TERM'
-                ? 'Bảng điểm học kỳ: STT, Họ và tên, KTTX (1..n), KTĐK (1..m), KTCK, TBMHK, Ghi chú.'
-                : 'Bảng điểm cả năm: STT, Họ và tên, TBM HK1, TBM HK2, ĐTBCN ban đầu, Thi lại, ĐTBCN chính thức.'
-            }}
-          </p>
         </div>
       </div>
 
@@ -481,4 +474,3 @@ const stats = computed(() => {
   color: #15803d;
 }
 </style>
-

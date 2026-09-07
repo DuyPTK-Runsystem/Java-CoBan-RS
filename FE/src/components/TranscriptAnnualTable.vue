@@ -65,13 +65,13 @@ const formattedFinalDtb = computed(() => formatScore(props.finalDtbcn))
             </td>
             <td class="cell-note">
               <template v-if="sub.calculationSource === 'RETAKE' && sub.retake">
-                <span class="badge retake-badge">RETAKE</span>
+                <span class="badge retake-badge">Thi lại</span>
                 <span class="retake-detail">
                   Thi lại (điểm cũ: {{ formatScore(sub.retake.preRetakeScore) }} ➔ {{ formatScore(sub.retake.retakeScore) }})
                 </span>
               </template>
               <template v-else-if="sub.retake && sub.retake.status === 'PLANNED'">
-                <span class="badge planned-badge">PLANNED</span>
+                <span class="badge planned-badge">Đã lên lịch</span>
                 <span class="retake-detail">Đã lên lịch thi lại</span>
               </template>
               <template v-else>

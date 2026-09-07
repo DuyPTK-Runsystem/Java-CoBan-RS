@@ -61,7 +61,7 @@ const filteredClasses = computed(() => {
   })
 })
 const pageState = computed<LoadingState>(() => loadingState.value === 'success' && filteredClasses.value.length === 0 ? 'empty' : loadingState.value)
-const selectedAcademicYear = computed(() => academicYears.value.find((year) => year.id === selectedAcademicYearId.value) ?? null)
+const readOnly = computed(() => getAuthSession()?.user.roles?.includes('TEACHER') && !getAuthSession()?.user.roles?.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE'))
 const yearStatistics = ref<AcademicYearStatistics | null>(null)
 
 const classStatisticsMap = computed<Record<number, ClassStatistic>>(() => {
@@ -254,14 +254,11 @@ onMounted(() => { void loadContext() })
   <ConfirmDialog />
   <div class="page-heading">
     <div>
-      <p class="eyebrow">Academic structure</p>
       <h1>Lớp học</h1>
-      <p v-if="selectedAcademicYear">Năm học {{ selectedAcademicYear.code }} · quản lý danh sách lớp và theo dõi cảnh báo sĩ số.</p>
-      <p v-else>Chọn năm học để tải danh sách lớp.</p>
     </div>
     <div class="page-heading-actions">
       <Button label="Danh sách khối" icon="pi pi-sitemap" severity="secondary" outlined @click="router.push({ name: 'v2-academic-grades' })" />
-      <Button label="Tạo lớp" icon="pi pi-plus" :disabled="!selectedAcademicYearId" @click="openCreate" />
+      <Button v-if="!readOnly" label="Tạo lớp" icon="pi pi-plus" :disabled="!selectedAcademicYearId" @click="openCreate" />
     </div>
   </div>
   <CapacityWarningBanner
@@ -295,6 +292,7 @@ onMounted(() => { void loadContext() })
         :school-classes="filteredClasses"
         :grades="grades"
         :class-statistics="classStatisticsMap"
+        :read-only="readOnly"
         @edit="openEdit"
         @close="confirmClose"
         @delete="confirmDelete"

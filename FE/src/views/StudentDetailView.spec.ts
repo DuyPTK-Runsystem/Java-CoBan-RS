@@ -361,7 +361,7 @@ describe('StudentDetailView.vue', () => {
     const tab1 = wrapper.find('[data-panel="profile"]')
     expect(tab1.text()).toContain('Tài khoản đăng nhập liên kết (V3)')
     expect(tab1.text()).toContain('nguyenvanan0000001')
-    expect(tab1.text()).toContain('STUDENT')
+    expect(tab1.text()).toContain('Học sinh')
   })
 
   it('Tab 1 displays unprovisioned account notice when student has no account', async () => {

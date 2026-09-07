@@ -291,8 +291,8 @@ describe('StudentListView.vue', () => {
     await deleteBtn.trigger('click')
     await flushPromises()
 
-    // Click "Chuyển sang INACTIVE"
-    const inactiveBtn = wrapper.findAll('button').find((b) => b.text().includes('Chuyển sang INACTIVE'))
+    // Click "Chuyển sang ngừng học"
+    const inactiveBtn = wrapper.findAll('button').find((b) => b.text().includes('Chuyển sang ngừng học'))
     expect(inactiveBtn).toBeDefined()
     await inactiveBtn!.trigger('click')
     await flushPromises()

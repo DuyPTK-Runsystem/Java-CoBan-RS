@@ -29,11 +29,11 @@ const type = ref<AssessmentType>('KTTT')
 const columnName = ref('')
 const validationMessage = ref('')
 const types = [
-  { label: 'KTTT', value: 'KTTT' },
-  { label: 'KTĐK', value: 'KTĐK' },
-  { label: 'KTCK', value: 'KTCK' },
+  { label: 'Thường xuyên', value: 'KTTT' },
+  { label: 'Giữa kỳ', value: 'KTĐK' },
+  { label: 'Cuối kỳ', value: 'KTCK' },
 ]
-const title = computed(() => props.mode === 'create' ? 'Thêm assessment column' : 'Sửa assessment column')
+const title = computed(() => props.mode === 'create' ? 'Thêm cột điểm' : 'Sửa cột điểm')
 
 watch(() => props.visible, (visible) => {
   if (!visible) return
@@ -78,4 +78,3 @@ function save(): void {
     </div>
   </Dialog>
 </template>
-

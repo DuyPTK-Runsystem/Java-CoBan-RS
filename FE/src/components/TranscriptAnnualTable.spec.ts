@@ -56,7 +56,7 @@ describe('TranscriptAnnualTable.vue', () => {
     // First subject has retake
     const firstRow = rows[0]
     expect(firstRow.text()).toContain('Toán học')
-    expect(firstRow.text()).toContain('RETAKE')
+    expect(firstRow.text()).toContain('Thi lại')
     expect(firstRow.text()).toContain('4.3')
     expect(firstRow.text()).toContain('6.0')
 

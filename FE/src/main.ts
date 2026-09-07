@@ -1,3 +1,4 @@
+import { vietnameseLocale } from './locales/vi'
 import { createApp } from 'vue'
 import ConfirmationService from 'primevue/confirmationservice'
 import PrimeVue from 'primevue/config'
@@ -18,6 +19,7 @@ const app = createApp(App)
 app.use(router)
 app.use(ConfirmationService)
 app.use(PrimeVue, {
+    locale: vietnameseLocale,
   theme: {
     preset: Aura,
     options: {

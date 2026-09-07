@@ -350,15 +350,9 @@ onMounted(async () => {
             @click="goBackToClassTranscripts"
           />
         </div>
-        <p class="eyebrow">
-          {{ isFromClassTranscript ? 'Bảng điểm theo lớp · Chi tiết bảng điểm học sinh' : 'Tra cứu bảng điểm · Read-only' }}
-        </p>
         <h1 class="page-title">
           {{ studentDisplayName ? `Bảng Điểm Học Sinh: ${studentDisplayName}` : 'Bảng Điểm Học Sinh' }}
         </h1>
-        <p class="page-caption">
-          {{ isFromClassTranscript ? 'Xem kết quả học tập chi tiết của học sinh theo từng học kỳ và cả năm học.' : 'Dữ liệu kết quả học tập chính thức từ hệ thống tính toán điểm trung bình.' }}
-        </p>
       </div>
       <div v-if="isFromClassTranscript">
         <div class="role-badge">

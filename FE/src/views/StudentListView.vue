@@ -10,6 +10,7 @@ import StudentSearchForm from '@/components/StudentSearchForm.vue'
 import StudentTable from '@/components/StudentTable.vue'
 import { clearAuthSession, getAuthSession } from '@/services/authSession'
 import { deleteStudent, fetchStudents, transitionStudentStatus } from '@/services/studentApi'
+import { studentUiMessage } from '@/utils/studentUiMessage'
 import { isApiError } from '@/types/api'
 import type { Student, StudentAcademicStatus, StudentQuery, StudentSearchValues } from '@/types/student'
 
@@ -61,7 +62,7 @@ async function load(): Promise<void> {
     query.value = { ...query.value, page: response.page }
   } catch (error) {
     if (isApiError(error, 401)) return
-    errorMessage.value = error instanceof Error ? error.message : 'Unable to load students.'
+    errorMessage.value = studentUiMessage(error, 'Không thể tải danh sách học sinh.')
   } finally {
     loading.value = false
   }
@@ -119,7 +120,7 @@ async function remove(student: Student): Promise<void> {
       safeDeleteDialogVisible.value = true
       return
     }
-    errorMessage.value = error instanceof Error ? error.message : 'Không thể xóa hồ sơ học sinh.'
+    errorMessage.value = studentUiMessage(error, 'Không thể xóa hồ sơ học sinh.')
   }
 }
 
@@ -131,10 +132,10 @@ async function changeStudentStatus(newStatus: StudentAcademicStatus): Promise<vo
   try {
     await transitionStudentStatus(accessToken, affectedStudent.value.studentId, newStatus)
     safeDeleteDialogVisible.value = false
-    statusMessage.value = `Đã cập nhật trạng thái học sinh thành ${newStatus}.`
+    statusMessage.value = `Đã cập nhật trạng thái học sinh thành ${({ ACTIVE: 'Đang học', INACTIVE: 'Ngừng học', GRADUATED: 'Tốt nghiệp' })[newStatus]}.`
     await load()
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : 'Không thể cập nhật trạng thái học sinh.'
+    errorMessage.value = studentUiMessage(error, 'Không thể cập nhật trạng thái học sinh.')
   } finally {
     updatingStatus.value = false
   }
@@ -162,12 +163,12 @@ onMounted(() => {
         <p class="text-secondary mb-4">
           Học sinh <strong>{{ affectedStudent?.studentName }}</strong> ({{ affectedStudent?.studentCode }})
           đã phát sinh dữ liệu học vụ (phân lớp, điểm danh hoặc sổ điểm).
-          Để bảo toàn tính toàn vẹn lịch sử, bạn nên chuyển trạng thái học sinh sang <strong>INACTIVE</strong> (Ngừng học) hoặc <strong>GRADUATED</strong> (Tốt nghiệp).
+          Để bảo toàn tính toàn vẹn lịch sử, bạn nên chuyển trạng thái học sinh sang <strong>Ngừng học</strong> hoặc <strong>Tốt nghiệp</strong>.
         </p>
         <div class="flex justify-end gap-2">
           <Button
             v-if="canManageStudents"
-            label="Chuyển sang INACTIVE"
+            label="Chuyển sang ngừng học"
             severity="secondary"
             icon="pi pi-ban"
             :loading="updatingStatus"
@@ -175,7 +176,7 @@ onMounted(() => {
           />
           <Button
             v-if="canManageStudents"
-            label="Chuyển sang GRADUATED"
+            label="Chuyển sang tốt nghiệp"
             severity="info"
             icon="pi pi-graduation-cap"
             :loading="updatingStatus"
@@ -193,9 +194,7 @@ onMounted(() => {
 
     <div class="page-heading">
       <div>
-        <p class="eyebrow">Phân hệ học vụ V2</p>
         <h1>Hồ sơ học sinh</h1>
-        <p>Tra cứu, quản lý hồ sơ và theo dõi tiến trình học vụ của học sinh.</p>
       </div>
       <div class="page-heading-actions">
         <Button

@@ -37,7 +37,7 @@ const values = reactive<StudentFormValues>({
   dateOfBirth: props.initialValue.dateOfBirth ?? null,
   address: props.initialValue.address ?? '',
   status: props.initialValue.status ?? 'ACTIVE',
-  provisionAccount: props.initialValue.provisionAccount ?? false,
+  provisionAccount: props.initialValue.provisionAccount ?? true,
   username: props.initialValue.username ?? '',
   password: props.initialValue.password ?? '',
 })
@@ -55,7 +55,7 @@ watch(() => props.initialValue, (initialValue) => {
     dateOfBirth: initialValue.dateOfBirth ?? null,
     address: initialValue.address ?? '',
     status: initialValue.status ?? 'ACTIVE',
-    provisionAccount: initialValue.provisionAccount ?? false,
+    provisionAccount: initialValue.provisionAccount ?? true,
     username: initialValue.username ?? '',
     password: initialValue.password ?? '',
   })
@@ -76,13 +76,13 @@ function validateStudentCode(showRequiredError: boolean): boolean {
   values.studentCode = studentCode
 
   if (!studentCode) {
-    errors.studentCode = showRequiredError ? 'Enter a student code or generate one before saving.' : undefined
+    errors.studentCode = showRequiredError ? 'Nhập mã học sinh hoặc tạo mã trước khi lưu.' : undefined
     return false
   }
 
   errors.studentCode = studentCodePattern.test(studentCode)
     ? undefined
-    : 'Use the format STU followed by exactly 7 digits.'
+    : 'Mã học sinh phải bắt đầu bằng STU và có đúng 7 chữ số phía sau.'
   return !errors.studentCode
 }
 
@@ -106,11 +106,11 @@ function normalizeStudentCode(): void {
 
 function validate(): boolean {
   const isStudentCodeValid = validateStudentCode(true)
-  errors.studentName = values.studentName.trim() ? undefined : 'Student name is required.'
+  errors.studentName = values.studentName.trim() ? undefined : 'Vui lòng nhập họ và tên học sinh.'
   if (!errors.studentName && values.studentName.length > 35) {
-    errors.studentName = 'Student name must be 35 characters or fewer.'
+    errors.studentName = 'Họ và tên học sinh không được vượt quá 35 ký tự.'
   }
-  errors.address = values.address.length <= 255 ? undefined : 'Address must be 255 characters or fewer.'
+  errors.address = values.address.length <= 255 ? undefined : 'Địa chỉ không được vượt quá 255 ký tự.'
   if (values.provisionAccount && values.username && values.username.trim().length > 20) {
     errors.username = 'Tên đăng nhập không được vượt quá 20 ký tự.'
   } else {
@@ -134,17 +134,17 @@ function save(): void {
     </div>
 
     <div v-if="isEdit" class="field-group">
-      <label for="student-id">Student id</label>
+      <label for="student-id">Mã định danh học sinh</label>
       <InputText id="student-id" :model-value="String(values.studentId ?? '')" disabled />
     </div>
 
     <div class="field-group">
-      <label for="student-code">Student code</label>
+      <label for="student-code">Mã học sinh</label>
       <div class="inline-field">
         <InputText
           id="student-code"
           :model-value="values.studentCode"
-          placeholder="Example: STU1234567"
+          placeholder="Ví dụ: STU1234567"
           :disabled="isEdit"
           :invalid="Boolean(errors.studentCode)"
           @update:model-value="updateStudentCode"
@@ -152,31 +152,31 @@ function save(): void {
         />
         <Button
           type="button"
-          label="Generate code"
+          label="Tạo mã"
           icon="pi pi-refresh"
           :disabled="isEdit"
           :loading="props.generating"
           @click="emit('generateCode')"
         />
       </div>
-      <small class="field-hint">Format: STUxxxxxxx</small>
+      <small class="field-hint">Định dạng: STU và 7 chữ số</small>
       <small v-if="errors.studentCode" class="field-error">{{ errors.studentCode }}</small>
     </div>
 
     <div class="field-group">
-      <label for="student-name">Student name</label>
+      <label for="student-name">Họ và tên</label>
       <InputText
         id="student-name"
         v-model="values.studentName"
         maxlength="35"
-        placeholder="Example: John Doe"
+        placeholder="Ví dụ: Nguyễn Văn An"
         :invalid="Boolean(errors.studentName)"
       />
       <small v-if="errors.studentName" class="field-error">{{ errors.studentName }}</small>
     </div>
 
     <div class="field-group">
-      <label for="student-birthday">Birthday</label>
+      <label for="student-birthday">Ngày sinh</label>
       <DatePicker
         id="student-birthday"
         v-model="values.dateOfBirth"
@@ -188,12 +188,12 @@ function save(): void {
     </div>
 
     <div class="field-group">
-      <label for="student-address">Address</label>
+      <label for="student-address">Địa chỉ</label>
       <InputText
         id="student-address"
         v-model="values.address"
         maxlength="255"
-        placeholder="Example: HCMC, Vietnam"
+        placeholder="Ví dụ: Thành phố Hồ Chí Minh"
         :invalid="Boolean(errors.address)"
       />
       <small v-if="errors.address" class="field-error">{{ errors.address }}</small>
@@ -208,11 +208,11 @@ function save(): void {
           :binary="true"
         />
         <label for="provision-account" class="font-medium cursor-pointer">
-          Cấp tài khoản đăng nhập cho học sinh (V3)
+          Cấp tài khoản đăng nhập cho học sinh
         </label>
       </div>
       <p class="section-hint">
-        Tạo tài khoản đăng nhập hệ thống với vai trò <strong>STUDENT</strong>. Giao diện không hiển thị hoặc trả lại mật khẩu.
+        Tạo tài khoản đăng nhập hệ thống với vai trò <strong>Học sinh</strong>.
       </p>
 
       <div v-if="values.provisionAccount" class="account-fields">
@@ -222,10 +222,10 @@ function save(): void {
             id="student-username"
             v-model="values.username"
             maxlength="20"
-            placeholder="Để trống để tự động sinh theo họ tên và mã"
+            placeholder="Để trống để tự động sinh theo họ tên và mã học sinh"
             :invalid="Boolean(errors.username)"
           />
-          <small class="field-hint">Nếu để trống: hệ thống sinh dạng 'hoten1234567' (tối đa 20 ký tự).</small>
+          <small class="field-hint">Nếu để trống, hệ thống tự sinh username và sẽ hiển thị khi tạo thành công.</small>
           <small v-if="errors.username" class="field-error">{{ errors.username }}</small>
         </div>
 
@@ -234,12 +234,12 @@ function save(): void {
           <Password
             id="student-password"
             v-model="values.password"
-            placeholder="Nhập mật khẩu khi quy trình cấp tài khoản yêu cầu"
+            placeholder="Mật khẩu có độ dài từ 6 đến 15 kí tự, hoặc bỏ trống để dùng mật khẩu mặc định"
             :feedback="false"
             toggle-mask
             fluid
           />
-          <small class="field-hint">Không có mật khẩu mặc định được hiển thị. Kênh bàn giao hoặc kích hoạt thông tin đăng nhập cần theo quy trình quản trị được phê duyệt.</small>
+          <small class="field-hint">Mật khẩu mặc định: 12345678</small>
         </div>
       </div>
     </div>
@@ -247,7 +247,7 @@ function save(): void {
     <div class="form-actions">
       <Button
         type="button"
-        label="Back"
+        label="Quay lại"
         icon="pi pi-arrow-left"
         severity="secondary"
         outlined
@@ -255,7 +255,7 @@ function save(): void {
       />
       <Button
         type="submit"
-        label="Save"
+        label="Lưu"
         icon="pi pi-check"
         :loading="props.saving"
       />

@@ -2,7 +2,6 @@
 import { computed, reactive, watch } from 'vue'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
-import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import FormAlert from '@/components/FormAlert.vue'
@@ -30,7 +29,6 @@ function close(): void { emit('update:visible', false); emit('cancel') }
         <div class="field-group"><label for="teacher-department">Tổ chuyên môn</label><InputText id="teacher-department" v-model="values.department" maxlength="100" fluid /></div>
         <div class="field-group"><label for="teacher-join-date">Ngày vào trường</label><InputText id="teacher-join-date" v-model="values.joinDate" type="date" fluid /></div>
         <div class="field-group"><label for="teacher-status">Trạng thái *</label><Select id="teacher-status" v-model="values.status" :options="statusOptions" option-label="label" option-value="value" fluid /></div>
-        <div class="field-group"><label for="teacher-user-id">User ID liên kết</label><InputNumber id="teacher-user-id" v-model="values.userId" :min="1" :use-grouping="false" :invalid="Boolean(errors.userId)" fluid /><small v-if="errors.userId" class="field-error">{{ errors.userId }}</small><small class="field-hint">Tùy chọn, để trống nếu chưa liên kết.</small></div>
       </div><div class="form-actions"><Button type="button" label="Hủy" icon="pi pi-times" severity="secondary" outlined :disabled="props.saving" @click="close" /><Button type="submit" :label="props.mode === 'edit' ? 'Lưu thay đổi' : 'Tạo giáo viên'" icon="pi pi-check" :loading="props.saving" /></div>
     </form>
   </Dialog>

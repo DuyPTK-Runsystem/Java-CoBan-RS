@@ -27,6 +27,7 @@ type Story = StoryObj<typeof meta>
 
 export const DefaultWithEvidence: Story = {}
 export const NoExistingScores: Story = { args: { snapshot: { ...snapshot, hasExistingScores: false, subjects: [] } } }
+export const NoTargetColumns: Story = { args: { snapshot: { ...snapshot, subjects: [{ ...snapshot.subjects[0], targetColumns: [] }] } } }
 export const UnmappedColumns: Story = { args: { snapshot: { ...snapshot, subjects: [{ ...snapshot.subjects[0], targetColumns: [snapshot.subjects[0].targetColumns[1]] }] } } }
 export const Loading: Story = { args: { snapshot: null, loading: true } }
 export const Forbidden403: Story = { args: { snapshot: null, errorMessage: 'Bạn không có quyền xem bằng chứng điểm của học sinh này.' } }

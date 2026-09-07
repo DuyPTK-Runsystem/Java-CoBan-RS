@@ -28,6 +28,7 @@ import {
   fetchStudentTermTranscript,
 } from '@/services/transcriptApi'
 import type { AcademicYear, Semester } from '@/types/academic'
+import { studentUiMessage } from '@/utils/studentUiMessage'
 import { isApiError } from '@/types/api'
 import type {
   StudentAttendanceHistoryItem,
@@ -129,7 +130,7 @@ async function loadStudent(): Promise<void> {
     student.value = await getStudent(accessToken, studentId.value)
   } catch (err: unknown) {
     if (isApiError(err, 401)) return
-    errorMessage.value = err instanceof Error ? err.message : 'Không thể tải thông tin học sinh.'
+    errorMessage.value = studentUiMessage(err, 'Không thể tải thông tin học sinh.')
   } finally {
     loading.value = false
   }
@@ -370,11 +371,11 @@ async function triggerRecalculation(): Promise<void> {
   statusMessage.value = ''
   try {
     const task = await recalculateTranscriptById(accessToken, studentId.value, selectedAcademicYearId.value)
-    statusMessage.value = `Yêu cầu tính lại điểm đã được tiếp nhận thành công (Mã tác vụ: #${task.taskId}, Trạng thái: ${task.status}). Hệ thống đang xử lý trong nền.`
+    statusMessage.value = `Yêu cầu tính lại điểm đã được tiếp nhận thành công (Mã tác vụ: #${task.taskId}, Trạng thái: ${({ PENDING: 'Đang chờ', RUNNING: 'Đang xử lý', SUCCEEDED: 'Thành công', FAILED: 'Thất bại', CANCELLED: 'Đã hủy' } as Record<string, string>)[task.status] ?? 'Chưa xác định'}). Hệ thống đang xử lý trong nền.`
     await loadTranscript()
   } catch (err: unknown) {
     if (isApiError(err, 401)) return
-    errorMessage.value = err instanceof Error ? err.message : 'Không thể gửi yêu cầu tính lại điểm.'
+    errorMessage.value = studentUiMessage(err, 'Không thể gửi yêu cầu tính lại điểm.')
   } finally {
     recalculating.value = false
   }
@@ -427,7 +428,6 @@ onMounted(async () => {
     <div class="page-heading">
       <div>
         <div class="heading-badge-row">
-          <p class="eyebrow">Phân hệ học vụ V2 · Hồ sơ học sinh</p>
           <Tag
             v-if="student"
             :value="getStatusLabel(student.status)"
@@ -438,7 +438,6 @@ onMounted(async () => {
           {{ student?.studentName || 'Đang tải hồ sơ...' }}
           <span v-if="student?.studentCode" class="student-code-text">({{ student.studentCode }})</span>
         </h1>
-        <p>Chi tiết hồ sơ học sinh, phân lớp, lịch sử chuyên cần và bảng điểm học vụ.</p>
       </div>
 
       <div class="page-heading-actions">
@@ -529,7 +528,7 @@ onMounted(async () => {
             <section class="content-surface info-card">
               <div class="card-header">
                 <h2>Tài khoản đăng nhập liên kết (V3)</h2>
-                <p class="section-caption">Tài khoản đăng nhập tự phục vụ (Self-service) cho học sinh.</p>
+                <p class="section-caption">Tài khoản để học sinh đăng nhập và tra cứu thông tin của mình.</p>
               </div>
 
               <div v-if="student?.account" class="account-card-body">
@@ -539,16 +538,16 @@ onMounted(async () => {
                 </div>
                 <dl class="meta-grid">
                   <div class="meta-item">
-                    <dt>Mã người dùng (User ID)</dt>
+                    <dt>Mã người dùng</dt>
                     <dd class="font-mono">{{ student.account.userId }}</dd>
                   </div>
                   <div class="meta-item">
-                    <dt>Tên đăng nhập (Username)</dt>
+                    <dt>Tên đăng nhập</dt>
                     <dd class="font-mono font-semibold">{{ student.account.username }}</dd>
                   </div>
                   <div class="meta-item">
-                    <dt>Vai trò hệ thống (Role)</dt>
-                    <dd><Tag :value="student.account.role" severity="info" /></dd>
+                    <dt>Vai trò hệ thống</dt>
+                    <dd><Tag :value="({ STUDENT: 'Học sinh', TEACHER: 'Giáo viên', ADMIN: 'Quản trị viên', ACADEMIC_OFFICE: 'Giáo vụ' } as Record<string, string>)[student.account.role] ?? 'Chưa xác định'" severity="info" /></dd>
                   </div>
                 </dl>
               </div>
@@ -588,7 +587,7 @@ onMounted(async () => {
                 </div>
                 <div class="active-class-pill">
                   <span class="label">Trạng thái:</span>
-                  <Tag :value="activeEnrollment.status" severity="success" />
+                  <Tag :value="({ ACTIVE: 'Đang học', COMPLETED: 'Đã hoàn thành', WITHDRAWN: 'Đã rút khỏi lớp' } as Record<string, string>)[activeEnrollment.status] ?? 'Chưa xác định'" severity="success" />
                 </div>
               </div>
             </section>

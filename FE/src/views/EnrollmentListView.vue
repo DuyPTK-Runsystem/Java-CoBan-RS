@@ -315,14 +315,17 @@ async function submitTransferWithScores(request: TransferWithScoresRequest): Pro
   transferAssistError.value = ''
   statusMessage.value = ''
   try {
-    if (request.scores.length === 0) {
+    const hasTargetScores = request.scores.length > 0
+    if (!hasTargetScores) {
       const result = await transferEnrollment(accessToken, student.enrollmentId, { targetClassId: request.targetClassId, effectiveAt: request.effectiveAt, reason: request.reason })
       warnings.value = result.warnings
     } else {
       const result = await transferWithScores(accessToken, student.enrollmentId, request)
       warnings.value = result.transfer.warnings
     }
-    statusMessage.value = `Đã chuyển ${student.studentCode}-${student.studentName} từ lớp ${oldClassName} sang ${newClassName} và lưu điểm lớp mới.`
+    statusMessage.value = hasTargetScores
+      ? `Đã chuyển ${student.studentCode}-${student.studentName} từ lớp ${oldClassName} sang ${newClassName} và lưu điểm lớp mới.`
+      : `Đã chuyển ${student.studentCode}-${student.studentName} từ lớp ${oldClassName} sang ${newClassName}.`
     await reloadAfterMutation()
     transferAssistVisible.value = false
     transferAssistSnapshot.value = null
@@ -390,9 +393,7 @@ onMounted(() => { void loadContext() })
 <template>
   <div class="page-heading enrollment-page-heading">
     <div>
-      <p class="eyebrow">Enrollment workspace</p>
       <h1>Xếp lớp</h1>
-      <p>Xếp học sinh vào lớp theo năm học, xem học sinh chưa xếp lớp</p>
     </div>
     <div class="page-heading-actions">
       <Button label="Làm mới context" icon="pi pi-refresh" severity="secondary" outlined :loading="academicYearLoading || classLoading" @click="loadContext" />

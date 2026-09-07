@@ -63,10 +63,8 @@ const calendarLabel: Record<'SCHEDULED' | 'NO_CLASS' | 'UNKNOWN', string> = {
   <section class="content-surface attendance-context-panel">
     <div class="section-heading">
       <div>
-        <h2>Context điểm danh</h2>
-        <p class="section-caption">Chọn đủ năm học, học kỳ, lớp, ngày và buổi trước khi mở session.</p>
+        <h2>Thông tin buổi điểm danh</h2>
       </div>
-      <span class="field-hint">Quyền thao tác do backend quyết định</span>
     </div>
     <div class="attendance-context-form">
       <div class="field-group">
@@ -148,7 +146,7 @@ const calendarLabel: Record<'SCHEDULED' | 'NO_CLASS' | 'UNKNOWN', string> = {
       <i :class="props.calendarStatus === 'SCHEDULED' ? 'pi pi-check-circle' : props.calendarStatus === 'NO_CLASS' ? 'pi pi-ban' : 'pi pi-info-circle'" aria-hidden="true" />
       <div>
         <strong>{{ calendarLabel[props.calendarStatus] }}</strong>
-        <span>{{ props.calendarLoading ? 'Đang kiểm tra lịch học...' : props.calendarMessage || 'Chọn context để kiểm tra ngày học hợp lệ.' }}</span>
+        <span>{{ props.calendarLoading ? 'Đang kiểm tra lịch học...' : props.calendarMessage || 'Chọn đầy đủ thông tin để kiểm tra ngày học hợp lệ.' }}</span>
       </div>
     </div>
   </section>

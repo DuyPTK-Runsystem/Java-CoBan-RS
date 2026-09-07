@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import AuthenticatedLayout, { type NavigationItem } from '@/components/AuthenticatedLayout.vue'
 import { clearAuthSession, getAuthSession } from '@/services/authSession'
+import { isStudentWorkspace, isStudentWorkspacePath, isTeacherWorkspace } from '@/services/studentNavigation'
 import { logout as logoutApi } from '@/services/userApi'
 
 const router = useRouter()
@@ -57,7 +58,16 @@ const navigation = computed<NavigationItem[]>(() => {
   }
   if (!roles.length || roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE')) {
     items.push({ label: 'Kết quả thi lại', to: '/v2/retake-exams', icon: 'pi pi-check-square' })
-    items.push({ label: 'Vận hành tính điểm', to: '/v2/scorebooks/operations', icon: 'pi pi-cog' })
+  }
+  if (isStudentWorkspace(roles)) return items.filter((item) => isStudentWorkspacePath(item.to))
+  if (isTeacherWorkspace(roles)) {
+    const teacherRestrictedPaths = new Set([
+      '/v2/academic-years',
+      '/v2/academic-catalog/grades',
+      '/v2/enrollments',
+      '/v2/scorebooks/operations',
+    ])
+    return items.filter((item) => !teacherRestrictedPaths.has(item.to))
   }
   return items
 })

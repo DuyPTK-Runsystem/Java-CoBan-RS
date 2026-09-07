@@ -6,7 +6,7 @@ import DataTable from 'primevue/datatable'
 import StatusTag from '@/components/StatusTag.vue'
 import type { ApplicationScope, Subject, SubjectStatus, SubjectType } from '@/types/academic'
 
-const props = withDefaults(defineProps<{ subjects?: Subject[]; loading?: boolean }>(), { subjects: () => [], loading: false })
+const props = withDefaults(defineProps<{ subjects?: Subject[]; loading?: boolean; readOnly?: boolean }>(), { subjects: () => [], loading: false, readOnly: false })
 const emit = defineEmits<{ edit: [subject: Subject]; configureApplicability: [subject: Subject] }>()
 
 const typeLabels: Record<SubjectType, string> = { ACADEMIC: 'CHÍNH KHÓA', SKILL: 'KỸ NĂNG' }
@@ -23,7 +23,7 @@ const statusLabels: Record<SubjectStatus, string> = { ACTIVE: 'Đang giảng d�
       <Column header="Loại"><template #body="slotProps"><StatusTag :label="typeLabels[slotProps.data.subjectType]" :severity="slotProps.data.subjectType === 'ACADEMIC' ? 'success' : 'secondary'" /></template></Column>
       <Column header="Phạm vi áp dụng"><template #body="slotProps">{{ scopeLabels[slotProps.data.applicationScope] }}</template></Column>
       <Column header="Trạng thái"><template #body="slotProps"><StatusTag :label="statusLabels[slotProps.data.status]" :severity="slotProps.data.status === 'ACTIVE' ? 'success' : 'danger'" /></template></Column>
-      <Column header="Thao tác" style="width: 17rem"><template #body="slotProps"><div class="table-actions"><Button :icon="slotProps.data.status === 'ACTIVE' ? 'pi pi-pencil' : 'pi pi-eye'" text rounded :aria-label="slotProps.data.status === 'ACTIVE' ? 'Sửa môn học' : 'Xem môn học'" :title="slotProps.data.status === 'ACTIVE' ? 'Sửa môn học' : 'Xem môn học'" @click="emit('edit', slotProps.data)" /><Button v-if="slotProps.data.status === 'ACTIVE'" icon="pi pi-sliders-h" text rounded aria-label="Cấu hình phạm vi áp dụng" title="Cấu hình phạm vi áp dụng" @click="emit('configureApplicability', slotProps.data)" /></div></template></Column>
+      <Column header="Thao tác" style="width: 17rem"><template #body="slotProps"><div class="table-actions"><template v-if="!props.readOnly"><Button :icon="slotProps.data.status === 'ACTIVE' ? 'pi pi-pencil' : 'pi pi-eye'" text rounded :aria-label="slotProps.data.status === 'ACTIVE' ? 'Sửa môn học' : 'Xem môn học'" :title="slotProps.data.status === 'ACTIVE' ? 'Sửa môn học' : 'Xem môn học'" @click="emit('edit', slotProps.data)" /><Button v-if="slotProps.data.status === 'ACTIVE'" icon="pi pi-sliders-h" text rounded aria-label="Cấu hình phạm vi áp dụng" title="Cấu hình phạm vi áp dụng" @click="emit('configureApplicability', slotProps.data)" /></template><span v-else class="table-action-note">Chỉ xem</span></div></template></Column>
     </DataTable>
   </div>
 </template>

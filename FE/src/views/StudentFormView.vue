@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 
 import StudentForm from '@/components/StudentForm.vue'
 import { clearAuthSession, getAuthSession } from '@/services/authSession'
@@ -11,6 +13,7 @@ import {
   getStudent,
   updateStudent,
 } from '@/services/studentApi'
+import { studentUiMessage } from '@/utils/studentUiMessage'
 import { isApiError } from '@/types/api'
 import type { Student, StudentFormValues, StudentV2Payload, StudentV3CreateRequest } from '@/types/student'
 
@@ -33,7 +36,7 @@ const initialValue = ref<Partial<StudentFormValues>>({
   dateOfBirth: null,
   address: '',
   status: 'ACTIVE',
-  provisionAccount: false,
+  provisionAccount: true,
   username: '',
   password: '',
 })
@@ -43,6 +46,7 @@ const userRoles = computed(() => session.value?.user.roles ?? [])
 const canProvisionAccount = computed(() => {
   return userRoles.value.includes('ADMIN') || userRoles.value.includes('ACADEMIC_OFFICE')
 })
+const createdAccountUsername = ref<string | null>(null)
 
 function token(): string | null {
   const sess = getAuthSession()
@@ -77,7 +81,7 @@ async function load(): Promise<void> {
     }
   } catch (error) {
     if (isApiError(error, 401)) return
-    errorMessage.value = error instanceof Error ? error.message : 'Không thể tải thông tin học sinh.'
+    errorMessage.value = studentUiMessage(error, 'Không thể tải thông tin học sinh.')
   }
 }
 
@@ -94,7 +98,7 @@ async function generate(): Promise<void> {
     }
   } catch (error) {
     if (isApiError(error, 401)) return
-    errorMessage.value = error instanceof Error ? error.message : 'Không thể tự động sinh mã học sinh.'
+    errorMessage.value = studentUiMessage(error, 'Không thể tự động sinh mã học sinh.')
   } finally {
     generating.value = false
   }
@@ -125,7 +129,8 @@ async function save(values: StudentFormValues): Promise<void> {
           username: values.username?.trim() || null,
           password: values.password || null,
         }
-        await createStudentV3(accessToken, v3Payload)
+        const created = await createStudentV3(accessToken, v3Payload)
+        createdAccountUsername.value = created.account.username
       } else {
         const v2Payload: StudentV2Payload = {
           studentCode: values.studentCode.trim(),
@@ -136,13 +141,15 @@ async function save(values: StudentFormValues): Promise<void> {
         await createStudent(accessToken, v2Payload)
       }
     }
-    await router.push('/v2/students')
+    if (!createdAccountUsername.value) {
+      await router.push('/v2/students')
+    }
   } catch (error: unknown) {
     if (isApiError(error, 401)) return
     if (isApiError(error, 409)) {
       errorMessage.value = error.message || 'Mã học sinh hoặc tên đăng nhập đã tồn tại trên hệ thống.'
     } else {
-      errorMessage.value = error instanceof Error ? error.message : 'Không thể lưu hồ sơ học sinh.'
+      errorMessage.value = studentUiMessage(error, 'Không thể lưu hồ sơ học sinh.')
     }
   } finally {
     saving.value = false
@@ -150,6 +157,11 @@ async function save(values: StudentFormValues): Promise<void> {
 }
 
 function handleBack(): void {
+  void router.push('/v2/students')
+}
+
+function finishAccountProvisioning(): void {
+  createdAccountUsername.value = null
   void router.push('/v2/students')
 }
 
@@ -164,15 +176,7 @@ onMounted(() => {
   <div class="student-form-view">
     <div class="page-heading">
       <div>
-        <p class="eyebrow">Phân hệ học vụ V2</p>
         <h1>{{ isEdit ? 'Chỉnh sửa hồ sơ học sinh' : 'Thêm mới học sinh' }}</h1>
-        <p>
-          {{
-            isEdit
-              ? 'Cập nhật thông tin lý lịch học sinh trong hệ thống.'
-              : 'Tạo mới hồ sơ học sinh và tùy chọn cấp tài khoản đăng nhập.'
-          }}
-        </p>
       </div>
     </div>
 
@@ -189,6 +193,20 @@ onMounted(() => {
         @back="handleBack"
       />
     </section>
+
+    <Dialog
+      :visible="Boolean(createdAccountUsername)"
+      modal
+      header="Đã cấp tài khoản học sinh"
+      :style="{ width: 'min(100% - 2rem, 28rem)' }"
+      :closable="false"
+    >
+      <p>Tài khoản đăng nhập của học sinh đã được tạo thành công.</p>
+      <p><strong>Username: {{ createdAccountUsername }}</strong></p>
+      <template #footer>
+        <Button label="Hoàn tất" icon="pi pi-check" @click="finishAccountProvisioning" />
+      </template>
+    </Dialog>
   </div>
 </template>
 

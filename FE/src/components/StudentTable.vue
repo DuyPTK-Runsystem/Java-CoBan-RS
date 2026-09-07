@@ -64,7 +64,7 @@ watch(() => [props.page, props.totalPages], () => {
 function goToPage(): void {
   const requestedPage = goToPageValue.value
   if (!Number.isInteger(requestedPage) || !requestedPage || requestedPage < 1 || requestedPage > props.totalPages) {
-    goToPageError.value = `Enter a page from 1 to ${props.totalPages}.`
+    goToPageError.value = `Nhập số trang từ 1 đến ${props.totalPages}.`
     return
   }
   goToPageError.value = ''
@@ -100,15 +100,15 @@ function getStatusLabel(status?: string | null): string {
       <template #empty>
         <div class="empty-state">
           <i class="pi pi-users" aria-hidden="true" />
-          <span>No students match the current search.</span>
+          <span>Không có học sinh phù hợp với điều kiện tìm kiếm.</span>
         </div>
       </template>
-      <Column header="No" style="width: 4rem">
+      <Column header="STT" style="width: 4rem">
         <template #body="slotProps">
           {{ props.page * props.rowsPerPage + slotProps.index + 1 }}
         </template>
       </Column>
-      <Column field="studentCode" header="Code" sortable>
+      <Column field="studentCode" header="Mã học sinh" sortable>
         <template #body="slotProps">
           <a
             class="student-link"
@@ -119,7 +119,7 @@ function getStatusLabel(status?: string | null): string {
           </a>
         </template>
       </Column>
-      <Column field="studentName" header="Name" sortable>
+      <Column field="studentName" header="Họ và tên" sortable>
         <template #body="slotProps">
           <a
             class="student-link font-medium"
@@ -130,7 +130,7 @@ function getStatusLabel(status?: string | null): string {
           </a>
         </template>
       </Column>
-      <Column field="dateOfBirth" header="Birthday">
+      <Column field="dateOfBirth" header="Ngày sinh">
         <template #body="slotProps">
           {{ formatStudentDate(slotProps.data.dateOfBirth) }}
         </template>
@@ -153,15 +153,15 @@ function getStatusLabel(status?: string | null): string {
           />
         </template>
       </Column>
-      <Column field="address" header="Address" />
-      <Column header="Actions" style="width: 10rem">
+      <Column field="address" header="Địa chỉ" />
+      <Column header="Thao tác" style="width: 10rem">
         <template #body="slotProps">
           <div class="table-actions">
             <Button
               icon="pi pi-eye"
               text
               rounded
-              aria-label="View student detail"
+              aria-label="Xem chi tiết học sinh"
               title="Xem chi tiết"
               @click="emit('viewDetail', slotProps.data)"
             />
@@ -170,7 +170,7 @@ function getStatusLabel(status?: string | null): string {
               icon="pi pi-pencil"
               text
               rounded
-              aria-label="Edit student"
+              aria-label="Chỉnh sửa học sinh"
               title="Chỉnh sửa"
               @click="emit('edit', slotProps.data)"
             />
@@ -180,7 +180,7 @@ function getStatusLabel(status?: string | null): string {
               text
               rounded
               severity="danger"
-              aria-label="Delete student"
+              aria-label="Xóa học sinh"
               title="Xóa hoặc chuyển trạng thái"
               @click="emit('delete', slotProps.data)"
             />
@@ -196,7 +196,7 @@ function getStatusLabel(status?: string | null): string {
       @page="handlePage"
     />
     <div class="go-to-page">
-      <label for="go-to-page">Go to page</label>
+      <label for="go-to-page">Đến trang</label>
       <InputNumber
         id="go-to-page"
         v-model="goToPageValue"
@@ -208,7 +208,7 @@ function getStatusLabel(status?: string | null): string {
         @keydown.enter.prevent="goToPage"
       />
       <span aria-live="polite">/ {{ props.totalPages }}</span>
-      <Button label="Go" :disabled="!hasPages" @click="goToPage" />
+      <Button label="Đi đến" :disabled="!hasPages" @click="goToPage" />
     </div>
     <p v-if="goToPageError" class="field-error go-to-page-error" role="alert">{{ goToPageError }}</p>
   </div>

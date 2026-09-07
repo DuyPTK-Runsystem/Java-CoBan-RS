@@ -58,7 +58,7 @@ const contextForbidden = ref(false)
 const initialized = ref(false)
 
 const calendarStatus = ref<'SCHEDULED' | 'NO_CLASS' | 'UNKNOWN'>('UNKNOWN')
-const calendarMessage = ref('Chọn đủ context để kiểm tra ngày học hợp lệ.')
+const calendarMessage = ref('Chọn đầy đủ thông tin để kiểm tra ngày học hợp lệ.')
 const calendarLoading = ref(false)
 const calendarError = ref('')
 let calendarRequestKey = ''
@@ -232,7 +232,7 @@ async function loadCalendar(): Promise<void> {
   const accessToken = token()
   if (!accessToken || selectedAcademicYearId.value === null || selectedSemesterId.value === null || !attendanceDate.value) {
     calendarStatus.value = 'UNKNOWN'
-    calendarMessage.value = 'Chọn đủ context để kiểm tra ngày học hợp lệ.'
+    calendarMessage.value = 'Chọn đầy đủ thông tin để kiểm tra ngày học hợp lệ.'
     return
   }
   const key = contextKey()
@@ -254,7 +254,7 @@ async function loadCalendar(): Promise<void> {
       calendarMessage.value = day?.reason || calendarSession?.reason || 'Ngày/buổi này không có lịch học.'
     } else if (calendarSession?.sessionStatus === 'SCHEDULED') {
       calendarStatus.value = 'SCHEDULED'
-      calendarMessage.value = 'Ngày và buổi học hợp lệ để mở attendance session.'
+      calendarMessage.value = 'Ngày và buổi học hợp lệ để mở buổi điểm danh.'
     } else {
       calendarStatus.value = 'UNKNOWN'
       calendarMessage.value = 'Chưa có cấu hình lịch cho ngày/buổi này; backend sẽ kiểm tra lần cuối.'
@@ -385,11 +385,11 @@ async function saveException(request: UpsertAttendanceExceptionRequest): Promise
   try {
     await upsertAttendanceException(accessToken, session.value.sessionId, selectedStudent.value.studentId, request, attendanceScope.value)
     await loadSessionStudents(session.value.sessionId)
-    statusMessage.value = `Đã cập nhật ngoại lệ cho ${selectedStudent.value.studentCode}.`
+    statusMessage.value = `Đã cập nhật điểm danh cho ${selectedStudent.value.studentCode}.`
     closeException()
   } catch (error) {
     if (isApiError(error, 401)) return
-    mutationError.value = messageFor(error, 'Không thể lưu ngoại lệ điểm danh.')
+    mutationError.value = messageFor(error, 'Không thể lưu điểm danh.')
   } finally {
     sessionSaving.value = false
   }
@@ -398,10 +398,10 @@ async function saveException(request: UpsertAttendanceExceptionRequest): Promise
 function confirmDelete(student: AttendanceStudent): void {
   if (!session.value || sessionReadOnly.value) return
   confirm.require({
-    header: 'Xóa ngoại lệ điểm danh',
-    message: `Xóa exception của ${student.studentCode} và trả về trạng thái có mặt mặc định?`,
+    header: 'Xóa ghi nhận điểm danh',
+    message: `Xóa trạng thái điểm danh của ${student.studentCode} và trả về trạng thái có mặt mặc định?`,
     icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'Xóa ngoại lệ',
+    acceptLabel: 'Xóa ghi nhận',
     rejectLabel: 'Hủy',
     accept: () => { void removeException(student) },
   })
@@ -415,10 +415,10 @@ async function removeException(student: AttendanceStudent): Promise<void> {
   try {
     await deleteAttendanceException(accessToken, session.value.sessionId, student.studentId, attendanceScope.value)
     await loadSessionStudents(session.value.sessionId)
-    statusMessage.value = `Đã xóa ngoại lệ của ${student.studentCode}; trạng thái trở về có mặt.`
+    statusMessage.value = `Đã xóa ghi nhận của ${student.studentCode}; trạng thái trở về có mặt.`
   } catch (error) {
     if (isApiError(error, 401)) return
-    mutationError.value = messageFor(error, 'Không thể xóa ngoại lệ điểm danh.')
+    mutationError.value = messageFor(error, 'Không thể xóa ghi nhận điểm danh.')
   } finally {
     sessionSaving.value = false
   }
@@ -574,9 +574,7 @@ onMounted(async () => {
 <template>
   <div class="page-heading attendance-page-heading">
     <div>
-      <p class="eyebrow">Attendance workspace</p>
       <h1>Điểm danh</h1>
-      <p>Mở buổi học, ghi nhận ngoại lệ và theo dõi chuyên cần trong một workspace.</p>
     </div>
     <div class="page-heading-actions"><Button label="Làm mới context" icon="pi pi-refresh" severity="secondary" outlined :loading="contextLoading" @click="isStudent ? loadStudentHistoryContext() : loadContext()" /></div>
   </div>
@@ -612,15 +610,15 @@ onMounted(async () => {
     />
     <FormAlert v-if="calendarError" tone="warning" :message="calendarError" />
     <FormAlert v-if="sessionError && !sessionForbidden" tone="error" :message="sessionError" />
-    <FormAlert v-if="sessionForbidden" tone="warning" message="Bạn không có quyền thao tác attendance session này." />
+    <FormAlert v-if="sessionForbidden" tone="warning" message="Bạn không có quyền thao tác buổi điểm danh này." />
     <section class="content-surface attendance-session-surface">
       <div class="section-heading">
-        <div><h2>Danh sách học sinh của buổi</h2><p class="section-caption">{{ session ? `Session #${session.sessionId} · ${session.attendanceDate} · ${session.sessionPeriod === 'MORNING' ? 'Sáng' : 'Chiều'}` : 'Chưa mở session' }}</p></div>
-        <span v-if="session" class="field-hint">{{ sessionStudents.length }} học sinh · không tạo PRESENT record</span>
+        <div><h2>Danh sách học sinh của buổi</h2></div>
+        <span v-if="session" class="field-hint">{{ sessionStudents.length }} học sinh</span>
       </div>
       <div v-if="sessionState === 'loading'" class="page-state page-state-loading" role="status"><i class="pi pi-spin pi-spinner" aria-hidden="true" /><span>Đang tải danh sách điểm danh...</span></div>
       <AttendanceSessionTable v-else :students="sessionStudents" :loading="sessionLoading" :read-only="sessionReadOnly" @exception="openException" @delete="confirmDelete" />
-      <p v-if="!session" class="section-caption attendance-session-hint">Chọn đủ context để tự động tải roster của buổi điểm danh đã tồn tại.</p>
+      <p v-if="!session" class="section-caption attendance-session-hint">Chọn đầy đủ thông tin để tải danh sách học sinh của buổi điểm danh.</p>
     </section>
   </template>
 

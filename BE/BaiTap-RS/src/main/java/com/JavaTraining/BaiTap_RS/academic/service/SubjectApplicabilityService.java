@@ -12,7 +12,6 @@ import com.JavaTraining.BaiTap_RS.academic.domain.entity.Semester;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Subject;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectApplicability;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectApplicabilityStatus;
-import com.JavaTraining.BaiTap_RS.academic.repository.ClassSubjectRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SemesterRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectApplicabilityRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectRepository;
@@ -29,7 +28,7 @@ public class SubjectApplicabilityService {
     private final SubjectRepository subjectRepository;
     private final SubjectApplicabilityRepository applicabilityRepository;
     private final SemesterRepository semesterRepository;
-    private final ClassSubjectRepository classSubjectRepository;
+    private final ClassSubjectApplicabilityProvisioningService provisioningService;
     private final AcademicCatalogAuditService auditService;
     private final SubjectApplicabilityValidator validator;
 
@@ -37,13 +36,13 @@ public class SubjectApplicabilityService {
             SubjectRepository subjectRepository,
             SubjectApplicabilityRepository applicabilityRepository,
             SemesterRepository semesterRepository,
-            ClassSubjectRepository classSubjectRepository,
+            ClassSubjectApplicabilityProvisioningService provisioningService,
             AcademicCatalogAuditService auditService,
             SubjectApplicabilityValidator validator) {
         this.subjectRepository = subjectRepository;
         this.applicabilityRepository = applicabilityRepository;
         this.semesterRepository = semesterRepository;
-        this.classSubjectRepository = classSubjectRepository;
+        this.provisioningService = provisioningService;
         this.auditService = auditService;
         this.validator = validator;
     }
@@ -87,6 +86,7 @@ public class SubjectApplicabilityService {
                 request.classId(),
                 SubjectApplicabilityStatus.ACTIVE);
         SubjectApplicability saved = applicabilityRepository.save(applicability);
+        provisioningService.createForGradeApplicability(saved, semester);
         auditService.writeAudit(
                 "SUBJECT_APPLICABILITY_CREATED",
                 "subject_applicability",
@@ -121,7 +121,7 @@ public class SubjectApplicabilityService {
                 || applicability.getScopeType() != request.scopeType()
                 || !Objects.equals(applicability.getGradeLevelId(), request.gradeLevelId())
                 || !Objects.equals(applicability.getClassId(), request.classId());
-        if (tupleChanged && classSubjectRepository.existsByApplicabilityTarget(
+        if (tupleChanged && provisioningService.hasConfiguredTarget(
                 subjectId,
                 applicability.getSemesterId(),
                 applicability.getScopeType(),

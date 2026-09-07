@@ -11,11 +11,13 @@ const props = withDefaults(defineProps<{
   grades?: GradeLevel[]
   classStatistics?: Record<number, ClassStatistic>
   loading?: boolean
+  readOnly?: boolean
 }>(), {
   schoolClasses: () => [],
   grades: () => [],
   classStatistics: () => ({}),
   loading: false,
+  readOnly: false,
 })
 
 const emit = defineEmits<{
@@ -69,7 +71,7 @@ function warningLabel(stat: ClassStatistic): string {
         </template>
       </Column>
       <Column header="Thao tác" style="width: 12rem">
-        <template #body="slotProps"><div class="table-actions"><Button v-if="slotProps.data.status !== 'CLOSED'" icon="pi pi-pencil" text rounded aria-label="Sửa lớp" title="Sửa lớp" @click="emit('edit', slotProps.data)" /><Button v-if="slotProps.data.status === 'ACTIVE' || slotProps.data.status === 'PLANNED'" icon="pi pi-lock" text rounded severity="warn" aria-label="Đóng lớp" title="Đóng lớp" @click="emit('close', slotProps.data)" /><Button v-if="slotProps.data.status !== 'CLOSED'" icon="pi pi-trash" text rounded severity="danger" aria-label="Xóa lớp" title="Xóa lớp" @click="emit('delete', slotProps.data)" /><span v-if="slotProps.data.status === 'CLOSED'" class="table-action-note">Chỉ xem</span></div></template>
+        <template #body="slotProps"><div class="table-actions"><template v-if="!props.readOnly"><Button v-if="slotProps.data.status !== 'CLOSED'" icon="pi pi-pencil" text rounded aria-label="Sửa lớp" title="Sửa lớp" @click="emit('edit', slotProps.data)" /><Button v-if="slotProps.data.status === 'ACTIVE' || slotProps.data.status === 'PLANNED'" icon="pi pi-lock" text rounded severity="warn" aria-label="Đóng lớp" title="Đóng lớp" @click="emit('close', slotProps.data)" /><Button v-if="slotProps.data.status !== 'CLOSED'" icon="pi pi-trash" text rounded severity="danger" aria-label="Xóa lớp" title="Xóa lớp" @click="emit('delete', slotProps.data)" /></template><span v-if="props.readOnly || slotProps.data.status === 'CLOSED'" class="table-action-note">Chỉ xem</span></div></template>
       </Column>
     </DataTable>
   </div>

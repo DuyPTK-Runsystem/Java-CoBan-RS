@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
@@ -43,8 +43,6 @@ const statuses = [
   { label: 'Miễn', value: 'EXEMPTED' },
   { label: 'Hủy', value: 'CANCELLED' },
 ]
-
-const targetCount = computed(() => Object.keys(drafts.value).length)
 
 function initialize(): void {
   drafts.value = Object.fromEntries((props.snapshot?.subjects ?? []).flatMap((subject) => subject.targetColumns.map((column) => [column.assessmentColumnId, {
@@ -113,8 +111,7 @@ function confirm(): void {
       return
     }
   }
-  if (!props.snapshot || targetCount.value === 0) {
-    validationMessage.value = 'Không có cột điểm lớp mới để lưu.'
+  if (!props.snapshot) {
     return
   }
   emit('confirm', {

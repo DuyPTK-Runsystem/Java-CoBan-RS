@@ -29,15 +29,15 @@ const isUpToDate = computed(() => props.status?.isUpToDate ?? false)
 
 const statusBadge = computed(() => {
   if (isInProgress.value) {
-    return { label: 'Đang cập nhật (IN_PROGRESS)', severity: 'warn' as const }
+    return { label: 'Đang cập nhật', severity: 'warn' as const }
   }
   if (isFinish.value) {
     if (isUpToDate.value) {
-      return { label: 'Đã cập nhật (FINISH · up-to-date)', severity: 'success' as const }
+      return { label: 'Đã cập nhật', severity: 'success' as const }
     }
-    return { label: 'Chưa đồng bộ (FINISH · out-of-date)', severity: 'warn' as const }
+    return { label: 'Chưa đồng bộ', severity: 'warn' as const }
   }
-  return { label: props.status?.calculationStatus ?? 'CHƯA RÕ', severity: 'secondary' as const }
+  return { label: 'Chưa xác định', severity: 'secondary' as const }
 })
 
 const studentDisplay = computed(() => {
@@ -81,12 +81,12 @@ const studentDisplay = computed(() => {
 
       <div class="version-row">
         <div class="version-stat">
-          <span class="stat-label">Source version:</span>
+          <span class="stat-label">Phiên bản dữ liệu nguồn:</span>
           <span class="stat-value">{{ props.status.sourceVersion ?? '—' }}</span>
         </div>
         <span class="stat-divider">·</span>
         <div class="version-stat">
-          <span class="stat-label">Calculated version:</span>
+          <span class="stat-label">Phiên bản đã tính:</span>
           <span class="stat-value">{{ props.status.calculatedVersion ?? '—' }}</span>
         </div>
         <span class="stat-divider">·</span>
@@ -104,7 +104,7 @@ const studentDisplay = computed(() => {
       <div class="notice-info">
         <i class="pi pi-info-circle" />
         <span>
-          <strong>Read-only status:</strong> Truy vấn trạng thái không tự kích hoạt lệnh tính toán. Dữ liệu bảng điểm chính thức được tính toán độc lập qua worker nền.
+          <strong>Trạng thái chỉ xem:</strong> Truy vấn trạng thái không tự kích hoạt lệnh tính toán. Dữ liệu bảng điểm chính thức được tính toán độc lập bởi tiến trình chạy nền.
         </span>
       </div>
     </div>

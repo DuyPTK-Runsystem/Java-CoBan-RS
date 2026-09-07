@@ -41,4 +41,27 @@ describe('TransferScoreAssistDialog', () => {
     expect(view.validationMessage).toContain('0 đến 10')
     expect(wrapper.emitted('confirm')).toBeUndefined()
   })
+
+  it('confirms a normal transfer with no score entries when the target has no columns', () => {
+    const wrapper = shallowMount(TransferScoreAssistDialog, {
+      props: {
+        visible: true,
+        snapshot: { ...snapshot, subjects: [{ ...snapshot.subjects[0], targetColumns: [] }] },
+        effectiveAt: '2026-09-07T09:00:00',
+        reason: '',
+      },
+    })
+    const view = wrapper.vm as unknown as { confirm: () => void; validationMessage: string }
+
+    view.confirm()
+
+    expect(view.validationMessage).toBe('')
+    expect(wrapper.emitted('confirm')).toEqual([[{
+      targetClassId: 102,
+      semesterId: 7,
+      effectiveAt: '2026-09-07T09:00:00',
+      reason: null,
+      scores: [],
+    }]])
+  })
 })

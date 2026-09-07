@@ -36,6 +36,7 @@
 |   068 | Student                                             | [Khắc phục chuyển đổi Student legacy sang V2](student/068-student-v2-migration-workspace-2026-09-05.md)                               | Amendment xóa Student Gender và teacher Gender/User display; FE lint/test/build và Chrome visual QA PASS                                | 2026-09-06 |
 |   069 | Enrollment                                          | [Hỗ trợ chuyển điểm khi chuyển lớp giữa học kỳ](enrollment/069-mid-semester-transfer-score-assist-ui-2026-09-07.md)                    | Fixed `hasExistingScores` contract mismatch; focused tests, lint, build và Storybook build PASS                                         | 2026-09-07 |
 |   070 | User/Auth | [Login Password & Shared Session](user-auth/070-login-password-shared-session-2026-09-07.md) | Implemented; lint/build/Storybook PASS; tests/coverage NOT RUN theo yêu cầu; browser QA NOT RUN | 2026-09-07 |
+|   071 | BE/FE | [Tinh chỉnh phần mềm](071-frontend-software-refinements-2026-09-07.md) | UI copy, Student/Teacher authorization UX, first-permitted-tab login routing, chuyển lớp fallback và tự tạo lớp-môn theo Khối; focused tests/build PASS, full FE/backend baseline failures recorded | 2026-09-07 |
 
 Plan 068 remediation: workspace `/v2/students` đã dùng contract `/api/v2/students`, filter/class/status, role guard, safe lifecycle và nullable V2 contract; FE lint, 82 file/427 test và build PASS. Chưa hoàn tất security credential vì V3 chưa có luồng activation/reset và browser/live QA chưa chạy.
 
