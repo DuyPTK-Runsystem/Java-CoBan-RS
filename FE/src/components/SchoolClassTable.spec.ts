@@ -108,5 +108,16 @@ describe('SchoolClassTable.vue', () => {
     expect(wrapper.emitted('close')).toBeTruthy()
     expect(wrapper.emitted('close')?.[0]?.[0]).toEqual(mockClasses[0])
   })
-})
 
+  it('shows class data without mutation controls in read-only mode', () => {
+    const wrapper = mount(SchoolClassTable, {
+      props: { schoolClasses: mockClasses, grades: mockGrades, readOnly: true },
+    })
+
+    expect(wrapper.text()).toContain('6A1')
+    expect(wrapper.find('button[aria-label="Sửa lớp"]').exists()).toBe(false)
+    expect(wrapper.find('button[aria-label="Đóng lớp"]').exists()).toBe(false)
+    expect(wrapper.find('button[aria-label="Xóa lớp"]').exists()).toBe(false)
+    expect(wrapper.text()).toContain('Chỉ xem')
+  })
+})

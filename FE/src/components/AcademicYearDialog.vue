@@ -48,7 +48,6 @@ const academicYearCodePattern = /^[0-9 -]+$/
 const isEdit = computed(() => props.mode === 'edit')
 const isReadOnly = computed(() => isEdit.value && props.initialValue?.status === 'CLOSED')
 const heading = computed(() => isEdit.value ? 'Chỉnh sửa năm học' : 'Tạo năm học')
-const caption = computed(() => isReadOnly.value ? 'Năm học đã đóng chỉ được xem.' : isEdit.value ? 'Cập nhật thông tin năm học chưa đóng.' : 'Thêm một năm học mới vào hệ thống.')
 const startDateModel = computed<Date | null>({
   get: () => parseAcademicDate(values.startDate),
   set: (value) => { values.startDate = formatAcademicDateInput(value) },
@@ -96,7 +95,7 @@ function save(): void {
 
 <template>
   <Dialog :visible="props.visible" modal :header="heading" :style="{ width: 'min(100% - 2rem, 620px)' }" :closable="!props.saving" @update:visible="emit('update:visible', $event)">
-    <p class="dialog-caption">{{ caption }}</p>
+    <p v-if="isReadOnly" class="dialog-caption">Năm học đã đóng chỉ được xem.</p>
     <FormAlert v-if="props.errorMessage" tone="error" :message="props.errorMessage" />
     <div v-if="isReadOnly" class="form-alert form-alert-info">Dữ liệu lịch sử được giữ nguyên và không thể chỉnh sửa.</div>
     <form class="form-stack" novalidate @submit.prevent="save">
@@ -120,7 +119,6 @@ function save(): void {
       <div class="field-group">
         <label for="academic-year-status">Trạng thái</label>
         <Select id="academic-year-status" v-model="values.status" :options="statusOptions" option-label="label" option-value="value" :disabled="isReadOnly" fluid />
-        <small class="field-hint">Chỉ dùng trạng thái DRAFT hoặc ACTIVE khi tạo/cập nhật.</small>
       </div>
       <div class="field-group">
         <label for="academic-year-notes">Ghi chú</label>

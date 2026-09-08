@@ -25,6 +25,9 @@ public interface ClassSubjectRepository extends JpaRepository<ClassSubject, Long
 
     List<ClassSubject> findAllByClassIdInAndSemesterIdIn(Collection<Long> classIds, Collection<Long> semesterIds);
 
+    List<ClassSubject> findAllBySubjectIdAndSemesterIdAndClassIdIn(
+            Long subjectId, Long semesterId, Collection<Long> classIds);
+
     List<ClassSubject> findAllBySemesterId(Long semesterId);
 
     List<ClassSubject> findAllBySemesterIdAndStatus(Long semesterId, ClassSubjectStatus status);

@@ -60,12 +60,12 @@ function close(): void {
 </script>
 
 <template>
-  <Dialog :visible="props.visible" modal header="Ghi nhận ngoại lệ điểm danh" :style="{ width: 'min(100% - 2rem, 640px)' }" :closable="!props.saving" @update:visible="emit('update:visible', $event)">
+  <Dialog :visible="props.visible" modal header="Cập nhật điểm danh" :style="{ width: 'min(100% - 2rem, 640px)' }" :closable="!props.saving" @update:visible="emit('update:visible', $event)">
     <FormAlert v-if="props.errorMessage" tone="error" :message="props.errorMessage" />
     <form class="form-stack attendance-exception-form" novalidate @submit.prevent="save">
-      <div class="context-strip"><strong>{{ props.student?.studentCode }} · {{ props.student?.studentName }}</strong><span v-if="props.session">Session #{{ props.session.sessionId }} · {{ props.session.attendanceDate }} · {{ props.session.sessionPeriod === 'MORNING' ? 'Sáng' : 'Chiều' }}</span></div>
+      <div class="context-strip"><strong>{{ props.student?.studentCode }} · {{ props.student?.studentName }}</strong><span v-if="props.session">{{ props.session.attendanceDate }} · {{ props.session.sessionPeriod === 'MORNING' ? 'Sáng' : 'Chiều' }}</span></div>
       <div class="field-group">
-        <label for="attendance-exception-status">Trạng thái exception *</label>
+        <label for="attendance-exception-status">Trạng thái điểm danh *</label>
         <Select id="attendance-exception-status" v-model="values.status" :options="statusOptions" option-label="label" option-value="value" fluid :invalid="Boolean(errors.status)" :disabled="props.saving" />
         <small v-if="errors.status" class="field-error">{{ errors.status }}</small>
       </div>
@@ -74,7 +74,7 @@ function close(): void {
         <Textarea id="attendance-exception-note" v-model="values.note" rows="4" maxlength="500" auto-resize fluid :invalid="Boolean(errors.note)" :disabled="props.saving" placeholder="Tối đa 500 ký tự" />
         <small v-if="errors.note" class="field-error">{{ errors.note }}</small>
       </div>
-      <div class="form-actions"><Button type="button" label="Hủy" icon="pi pi-times" severity="secondary" outlined :disabled="props.saving" @click="close" /><Button type="submit" label="Lưu ngoại lệ" icon="pi pi-check" :loading="props.saving" /></div>
+      <div class="form-actions"><Button type="button" label="Hủy" icon="pi pi-times" severity="secondary" outlined :disabled="props.saving" @click="close" /><Button type="submit" label="Lưu điểm danh" icon="pi pi-check" :loading="props.saving" /></div>
     </form>
   </Dialog>
 </template>

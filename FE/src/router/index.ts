@@ -2,6 +2,9 @@ import { createRouter, createWebHistory, RouterView } from 'vue-router'
 
 import { configureApiClient } from '@/services/apiClient'
 import { hasAuthenticatedSession } from '@/services/authSession'
+import { getAuthSession } from '@/services/authSession'
+import { firstPermittedWorkspacePath, isStudentWorkspace, isStudentWorkspacePath, isTeacherWorkspace, studentWorkspacePaths } from '@/services/studentNavigation'
+import type { UserRole } from '@/types/user'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -9,6 +12,7 @@ declare module 'vue-router' {
     requiresAuth?: boolean
     module?: string
     shell?: 'authenticated'
+    allowedRoles?: UserRole[]
   }
 }
 
@@ -33,21 +37,15 @@ const router = createRouter({
     },
     {
       path: '/students',
-      name: 'students',
-      component: () => import('@/views/StudentListView.vue'),
-      meta: { requiresAuth: true },
+      redirect: '/v2/students',
     },
     {
       path: '/students/new',
-      name: 'student-create',
-      component: () => import('@/views/StudentFormView.vue'),
-      meta: { requiresAuth: true },
+      redirect: '/v2/students/new',
     },
     {
       path: '/students/:studentId/edit',
-      name: 'student-edit',
-      component: () => import('@/views/StudentFormView.vue'),
-      meta: { requiresAuth: true },
+      redirect: (to) => `/v2/students/${to.params.studentId}/edit`,
     },
     {
       path: '/v2',
@@ -60,19 +58,46 @@ const router = createRouter({
           component: RouterView,
         },
         {
+          path: 'students',
+          name: 'v2-students',
+          component: () => import('@/views/StudentListView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE', 'TEACHER'] },
+        },
+        {
+          path: 'students/new',
+          name: 'v2-student-create',
+          component: () => import('@/views/StudentFormView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+        },
+        {
+          path: 'students/:studentId',
+          name: 'v2-student-detail',
+          component: () => import('@/views/StudentDetailView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE', 'TEACHER'] },
+        },
+        {
+          path: 'students/:studentId/edit',
+          name: 'v2-student-edit',
+          component: () => import('@/views/StudentFormView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+        },
+        {
           path: 'academic-years',
           name: 'v2-academic-years',
           component: () => import('@/views/AcademicYearListView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
         },
         {
           path: 'academic-years/:academicYearId/semesters',
           name: 'v2-semesters',
           component: () => import('@/views/SemesterListView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
         },
         {
           path: 'academic-catalog/grades',
           name: 'v2-academic-grades',
           component: () => import('@/views/GradeListView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
         },
         {
           path: 'academic-catalog/classes',
@@ -93,6 +118,7 @@ const router = createRouter({
           path: 'enrollments',
           name: 'v2-enrollments',
           component: () => import('@/views/EnrollmentListView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
         },
         {
           path: 'teachers',
@@ -138,6 +164,7 @@ const router = createRouter({
           path: 'scorebooks/operations',
           name: 'v2-scorebook-operations',
           component: () => import('@/views/CalculationOperationsView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
         },
         {
           // Business routes must be registered before this neutral outlet.
@@ -157,7 +184,22 @@ router.beforeEach((to) => {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
   if (to.meta.guestOnly && authenticated) {
-    return { name: 'students' }
+    return firstPermittedWorkspacePath(getAuthSession()?.user.roles ?? [])
+  }
+  const roles = getAuthSession()?.user.roles ?? []
+  if (to.name === 'v2-shell') {
+    return firstPermittedWorkspacePath(roles)
+  }
+  if (to.meta.requiresAuth && isStudentWorkspace(roles) && !isStudentWorkspacePath(to.path)) {
+    return studentWorkspacePaths[0]
+  }
+  if (to.meta.requiresAuth && isTeacherWorkspace(roles) && to.meta.allowedRoles && !roles.some((role) => to.meta.allowedRoles?.includes(role))) {
+    return { name: 'v2-attendance' }
+  }
+  if (to.meta.allowedRoles) {
+    if (!roles.some((role) => to.meta.allowedRoles?.includes(role))) {
+      return { name: 'v2-shell' }
+    }
   }
   return true
 })

@@ -379,9 +379,7 @@ onMounted(async () => {
   <div class="calculation-operations-view">
     <header class="operations-heading">
       <div>
-        <p class="eyebrow">Scorebook operations</p>
         <h1 class="page-title">Calculation Task & Audit</h1>
-        <p class="page-caption">Theo dõi xử lý nền, retry task lỗi và tra cứu lịch sử thay đổi.</p>
       </div>
     </header>
 

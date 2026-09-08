@@ -6,7 +6,7 @@ import { primeVueStubs } from '@/test/stubs'
 
 const inputNumberStub = { template: '<input />' }
 
-function mountForm(mode: 'add' | 'edit' = 'add', averageScore = 6.7) {
+function mountForm(mode: 'add' | 'edit' = 'add') {
   return mount(StudentForm, {
     props: {
       mode,
@@ -15,7 +15,6 @@ function mountForm(mode: 'add' | 'edit' = 'add', averageScore = 6.7) {
         studentName: 'John Doe',
         dateOfBirth: new Date(2000, 7, 19),
         address: 'Ho Chi Minh City',
-        averageScore,
       },
     },
     global: {
@@ -36,17 +35,17 @@ describe('StudentForm', () => {
     await studentCode.trigger('blur')
 
     expect((studentCode.element as HTMLInputElement).value).toBe('STU0123456')
-    expect(wrapper.text()).not.toContain('Use the format STU followed by exactly 7 digits.')
+    expect(wrapper.text()).not.toContain('Mã học sinh phải bắt đầu bằng STU và có đúng 7 chữ số phía sau.')
   })
 
-  it('does not show a format warning for a valid partial Student code while typing', async () => {
+  it('does not show a format warning for a valid partial Mã học sinh while typing', async () => {
     const wrapper = mountForm()
 
     await wrapper.get('#student-code').setValue('123456')
-    expect(wrapper.text()).not.toContain('Use the format STU followed by exactly 7 digits.')
+    expect(wrapper.text()).not.toContain('Mã học sinh phải bắt đầu bằng STU và có đúng 7 chữ số phía sau.')
 
     await wrapper.get('#student-code').setValue('STU123')
-    expect(wrapper.text()).not.toContain('Use the format STU followed by exactly 7 digits.')
+    expect(wrapper.text()).not.toContain('Mã học sinh phải bắt đầu bằng STU và có đúng 7 chữ số phía sau.')
   })
 
   it('shows a format warning immediately for more than seven digits', async () => {
@@ -54,18 +53,18 @@ describe('StudentForm', () => {
 
     await wrapper.get('#student-code').setValue('STU12345678')
 
-    expect(wrapper.text()).toContain('Use the format STU followed by exactly 7 digits.')
+    expect(wrapper.text()).toContain('Mã học sinh phải bắt đầu bằng STU và có đúng 7 chữ số phía sau.')
   })
 
-  it('disables the Student code and Generate code controls in Edit mode', () => {
+  it('disables the Mã học sinh and Tạo mã controls in Edit mode', () => {
     const wrapper = mountForm('edit')
 
     expect(wrapper.get('#student-code').attributes('disabled')).toBeDefined()
     expect(wrapper.get('button').attributes('disabled')).toBeDefined()
   })
 
-  it.each([0, 10])('emits Save for the Average score boundary %s', async (averageScore) => {
-    const wrapper = mountForm('add', averageScore)
+  it('emits Save without legacy average score input', async () => {
+    const wrapper = mountForm('add')
 
     await wrapper.get('#student-code').setValue('STU1234567')
     await wrapper.get('form').trigger('submit')
@@ -73,12 +72,18 @@ describe('StudentForm', () => {
     expect(wrapper.emitted('save')).toHaveLength(1)
   })
 
-  it.each([-0.01, 10.01])('rejects an out-of-range Average score %s', async (averageScore) => {
-    const wrapper = mountForm('add', averageScore)
+  it('does not render the legacy average score input', () => {
+    const wrapper = mountForm('add')
 
-    await wrapper.get('form').trigger('submit')
+    expect(wrapper.find('#student-score').exists()).toBe(false)
+  })
 
-    expect(wrapper.text()).toContain('Average score must be between 0 and 10.')
-    expect(wrapper.emitted('save')).toBeUndefined()
+  it('provisions an account by default and explains the generated username', () => {
+    const wrapper = mountForm('add')
+
+    expect(wrapper.get('#provision-account').attributes('checked')).toBeDefined()
+    expect(wrapper.text()).toContain('Cấp tài khoản đăng nhập cho học sinh')
+    expect(wrapper.text()).toContain('Mật khẩu mặc định: 12345678')
+    expect(wrapper.text()).toContain('hệ thống tự sinh username và sẽ hiển thị khi tạo thành công')
   })
 })

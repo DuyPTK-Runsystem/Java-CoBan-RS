@@ -220,22 +220,6 @@ describe('RetakeResultView', () => {
     expect(wrapper.text()).toContain('Bạn không có quyền quản lý kỳ thi lại')
   })
 
-  it('shows calculation IN_PROGRESS warning when transcript calculation is running', async () => {
-    mocks.fetchStudentAnnualTranscript.mockResolvedValueOnce({
-      studentId: 1001,
-      academicYearId: 1,
-      calculationStatus: 'IN_PROGRESS',
-      lastCalculationTaskId: null,
-      subjects: [],
-    })
-
-    const wrapper = mountView()
-    await flushPromises()
-
-    expect(wrapper.find('[data-testid="notice-calculation-in-progress"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="tag-calculation-progress"]').exists()).toBe(true)
-  })
-
   it('opens create dialog, submits, and refreshes list', async () => {
     const wrapper = mountView()
     await flushPromises()
@@ -321,21 +305,6 @@ describe('RetakeResultView', () => {
     expect(wrapper.find('[data-testid="panel-error"]').text()).toContain('Network disconnected')
   })
 
-  it('renders neutral calculation status when no items are calculated', async () => {
-    mocks.fetchStudentAnnualTranscript.mockResolvedValue({
-      studentId: 1001,
-      academicYearId: 1,
-      calculationStatus: null,
-      lastCalculationTaskId: null,
-      subjects: [],
-    })
-
-    const wrapper = mountView()
-    await flushPromises()
-
-    expect(wrapper.find('[data-testid="tag-calculation-none"]').exists()).toBe(true)
-  })
-
   it('prioritizes backend message over hardcoded fallback when create fails with 409 Conflict', async () => {
     const backendMessage = 'Chưa có điểm tổng kết thường (regular_dtbmh_cn)...'
     mocks.createRetakeExam.mockRejectedValueOnce(
@@ -366,7 +335,7 @@ describe('RetakeResultView', () => {
     await flushPromises()
 
     expect(wrapper.get('[data-testid="stub-error-message"]').text()).toBe(
-      '409 Conflict: Record cùng student/year/subject đã tồn tại hoặc lifecycle không cho phép thao tác.',
+      'Học sinh đã có kỳ thi lại cho năm học và môn học này, hoặc trạng thái hiện tại không cho phép thao tác.',
     )
   })
 
@@ -400,7 +369,7 @@ describe('RetakeResultView', () => {
     await flushPromises()
 
     expect(wrapper.get('[data-testid="stub-error-message"]').text()).toBe(
-      '409 Conflict: Dữ liệu đã thay đổi hoặc lifecycle không cho phép cập nhật điểm.',
+      'Dữ liệu đã thay đổi hoặc trạng thái hiện tại không cho phép cập nhật điểm.',
     )
   })
 
@@ -434,7 +403,7 @@ describe('RetakeResultView', () => {
     await flushPromises()
 
     expect(wrapper.get('[data-testid="stub-error-message"]').text()).toBe(
-      '409 Conflict: Record đã bị hủy hoặc không được phép hủy ở trạng thái hiện tại.',
+      'Kỳ thi lại đã bị hủy hoặc không thể hủy ở trạng thái hiện tại.',
     )
   })
 

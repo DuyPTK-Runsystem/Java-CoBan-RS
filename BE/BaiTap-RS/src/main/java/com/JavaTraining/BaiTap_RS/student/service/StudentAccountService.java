@@ -64,7 +64,8 @@ public class StudentAccountService {
 
         Student student = new Student(request.studentName(), request.studentCode());
         student.setUserId(savedUser.getId());
-        student.assignInfo(new StudentInfo(request.dateOfBirth(), request.address(), request.averageScore()));
+        student.assignInfo(new StudentInfo(
+                request.dateOfBirth(), request.address(), request.averageScore()));
         Student savedStudent = studentRepository.save(student);
         return toResponse(savedStudent, savedUser);
     }

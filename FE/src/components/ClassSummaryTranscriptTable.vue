@@ -112,11 +112,6 @@ const displayTitle = computed(() => {
   )
 })
 
-const displaySubtitle = computed(() => {
-  return props.mode === 'TERM'
-    ? 'Tổng hợp điểm tất cả các môn: STT, Họ và tên, các môn học, TBHK, Ghi chú.'
-    : 'Tổng hợp cả năm: STT, Họ và tên, các môn học (hiển thị thi lại trực tiếp), TBCN, Ghi chú.'
-})
 </script>
 
 <template>
@@ -125,7 +120,6 @@ const displaySubtitle = computed(() => {
       <div class="table-top-bar">
         <div>
           <h2 class="table-heading">{{ displayTitle }}</h2>
-          <p class="table-subtitle">{{ displaySubtitle }}</p>
         </div>
       </div>
 
@@ -144,7 +138,6 @@ const displaySubtitle = computed(() => {
                 {{ sub.name }}
               </th>
               <th class="col-dtb">TBHK</th>
-              <th class="col-note">Ghi chú</th>
             </tr>
           </thead>
           <tbody>
@@ -177,7 +170,6 @@ const displaySubtitle = computed(() => {
               <td class="cell-score cell-dtb">
                 {{ formatScore(stu.dtbhk) }}
               </td>
-              <td class="col-note cell-center">—</td>
             </tr>
           </tbody>
         </table>
@@ -197,7 +189,6 @@ const displaySubtitle = computed(() => {
                 {{ sub.name }}
               </th>
               <th class="col-dtb">TBCN</th>
-              <th class="col-note">Ghi chú</th>
             </tr>
           </thead>
           <tbody>
@@ -239,13 +230,6 @@ const displaySubtitle = computed(() => {
               <!-- TBCN -->
               <td class="cell-score cell-dtb">
                 {{ formatScore(stu.finalDtbcn ?? stu.regularDtbcn) }}
-              </td>
-              <td class="col-note cell-center">
-                {{
-                  stu.subjects.some((s) => s.retake?.retakeScore != null)
-                    ? 'Lên lớp sau thi lại'
-                    : (stu.finalDtbcn ?? 0) >= 5.0 ? 'Lên lớp thẳng' : '—'
-                }}
               </td>
             </tr>
           </tbody>
@@ -442,4 +426,3 @@ const displaySubtitle = computed(() => {
   color: #15803d;
 }
 </style>
-

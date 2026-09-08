@@ -51,8 +51,8 @@ describe('TranscriptStatusCard.vue', () => {
     })
 
     expect(wrapper.text()).toContain('Nguyễn Minh An · HS0001')
-    expect(wrapper.text()).toContain('IN_PROGRESS')
-    expect(wrapper.text()).toContain('Source version:')
+    expect(wrapper.text()).toContain('Đang cập nhật')
+    expect(wrapper.text()).toContain('Phiên bản dữ liệu nguồn:')
     expect(wrapper.text()).toContain('12')
     expect(wrapper.find('.mock-progress').exists()).toBe(true)
   })
@@ -71,7 +71,7 @@ describe('TranscriptStatusCard.vue', () => {
     })
 
     expect(wrapper.text()).toContain('Trần Gia Bảo · HS0002')
-    expect(wrapper.text()).toContain('FINISH · up-to-date')
+    expect(wrapper.text()).toContain('Đã cập nhật')
     expect(wrapper.find('.mock-progress').exists()).toBe(false)
   })
 
@@ -88,7 +88,7 @@ describe('TranscriptStatusCard.vue', () => {
     })
 
     expect(wrapper.text()).toContain('Thiếu điểm hệ số môn Toán')
-    expect(wrapper.text()).toContain('out-of-date')
+    expect(wrapper.text()).toContain('Chưa đồng bộ')
   })
 
   it('emits refresh when refresh button is clicked', async () => {

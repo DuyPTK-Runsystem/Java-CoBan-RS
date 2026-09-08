@@ -77,7 +77,7 @@ const filteredSubjects = computed(() => {
   })
 })
 const pageState = computed<LoadingState>(() => loadingState.value === 'success' && filteredSubjects.value.length === 0 ? 'empty' : loadingState.value)
-const selectedAcademicYear = computed(() => academicYears.value.find((year) => year.id === selectedAcademicYearId.value) ?? null)
+const readOnly = computed(() => getAuthSession()?.user.roles?.includes('TEACHER') && !getAuthSession()?.user.roles?.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE'))
 
 function token(): string | null {
   const session = getAuthSession()
@@ -330,14 +330,11 @@ onMounted(() => { void loadSubjects(); void loadContext() })
   <ConfirmDialog />
   <div class="page-heading">
     <div>
-      <p class="eyebrow">Academic catalog</p>
       <h1>Môn học</h1>
-      <p v-if="selectedAcademicYear">Năm học {{ selectedAcademicYear.code }} · cấu hình phạm vi áp dụng theo học kỳ.</p>
-      <p v-else>Chọn năm học khi cần cấu hình phạm vi áp dụng.</p>
     </div>
     <div class="page-heading-actions">
       <Button label="Quản lí môn học các lớp" icon="pi pi-link" severity="secondary" outlined @click="router.push({ name: 'v2-academic-class-subjects' })" />
-      <Button label="Tạo môn" icon="pi pi-plus" @click="openCreate" />
+      <Button v-if="!readOnly" label="Tạo môn" icon="pi pi-plus" @click="openCreate" />
     </div>
   </div>
   <FormAlert v-if="statusMessage" tone="success" :message="statusMessage" />
@@ -353,7 +350,7 @@ onMounted(() => { void loadSubjects(); void loadContext() })
   </section>
   <section class="content-surface">
     <PageState :state="pageState" :forbidden="forbidden" forbidden-message="Bạn không có quyền xem danh sách môn học." :error-message="errorMessage" empty-heading="Chưa có môn học" empty-message="Chưa có môn học phù hợp với bộ lọc hiện tại." @retry="loadSubjects">
-      <SubjectTable :subjects="filteredSubjects" @edit="openEdit" @configure-applicability="openApplicability" />
+      <SubjectTable :subjects="filteredSubjects" :read-only="readOnly" @edit="openEdit" @configure-applicability="openApplicability" />
     </PageState>
   </section>
   <SubjectDialog v-model:visible="dialogVisible" :mode="dialogMode" :initial-value="selectedSubject" :saving="saving" :error-message="dialogErrorMessage" @save="saveSubject" @cancel="closeDialog" />

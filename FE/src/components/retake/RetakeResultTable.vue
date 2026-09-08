@@ -33,10 +33,10 @@ function formatScore(score: number | null | undefined): string {
         <tr>
           <th>Học sinh</th>
           <th>Năm / môn</th>
-          <th>Trước thi lại</th>
+          <th>Điểm trước thi lại</th>
           <th>Điểm thi lại</th>
-          <th>Official sau tính</th>
-          <th>Calculation</th>
+          <th>Điểm chính thức</th>
+          <th>Cập nhật kết quả</th>
           <th>Trạng thái</th>
           <th>Thao tác</th>
         </tr>
@@ -44,17 +44,12 @@ function formatScore(score: number | null | undefined): string {
       <tbody>
         <tr v-for="item in props.items" :key="item.retakeId" :data-testid="`retake-row-${item.retakeId}`">
           <td>
-            <strong>{{ item.studentName || `Học sinh #${item.studentId}` }}</strong>
-            <div class="muted">
-              studentId: {{ item.studentId }}
-              <template v-if="item.studentCode"> · {{ item.studentCode }}</template>
-            </div>
+            <strong>{{ item.studentName || 'Học sinh' }}</strong>
+            <div v-if="item.studentCode" class="muted">{{ item.studentCode }}</div>
           </td>
           <td>
-            <strong>{{ item.academicYearCode || `Năm #${item.academicYearId}` }}</strong>
-            <div class="muted">
-              {{ item.subjectName || 'Môn học' }} · subjectId: {{ item.subjectId }}
-            </div>
+            <strong>{{ item.academicYearCode || 'Năm học' }}</strong>
+            <div class="muted">{{ item.subjectName || 'Môn học' }}</div>
           </td>
           <td class="score before">
             {{ formatScore(item.preRetakeScore) }}
@@ -86,39 +81,36 @@ function formatScore(score: number | null | undefined): string {
               <Tag value="Không áp dụng" severity="secondary" />
             </template>
             <template v-else-if="item.calculationStatus === 'IN_PROGRESS'">
-              <Tag value="IN_PROGRESS" severity="warn" />
-              <div class="muted">Đang chờ worker</div>
+              <Tag value="Đang cập nhật kết quả" severity="warn" />
             </template>
             <template v-else-if="item.calculationStatus === 'FINISH'">
-              <Tag value="FINISH" severity="success" />
-              <div v-if="item.lastTaskId" class="muted">task #{{ item.lastTaskId }}</div>
-              <div v-else class="muted">Đã đồng bộ</div>
+              <Tag value="Đã cập nhật kết quả" severity="success" />
             </template>
             <template v-else>
               <Tag value="—" severity="secondary" />
-              <div class="muted">Chưa tạo task</div>
+              <div class="muted">Chưa cập nhật</div>
             </template>
           </td>
           <td>
             <Tag
               v-if="item.status === 'PLANNED'"
-              value="PLANNED"
+              value="Chờ nhập điểm"
               severity="warn"
             />
             <Tag
               v-else-if="item.status === 'SCORED'"
-              value="SCORED"
+              value="Đã có điểm"
               severity="success"
             />
             <Tag
               v-else
-              value="CANCELLED"
+              value="Đã hủy"
               severity="secondary"
             />
           </td>
           <td>
             <div v-if="item.status === 'CANCELLED'" class="muted">
-              Read-only
+              Chỉ xem
             </div>
             <div v-else class="row-actions">
               <Button
@@ -165,6 +157,22 @@ function formatScore(score: number | null | undefined): string {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: #68768e;
+  background: #fafbfd;
+}
+.table th:first-child,
+.table td:first-child {
+  position: sticky;
+  left: 0;
+  background: #fff;
+}
+.table th:last-child,
+.table td:last-child {
+  position: sticky;
+  right: 0;
+  background: #fff;
+}
+.table th:first-child,
+.table th:last-child {
   background: #fafbfd;
 }
 .table tr:hover td {

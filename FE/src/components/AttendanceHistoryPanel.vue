@@ -93,8 +93,7 @@ function handlePageChange(page: number, pageSize: number): void {
 <template>
   <section class="content-surface attendance-history-panel">
     <div class="section-heading">
-      <div><h2>Lịch sử chuyên cần của tôi</h2><p class="section-caption">Read-only · endpoint self-service chỉ trả dữ liệu của học sinh đang đăng nhập.</p></div>
-      <span class="field-hint">Không nhận studentId từ giao diện</span>
+      <div><h2>Lịch sử chuyên cần của tôi</h2></div>
     </div>
     <FormAlert v-if="props.forbidden" tone="warning" message="Bạn không có quyền xem lịch sử chuyên cần này." />
     <FormAlert v-else-if="props.errorMessage" tone="error" :message="props.errorMessage" />
@@ -113,7 +112,7 @@ function handlePageChange(page: number, pageSize: number): void {
         <Column header="Buổi"><template #body="slotProps">{{ periodLabels[slotProps.data.sessionPeriod] }}</template></Column>
         <Column header="Lớp"><template #body="slotProps">{{ slotProps.data.className || `Lớp #${slotProps.data.classId}` }}</template></Column>
         <Column header="Trạng thái"><template #body="slotProps"><Tag :value="statusLabel(slotProps.data.status)" :severity="statusTagSeverity(slotProps.data.status)" /></template></Column>
-        <Column header="Exception"><template #body="slotProps">{{ slotProps.data.exceptionStatus || '—' }}</template></Column>
+        <Column header="Trạng thái ghi nhận"><template #body="slotProps">{{ slotProps.data.exceptionStatus || '—' }}</template></Column>
         <Column header="Ghi chú"><template #body="slotProps">{{ slotProps.data.note || '—' }}</template></Column>
       </DataTable>
     </div>

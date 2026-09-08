@@ -1,16 +1,29 @@
+export type StudentAcademicStatus = 'ACTIVE' | 'INACTIVE' | 'GRADUATED'
+
+export interface StudentAccountSummary {
+  userId: number
+  username: string
+  role: string
+}
+
 export interface Student {
   studentId: number
   studentCode: string
   studentName: string
-  dateOfBirth: string
-  address: string
-  averageScore: number | null
+  dateOfBirth: string | null
+  address: string | null
+  status: StudentAcademicStatus
+  currentClassCode: string | null
+  currentClassId: number | null
+  account: StudentAccountSummary | null
 }
 
 export interface StudentSearchValues {
   studentCode: string
   studentName: string
   dateOfBirth: Date | null
+  status?: StudentAcademicStatus | ''
+  classId?: number | null
 }
 
 export interface StudentFormValues {
@@ -19,7 +32,10 @@ export interface StudentFormValues {
   studentName: string
   dateOfBirth: Date | null
   address: string
-  averageScore: number | null
+  status: StudentAcademicStatus
+  provisionAccount?: boolean
+  username?: string
+  password?: string
 }
 
 export interface StudentQuery {
@@ -38,10 +54,27 @@ export interface StudentPage {
   totalPages: number
 }
 
-export interface StudentPayload {
-  studentCode?: string
+export interface StudentV2Payload {
+  studentCode: string
   studentName: string
   dateOfBirth: string | null
-  address: string
-  averageScore: number | null
+  address: string | null
+}
+
+export interface StudentV3CreateRequest {
+  studentCode: string
+  studentName: string
+  dateOfBirth: string | null
+  address?: string | null
+  username?: string | null
+  password?: string | null
+}
+
+export interface StudentV3CreateResponse {
+  studentId: number
+  studentCode: string
+  studentName: string
+  dateOfBirth?: string | null
+  address?: string | null
+  account: StudentAccountSummary
 }

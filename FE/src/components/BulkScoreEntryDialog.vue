@@ -14,6 +14,8 @@ import type {
   StudentScoreGridRow,
 } from '@/types/scorebook'
 
+const assessmentTypeLabels: Record<string, string> = { KTTT: 'Thường xuyên', 'KTĐK': 'Giữa kỳ', KTCK: 'Cuối kỳ' }
+
 interface EditableScoreRow {
   studentId: number
   studentCode: string
@@ -134,7 +136,7 @@ function save(): void {
 <template>
   <Dialog :visible="props.visible" header="Nhập điểm hàng loạt" modal :style="{ width: 'min(1120px, calc(100vw - 32px))' }" @update:visible="emit('update:visible', $event)">
     <div class="form-stack">
-      <p class="dialog-caption">Cột: {{ props.column?.columnName || props.column?.assessmentType || '—' }}</p>
+      <p class="dialog-caption">Cột: {{ props.column?.columnName || (props.column ? assessmentTypeLabels[props.column.assessmentType] ?? props.column.assessmentType : '—') }}</p>
       <div v-if="validationMessage || props.errorMessage" class="form-alert form-alert-error" role="alert">{{ validationMessage || props.errorMessage }}</div>
       <div class="bulk-score-list">
         <div v-for="row in rows" :key="row.studentId" class="bulk-score-row">

@@ -219,9 +219,7 @@ onMounted(() => { void load() })
   <ConfirmDialog />
   <div class="page-heading">
     <div>
-      <p class="eyebrow">Academic structure</p>
       <h1>Khối</h1>
-      <p>Quản lý metadata khối và chuỗi khối kế tiếp.</p>
     </div>
     <div class="page-heading-actions">
       <Button label="Danh sách lớp" icon="pi pi-building" severity="secondary" outlined @click="router.push({ name: 'v2-academic-classes' })" />

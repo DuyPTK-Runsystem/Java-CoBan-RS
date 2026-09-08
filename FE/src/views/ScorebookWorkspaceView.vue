@@ -101,8 +101,16 @@ let gridRequestId = 0
 
 const selectedClassSubject = computed(() =>
   classSubjects.value.find((item) => item.id === selectedClassSubjectId.value) ?? null)
+const selectedClass = computed(() =>
+  classes.value.find((item) => item.id === selectedClassId.value) ?? null)
+const selectedSemester = computed(() =>
+  semesters.value.find((item) => item.id === selectedSemesterId.value) ?? null)
 const selectedSubject = computed(() =>
   subjects.value.find((item) => item.id === selectedClassSubject.value?.subjectId) ?? null)
+const selectedContextLabel = computed(() => {
+  if (!selectedClass.value || !selectedSubject.value || !selectedSemester.value) return ''
+  return `${selectedClass.value.classCode} · ${selectedSubject.value.name} · ${selectedSemester.value.name}`
+})
 const roles = computed<UserRole[]>(() => getAuthSession()?.user.roles ?? [])
 const hasRoleContract = computed(() => getAuthSession()?.user.roles !== undefined)
 const canUseWorkspace = computed(() =>
@@ -111,6 +119,7 @@ const canCreate = computed(() =>
   roles.value.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE'))
 const readOnlyColumns = computed(() =>
   scorebook.value?.status === 'PUBLISHED' || scorebook.value?.status === 'CLOSED')
+const assessmentTypeLabels: Record<string, string> = { KTTT: 'Thường xuyên', 'KTĐK': 'Giữa kỳ', KTCK: 'Cuối kỳ' }
 
 function token(): string | null {
   const session = getAuthSession()
@@ -258,7 +267,7 @@ async function loadYearContext(yearId: number | null): Promise<void> {
   } catch (error) {
     if (isApiError(error, 401)) return
     forbidden.value = isApiError(error, 403)
-    errorMessage.value = messageFor(error, 'Không thể tải context scorebook.')
+    errorMessage.value = messageFor(error, 'Không thể tải thông tin sổ điểm.')
   } finally {
     loading.value = false
   }
@@ -291,7 +300,7 @@ async function load(): Promise<void> {
   } catch (error) {
     if (isApiError(error, 401)) return
     forbidden.value = isApiError(error, 403)
-    errorMessage.value = messageFor(error, 'Không thể tải danh mục scorebook.')
+    errorMessage.value = messageFor(error, 'Không thể tải danh mục sổ điểm.')
     loading.value = false
     return
   }
@@ -338,13 +347,22 @@ async function create(): Promise<void> {
   if (!accessToken || selectedClassSubjectId.value === null || !canCreate.value) return
   saving.value = true
   clearMessages()
+  let created = false
   try {
     scorebook.value = await createScorebook(accessToken, { classSubjectId: selectedClassSubjectId.value })
+    created = true
     lookupState.value = 'ready'
+    scorebook.value = await openScorebook(accessToken, scorebook.value.id)
     await loadGrid(0, size.value)
-    statusMessage.value = 'Đã tạo sổ điểm.'
+    statusMessage.value = 'Đã tạo và mở sổ điểm.'
   } catch (error) {
     if (isApiError(error, 401)) return
+    if (created) {
+      await reloadAuthoritative(false)
+      forbidden.value = isApiError(error, 403)
+      errorMessage.value = `Đã tạo sổ điểm nhưng chưa thể mở. ${messageFor(error, 'Vui lòng thử mở lại sổ điểm.')}`
+      return
+    }
     if (isApiError(error, 409)) {
       await lookupSelectedScorebook()
       conflictMessage.value = 'Sổ điểm đã tồn tại và vừa được tải lại.'
@@ -372,7 +390,7 @@ async function lifecycle(action: 'open' | 'publish'): Promise<void> {
     if (isApiError(error, 401)) return
     if (await handleConflict(error)) return
     forbidden.value = isApiError(error, 403)
-    errorMessage.value = messageFor(error, 'Không thể cập nhật lifecycle sổ điểm.')
+    errorMessage.value = messageFor(error, 'Không thể cập nhật trạng thái sổ điểm.')
   } finally {
     saving.value = false
   }
@@ -412,7 +430,7 @@ async function saveColumn(request: CreateAssessmentColumnRequest | UpdateAssessm
   } catch (error) {
     if (isApiError(error, 401)) return
     if (await handleConflict(error)) return
-    dialogError.value = messageFor(error, 'Không thể lưu assessment column.')
+    dialogError.value = messageFor(error, 'Không thể lưu cột điểm.')
   } finally {
     saving.value = false
   }
@@ -420,9 +438,9 @@ async function saveColumn(request: CreateAssessmentColumnRequest | UpdateAssessm
 
 function confirmDeactivateColumn(column: AssessmentColumn): void {
   confirm.require({
-    header: 'Xác nhận vô hiệu hóa cột',
-    message: `Vô hiệu hóa cột ${column.columnName || column.assessmentType}?`,
-    acceptLabel: 'Vô hiệu hóa',
+    header: 'Xác nhận ngừng sử dụng cột điểm',
+    message: `Cột ${column.columnName || assessmentTypeLabels[column.assessmentType] || column.assessmentType} sẽ không còn được dùng để nhập điểm. Bạn có muốn tiếp tục?`,
+    acceptLabel: 'Ngừng sử dụng',
     rejectLabel: 'Hủy',
     accept: () => void deactivateColumn(column),
   })
@@ -436,11 +454,11 @@ async function deactivateColumn(column: AssessmentColumn): Promise<void> {
   try {
     await deactivateAssessmentColumn(accessToken, column.id)
     await reloadAuthoritative(false)
-    statusMessage.value = 'Đã vô hiệu hóa assessment column.'
+    statusMessage.value = 'Đã ngừng sử dụng cột điểm.'
   } catch (error) {
     if (isApiError(error, 401)) return
     if (await handleConflict(error)) return
-    errorMessage.value = messageFor(error, 'Không thể vô hiệu hóa assessment column.')
+    errorMessage.value = messageFor(error, 'Không thể ngừng sử dụng cột điểm.')
   } finally {
     saving.value = false
   }
@@ -585,9 +603,7 @@ onMounted(() => { void load() })
 <template>
   <div class="page-heading">
     <div>
-      <p class="eyebrow">Scorebook workspace</p>
       <h1>Sổ điểm</h1>
-      <p>Chọn context học vụ trước khi mở hoặc tạo sổ điểm.</p>
     </div>
     <div class="page-heading-actions">
       <Button label="Làm mới" icon="pi pi-refresh" severity="secondary" outlined :loading="loading" @click="load" />
@@ -598,7 +614,7 @@ onMounted(() => { void load() })
   <FormAlert v-if="statusMessage" tone="success" :message="statusMessage" />
   <FormAlert v-if="conflictMessage" tone="warning" :message="conflictMessage" />
   <FormAlert v-if="errorMessage && !forbidden" tone="error" :message="errorMessage" />
-  <FormAlert v-if="forbidden" tone="warning" :message="errorMessage || 'Bạn không có quyền thao tác scorebook này. Phiên đăng nhập vẫn được giữ nguyên.'" />
+  <FormAlert v-if="forbidden" tone="warning" :message="errorMessage || 'Bạn không có quyền thao tác sổ điểm này. Phiên đăng nhập vẫn được giữ nguyên.'" />
 
   <ScorebookContextPanel
     v-model:academic-year-id="selectedAcademicYearId"
@@ -612,6 +628,7 @@ onMounted(() => { void load() })
     :subjects="subjects"
     :loading="loading"
   />
+  <p v-if="selectedContextLabel" class="selected-scorebook-context">{{ selectedContextLabel }}</p>
 
   <div v-if="loading || lookupState === 'loading'" class="page-state page-state-loading" role="status">
     <i class="pi pi-spin pi-spinner" aria-hidden="true" />
@@ -635,8 +652,8 @@ onMounted(() => { void load() })
 
     <template v-if="scorebook">
       <div class="tab-strip">
-        <Button label="Bảng điểm" icon="pi pi-table" :outlined="activeTab !== 'grid'" @click="activeTab = 'grid'" />
-        <Button label="Cấu hình cột" icon="pi pi-sliders-h" :outlined="activeTab !== 'columns'" @click="activeTab = 'columns'" />
+        <Button label="Nhập điểm" icon="pi pi-table" :outlined="activeTab !== 'grid'" @click="activeTab = 'grid'" />
+        <Button label="Cột điểm" icon="pi pi-sliders-h" :outlined="activeTab !== 'columns'" @click="activeTab = 'columns'" />
       </div>
       <ScoreGrid
         v-if="activeTab === 'grid'"

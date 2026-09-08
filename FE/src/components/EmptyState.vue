@@ -9,8 +9,8 @@ withDefaults(defineProps<{
   actionIcon?: string
 }>(), {
   icon: 'pi pi-inbox',
-  heading: 'Nothing to show',
-  message: 'There are no records available yet.',
+  heading: 'Chưa có dữ liệu',
+  message: 'Hiện chưa có bản ghi nào.',
   actionLabel: '',
   actionIcon: 'pi pi-refresh',
 })

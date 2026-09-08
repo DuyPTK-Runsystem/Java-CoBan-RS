@@ -31,6 +31,10 @@
 |   063 | [Calculation Task & Audit UI](scorebook/063-calculation-task-audit-ui-2026-09-03.md)                                               | Calculation task monitoring/retry and score audit log | Completed; dev note 063; FE validation PASS | 2026-09-04 |
 |   064 | [FE E2E & Release Hardening](release/064-fe-e2e-release-hardening-2026-09-03.md)                                                  | FE v2 browser/E2E, permission, error, persistence, responsive/accessibility and release validation | Draft; awaiting user approval; not implemented | 2026-09-03 |
 |   065 | [Published Score Entry and Reopen](../../be/scorebook/065-published-score-entry-and-reopen-2026-09-03.md) | Published score entry, reopen lifecycle and closed read-only alignment | Completed; validation PASS | 2026-09-03 |
+|   066 | [Student Attendance History by Student ID and Transcript Integration](../../be/attendance/066-student-attendance-history-by-id-and-transcript-integration-2026-09-04.md) | Tra cứu chuyên cần học sinh theo studentId và tích hợp bảng điểm cá nhân chi tiết khi drill-down | Completed; validation PASS | 2026-09-04 |
+|   068 | [Student V2 Migration Workspace](student/068-student-v2-migration-workspace-2026-09-05.md) | Chuyển đổi phân hệ quản lý học sinh từ /student sang /v2/students, multi-dimensional search, V3 creation, 4-tab workspace và safe lifecycle | In-progress | 2026-09-05 |
+|   070 | [Login Password & Shared Session](user-auth/070-login-password-shared-session-2026-09-07.md) | Bỏ giới hạn độ dài mật khẩu login và dùng chung phiên giữa các tab | Implemented; lint/build/Storybook PASS; tests/coverage NOT RUN theo yêu cầu; browser QA NOT RUN | 2026-09-07 |
+
 
 ## Current FE notes
 

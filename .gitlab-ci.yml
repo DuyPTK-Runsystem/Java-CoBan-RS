@@ -1,0 +1,26 @@
+stages:
+  - Build $SOURCE
+  - Deploy $SOURCE
+build_be:
+  stage: Build $SOURCE
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker build --no-cache -t $DOCKER_IMAGE_NAME .
+  only:
+    - schedules
+  tags: 
+    - runner_181
+deploy_be:
+  stage: Deploy $SOURCE
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker rm -f $NAME_CONTAINER
+    - docker run --restart=always -e TZ=Asia/Ho_Chi_Minh $DOCKER_ENV -d --log-opt max-size=200m -p $PORT:$PORT_APP --name $NAME_CONTAINER $MOUNT $DOCKER_IMAGE_NAME
+  only:
+    - schedules
+  tags: 
+    - runner_181

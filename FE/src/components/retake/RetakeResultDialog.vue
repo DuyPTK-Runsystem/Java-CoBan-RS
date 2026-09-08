@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import Button from 'primevue/button'
+import DatePicker from 'primevue/datepicker'
 import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
-import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
 
@@ -70,6 +70,20 @@ const retakeScore = ref<number | null>(null)
 const note = ref('')
 const validationError = ref('')
 
+const examDateModel = computed<Date | null>({
+  get: () => examDate.value ? new Date(`${examDate.value}T00:00:00`) : null,
+  set: (value) => {
+    if (!value) {
+      examDate.value = ''
+      return
+    }
+    const year = value.getFullYear()
+    const month = String(value.getMonth() + 1).padStart(2, '0')
+    const day = String(value.getDate()).padStart(2, '0')
+    examDate.value = `${year}-${month}-${day}`
+  },
+})
+
 const errorList = computed(() => {
   if (Array.isArray(props.errorMessage)) {
     return props.errorMessage
@@ -103,9 +117,9 @@ watch(
     if (!props.visible) return
     validationError.value = ''
     if (props.mode === 'create') {
-      studentId.value = props.students[0]?.id ?? null
-      academicYearId.value = props.academicYears[0]?.id ?? null
-      subjectId.value = props.subjects[0]?.id ?? null
+      studentId.value = null
+      academicYearId.value = null
+      subjectId.value = null
       examDate.value = ''
       retakeScore.value = null
       note.value = ''
@@ -131,14 +145,14 @@ const dialogTitle = computed(() => {
 
 const dialogCaption = computed(() => {
   if (props.mode === 'create') {
-    return 'Tạo record PLANNED cho một học sinh/môn/năm học.'
+    return 'Chọn học sinh, năm học và môn học để tạo kỳ thi lại.'
   }
   if (props.mode === 'score' && props.item) {
-    const student = props.item.studentName || `Học sinh #${props.item.studentId}`
-    const subject = props.item.subjectName || `Môn #${props.item.subjectId}`
-    return `${student} · ${subject} · retakeId: ${props.item.retakeId}`
+    const student = props.item.studentName || 'Học sinh'
+    const subject = props.item.subjectName || 'Môn học'
+    return `${student} · ${subject}`
   }
-  return 'Record sẽ chuyển sang CANCELLED và audit history được giữ lại.'
+  return 'Kỳ thi lại sẽ được hủy và lịch sử vẫn được lưu lại.'
 })
 
 function hasAtMostOneDecimal(input: number): boolean {
@@ -255,9 +269,9 @@ function handleSave(): void {
     <!-- MODE: CANCEL -->
     <template v-if="props.mode === 'cancel'">
       <div class="notice warn">
-        <strong>Ảnh hưởng:</strong>
+        <strong>Xác nhận:</strong>
         <span>
-          Nếu record đang SCORED, backend có thể tạo task để khôi phục official result về regular score. Không xóa dữ liệu lịch sử.
+          Điểm chính thức sẽ được cập nhật lại. Dữ liệu lịch sử vẫn được lưu.
         </span>
       </div>
     </template>
@@ -266,13 +280,13 @@ function handleSave(): void {
     <template v-else-if="props.mode === 'score'">
       <div class="compare">
         <div class="compare-card">
-          <div class="muted">Trước thi lại · preRetakeScore</div>
+          <div class="muted">Điểm trước thi lại</div>
           <div class="score before" style="font-size: 24px">
             {{ props.item?.preRetakeScore !== null && props.item?.preRetakeScore !== undefined ? props.item.preRetakeScore.toFixed(1) : '—' }}
           </div>
         </div>
         <div class="compare-card">
-          <div class="muted">Sau thi lại · retakeScore</div>
+          <div class="muted">Điểm thi lại</div>
           <div class="score after" style="font-size: 24px">
             {{ props.item?.retakeScore !== null && props.item?.retakeScore !== undefined ? props.item.retakeScore.toFixed(1) : '—' }}
           </div>
@@ -281,7 +295,7 @@ function handleSave(): void {
 
       <div v-if="isCancelled" class="notice warn" data-testid="notice-cancelled-readonly">
         <strong>Chỉ đọc:</strong>
-        <span>Kỳ thi lại này đã bị hủy (CANCELLED). Điểm và thông tin không thể sửa đổi.</span>
+        <span>Kỳ thi lại này đã bị hủy. Điểm và thông tin không thể sửa đổi.</span>
       </div>
 
       <div class="form-grid">
@@ -302,10 +316,12 @@ function handleSave(): void {
         </div>
         <div class="field">
           <label for="score-date">Ngày thi</label>
-          <InputText
+          <DatePicker
             id="score-date"
-            v-model="examDate"
-            type="date"
+            v-model="examDateModel"
+            date-format="dd/mm/yy"
+            placeholder="dd/mm/yyyy"
+            show-icon
             :disabled="isCancelled"
             fluid
             data-testid="input-exam-date"
@@ -331,22 +347,21 @@ function handleSave(): void {
         class="notice success"
         data-testid="notice-official"
       >
-        <strong>Official:</strong>
+        <strong>Điểm chính thức:</strong>
         <span>
           {{ props.item.officialDtbmhCn.toFixed(1) }}
-          <template v-if="props.item.calculationSource"> · calculationSource: {{ props.item.calculationSource }}</template>
-          <template v-if="props.item.calculationStatus"> · status {{ props.item.calculationStatus }}</template>
-          (dữ liệu đọc từ Transcript API).
+          <template v-if="props.item.calculationStatus === 'IN_PROGRESS'"> · đang cập nhật kết quả</template>
+          <template v-else-if="props.item.calculationStatus === 'FINISH'"> · đã cập nhật kết quả</template>
         </span>
       </div>
       <div v-else-if="props.item?.calculationStatus === 'IN_PROGRESS'" class="notice warn">
         <strong>Đang xử lý:</strong>
-        <span>Backend đang tính lại transcript. Kết quả cũ chưa được cập nhật chính thức.</span>
+        <span>Kết quả đang được cập nhật. Vui lòng tải lại sau ít phút.</span>
       </div>
 
       <div class="notice warn">
-        <strong>Rule:</strong>
-        <span>Điểm hợp lệ từ 0.0 đến 10.0, tối đa 1 chữ số thập phân. Lưu điểm sẽ tạo calculation task.</span>
+        <strong>Lưu ý:</strong>
+        <span>Điểm hợp lệ từ 0.0 đến 10.0, tối đa 1 chữ số thập phân.</span>
       </div>
     </template>
 
@@ -356,7 +371,6 @@ function handleSave(): void {
         <div class="field">
           <label for="create-student">Học sinh *</label>
           <Select
-            v-if="props.students.length > 0"
             id="create-student"
             v-model="studentId"
             :options="props.students"
@@ -366,20 +380,10 @@ function handleSave(): void {
             fluid
             data-testid="select-student"
           />
-          <InputNumber
-            v-else
-            id="create-student"
-            v-model="studentId"
-            :min="1"
-            placeholder="Nhập ID học sinh"
-            fluid
-            data-testid="select-student"
-          />
         </div>
         <div class="field">
           <label for="create-year">Năm học *</label>
           <Select
-            v-if="props.academicYears.length > 0"
             id="create-year"
             v-model="academicYearId"
             :options="props.academicYears"
@@ -389,20 +393,10 @@ function handleSave(): void {
             fluid
             data-testid="select-year"
           />
-          <InputNumber
-            v-else
-            id="create-year"
-            v-model="academicYearId"
-            :min="1"
-            placeholder="Nhập ID năm học"
-            fluid
-            data-testid="select-year"
-          />
         </div>
         <div class="field">
           <label for="create-subject">Môn học *</label>
           <Select
-            v-if="props.subjects.length > 0"
             id="create-subject"
             v-model="subjectId"
             :options="props.subjects"
@@ -412,28 +406,21 @@ function handleSave(): void {
             fluid
             data-testid="select-subject"
           />
-          <InputNumber
-            v-else
-            id="create-subject"
-            v-model="subjectId"
-            :min="1"
-            placeholder="Nhập ID môn học"
-            fluid
-            data-testid="select-subject"
-          />
         </div>
         <div class="field">
           <label for="create-date">Ngày thi</label>
-          <InputText
+          <DatePicker
             id="create-date"
-            v-model="examDate"
-            type="date"
+            v-model="examDateModel"
+            date-format="dd/mm/yy"
+            placeholder="dd/mm/yyyy"
+            show-icon
             fluid
             data-testid="input-create-date"
           />
         </div>
         <div class="field wide">
-          <label for="create-score">Điểm thi lại (optional)</label>
+          <label for="create-score">Điểm thi lại</label>
           <InputNumber
             id="create-score"
             v-model="retakeScore"
@@ -442,7 +429,7 @@ function handleSave(): void {
             :min-fraction-digits="0"
             :max-fraction-digits="1"
             :step="0.1"
-            placeholder="Để trống = PLANNED"
+            placeholder="Để trống để nhập điểm sau"
             fluid
             data-testid="input-create-score"
           />
@@ -459,11 +446,6 @@ function handleSave(): void {
             data-testid="input-create-note"
           />
         </div>
-      </div>
-
-      <div class="notice info">
-        <strong>Snapshot:</strong>
-        <span>preRetakeScore được backend lấy từ regular_dtbmh_cn; FE không tự nhập hoặc tính snapshot.</span>
       </div>
     </template>
 
@@ -494,7 +476,7 @@ function handleSave(): void {
         />
         <Button
           v-else
-          :label="(retakeScore !== null && retakeScore !== undefined) ? 'Tạo kỳ thi lại' : 'Tạo PLANNED'"
+          label="Tạo kỳ thi lại"
           :loading="props.saving"
           data-testid="btn-dialog-save-create"
           @click="handleSave"

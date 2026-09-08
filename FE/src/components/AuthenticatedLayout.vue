@@ -16,26 +16,26 @@ const props = withDefaults(defineProps<{
 })
 const emit = defineEmits<{ logout: [] }>()
 const defaultNavigation: NavigationItem[] = [
-  { label: 'Students', to: '/students', icon: 'pi pi-users' },
-  { label: 'Add student', to: '/students/new', icon: 'pi pi-user-plus' },
+  { label: 'Hồ sơ học sinh', to: '/students', icon: 'pi pi-users' },
+  { label: 'Thêm học sinh', to: '/students/new', icon: 'pi pi-user-plus' },
 ]
 </script>
 
 <template>
   <div class="app-shell">
     <header class="app-header">
-      <RouterLink class="brand" to="/students">
+      <RouterLink class="brand" to="/v2">
         <span class="brand-mark" aria-hidden="true">AC</span>
         <span>Academic Core</span>
       </RouterLink>
       <div class="header-actions">
-        <span class="welcome">Welcome, {{ userName }}</span>
-        <Button label="Logout" icon="pi pi-sign-out" severity="secondary" text @click="emit('logout')" />
+        <span class="welcome">Xin chào, {{ userName }}</span>
+        <Button label="Đăng xuất" icon="pi pi-sign-out" severity="secondary" text @click="emit('logout')" />
       </div>
     </header>
     <div class="app-body">
-      <aside class="sidebar" aria-label="Main navigation">
-        <nav aria-label="Workspace navigation">
+      <aside class="sidebar" aria-label="Điều hướng chính">
+        <nav aria-label="Điều hướng chức năng">
           <slot name="navigation">
             <RouterLink
               v-for="item in props.navigation ?? defaultNavigation"

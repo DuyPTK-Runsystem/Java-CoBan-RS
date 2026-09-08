@@ -54,6 +54,11 @@ const inputTextStub = {
   emits: ['update:modelValue'],
   template: '<input type="text" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
 }
+const datePickerStub = {
+  props: ['modelValue'],
+  emits: ['update:modelValue'],
+  template: '<input v-bind="$attrs" type="date" :value="modelValue ? modelValue.toISOString().slice(0, 10) : \'\'" @input="$emit(\'update:modelValue\', $event.target.value ? new Date(`${$event.target.value}T00:00:00`) : null)" />',
+}
 const textareaStub = {
   props: ['modelValue'],
   emits: ['update:modelValue'],
@@ -85,6 +90,7 @@ function mountDialog(propsOverrides: Record<string, unknown> = {}) {
         Dialog: dialogStub,
         InputNumber: inputNumberStub,
         InputText: inputTextStub,
+        DatePicker: datePickerStub,
         Textarea: textareaStub,
         Select: selectStub,
         Button: buttonStub,
@@ -98,7 +104,10 @@ describe('RetakeResultDialog', () => {
     const wrapper = mountDialog({ mode: 'create' })
 
     expect(wrapper.text()).toContain('Tạo kỳ thi lại')
-    expect(wrapper.text()).toContain('Snapshot:')
+    expect(wrapper.text()).toContain('Chọn học sinh, năm học và môn học')
+    await wrapper.findAll('select')[0].setValue('1001')
+    await wrapper.findAll('select')[1].setValue('1')
+    await wrapper.findAll('select')[2].setValue('21')
 
     // Trigger save
     await wrapper.find('[data-testid="btn-dialog-save-create"]').trigger('click')
@@ -121,7 +130,7 @@ describe('RetakeResultDialog', () => {
     })
 
     expect(wrapper.text()).toContain('Nhập/sửa điểm thi lại')
-    expect(wrapper.text()).toContain('Trước thi lại · preRetakeScore')
+    expect(wrapper.text()).toContain('Điểm trước thi lại')
     expect(wrapper.text()).toContain('4.0')
     expect(wrapper.find('[data-testid="notice-official"]').exists()).toBe(true)
 
@@ -176,7 +185,7 @@ describe('RetakeResultDialog', () => {
     })
 
     expect(wrapper.text()).toContain('Hủy kỳ thi lại?')
-    expect(wrapper.text()).toContain('Ảnh hưởng:')
+    expect(wrapper.text()).toContain('Xác nhận:')
 
     await wrapper.find('[data-testid="btn-dialog-confirm-cancel"]').trigger('click')
     expect(wrapper.emitted('submitCancel')).toBeTruthy()
@@ -202,21 +211,6 @@ describe('RetakeResultDialog', () => {
     expect(saveBtn.attributes('disabled')).toBeDefined()
 
     await saveBtn.trigger('click')
-    expect(wrapper.emitted('submitScore')).toBeFalsy()
-  })
-
-  it('validates invalid date format', async () => {
-    const wrapper = mountDialog({
-      mode: 'score',
-      item: sampleItem,
-    })
-
-    await wrapper.findComponent({ name: 'InputText' }).vm.$emit('update:modelValue', 'invalid-date')
-    await wrapper.find('[data-testid="btn-dialog-save-score"]').trigger('click')
-
-    expect(wrapper.find('[data-testid="dialog-validation-error"]').text()).toContain(
-      'Ngày thi không đúng định dạng yyyy-MM-dd',
-    )
     expect(wrapper.emitted('submitScore')).toBeFalsy()
   })
 

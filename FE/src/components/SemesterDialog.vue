@@ -142,7 +142,6 @@ function save(): void {
         <DatePicker id="semester-lock-at" v-model="automaticLockAtModel" date-format="dd/mm/yy" placeholder="dd/mm/yyyy hh:mm:ss" show-icon icon="pi pi-calendar-clock" show-time show-seconds hour-format="24" fluid />
         <small class="field-hint">Chọn ngày và giờ theo định dạng dd/mm/yyyy hh:mm:ss; dữ liệu gửi API vẫn là local datetime.</small>
       </div>
-      <div class="form-alert form-alert-info">Học kỳ mới luôn bắt đầu ở trạng thái Nháp. Kích hoạt, khóa và mở lại dùng action lifecycle riêng.</div>
       <div class="form-actions">
         <Button type="button" label="Hủy" icon="pi pi-times" severity="secondary" outlined :disabled="props.saving" @click="close" />
         <Button type="submit" :label="isEdit ? 'Lưu thay đổi' : 'Tạo học kỳ'" icon="pi pi-check" :loading="props.saving" />

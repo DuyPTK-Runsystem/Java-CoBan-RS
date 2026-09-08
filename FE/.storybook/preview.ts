@@ -1,3 +1,4 @@
+import { vietnameseLocale } from '../src/locales/vi'
 import { setup } from '@storybook/vue3'
 import type { Preview } from '@storybook/vue3'
 import Aura from '@primevue/themes/aura'
@@ -9,6 +10,7 @@ import 'primeicons/primeicons.css'
 
 setup((app) => {
   app.use(PrimeVue, {
+    locale: vietnameseLocale,
     theme: {
       preset: Aura,
       options: {

@@ -7,12 +7,16 @@ import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.requests.ReqBulkCreateEnrollmentDTO;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.requests.ReqCreateEnrollmentDTO;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.requests.ReqTransferEnrollmentDTO;
+import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.requests.ReqTransferWithScoresDTO;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.response.ResClassStudentDTO;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.response.ResEnrollmentMutationDTO;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.response.ResStudentEnrollmentHistoryDTO;
+import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.response.ResTransferScoreAssistDTO;
+import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.response.ResTransferWithScoresDTO;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.response.ResUnassignedStudentDTO;
 import com.JavaTraining.BaiTap_RS.enrollment.service.EnrollmentQueryService;
 import com.JavaTraining.BaiTap_RS.enrollment.service.EnrollmentService;
+import com.JavaTraining.BaiTap_RS.enrollment.service.EnrollmentTransferScoreService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
@@ -35,14 +39,19 @@ import org.springframework.web.bind.annotation.RestController;
 @SuppressWarnings("PMD.GuardLogStatement")
 public class EnrollmentController {
 
+    private static final String OFFICE_ROLES = "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')";
+
     private final EnrollmentService enrollmentService;
     private final EnrollmentQueryService enrollmentQueryService;
+    private final EnrollmentTransferScoreService enrollmentTransferScoreService;
 
     public EnrollmentController(
             EnrollmentService enrollmentService,
-            EnrollmentQueryService enrollmentQueryService) {
+            EnrollmentQueryService enrollmentQueryService,
+            EnrollmentTransferScoreService enrollmentTransferScoreService) {
         this.enrollmentService = enrollmentService;
         this.enrollmentQueryService = enrollmentQueryService;
+        this.enrollmentTransferScoreService = enrollmentTransferScoreService;
     }
 
     @GetMapping("/classes/{classId}/students")
@@ -55,7 +64,7 @@ public class EnrollmentController {
     }
 
     @PostMapping("/enrollments")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')")
+    @PreAuthorize(OFFICE_ROLES)
     @ApiMessage("Xếp học sinh vào lớp")
     public ResponseEntity<ResEnrollmentMutationDTO> createEnrollment(
             @Valid @RequestBody ReqCreateEnrollmentDTO request) {
@@ -66,7 +75,7 @@ public class EnrollmentController {
     }
 
     @PostMapping("/enrollments/bulk")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')")
+    @PreAuthorize(OFFICE_ROLES)
     @ApiMessage("Xếp nhiều học sinh vào lớp")
     public ResEnrollmentMutationDTO createBulkEnrollment(
             @Valid @RequestBody ReqBulkCreateEnrollmentDTO request) {
@@ -77,7 +86,7 @@ public class EnrollmentController {
     }
 
     @PostMapping("/enrollments/{enrollmentId}/transfer")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')")
+    @PreAuthorize(OFFICE_ROLES)
     @ApiMessage("Chuyển lớp cho học sinh")
     public ResEnrollmentMutationDTO transferEnrollment(
             @PathVariable("enrollmentId") @Positive Long enrollmentId,
@@ -86,6 +95,31 @@ public class EnrollmentController {
                         EnrollmentController.class,
                         "EnrollmentController.transferEnrollment");
         return enrollmentService.transferEnrollment(enrollmentId, request);
+    }
+
+    @GetMapping("/enrollments/{enrollmentId}/transfer-score-assist")
+    @PreAuthorize(OFFICE_ROLES)
+    @ApiMessage("Lấy bằng chứng điểm để hỗ trợ chuyển lớp")
+    public ResTransferScoreAssistDTO getTransferScoreAssist(
+            @PathVariable("enrollmentId") @Positive Long enrollmentId,
+            @RequestParam("targetClassId") @Positive Long targetClassId,
+            @RequestParam("semesterId") @Positive Long semesterId) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                EnrollmentController.class,
+                "EnrollmentController.getTransferScoreAssist");
+        return enrollmentTransferScoreService.getAssist(enrollmentId, targetClassId, semesterId);
+    }
+
+    @PostMapping("/enrollments/{enrollmentId}/transfer-with-scores")
+    @PreAuthorize(OFFICE_ROLES)
+    @ApiMessage("Chuyển lớp và lưu điểm lớp đích")
+    public ResTransferWithScoresDTO transferWithScores(
+            @PathVariable("enrollmentId") @Positive Long enrollmentId,
+            @Valid @RequestBody ReqTransferWithScoresDTO request) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                EnrollmentController.class,
+                "EnrollmentController.transferWithScores");
+        return enrollmentTransferScoreService.transferWithScores(enrollmentId, request);
     }
 
     @GetMapping("/enrollments/unassigned")

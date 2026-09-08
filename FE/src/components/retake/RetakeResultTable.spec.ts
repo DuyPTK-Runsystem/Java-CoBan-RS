@@ -88,28 +88,28 @@ describe('RetakeResultTable', () => {
     const rows = wrapper.findAll('tbody tr')
     expect(rows.length).toBe(4)
 
-    // Row 1: SCORED with FINISH
+    // Row 1: scored and result updated
     expect(rows[0].text()).toContain('Nguyễn Minh An')
     expect(rows[0].text()).toContain('Toán')
     expect(rows[0].text()).toContain('4.0')
     expect(rows[0].text()).toContain('6.5')
-    expect(rows[0].text()).toContain('FINISH')
-    expect(rows[0].text()).toContain('SCORED')
+    expect(rows[0].text()).toContain('Đã cập nhật kết quả')
+    expect(rows[0].text()).toContain('Đã có điểm')
 
     // Row 2: PLANNED with null score
     expect(rows[1].text()).toContain('Trần Gia Bảo')
     expect(rows[1].text()).toContain('Ngữ văn')
     expect(rows[1].text()).toContain('Chưa nhập')
-    expect(rows[1].text()).toContain('PLANNED')
+    expect(rows[1].text()).toContain('Chờ nhập điểm')
 
     // Row 3: SCORED with IN_PROGRESS
     expect(rows[2].text()).toContain('Lê Hoàng Chi')
-    expect(rows[2].text()).toContain('IN_PROGRESS')
+    expect(rows[2].text()).toContain('Đang cập nhật kết quả')
 
     // Row 4: CANCELLED
     expect(rows[3].text()).toContain('Phạm Anh Dũng')
-    expect(rows[3].text()).toContain('CANCELLED')
-    expect(rows[3].text()).toContain('Read-only')
+    expect(rows[3].text()).toContain('Đã hủy')
+    expect(rows[3].text()).toContain('Chỉ xem')
   })
 
   it('displays appropriate action buttons based on row status', () => {
@@ -131,7 +131,7 @@ describe('RetakeResultTable', () => {
     expect(btnScore2.exists()).toBe(true)
     expect(btnScore2.text()).toBe('Nhập điểm')
 
-    // Row 4 (CANCELLED): no buttons, only "Read-only"
+    // Row 4 (cancelled): no buttons, only "Chỉ xem"
     expect(wrapper.find('[data-testid="btn-score-104"]').exists()).toBe(false)
     expect(wrapper.find('[data-testid="btn-cancel-104"]').exists()).toBe(false)
   })
@@ -172,7 +172,7 @@ describe('RetakeResultTable', () => {
 
     const row = wrapper.find('tbody tr')
     expect(row.findAll('td')[4]?.text()).toBe('—')
-    expect(row.text()).toContain('Đã đồng bộ')
+    expect(row.text()).toContain('Đã cập nhật kết quả')
     expect(row.text()).not.toContain('8801')
   })
 })

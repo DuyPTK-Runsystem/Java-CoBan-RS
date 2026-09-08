@@ -41,6 +41,7 @@ const classClosed = computed(() => selectedClass.value?.status === 'CLOSED')
 const semesterClosed = computed(() => selectedSemester.value?.status === 'CLOSED' || selectedSemester.value?.status === 'LOCKED')
 const availableSubjects = computed(() => subjects.value.filter((subject) => subject.status === 'ACTIVE' && !classSubjects.value.some((item) => item.subjectId === subject.id)))
 const pageState = computed<LoadingState>(() => loadingState.value === 'success' && classSubjects.value.length === 0 ? 'empty' : loadingState.value)
+const readOnly = computed(() => getAuthSession()?.user.roles?.includes('TEACHER') && !getAuthSession()?.user.roles?.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE'))
 
 function token(): string | null {
   const session = getAuthSession()
@@ -191,13 +192,11 @@ onMounted(() => { void loadContext() })
 <template>
   <div class="page-heading">
     <div>
-      <p class="eyebrow">Academic catalog</p>
       <h1>Quản lí môn học các lớp</h1>
-      <p>Gán môn học và cập nhật trạng thái theo lớp, năm học và học kỳ.</p>
     </div>
     <div class="page-heading-actions">
       <Button label="Môn học" icon="pi pi-book" severity="secondary" outlined @click="router.push({ name: 'v2-academic-subjects' })" />
-      <Button label="Thêm môn cho lớp" icon="pi pi-plus" :disabled="!selectedClassId || !selectedSemesterId || classClosed || semesterClosed" @click="openCreate" />
+      <Button v-if="!readOnly" label="Thêm môn cho lớp" icon="pi pi-plus" :disabled="!selectedClassId || !selectedSemesterId || classClosed || semesterClosed" @click="openCreate" />
     </div>
   </div>
   <FormAlert v-if="statusMessage" tone="success" :message="statusMessage" />
@@ -208,11 +207,11 @@ onMounted(() => { void loadContext() })
       <div class="field-group"><label for="class-subject-class">Lớp</label><Select id="class-subject-class" v-model="selectedClassId" :options="schoolClasses" option-label="classCode" option-value="id" placeholder="Chọn lớp" :disabled="!selectedAcademicYearId" fluid /></div>
       <div class="field-group"><label for="class-subject-semester">Học kỳ</label><Select id="class-subject-semester" v-model="selectedSemesterId" :options="semesters" option-label="name" option-value="id" placeholder="Chọn học kỳ" :disabled="!selectedAcademicYearId" fluid /></div>
     </div>
-    <div v-if="selectedClass || selectedSemester" class="catalog-context-summary"><span>{{ selectedClass?.classCode ?? 'Chưa chọn lớp' }}</span><span>{{ selectedSemester?.name ?? 'Chưa chọn học kỳ' }}</span><span>{{ classClosed || semesterClosed ? 'Chỉ xem' : 'Có thể chỉnh sửa' }}</span></div>
+    <div v-if="selectedClass || selectedSemester" class="catalog-context-summary"><span>{{ selectedClass?.classCode ?? 'Chưa chọn lớp' }}</span><span>{{ selectedSemester?.name ?? 'Chưa chọn học kỳ' }}</span><span>{{ readOnly || classClosed || semesterClosed ? 'Chỉ xem' : 'Có thể chỉnh sửa' }}</span></div>
   </section>
   <section class="content-surface">
     <PageState :state="pageState" :forbidden="forbidden" forbidden-message="Bạn không có quyền xem danh sách lớp-môn." :error-message="errorMessage" empty-heading="Chưa có môn trong lớp" empty-message="Chọn đủ context hoặc gán môn đầu tiên cho lớp này." @retry="loadClassSubjects">
-      <ClassSubjectTable :class-subjects="classSubjects" :subjects="subjects" :semesters="semesters" :read-only="classClosed || semesterClosed" @change-status="openEdit" />
+      <ClassSubjectTable :class-subjects="classSubjects" :subjects="subjects" :semesters="semesters" :read-only="readOnly || classClosed || semesterClosed" @change-status="openEdit" />
     </PageState>
   </section>
   <ClassSubjectDialog v-model:visible="dialogVisible" :mode="dialogMode" :initial-value="selectedClassSubject" :available-subjects="availableSubjects" :class-label="selectedClass?.classCode" :semester-label="selectedSemester?.name" :class-closed="classClosed" :semester-closed="semesterClosed" :saving="saving" :error-message="dialogErrorMessage" :conflict-message="conflictMessage" @save="save" @cancel="closeDialog" @configure-applicability="configureApplicability" />

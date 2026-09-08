@@ -20,6 +20,7 @@ const emit = defineEmits<{
 }>()
 
 const displayedColumns = computed(() => [...(props.grid?.columns ?? [])].sort(compareAssessmentColumns))
+const assessmentTypeLabels: Record<string, string> = { KTTT: 'Thường xuyên', 'KTĐK': 'Giữa kỳ', KTCK: 'Cuối kỳ' }
 
 function scoreFor(student: StudentScoreGrid['students'][number], column: ScoreGridColumn): StudentScore | null {
   return student.scores[String(column.columnId)] ?? null
@@ -37,7 +38,6 @@ function label(score: StudentScore | null): string {
     <div class="section-heading">
       <div>
         <h2>Bảng điểm</h2>
-        <p class="section-caption">Điểm 0 là hợp lệ; ô thiếu entry hiển thị là “Chưa nhập”.</p>
       </div>
     </div>
     <div v-if="props.loading" class="page-state page-state-loading" role="status">
@@ -48,14 +48,14 @@ function label(score: StudentScore | null): string {
       <p>Chưa có học sinh trong trang này.</p>
     </div>
     <div v-else class="scorebook-table-scroll">
-      <DataTable :value="props.grid.students" striped-rows responsive-layout="scroll" class="scorebook-grid-table">
-        <Column field="studentCode" header="Mã HS" />
-        <Column field="studentName" header="Họ và tên" />
+      <DataTable :value="props.grid.students" striped-rows scrollable responsive-layout="scroll" class="scorebook-grid-table">
+        <Column field="studentCode" header="Mã HS" frozen />
+        <Column field="studentName" header="Họ và tên" frozen />
         <Column v-for="column in displayedColumns" :key="column.columnId">
           <template #header>
             <div class="scorebook-column-header">
-              <span>{{ column.assessmentType }} · {{ column.columnName || `Cột ${column.columnNo}` }}</span>
-              <Button aria-label="Nhập hàng loạt cho cột" icon="pi pi-list" text size="small" :disabled="props.readOnly" @click="emit('bulk-edit', column)" />
+              <span>{{ assessmentTypeLabels[column.assessmentType] ?? column.assessmentType }} · {{ column.columnName || `Cột ${column.columnNo}` }}</span>
+              <Button aria-label="Nhập điểm cả cột" title="Nhập điểm cả cột" icon="pi pi-list" text size="small" :disabled="props.readOnly" @click="emit('bulk-edit', column)" />
             </div>
           </template>
           <template #body="slot">
@@ -66,14 +66,15 @@ function label(score: StudentScore | null): string {
         </Column>
       </DataTable>
     </div>
-    <ServerPagination
-      v-if="props.grid"
-      :page="props.grid.page"
-      :page-size="props.grid.size"
-      :total-records="props.grid.totalElements"
-      @page-change="(nextPage, nextSize) => emit('page-change', nextPage, nextSize)"
-    />
-    <p v-if="props.grid" class="field-hint scorebook-review-note">Trang {{ props.grid.page + 1 }}/{{ Math.max(props.grid.totalPages, 1) }} · {{ props.grid.totalElements }} học sinh</p>
+    <div v-if="props.grid" class="scorebook-pagination-bar">
+      <span class="field-hint">{{ props.grid.totalElements }} học sinh</span>
+      <ServerPagination
+        :page="props.grid.page"
+        :page-size="props.grid.size"
+        :total-records="props.grid.totalElements"
+        @page-change="(nextPage, nextSize) => emit('page-change', nextPage, nextSize)"
+      />
+    </div>
   </section>
 </template>
 
@@ -82,7 +83,9 @@ function label(score: StudentScore | null): string {
 .scorebook-table-scroll { max-width: 100%; overflow-x: auto; }
 .score-grid-table { min-width: 760px; }
 .scorebook-column-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.scorebook-pagination-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 14px; }
 .scorebook-score-cell { min-width: 78px; padding: 7px 9px; border: 0; border-radius: 6px; background: transparent; cursor: pointer; text-align: left; }
 .scorebook-score-cell:hover:not(:disabled), .scorebook-score-cell:focus-visible { outline: 2px solid var(--primary); background: #eef2ff; }
 .scorebook-score-cell:disabled { cursor: default; }
+@media (max-width: 680px) { .scorebook-pagination-bar { align-items: flex-start; flex-direction: column; } }
 </style>

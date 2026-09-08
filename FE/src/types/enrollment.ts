@@ -91,3 +91,85 @@ export interface TransferEnrollmentFormValues {
   effectiveAt: string
   reason: string
 }
+
+import type { ScoreStatus } from '@/types/scorebook'
+
+export interface TransferScoreStudentContext {
+  studentId: number
+  studentCode: string
+  studentName: string
+}
+
+export interface TransferScoreClassContext {
+  id: number
+  academicYearId: number
+  classCode: string
+  className: string | null
+}
+
+export interface TransferScoreEvidence {
+  assessmentColumnId: number
+  scorebookId: number
+  assessmentType: string
+  columnNo: number
+  columnName: string | null
+  scoreStatus: ScoreStatus
+  scoreValue: number | null
+  note: string | null
+  version: number | null
+}
+
+export interface TransferScoreTargetColumn {
+  assessmentColumnId: number
+  scorebookId: number
+  assessmentType: string
+  columnNo: number
+  columnName: string | null
+  status: 'ACTIVE' | 'INACTIVE'
+  mappingKey: string
+  suggestedSourceColumnId: number | null
+  existingScoreStatus: ScoreStatus | null
+  existingScoreValue: number | null
+  existingNote: string | null
+  existingVersion: number | null
+}
+
+export interface TransferScoreSubjectRow {
+  subjectId: number
+  subjectCode: string
+  subjectName: string
+  sourceEvidence: TransferScoreEvidence[]
+  targetColumns: TransferScoreTargetColumn[]
+}
+
+export interface TransferScoreAssistSnapshot {
+  enrollmentId: number
+  studentId: number
+  studentCode: string
+  studentName: string
+  academicYearId: number
+  semesterId: number
+  sourceClass: TransferScoreClassContext
+  targetClass: TransferScoreClassContext
+  hasExistingScores: boolean
+  subjects: TransferScoreSubjectRow[]
+  warnings: string[]
+}
+
+export interface TransferScoreEntryRequest {
+  assessmentColumnId: number
+  scoreStatus: ScoreStatus
+  scoreValue?: number | null
+  note?: string | null
+  expectedVersion?: number | null
+}
+
+export interface TransferWithScoresRequest extends TransferEnrollmentRequest {
+  semesterId: number
+  scores: TransferScoreEntryRequest[]
+}
+
+export interface TransferWithScoresResponse {
+  transfer: EnrollmentMutation
+  scores: import('@/types/scorebook').StudentScore[]
+}

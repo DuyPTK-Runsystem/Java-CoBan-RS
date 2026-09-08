@@ -1,7 +1,9 @@
 package com.JavaTraining.BaiTap_RS.student.service;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
@@ -13,7 +15,9 @@ import com.JavaTraining.BaiTap_RS.student.domain.DTOs.response.ResStudentCodeDTO
 import com.JavaTraining.BaiTap_RS.student.domain.DTOs.response.ResStudentDTO;
 import com.JavaTraining.BaiTap_RS.student.domain.DTOs.response.ResStudentPageDTO;
 import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
+import com.JavaTraining.BaiTap_RS.student.repository.StudentClassLookupRepository;
 import com.JavaTraining.BaiTap_RS.student.repository.StudentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,11 +32,19 @@ public class StudentService {
     private static final int MAX_GENERATE_CODE_BATCH_ATTEMPTS = 5;
     private final StudentRepository studentRepository;
     private final StudentCodeGenerator studentCodeGenerator;
+    private final StudentClassLookupRepository classLookupRepository;
     private final StudentServiceSupport support;
 
     public StudentService(StudentRepository studentRepository, StudentCodeGenerator studentCodeGenerator) {
+        this(studentRepository, studentCodeGenerator, null);
+    }
+
+    @Autowired
+    public StudentService(StudentRepository studentRepository, StudentCodeGenerator studentCodeGenerator,
+            StudentClassLookupRepository classLookupRepository) {
         this.studentRepository = studentRepository;
         this.studentCodeGenerator = studentCodeGenerator;
+        this.classLookupRepository = classLookupRepository;
         this.support = new StudentServiceSupport(studentRepository);
     }
 
@@ -42,20 +54,41 @@ public class StudentService {
         Pageable pageable = PageRequest.of(support.page(request.getPage()), support.size(request.getSize()),
                 StudentSortResolver.resolve(request.getSortField(), request.getSortDirection()));
         Page<Student> page = studentRepository.findAll(StudentSpecifications.from(request), pageable);
-        List<ResStudentDTO> content = page.getContent().stream().map(support::response).toList();
-        return new ResStudentPageDTO(content, page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages());
+        List<Long> studentIds = page.getContent().stream().map(Student::getId).toList();
+        Map<Long, String> classCodeMap = new HashMap<>();
+        if (classLookupRepository != null && !studentIds.isEmpty()) {
+            List<Object[]> rows = classLookupRepository.findActiveClassCodesByStudentIds(studentIds);
+            for (Object[] row : rows) {
+                if (row[0] instanceof Long sid && row[1] instanceof String code) {
+                    classCodeMap.put(sid, code);
+                }
+            }
+        }
+        List<ResStudentDTO> content = page.getContent().stream()
+                .map(student -> support.response(student, classCodeMap.get(student.getId())))
+                .toList();
+        return new ResStudentPageDTO(content, page.getNumber(), page.getSize(), page.getTotalElements(),
+                page.getTotalPages());
     }
 
     @Transactional(readOnly = true)
     public ResStudentDTO getStudent(Long studentId) {
         DeveloperTrace.trace(/* NOPMD GuardLogStatement */ StudentService.class, "StudentService.getStudent");
-        return support.response(support.find(studentId));
+        Student student = support.find(studentId);
+        List<String> codes = classLookupRepository == null ? List.of()
+                : classLookupRepository.findActiveClassCodeByStudentId(studentId);
+        String currentClassCode = codes.isEmpty() ? null : codes.get(0);
+        return support.response(student, currentClassCode);
     }
 
     @Transactional(readOnly = true)
     public ResStudentDTO getStudentByCode(String studentCode) {
         DeveloperTrace.trace(/* NOPMD GuardLogStatement */ StudentService.class, "StudentService.getStudentByCode");
-        return support.response(support.findByCode(studentCode));
+        Student student = support.findByCode(studentCode);
+        List<String> codes = classLookupRepository == null ? List.of()
+                : classLookupRepository.findActiveClassCodeByStudentId(student.getId());
+        String currentClassCode = codes.isEmpty() ? null : codes.get(0);
+        return support.response(student, currentClassCode);
     }
 
     @Transactional

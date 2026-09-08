@@ -16,7 +16,7 @@ const meta = {
     attendanceDate: '2026-09-04',
     sessionPeriod: 'MORNING',
     calendarStatus: 'SCHEDULED',
-    calendarMessage: 'Ngày và buổi học hợp lệ để mở attendance session.',
+    calendarMessage: 'Ngày và buổi học hợp lệ để mở buổi điểm danh.',
     showOpen: true,
   },
   parameters: { layout: 'padded' },

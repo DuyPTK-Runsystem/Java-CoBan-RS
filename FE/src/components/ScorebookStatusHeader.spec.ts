@@ -30,7 +30,7 @@ describe('ScorebookStatusHeader', () => {
   it('keeps a closed scorebook read-only', () => {
     const wrapper = mountHeader('CLOSED')
 
-    expect(wrapper.get('button:nth-of-type(2)').attributes('disabled')).toBeDefined()
+    expect(wrapper.findAll('button')).toHaveLength(1)
     expect(wrapper.text()).toContain('Sổ điểm đang ở chế độ chỉ đọc.')
   })
 })

@@ -57,7 +57,7 @@ function timestamp(value: string | null): string {
   <div class="table-shell enrollment-table attendance-session-table">
     <DataTable :value="props.students" :loading="props.loading" data-key="studentId" striped-rows responsive-layout="scroll">
       <template #empty>
-        <div class="empty-state"><i class="pi pi-calendar-times" aria-hidden="true" /><strong>Chưa có danh sách học sinh</strong><p>Mở một session hợp lệ để tải danh sách điểm danh.</p></div>
+        <div class="empty-state"><i class="pi pi-calendar-times" aria-hidden="true" /><strong>Chưa có danh sách học sinh</strong><p>Mở một buổi điểm danh hợp lệ để tải danh sách.</p></div>
       </template>
       <Column header="Học sinh">
         <template #body="slotProps">
@@ -72,8 +72,8 @@ function timestamp(value: string | null): string {
       <Column header="Thao tác" style="width: 12rem">
         <template #body="slotProps">
           <div class="table-actions">
-            <Button v-if="!props.readOnly" :icon="slotProps.data.attendanceRecordId === null ? 'pi pi-plus' : 'pi pi-pencil'" text rounded :aria-label="slotProps.data.attendanceRecordId === null ? 'Ghi nhận ngoại lệ' : 'Sửa ngoại lệ'" :title="slotProps.data.attendanceRecordId === null ? 'Ghi nhận ngoại lệ' : 'Sửa ngoại lệ'" @click="emit('exception', slotProps.data)" />
-            <Button v-if="!props.readOnly && slotProps.data.attendanceRecordId !== null" icon="pi pi-trash" text rounded severity="danger" aria-label="Xóa ngoại lệ" title="Xóa ngoại lệ" @click="emit('delete', slotProps.data)" />
+            <Button v-if="!props.readOnly" :icon="slotProps.data.attendanceRecordId === null ? 'pi pi-plus' : 'pi pi-pencil'" text rounded :aria-label="slotProps.data.attendanceRecordId === null ? 'Cập nhật điểm danh' : 'Sửa điểm danh'" :title="slotProps.data.attendanceRecordId === null ? 'Cập nhật điểm danh' : 'Sửa điểm danh'" @click="emit('exception', slotProps.data)" />
+            <Button v-if="!props.readOnly && slotProps.data.attendanceRecordId !== null" icon="pi pi-trash" text rounded severity="danger" aria-label="Xóa ghi nhận điểm danh" title="Xóa ghi nhận điểm danh" @click="emit('delete', slotProps.data)" />
           </div>
         </template>
       </Column>

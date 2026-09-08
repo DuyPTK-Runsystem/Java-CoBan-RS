@@ -348,7 +348,6 @@ watch(() => route.params.academicYearId, () => { void load() }, { immediate: tru
   <ConfirmDialog />
   <div class="page-heading">
     <div>
-      <p class="eyebrow">Academic structure</p>
       <h1>Học kỳ</h1>
       <p v-if="academicYear">Năm học {{ academicYear.code }} · {{ formatAcademicDate(academicYear.startDate) }} → {{ formatAcademicDate(academicYear.endDate) }}</p>
       <p v-else>Đang tải thông tin năm học...</p>

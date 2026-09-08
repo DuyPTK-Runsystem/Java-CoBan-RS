@@ -46,10 +46,8 @@ const classSubjectOptions = computed(() => props.classSubjects.map((classSubject
   <section class="content-surface scorebook-context-panel">
     <div class="section-heading">
       <div>
-        <h2>Context học vụ</h2>
-        <p class="section-caption">Năm học → học kỳ → lớp → môn học.</p>
+        <h2>Thông tin sổ điểm</h2>
       </div>
-      <span class="field-hint">Quyền thao tác do backend quyết định</span>
     </div>
     <div class="search-grid">
       <div class="field-group">
@@ -71,4 +69,3 @@ const classSubjectOptions = computed(() => props.classSubjects.map((classSubject
     </div>
   </section>
 </template>
-

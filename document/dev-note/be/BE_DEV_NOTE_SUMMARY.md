@@ -59,6 +59,8 @@
 |   065 | scorebook          | [Published Score Entry and Reopen](scorebook/065-published-score-entry-and-reopen-2026-09-03.md)                                                                | Completed; BE/FE validation PASS                                                 | 2026-09-03 |
 | 062.1 | scorebook          | [Class Transcript & Homeroom Student Transcript Viewer UI](../fe/scorebook/062.1-class-transcript-viewer-ui-2026-09-04.md)                                      | Completed; validation PASS                                                       | 2026-09-04 |
 |   066 | attendance         | [Student Attendance History by Student ID and Transcript Integration](attendance/066-student-attendance-history-by-id-and-transcript-integration-2026-09-04.md) | Completed; validation PASS                                                       | 2026-09-04 |
+|   067 | workflow-skill     | [Actual Permission Matrix and FE Remaining Plans Audit](workflow-skill/067-actual-permission-matrix-and-fe-remaining-plans-audit-2026-09-04.md)                 | Completed; documentation audit PASS                                              | 2026-09-04 |
+|   068 | student            | [Student legacy to V2 remediation](../../fe/student/068-student-v2-migration-workspace-2026-09-05.md)                                                          | Amendment removed Student Gender entity/DTO/service/V20; 87 test reports with 0 failure/error; PMD/build remain baseline-blocked | 2026-09-06 |
 
 ## Module folders
 

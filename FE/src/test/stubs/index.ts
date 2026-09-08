@@ -7,4 +7,6 @@ export const primeVueStubs = {
   InputText: InputTextStub,
   Password: InputTextStub,
   DatePicker: DatePickerStub,
+  Select: InputTextStub,
+  Checkbox: InputTextStub,
 }

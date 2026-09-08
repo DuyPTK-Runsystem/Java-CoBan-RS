@@ -7,6 +7,7 @@ import java.util.Optional;
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.requests.ReqCreateSubjectApplicabilityDTO;
 import com.JavaTraining.BaiTap_RS.academic.domain.DTOs.requests.ReqUpdateSubjectApplicabilityDTO;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.ApplicationScope;
+import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClassStatus;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Semester;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SemesterStatus;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Subject;
@@ -14,7 +15,6 @@ import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectApplicability;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectApplicabilityStatus;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectStatus;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectType;
-import com.JavaTraining.BaiTap_RS.academic.repository.ClassSubjectRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.GradeLevelRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SemesterRepository;
@@ -48,7 +48,7 @@ class SubjectApplicabilityServiceTest {
     private SchoolClassRepository schoolClassRepository;
 
     @Mock
-    private ClassSubjectRepository classSubjectRepository;
+    private ClassSubjectApplicabilityProvisioningService provisioningService;
 
     @Mock
     private AcademicCatalogAuditService auditService;
@@ -76,7 +76,7 @@ class SubjectApplicabilityServiceTest {
         Mockito.when(gradeLevelRepository.existsById(2L)).thenReturn(true);
         Mockito.when(applicabilityRepository.existsBySubjectIdAndSemesterIdAndScopeTypeAndGradeLevelIdAndIdNot(
                 70L, 81L, ApplicationScope.GRADE, 2L, 501L)).thenReturn(false);
-        Mockito.when(classSubjectRepository.existsByApplicabilityTarget(
+        Mockito.when(provisioningService.hasConfiguredTarget(
                 70L, 80L, ApplicationScope.GRADE, 1L, null)).thenReturn(false);
         SubjectApplicabilityService service = service();
 
@@ -98,7 +98,7 @@ class SubjectApplicabilityServiceTest {
         Mockito.when(gradeLevelRepository.existsById(2L)).thenReturn(true);
         Mockito.when(applicabilityRepository.existsBySubjectIdAndSemesterIdAndScopeTypeAndGradeLevelIdAndIdNot(
                 70L, 81L, ApplicationScope.GRADE, 2L, 501L)).thenReturn(false);
-        Mockito.when(classSubjectRepository.existsByApplicabilityTarget(
+        Mockito.when(provisioningService.hasConfiguredTarget(
                 70L, 80L, ApplicationScope.GRADE, 1L, null)).thenReturn(true);
         SubjectApplicabilityService service = service();
 
@@ -146,7 +146,7 @@ class SubjectApplicabilityServiceTest {
                 subjectRepository,
                 applicabilityRepository,
                 semesterRepository,
-                classSubjectRepository,
+                provisioningService,
                 auditService,
                 new SubjectApplicabilityValidator(
                         applicabilityRepository,
@@ -181,4 +181,5 @@ class SubjectApplicabilityServiceTest {
         ReflectionTestUtils.setField(applicability, "id", 501L);
         return applicability;
     }
+
 }

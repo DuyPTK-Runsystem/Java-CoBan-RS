@@ -297,3 +297,22 @@ occurredAt
 ```
 
 `beforeData` / `afterData` are JSON values and should be treated as untrusted display data, not as a stable typed domain model unless a specific audit screen defines a schema.
+
+## Transfer score assistance contract
+
+Plan 069 reuses `student_score` and `assessment_column`; it does not introduce
+a second score table or copy source rows. The enrollment transfer endpoint
+accepts target score values only after the caller has reviewed the immutable
+source evidence returned by
+`GET /api/v2/enrollments/{enrollmentId}/transfer-score-assist`.
+
+The target mapping key is deterministic:
+
+```text
+subjectId + ":" + assessmentType + ":" + columnNo
+```
+
+It is a suggestion for the UI and is not a positional or name-based mapping.
+Target-column validation still checks that the column belongs to the requested
+target class and semester, is `ACTIVE`, and belongs to a writable scorebook.
+All target score audit entries use the existing `StudentScore` audit path.

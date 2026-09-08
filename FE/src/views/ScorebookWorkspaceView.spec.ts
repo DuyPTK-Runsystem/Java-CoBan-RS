@@ -107,6 +107,7 @@ describe('ScorebookWorkspaceView', () => {
     mocks.fetchScorebook.mockResolvedValue(scorebook)
     mocks.fetchScoreGrid.mockImplementation((_token, _id, page = 0, size = 10) =>
       Promise.resolve({ ...grid, page, size }))
+    mocks.openScorebook.mockResolvedValue({ ...scorebook, status: 'OPEN' })
     await router.push({ name: 'v2-scorebooks' })
   })
 
@@ -170,7 +171,7 @@ describe('ScorebookWorkspaceView', () => {
     expect(mocks.createScorebook).not.toHaveBeenCalled()
   })
 
-  it('allows an academic office session to create an absent scorebook', async () => {
+  it('creates then opens an absent scorebook for an academic office session', async () => {
     clearAuthSession()
     saveAuthSession({
       accessToken: 'office-token',
@@ -186,6 +187,32 @@ describe('ScorebookWorkspaceView', () => {
     await view.create()
 
     expect(mocks.createScorebook).toHaveBeenCalledWith('office-token', { classSubjectId: 20 })
+    expect(mocks.openScorebook).toHaveBeenCalledWith('office-token', 12)
+  })
+
+  it('reloads the created scorebook and reports when opening it fails', async () => {
+    clearAuthSession()
+    saveAuthSession({
+      accessToken: 'office-token',
+      user: { id: 2, username: 'office.demo', roles: ['ACADEMIC_OFFICE'] },
+    })
+    mocks.fetchScorebookByClassSubject.mockRejectedValue(new ApiError(404, 'Chưa có sổ điểm'))
+    mocks.createScorebook.mockResolvedValue(scorebook)
+    mocks.openScorebook.mockRejectedValue(new ApiError(409, 'Sổ điểm chưa thể mở'))
+    mocks.fetchScorebook.mockResolvedValue(scorebook)
+    const wrapper = mountView()
+    await flushPromises()
+    const view = wrapper.vm as unknown as {
+      create: () => Promise<void>
+      scorebook: typeof scorebook | null
+      errorMessage: string
+    }
+
+    await view.create()
+
+    expect(mocks.fetchScorebook).toHaveBeenCalledWith('office-token', 12)
+    expect(view.scorebook?.status).toBe('OPEN')
+    expect(view.errorMessage).toContain('Đã tạo sổ điểm nhưng chưa thể mở.')
   })
 
   it('reloads authoritative metadata and sets conflictMessage from API after a 409', async () => {
@@ -264,7 +291,7 @@ describe('ScorebookWorkspaceView', () => {
     })
   })
 
-  it('requires confirmation before deactivating a column', async () => {
+  it('requires confirmation before stopping use of a column', async () => {
     const wrapper = mountView()
     await flushPromises()
     const column = {
@@ -281,7 +308,7 @@ describe('ScorebookWorkspaceView', () => {
         .confirmDeactivateColumn(column)
 
     expect(mocks.confirmRequire).toHaveBeenCalledWith(expect.objectContaining({
-      header: 'Xác nhận vô hiệu hóa cột',
+      header: 'Xác nhận ngừng sử dụng cột điểm',
       accept: expect.any(Function),
     }))
   })

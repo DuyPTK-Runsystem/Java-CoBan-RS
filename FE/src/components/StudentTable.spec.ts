@@ -57,7 +57,7 @@ describe('StudentTable pagination', () => {
     expect(wrapper.emitted('pageChange')).toEqual([[0, 20]])
   })
 
-  it('converts a valid one-based Go to page value to a zero-based request', async () => {
+  it('converts a valid one-based Đến trang value to a zero-based request', async () => {
     const wrapper = mountTable()
 
     await wrapper.get('[data-testid="go-to-page-input"]').setValue('2')
@@ -73,6 +73,6 @@ describe('StudentTable pagination', () => {
     await wrapper.get('button:last-child').trigger('click')
 
     expect(wrapper.emitted('pageChange')).toBeUndefined()
-    expect(wrapper.get('[role="alert"]').text()).toContain('Enter a page from 1 to 2.')
+    expect(wrapper.get('[role="alert"]').text()).toContain('Nhập số trang từ 1 đến 2.')
   })
 })

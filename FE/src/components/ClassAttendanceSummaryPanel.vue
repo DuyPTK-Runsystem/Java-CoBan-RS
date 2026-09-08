@@ -71,8 +71,7 @@ function handlePageChange(page: number, pageSize: number): void {
 <template>
   <section class="content-surface attendance-summary-panel">
     <div class="section-heading">
-      <div><h2>Báo cáo chuyên cần theo lớp</h2><p class="section-caption">Số liệu read-only theo buổi học hợp lệ và enrollment tại ngày điểm danh.</p></div>
-      <span class="field-hint">Aggregation do backend thực hiện</span>
+      <div><h2>Báo cáo chuyên cần theo lớp</h2></div>
     </div>
     <FormAlert v-if="props.forbidden" tone="warning" message="Bạn không có quyền xem báo cáo của lớp này." />
     <FormAlert v-else-if="props.errorMessage" tone="error" :message="props.errorMessage" />

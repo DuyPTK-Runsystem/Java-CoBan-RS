@@ -61,10 +61,11 @@ describe('LoginView status popup', () => {
     clearAuthSession()
   })
 
-  it('stores the session, shows success, and redirects only after Close', async () => {
+  it('stores the session and redirects to the first permitted tab after Close', async () => {
+    await router.push('/login?redirect=/v2/students/new')
     loginMock.mockResolvedValue({
       accessToken: 'jwt-token',
-      user: { id: 1, username: 'student01' },
+      user: { id: 1, username: 'student01', roles: ['ADMIN'] },
     })
     const wrapper = mountView()
 
@@ -77,7 +78,43 @@ describe('LoginView status popup', () => {
 
     await (wrapper.vm as unknown as { closePopup: () => Promise<void> }).closePopup()
 
-    expect(router.currentRoute.value.fullPath).toBe('/students/new')
+    expect(router.currentRoute.value.fullPath).toBe('/v2/academic-years')
+  })
+
+  it('routes a student to the first student tab when no redirect query is provided', async () => {
+    await router.push('/login')
+    loginMock.mockResolvedValue({
+      accessToken: 'jwt-token',
+      user: { id: 1, username: 'student01' },
+    })
+    const wrapper = mountView()
+
+    await wrapper.get('[data-testid="login-submit"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.get('[data-testid="status-popup"]').text()).toContain('Login successful')
+
+    await (wrapper.vm as unknown as { closePopup: () => Promise<void> }).closePopup()
+
+    expect(router.currentRoute.value.fullPath).toBe('/v2/attendance')
+  })
+
+  it('still routes to the first permitted tab for an unsafe redirect query', async () => {
+    await router.push('/login?redirect=//malicious-site.com')
+    loginMock.mockResolvedValue({
+      accessToken: 'jwt-token',
+      user: { id: 1, username: 'student01' },
+    })
+    const wrapper = mountView()
+
+    await wrapper.get('[data-testid="login-submit"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.get('[data-testid="status-popup"]').text()).toContain('Login successful')
+
+    await (wrapper.vm as unknown as { closePopup: () => Promise<void> }).closePopup()
+
+    expect(router.currentRoute.value.fullPath).toBe('/v2/attendance')
   })
 
   it('shows a failure popup without saving a session or redirecting', async () => {

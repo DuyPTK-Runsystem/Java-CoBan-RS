@@ -6,8 +6,10 @@ import {
   fetchClassStudents,
   fetchStudentEnrollmentHistory,
   fetchStudentEnrollmentHistoryByCode,
+  fetchTransferScoreAssist,
   fetchUnassignedStudents,
   transferEnrollment,
+  transferWithScores,
 } from './enrollmentApi'
 
 const fetchMock = vi.fn()
@@ -62,5 +64,27 @@ describe('enrollmentApi', () => {
       'http://localhost:8081/api/v2/students/101/enrollments',
       'http://localhost:8081/api/v2/students/by-code/STU%2F101%20A/enrollments',
     ])
+  })
+
+  it('serializes transfer score assist query and atomic score transfer payload', async () => {
+    fetchMock.mockImplementation(() => Promise.resolve(new Response(JSON.stringify({ data: { hasExistingScores: true } }), { status: 200 })))
+    vi.stubGlobal('fetch', fetchMock)
+    const request = {
+      targetClassId: 22,
+      semesterId: 7,
+      effectiveAt: '2026-08-28T09:30:00',
+      reason: 'Điều chỉnh sĩ số',
+      scores: [{ assessmentColumnId: 88, scoreStatus: 'SCORED' as const, scoreValue: 0, note: null, expectedVersion: 4 }],
+    }
+
+    const assistSnapshot = await fetchTransferScoreAssist('token', 501, 22, 7)
+    await transferWithScores('token', 501, request)
+
+    expect(assistSnapshot.hasExistingScores).toBe(true)
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      'http://localhost:8081/api/v2/enrollments/501/transfer-score-assist?targetClassId=22&semesterId=7',
+      'http://localhost:8081/api/v2/enrollments/501/transfer-with-scores',
+    ])
+    expect(fetchMock.mock.calls[1][1]).toMatchObject({ method: 'POST', body: JSON.stringify(request) })
   })
 })

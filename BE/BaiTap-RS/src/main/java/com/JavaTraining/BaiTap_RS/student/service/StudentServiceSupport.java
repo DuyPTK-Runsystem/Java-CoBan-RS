@@ -42,10 +42,14 @@ final class StudentServiceSupport {
     }
 
     public ResStudentDTO response(Student student) {
+        return response(student, null);
+    }
+
+    public ResStudentDTO response(Student student, String currentClassCode) {
         StudentInfo info = student.getStudentInfo();
         return new ResStudentDTO(student.getId(), student.getStudentCode(), student.getStudentName(),
                 info == null ? null : info.getDateOfBirth(), info == null ? null : info.getAddress(),
-                info == null ? null : info.getAverageScore());
+                info == null ? null : info.getAverageScore(), student.getStatus(), currentClassCode);
     }
 
     public ResStudentDTO create(ReqCreateStudentDTO request) {
@@ -59,7 +63,8 @@ final class StudentServiceSupport {
         student.setStudentName(request.getStudentName());
         StudentInfo info = student.getStudentInfo();
         if (info == null) {
-            student.assignInfo(new StudentInfo(request.getDateOfBirth(), request.getAddress(), request.getAverageScore()));
+            student.assignInfo(
+                    new StudentInfo(request.getDateOfBirth(), request.getAddress(), request.getAverageScore()));
         } else {
             info.setDateOfBirth(request.getDateOfBirth());
             info.setAddress(request.getAddress());

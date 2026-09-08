@@ -166,9 +166,7 @@ onMounted(() => { void load() })
   <ConfirmDialog />
   <div class="page-heading">
     <div>
-      <p class="eyebrow">Academic structure</p>
       <h1>Năm học</h1>
-      <p>Quản lý năm học và mở danh sách học kỳ tương ứng.</p>
     </div>
     <div class="page-heading-actions">
       <Button label="Tạo năm học" icon="pi pi-plus" @click="openCreate" />
@@ -180,7 +178,6 @@ onMounted(() => { void load() })
     <div class="section-heading">
       <div>
         <h2>Danh sách năm học</h2>
-        <p class="section-caption">Tìm theo mã năm học và lọc trên danh sách hiện tại.</p>
       </div>
     </div>
     <div class="search-grid">

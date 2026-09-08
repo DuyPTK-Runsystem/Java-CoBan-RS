@@ -40,7 +40,7 @@ describe('TransferEnrollmentDialog', () => {
     await wrapper.find('select').setValue('102')
     await wrapper.find('form').trigger('submit')
 
-    const submitted = wrapper.emitted('submit')?.[0]?.[0] as { targetClassId: number; effectiveAt: string; reason: string }
+    const submitted = wrapper.emitted('continue-score-assist')?.[0]?.[0] as { targetClassId: number; effectiveAt: string; reason: string }
     expect(submitted.targetClassId).toBe(102)
     expect(submitted.effectiveAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/)
     expect(submitted.reason).toBe('')
@@ -54,7 +54,7 @@ describe('TransferEnrollmentDialog', () => {
 
     await wrapper.find('form').trigger('submit')
 
-    expect(wrapper.emitted('submit')).toBeUndefined()
+    expect(wrapper.emitted('continue-score-assist')).toBeUndefined()
     expect(wrapper.text()).toContain('Lớp đích là bắt buộc.')
   })
 })

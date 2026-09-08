@@ -29,11 +29,11 @@ class StudentServiceCodeTest {
     @Mock
     private StudentCodeGenerator studentCodeGenerator;
 
-    private StudentService studentService;
+    private StudentCodeGenerationService studentCodeGenerationService;
 
     @BeforeEach
     void setUp() {
-        studentService = new StudentService(studentRepository, studentCodeGenerator);
+        studentCodeGenerationService = new StudentCodeGenerationService(studentRepository, studentCodeGenerator);
     }
 
     @Test
@@ -42,7 +42,7 @@ class StudentServiceCodeTest {
         Mockito.when(studentRepository.findExistingStudentCodes(FIRST_BATCH))
                 .thenReturn(List.of(STUDENT_CODE));
 
-        ResStudentCodeDTO response = studentService.generateStudentCode();
+        ResStudentCodeDTO response = studentCodeGenerationService.generateStudentCode();
 
         Assertions.assertEquals("STU7654321", response.getStudentCode(), "generate should return first available code");
     }
@@ -56,7 +56,7 @@ class StudentServiceCodeTest {
         Mockito.when(studentRepository.findExistingStudentCodes(secondBatch))
                 .thenReturn(List.of("STU0000002"));
 
-        ResStudentCodeDTO response = studentService.generateStudentCode();
+        ResStudentCodeDTO response = studentCodeGenerationService.generateStudentCode();
 
         Assertions.assertEquals("STU0000003", response.getStudentCode(), "generate should retry next batch");
     }

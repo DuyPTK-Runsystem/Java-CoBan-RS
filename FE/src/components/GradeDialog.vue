@@ -78,7 +78,6 @@ function save(): void {
 
 <template>
   <Dialog :visible="props.visible" modal :header="heading" :style="{ width: 'min(100% - 2rem, 640px)' }" :closable="!props.saving" @update:visible="emit('update:visible', $event)">
-    <p class="dialog-caption">Metadata khối dùng chung; trạng thái không xóa lịch sử.</p>
     <FormAlert v-if="props.errorMessage" tone="error" :message="props.errorMessage" />
     <form class="form-stack" novalidate @submit.prevent="save">
       <div class="catalog-form-grid">
