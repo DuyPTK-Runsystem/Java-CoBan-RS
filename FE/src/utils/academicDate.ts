@@ -1,16 +1,11 @@
+import { formatApiDate, formatApiDateTime } from './dateFormat'
+
 export function formatAcademicDate(value: string | null | undefined): string {
-  if (!value) return '-'
-  const [date] = value.split('T')
-  const [year, month, day] = date.split('-')
-  return year && month && day ? `${day}/${month}/${year}` : value
+  return formatApiDate(value)
 }
 
 export function formatAcademicDateTime(value: string | null | undefined): string {
-  if (!value) return '-'
-  const [date, time] = value.split('T')
-  const [year, month, day] = date.split('-')
-  if (!year || !month || !day) return value.replace('T', ' ')
-  return `${day}/${month}/${year}${time ? ` ${time}` : ''}`
+  return value && !/^\d{4}-\d{2}-\d{2}/.test(value) ? value.replace('T', ' ') : formatApiDateTime(value)
 }
 
 function isValidDate(value: Date): boolean {

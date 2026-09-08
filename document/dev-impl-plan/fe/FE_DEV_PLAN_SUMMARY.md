@@ -36,6 +36,8 @@
 |   070 | [Login Password & Shared Session](user-auth/070-login-password-shared-session-2026-09-07.md) | Bỏ giới hạn độ dài mật khẩu login và dùng chung phiên giữa các tab | Implemented; lint/build/Storybook PASS; tests/coverage NOT RUN theo yêu cầu; browser QA NOT RUN | 2026-09-07 |
 
 
+|   072   | [FE Source Refactor](tooling/072-frontend-source-refactor-2026-09-08.md) | Refactor `FE/src` theo vertical slice, chuẩn hóa foundation dùng chung, giảm view/component coupling và giữ nguyên API/behavior | Completed; foundation, Student, Attendance and high-risk workspace refactors, CSS split, and complete domain directory reorganization (components/ & views/); automated and browser validation PASS | 2026-09-08 |
+
 ## Current FE notes
 
 - Frontend scope is not part of plan `001`.

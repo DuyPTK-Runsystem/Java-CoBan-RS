@@ -2,7 +2,7 @@ import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { clearAuthSession, getAuthSession, saveAuthSession } from '@/services/authSession'
-import AuthenticatedV2ShellView from '@/views/AuthenticatedV2ShellView.vue'
+import AuthenticatedV2ShellView from '@/views/shell/AuthenticatedV2ShellView.vue'
 
 import router from './index'
 

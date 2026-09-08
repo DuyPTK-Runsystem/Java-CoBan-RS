@@ -7,7 +7,7 @@ import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
 
-import FormAlert from '@/components/FormAlert.vue'
+import FormAlert from '@/components/common/FormAlert.vue'
 import type {
   ReqCreateRetakeExamDTO,
   ReqUpdateRetakeScoreDTO,

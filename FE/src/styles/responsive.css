@@ -1,0 +1,197 @@
+@media (max-width: 900px) {
+  .search-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .search-action {
+    width: max-content;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1100px) and (min-width: 681px) {
+  .attendance-context-form {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .attendance-open-action {
+    width: 100%;
+  }
+}
+
+@media (max-width: 680px) {
+  .auth-surface {
+    padding: 24px 20px;
+  }
+
+  .app-header {
+    padding: 0 16px;
+  }
+
+  .welcome {
+    display: none;
+  }
+
+  .app-body {
+    display: block;
+  }
+
+  .sidebar {
+    width: 100%;
+    padding: 8px 16px;
+    border-right: 0;
+    border-bottom: 1px solid #e2e8f0;
+    position: static;
+    height: auto;
+  }
+
+  .sidebar nav {
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .sidebar a {
+    white-space: nowrap;
+  }
+
+  .page-content {
+    padding: 24px 16px;
+  }
+
+  .page-heading {
+    display: grid;
+  }
+
+  .page-heading-actions {
+    justify-content: stretch;
+  }
+
+  .page-heading-actions .p-button {
+    flex: 1;
+  }
+
+  .content-surface {
+    padding: 18px 16px;
+  }
+
+  .search-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search-action {
+    width: 100%;
+  }
+
+  .inline-field {
+    display: grid;
+  }
+
+  .form-grid-two,
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-item-wide {
+    grid-column: auto;
+  }
+
+  .form-actions {
+    display: grid;
+  }
+
+  .go-to-page {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .go-to-page-error {
+    text-align: left;
+  }
+
+  .status-dialog-heading {
+    display: grid;
+  }
+
+  .lifecycle-timeline {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .timeline-step {
+    grid-template-columns: 30px 1fr;
+    align-items: center;
+    column-gap: 10px;
+    padding-top: 0;
+  }
+
+  .timeline-step:not(:last-child)::after {
+    top: 30px;
+    left: 14px;
+    width: 2px;
+    height: calc(100% + 14px);
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .storybook-surface {
+    min-width: 0;
+  }
+
+  .storybook-screen {
+    min-width: 0;
+    padding: 16px;
+  }
+
+  .catalog-form-grid,
+  .catalog-context,
+  .catalog-context-form {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-form-grid .wide {
+    grid-column: auto;
+  }
+
+  .applicability-table .p-datatable-table {
+    min-width: 620px;
+  }
+
+  .table-toolbar {
+    display: grid;
+    align-items: stretch;
+  }
+
+  .table-toolbar .p-inputtext {
+    width: 100%;
+  }
+
+  .enrollment-context-summary {
+    display: grid;
+    gap: 8px;
+  }
+
+  .assignment-current,
+  .assignment-empty {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .attendance-context-form,
+  .attendance-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .attendance-report-context {
+    display: grid;
+    gap: 8px;
+  }
+}

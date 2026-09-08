@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { clearAuthSession, saveAuthSession } from './authSession'
+import { clearAuthSession, getAuthSession, saveAuthSession } from './authSession'
 import { apiClient, configureApiClient } from './apiClient'
 import { isApiError } from '@/types/api'
 
@@ -96,7 +96,7 @@ describe('apiClient', () => {
       kind: 'forbidden',
       message: 'You do not have permission to perform this action.',
     })
-    expect(sessionStorage.getItem('student-management.access-token')).toBe('valid-token')
+    expect(getAuthSession()?.accessToken).toBe('valid-token')
   })
 
   it.each([

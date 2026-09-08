@@ -1,0 +1,26 @@
+.calculation-operations-view { display: flex; flex-direction: column; gap: 20px; color: #182230; }
+.operations-heading { margin-bottom: 4px; }
+.eyebrow { margin: 0 0 4px; color: #176b87; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.page-title { margin: 0; font-size: 26px; font-weight: 800; }
+.page-caption { margin: 4px 0 0; color: #667085; font-size: 14px; }
+.context-bar { display: grid; grid-template-columns: 240px 240px auto; align-items: flex-end; gap: 16px; padding: 16px 20px; border: 1px solid #dfe4ea; border-radius: 12px; background: #ffffff; }
+.field-item { display: flex; flex-direction: column; gap: 4px; }
+.field-label { color: #475467; font-size: 12px; font-weight: 700; }
+.notice-box { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; border-radius: 9px; font-size: 13px; line-height: 1.45; }
+.notice-info { border: 1px solid #a8d6e3; background: #e6f4f8; color: #17556b; }
+.notice-error { border: 1px solid #f5b8b2; background: #ffefed; color: #8f1d14; }
+.notice-success { border: 1px solid #a6e2c3; background: #e9f7ef; color: #18794e; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.stat-card { display: flex; flex-direction: column; padding: 16px 20px; border: 1px solid #dfe4ea; border-radius: 12px; background: #ffffff; box-shadow: 0 2px 6px rgba(20, 32, 50, .04); }
+.stat-title, .stat-subtitle { color: #667085; font-size: 12px; }
+.stat-title { font-weight: 700; }
+.stat-count { margin: 4px 0 2px; color: #182230; font-size: 24px; font-weight: 800; }
+.count-failed { color: #b42318; }.count-running { color: #176b87; }.count-progress { color: #9a6700; }
+.tabs-container { display: flex; width: max-content; gap: 6px; padding: 5px; border-radius: 10px; background: #e9edf1; }
+.tab-button { padding: 9px 16px; border: 0; border-radius: 7px; background: transparent; color: #475467; font-size: 13px; font-weight: 700; cursor: pointer; transition: all .15s ease; }
+.tab-button.active { background: #ffffff; color: #176b87; box-shadow: 0 2px 8px rgba(20, 32, 50, .09); }
+.forbidden-card { padding: 48px 24px; border: 1px solid #dfe4ea; border-radius: 12px; background: #ffffff; text-align: center; }
+.forbidden-icon { display: grid; width: 48px; height: 48px; margin: 0 auto 12px; place-items: center; border-radius: 50%; background: #fee4e2; color: #b42318; font-size: 20px; font-weight: 800; }
+.text-muted { color: #667085; }
+@media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); }.context-bar { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .stats-grid, .context-bar { grid-template-columns: 1fr; }.tabs-container { width: 100%; overflow-x: auto; } }
