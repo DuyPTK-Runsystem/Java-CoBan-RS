@@ -32,7 +32,7 @@ Chỉ đọc tài liệu phù hợp khi task cần; không tải toàn bộ tài
 
 ## Chọn phiên bản tài liệu ứng dụng
 
-- Prompt phải nêu rõ phiên bản tài liệu ứng dụng áp dụng, ví dụ `v1` hoặc `v2`.
+- Prompt phải nêu rõ phiên bản tài liệu ứng dụng áp dụng, ví dụ `v1`, `v2` hoặc `v3`.
 - Nếu prompt chưa chỉ định phiên bản, dừng xử lý phần phụ thuộc tài liệu ứng dụng và hỏi người dùng chính xác version cần áp dụng. Không tự mặc định v1, v2 hoặc suy luận từ loại task.
 - Chỉ tiếp tục đọc tài liệu ứng dụng, lập Developer Plan hoặc triển khai sau khi người dùng xác nhận version.
 
@@ -51,6 +51,19 @@ Chỉ đọc tài liệu phù hợp khi task cần; không tải toàn bộ tài
 - Module user/auth: đọc `document/application-doc/v2/modules/UserModule.md` cho contract hiện tại và `00-CommonAndAuthModule.md` cùng thư mục cho baseline auth/role mở rộng.
 - Module student: đọc `document/application-doc/v2/modules/StudentModule.md` cho CRUD hiện tại; đọc thêm `01-AcademicStructureModule.md` hoặc `02-EnrollmentAndTeachingModule.md` khi task mở rộng sang khối, lớp hoặc xếp lớp.
 - Database: đọc `document/application-doc/v2/DataStructure.md`, sau đó chỉ đọc nhóm file `data-model/` phù hợp khi task liên quan schema, migration, JPA, relationship hoặc batch data.
+
+### Version v3
+
+- Entry point: đọc `document/application-doc/v3/ApplicationContext.md` để xác định ranh giới v3 và nguyên tắc không sửa ngầm contract v2.
+- Requirement baseline: đọc `document/application-doc/v3/RequirementBaseline.md`, sau đó chỉ chọn module v3 phù hợp.
+- Change request: đọc CR liên quan trong `document/application-doc/v3/change-request/`; CR nền hiện tại là `CR-V3-001-academic-operations-and-targeted-communication.md`.
+- Module placement/timetable: đọc `modules/01-PlacementAndEnrollment.md` hoặc `modules/02-TimetableAndTeachingLoad.md` khi task liên quan xếp lớp, thời khóa biểu, conflict hoặc định mức tiết giáo viên.
+- Module notification/query/import/lesson log: đọc `modules/03-NotificationAndAudience.md`, `modules/04-QueryAndScoreImport.md` hoặc `modules/05-LessonLog.md` theo capability.
+- Data boundary: đọc `document/application-doc/v3/data-model/README.md` khi task liên quan schema, migration, JPA, relationship, audit hoặc lifecycle.
+- FE boundary: đọc `document/application-doc/v3/frontend-api/README.md` khi task liên quan API service, DTO, query state, error handling hoặc FE/BE contract.
+- HTML specification: dùng `document/application-doc/v3/specification.html` để review tổng quan trực quan; HTML không thay thế các markdown requirement/module contract.
+- Parallel delivery: từ Plan 073, đọc `document/dev-impl-plan/summary/MASTER_PLAN_V3-2026-09-09.md` và plan BE/FE tương ứng; không áp dụng mô hình chờ toàn bộ BE hoàn thành rồi mới bắt đầu FE.
+- Open decisions: các mục `TBD` trong v3, đặc biệt quy định định mức tiết/tuần, phải được xác nhận trước khi code phần bị ảnh hưởng; không tự suy đoán giá trị nghiệp vụ.
 
 ### Tài liệu dùng chung
 

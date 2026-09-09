@@ -24,6 +24,14 @@ Example:
 
 ## Plans
 
+### v3 draft plans starting from Plan 073
+
+| No. | Area | Plan | Status |
+|---:|---|---|---|
+| 073 | BE/FE | [v3 Foundation and Cross-cutting Contract](MASTER_PLAN_V3-2026-09-09.md) ([BE](../BE/073-v3-foundation-contract-2026-09-09.md), [FE](../FE/foundation/073-v3-foundation-contract-2026-09-09.md)) | Draft; CR-V3-001 and wireframe awaiting approval |
+
+Master plan: [MASTER_PLAN_V3-2026-09-09.md](MASTER_PLAN_V3-2026-09-09.md). Plans 074–080 are sequenced in that master plan and remain draft until their contract slice is approved.
+
 |   No. | Area           | Plan                                                                                                                                                                  | Status                                                                                                                                     | Created                                                                                          |
 | ----: | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
 |   001 | BE             | [Base Backend Theo Boilerplate, Rút Gọn User/Auth](../be/user-auth/001-base-boilerplate-user-auth-2026-08-17.md)                                                      | Approved                                                                                                                                   | 2026-08-17                                                                                       |
