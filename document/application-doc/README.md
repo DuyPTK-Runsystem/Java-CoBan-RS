@@ -9,6 +9,7 @@ versions when reading requirements, planning work or implementing changes.
 |---|---|---|
 | v1 | `document/application-doc/v1/` | Existing baseline for the original user, student and UI flows |
 | v2 | `document/application-doc/v2/` | Modular application baseline, expanded academic model and change requests |
+| v3 | `document/application-doc/v3/` | Planned scheduling, rule-based placement, targeted notifications, richer search/filter, score-column import and lesson-log scope |
 
 ## v1 structure
 
@@ -28,7 +29,7 @@ versions when reading requirements, planning work or implementing changes.
 
 ## Rules
 
-- A task must identify `v1` or `v2` before reading application documents.
+- A task must identify `v1`, `v2` or `v3` before reading application documents.
 - Use only the selected version as the source of truth for that task.
 - Do not infer a version from a file's content or from the affected module.
 - When a task changes version-specific documentation, update references in the
