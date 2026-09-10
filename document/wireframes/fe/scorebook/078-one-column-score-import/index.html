@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wireframe Plan 078 — Bulk score v2 + file mẫu</title>
+  <style>
+    :root { --ink:#182230; --muted:#667085; --line:#dfe4ea; --surface:#fff; --canvas:#f4f6f8; --nav:#17212b; --primary:#176b87; --primary-soft:#e6f4f8; --success:#18794e; --success-soft:#e9f7ef; --warning:#9a6700; --warning-soft:#fff7d6; --danger:#b42318; --danger-soft:#ffefed; --violet:#6941c6; --shadow:0 16px 42px rgba(20,32,50,.16); }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--canvas); font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    button,select,input { font:inherit; } button { cursor:pointer; }
+    .app { min-height:100vh; display:grid; grid-template-columns:228px minmax(0,1fr); }
+    .sidebar { padding:24px 16px; color:#eef4f8; background:var(--nav); }
+    .brand { display:flex; gap:10px; align-items:center; padding:0 10px 26px; font-weight:800; }
+    .brand-mark { width:34px; height:34px; display:grid; place-items:center; border-radius:10px; color:#fff; background:var(--primary); }
+    .nav-label { margin:18px 10px 8px; color:#8fa2b5; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+    .nav-item { display:flex; gap:10px; align-items:center; padding:11px 12px; margin:3px 0; border-radius:9px; color:#c8d4df; }
+    .nav-item.active { color:#fff; background:#263443; box-shadow:inset 3px 0 var(--primary); }
+    .main { min-width:0; }
+    .topbar { height:64px; display:flex; justify-content:space-between; align-items:center; padding:0 28px; background:#fff; border-bottom:1px solid var(--line); }
+    .breadcrumb { color:var(--muted); font-size:13px; }
+    .user { display:flex; align-items:center; gap:9px; } .avatar { width:34px; height:34px; display:grid; place-items:center; border-radius:50%; color:#fff; background:var(--violet); font-weight:800; }
+    .page { max-width:1480px; margin:0 auto; padding:28px; }
+    .heading { display:flex; align-items:flex-start; justify-content:space-between; gap:24px; margin-bottom:18px; }
+    .eyebrow { margin:0 0 5px; color:var(--primary); font-size:12px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+    h1 { margin:0; font-size:27px; letter-spacing:-.02em; } h2 { margin:0; font-size:18px; } h3 { margin:0; font-size:14px; } p { margin:4px 0 0; } .caption { color:var(--muted); }
+    .demo-control { display:flex; gap:9px; align-items:end; } .field { display:grid; gap:6px; min-width:220px; } label { color:#475467; font-size:12px; font-weight:750; }
+    select,input { width:100%; padding:9px 10px; border:1px solid #cfd7df; border-radius:8px; color:var(--ink); background:#fff; }
+    .surface { background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:0 8px 24px rgba(20,32,50,.08); }
+    .scorebook { padding:18px; } .scorebook-head { display:flex; justify-content:space-between; gap:18px; align-items:center; margin-bottom:16px; }
+    .context { display:flex; flex-wrap:wrap; gap:10px; align-items:center; } .context-chip { padding:8px 11px; border:1px solid var(--line); border-radius:8px; background:#f8fafb; } .context-chip small { display:block; color:var(--muted); font-size:11px; }
+    .btn { padding:9px 13px; border:1px solid transparent; border-radius:8px; color:#fff; background:var(--primary); font-weight:800; } .btn.secondary { color:#344054; border-color:#cfd7df; background:#fff; } .btn.ghost { color:var(--primary); background:var(--primary-soft); } .btn.danger { color:var(--danger); border-color:#f3b7b1; background:#fff; } .btn:disabled { opacity:.45; cursor:not-allowed; }
+    .fake-table { overflow:hidden; border:1px solid var(--line); border-radius:10px; } table { width:100%; border-collapse:collapse; } th,td { padding:12px; border-bottom:1px solid #e7ebef; text-align:left; white-space:nowrap; } th { color:#475467; background:#f8fafb; font-size:12px; } tr:last-child td { border-bottom:0; } .score-cell { color:var(--primary); font-weight:800; }
+    .backdrop { position:relative; margin-top:18px; padding:24px; border-radius:14px; background:rgba(23,33,43,.1); }
+    .dialog { max-width:1160px; margin:0 auto; overflow:hidden; background:#fff; border:1px solid #cfd7df; border-radius:14px; box-shadow:var(--shadow); }
+    .dialog-head { display:flex; justify-content:space-between; gap:18px; align-items:flex-start; padding:20px 22px 15px; border-bottom:1px solid var(--line); } .close { border:0; color:var(--muted); background:transparent; font-size:22px; }
+    .dialog-body { padding:18px 22px 22px; } .dialog-caption { margin:0 0 14px; color:var(--muted); }
+    .modes { display:flex; gap:5px; width:max-content; padding:5px; margin-bottom:16px; border-radius:10px; background:#e9edf1; } .mode { padding:9px 14px; border:0; border-radius:7px; color:#475467; background:transparent; font-weight:800; } .mode.active { color:var(--primary); background:#fff; box-shadow:0 2px 8px rgba(20,32,50,.09); }
+    .mode-panel.hidden,.preview.hidden { display:none; }
+    .manual { display:grid; gap:10px; max-height:350px; overflow:auto; padding:2px; } .manual-row { display:grid; grid-template-columns:minmax(240px,1.4fr) 170px 140px minmax(190px,1fr); gap:12px; align-items:center; padding:10px; border:1px solid #edf0f2; border-radius:9px; } .student { color:#334155; } .student small { display:block; color:var(--muted); }
+    .section-grid { display:grid; grid-template-columns:minmax(0,1fr) 280px; gap:16px; } .template-card,.upload-card { padding:15px; border:1px solid var(--line); border-radius:10px; } .template-card { background:#f8fcfd; border-color:#cfe5eb; }
+    .template-top { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; } .file-status { display:flex; gap:8px; align-items:center; margin-top:12px; padding:10px; border-radius:8px; background:#fff; } .dot { width:8px; height:8px; border-radius:50%; background:var(--success); }
+    .upload-card.disabled { opacity:.55; } .dropzone { min-height:130px; display:grid; place-items:center; padding:15px; border:1.5px dashed #9db5c1; border-radius:10px; text-align:center; background:#fbfdfe; } .upload-icon { margin-bottom:6px; color:var(--primary); font-size:24px; }
+    .rules { display:grid; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid #e2e7ec; } .rule { display:flex; justify-content:space-between; gap:12px; color:#475467; }
+    .notice { display:flex; gap:9px; padding:11px 13px; margin-bottom:14px; border:1px solid; border-radius:9px; } .notice.info { color:#17556b; border-color:#a8d6e3; background:var(--primary-soft); } .notice.warning { color:#6f4a00; border-color:#efd98d; background:var(--warning-soft); } .notice.error { color:#8f1d14; border-color:#f5b8b2; background:var(--danger-soft); }
+    .summary { display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin-bottom:14px; } .metric { padding:11px; border:1px solid var(--line); border-radius:9px; } .metric small { display:block; color:var(--muted); } .metric strong { display:block; margin-top:2px; font-size:22px; } .metric.good strong { color:var(--success); } .metric.bad strong { color:var(--danger); }
+    .table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:9px; } .preview-table { min-width:940px; } .preview-table tr.error-row td { background:#fffaf9; } .tag { display:inline-flex; align-items:center; padding:4px 8px; border-radius:999px; font-size:12px; font-weight:800; } .tag.ok { color:var(--success); background:var(--success-soft); } .tag.warn { color:var(--warning); background:var(--warning-soft); } .tag.error { color:var(--danger); background:var(--danger-soft); } .tag.info { color:var(--primary); background:var(--primary-soft); }
+    .preview-head { display:flex; justify-content:space-between; gap:14px; align-items:flex-start; margin:18px 0 12px; } .preview-actions { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-top:16px; } .action-group { display:flex; gap:9px; flex-wrap:wrap; }
+    .hidden { display:none!important; } .state-empty { color:#98a2b3; font-style:italic; } .new-value { color:var(--primary); font-weight:800; }
+    @media(max-width:980px){ .app{grid-template-columns:1fr}.sidebar{display:none}.section-grid{grid-template-columns:1fr}.backdrop{padding:12px}.manual-row{grid-template-columns:1fr 1fr}.scorebook-head{align-items:flex-start;flex-direction:column} }
+    @media(max-width:640px){ .topbar{padding:0 16px}.page{padding:18px 12px}.heading{display:block}.demo-control{margin-top:14px}.dialog-body{padding:15px}.dialog-head{padding:16px}.modes{width:100%}.mode{flex:1}.summary{grid-template-columns:1fr 1fr}.preview-actions{align-items:flex-start;flex-direction:column}.manual-row{grid-template-columns:1fr}.context-chip{flex:1 1 42%} }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">S</span><span>School Admin</span></div>
+      <div class="nav-label">Không gian làm việc</div><div class="nav-item">⌂ Tổng quan</div><div class="nav-item">▦ Lớp học</div><div class="nav-item active">▤ Bảng điểm</div><div class="nav-item">◷ Điểm danh</div>
+      <div class="nav-label">Tài khoản</div><div class="nav-item">⚙ Cài đặt</div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div class="breadcrumb">Bảng điểm / 7A1 / Toán</div><div class="user"><span>Nguyễn Minh</span><span class="avatar">NM</span></div></header>
+      <div class="page">
+        <div class="heading">
+          <div><p class="eyebrow">Plan 078 · Bổ sung bulk v2</p><h1>Nhập điểm hàng loạt</h1><p class="caption">Chọn cách nhập điểm cho cột Giữa kỳ 1.</p></div>
+          <div class="demo-control"><div class="field"><label for="demoState">Trạng thái xem thử</label><select id="demoState"><option value="normal">Bình thường</option><option value="template">Chưa tải file mẫu</option><option value="errors">Có lỗi theo dòng</option><option value="conflict">Xung đột dữ liệu</option><option value="forbidden">Không có quyền</option></select></div></div>
+        </div>
+
+        <section class="surface scorebook">
+          <div class="scorebook-head"><div><h2>Bảng điểm lớp 7A1</h2><p class="caption">Toán · Học kỳ 1 · Năm học 2026–2027</p></div><span class="tag ok">Sổ điểm đang mở</span></div>
+          <div class="context"><div class="context-chip"><small>Cột đang chọn</small><strong>Giữa kỳ 1 · Cột 1</strong></div><div class="context-chip"><small>Sĩ số</small><strong>32 học sinh</strong></div><button class="btn" type="button">Nhập điểm hàng loạt</button></div>
+          <div class="fake-table" style="margin-top:16px"><table><thead><tr><th>Học sinh</th><th>Thường xuyên 1</th><th>Giữa kỳ 1</th><th>Cuối kỳ 1</th></tr></thead><tbody><tr><td>STU0000001 · Nguyễn An</td><td class="score-cell">8.0</td><td class="score-cell">Chưa nhập</td><td class="score-cell">—</td></tr><tr><td>STU0000002 · Trần Bình</td><td class="score-cell">7.5</td><td class="score-cell">7.0</td><td class="score-cell">—</td></tr><tr><td>STU0000003 · Lê Chi</td><td class="score-cell">9.0</td><td class="score-cell">Vắng</td><td class="score-cell">—</td></tr></tbody></table></div>
+        </section>
+
+        <div class="backdrop">
+          <section class="dialog" aria-label="Nhập điểm hàng loạt">
+            <div class="dialog-head"><div><h2>Nhập điểm hàng loạt</h2><p class="dialog-caption">Cột: <strong>Giữa kỳ 1 · Cột 1</strong> · 32 học sinh</p></div><button class="close" type="button" aria-label="Đóng">×</button></div>
+            <div class="dialog-body">
+              <div class="modes"><button class="mode" id="manualMode" type="button">Nhập trực tiếp</button><button class="mode active" id="fileMode" type="button">Dùng file mẫu</button></div>
+              <div class="mode-panel hidden" id="manualPanel"><div class="notice info"><span>●</span><span>Đây là màn hình nhập hàng loạt v2 hiện có. Các dòng không thay đổi sẽ không được gửi.</span></div><div class="manual"><div class="manual-row"><div class="student"><strong>STU0000001 · Nguyễn An</strong><small>Điểm hiện tại: Chưa nhập</small></div><select><option>Có điểm</option><option>Vắng</option><option>Miễn</option><option>Hủy</option></select><input placeholder="Điểm"><input placeholder="Ghi chú"></div><div class="manual-row"><div class="student"><strong>STU0000002 · Trần Bình</strong><small>Điểm hiện tại: 7.0</small></div><select><option>Có điểm</option><option>Vắng</option><option>Miễn</option><option>Hủy</option></select><input value="9.0"><input placeholder="Ghi chú"></div></div></div>
+              <div class="mode-panel" id="filePanel">
+                <div id="stateNotice" class="notice info"><span>●</span><span>Tải file mẫu có sẵn 32 học sinh, sau đó điền điểm và upload lại.</span></div>
+                <div class="section-grid">
+                  <div class="template-card"><div class="template-top"><div><h3>1. Tải file mẫu của lớp</h3><p class="caption">File đã có mã, tên và điểm hiện tại để đối chiếu.</p></div><span class="tag info">32 học sinh</span></div><button class="btn ghost" style="margin-top:13px" type="button" id="downloadButton">↓ Tải file mẫu</button><div class="file-status" id="templateStatus"><span class="dot"></span><span><strong id="templateText">Đã tải file mẫu lúc 09:41</strong><br><small class="caption">mau-diem-giua-ky-7A1.xlsx</small></span></div><div class="rules"><div class="rule"><span>Cột tham chiếu</span><strong>Mã, tên, điểm hiện tại</strong></div><div class="rule"><span>Cột điền</span><strong>Trạng thái, điểm, ghi chú</strong></div></div></div>
+                  <div class="upload-card" id="uploadCard"><h3>2. Upload file đã điền</h3><p class="caption">Chỉ nhận file mẫu `.xlsx` của cột đang chọn.</p><div class="dropzone" style="margin-top:12px"><div><div class="upload-icon">↑</div><strong id="uploadText">diem-giua-ky-7A1.xlsx</strong><p class="caption">Đã sẵn sàng xem trước</p><button class="btn secondary" style="margin-top:10px" type="button" id="chooseButton">Chọn file khác</button></div></div></div>
+                </div>
+                <div class="preview" id="preview">
+                  <div class="preview-head"><div><h3>3. Xem trước trước khi lưu</h3><p class="caption">Giá trị hiện tại và giá trị trong file được đặt cạnh nhau.</p></div><span class="tag ok" id="previewBadge">Có thể lưu hàng loạt</span></div>
+                  <div class="summary"><div class="metric"><small>Tổng số dòng</small><strong>32</strong></div><div class="metric good"><small>Hợp lệ</small><strong id="validMetric">29</strong></div><div class="metric bad"><small>Có lỗi</small><strong id="errorMetric">0</strong></div><div class="metric"><small>Sẽ cập nhật</small><strong>9</strong></div></div>
+                  <div class="table-wrap"><table class="preview-table"><thead><tr><th>Dòng</th><th>Học sinh</th><th>Hiện tại</th><th>Giá trị mới</th><th>Trạng thái</th><th>Kết quả</th></tr></thead><tbody id="previewRows"></tbody></table></div>
+                </div>
+                <div class="preview-actions"><button class="btn secondary" type="button">Hủy</button><div class="action-group"><span class="caption" id="saveHint">Dùng cùng thao tác Lưu hàng loạt của v2.</span><button class="btn" id="saveButton" type="button">Lưu hàng loạt</button></div></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    const normalRows = [
+      ['2','STU0000001 · Nguyễn An','Chưa nhập','8.5','SCORED','Hợp lệ','ok'],
+      ['3','STU0000002 · Trần Bình','7.0','9.0','SCORED','Cập nhật','ok'],
+      ['4','STU0000003 · Lê Chi','Chưa nhập','Vắng','ABSENT','Hợp lệ','ok'],
+      ['5','STU0000004 · Phạm Dũng','6.5','Hủy','CANCELLED','Cập nhật','ok']
+    ];
+    const errorRows = [
+      ['2','STU0000001 · Nguyễn An','Chưa nhập','8.5','SCORED','Hợp lệ','ok'],
+      ['3','STU0000002 · Trần Bình','7.0','11.5','SCORED','Điểm ngoài khoảng 0–10','error'],
+      ['4','STU0000002 · Trần Bình','7.0','9.0','SCORED','Trùng mã học sinh','error'],
+      ['5','STU0000099 · Không tìm thấy','—','8.0','SCORED','Không tìm thấy học sinh','error']
+    ];
+    const state = document.querySelector('#demoState'); const preview = document.querySelector('#preview'); const rows = document.querySelector('#previewRows'); const notice = document.querySelector('#stateNotice'); const badge = document.querySelector('#previewBadge'); const save = document.querySelector('#saveButton'); const hint = document.querySelector('#saveHint'); const uploadCard = document.querySelector('#uploadCard');
+    function renderRows(data){ rows.innerHTML = data.map(r => `<tr class="${r[6] === 'error' ? 'error-row' : ''}"><td>${r[0]}</td><td><strong>${r[1]}</strong></td><td class="${r[2] === 'Chưa nhập' || r[2] === '—' ? 'state-empty' : ''}">${r[2]}</td><td class="new-value">${r[3]}</td><td><span class="tag info">${r[4]}</span></td><td><span class="tag ${r[6] === 'error' ? 'error' : 'ok'}">${r[5]}</span></td></tr>`).join(''); }
+    function setState(value){
+      const templateMissing = value === 'template'; const hasErrors = value === 'errors'; const conflict = value === 'conflict'; const forbidden = value === 'forbidden';
+      if(templateMissing){ preview.classList.add('hidden'); uploadCard.classList.add('disabled'); notice.className='notice warning'; notice.innerHTML='<span>!</span><span>Hãy tải file mẫu có danh sách học sinh trước khi upload.</span>'; badge.className='tag warn'; badge.textContent='Chưa có file'; save.disabled=true; hint.textContent='Tải mẫu trước rồi upload file đã điền.'; renderRows(normalRows); document.querySelector('#templateText').textContent='Chưa tải file mẫu'; }
+      else if(hasErrors){ preview.classList.remove('hidden'); uploadCard.classList.remove('disabled'); notice.className='notice warning'; notice.innerHTML='<span>!</span><span>File còn 3 dòng lỗi. Hãy sửa file rồi chọn lại trước khi lưu.</span>'; badge.className='tag error'; badge.textContent='Chưa thể lưu'; save.disabled=true; hint.textContent='Còn lỗi nên chưa thể Lưu hàng loạt.'; document.querySelector('#errorMetric').textContent='3'; document.querySelector('#validMetric').textContent='29'; renderRows(errorRows); document.querySelector('#templateText').textContent='Đã tải file mẫu lúc 09:41'; }
+      else if(conflict){ preview.classList.remove('hidden'); uploadCard.classList.remove('disabled'); notice.className='notice warning'; notice.innerHTML='<span>!</span><span>Bảng điểm đã thay đổi sau khi file được xem trước. Hãy tải lại dữ liệu để tiếp tục.</span>'; badge.className='tag warn'; badge.textContent='Cần tải lại'; save.disabled=true; hint.textContent='Không ghi đè dữ liệu mới hơn.'; document.querySelector('#errorMetric').textContent='0'; document.querySelector('#validMetric').textContent='29'; renderRows(normalRows); document.querySelector('#templateText').textContent='Đã tải file mẫu lúc 09:41'; }
+      else if(forbidden){ preview.classList.remove('hidden'); uploadCard.classList.remove('disabled'); notice.className='notice error'; notice.innerHTML='<span>!</span><span>Bạn không có quyền nhập điểm cho cột này.</span>'; badge.className='tag error'; badge.textContent='Không có quyền'; save.disabled=true; hint.textContent='Liên hệ giáo vụ nếu cần được cấp quyền.'; document.querySelector('#errorMetric').textContent='—'; document.querySelector('#validMetric').textContent='—'; renderRows(normalRows); document.querySelector('#templateText').textContent='Đã tải file mẫu lúc 09:41'; }
+      else { preview.classList.remove('hidden'); uploadCard.classList.remove('disabled'); notice.className='notice info'; notice.innerHTML='<span>●</span><span>File đã được xem trước. Kiểm tra các dòng rồi bấm Lưu hàng loạt.</span>'; badge.className='tag ok'; badge.textContent='Có thể lưu hàng loạt'; save.disabled=false; hint.textContent='Dùng cùng thao tác Lưu hàng loạt của v2.'; document.querySelector('#errorMetric').textContent='0'; document.querySelector('#validMetric').textContent='29'; renderRows(normalRows); document.querySelector('#templateText').textContent='Đã tải file mẫu lúc 09:41'; }
+    }
+    document.querySelector('#manualMode').addEventListener('click',()=>{document.querySelector('#manualMode').classList.add('active');document.querySelector('#fileMode').classList.remove('active');document.querySelector('#manualPanel').classList.remove('hidden');document.querySelector('#filePanel').classList.add('hidden');});
+    document.querySelector('#fileMode').addEventListener('click',()=>{document.querySelector('#fileMode').classList.add('active');document.querySelector('#manualMode').classList.remove('active');document.querySelector('#filePanel').classList.remove('hidden');document.querySelector('#manualPanel').classList.add('hidden');});
+    document.querySelector('#downloadButton').addEventListener('click',()=>{document.querySelector('#templateText').textContent='Đã tải file mẫu lúc 09:41';uploadCard.classList.remove('disabled');notice.className='notice info';notice.innerHTML='<span>●</span><span>Đã tải file mẫu. Bạn có thể điền điểm rồi upload lại.</span>';});
+    document.querySelector('#chooseButton').addEventListener('click',()=>{preview.classList.remove('hidden');});
+    state.addEventListener('change',()=>setState(state.value)); setState('normal');
+  </script>
+</body>
+</html>
