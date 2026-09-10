@@ -29,6 +29,7 @@ Example:
 | No. | Area | Plan | Status |
 |---:|---|---|---|
 | 073 | BE/FE | [v3 Foundation and Cross-cutting Contract](MASTER_PLAN_V3-2026-09-09.md) ([BE](../BE/073-v3-foundation-contract-2026-09-09.md), [FE](../FE/foundation/073-v3-foundation-contract-2026-09-09.md)) | Draft; CR-V3-001 and wireframe awaiting approval |
+| 078 | BE/FE | [One-column Score Import](../be/scorebook/078-one-column-score-import-2026-09-10.md) ([FE](../fe/scorebook/078-one-column-score-import-ui-2026-09-10.md), [wireframe](../../wireframes/fe/scorebook/078-one-column-score-import/README.md)) | Draft; awaiting Plan and wireframe approval |
 
 Master plan: [MASTER_PLAN_V3-2026-09-09.md](MASTER_PLAN_V3-2026-09-09.md). Plans 074–080 are sequenced in that master plan and remain draft until their contract slice is approved.
 
@@ -104,3 +105,4 @@ Master plan: [MASTER_PLAN_V3-2026-09-09.md](MASTER_PLAN_V3-2026-09-09.md). Plans
 |   066 | BE/FE          | [Student Attendance History by Student ID and Transcript Integration](../be/attendance/066-student-attendance-history-by-id-and-transcript-integration-2026-09-04.md) | Completed; validation PASS                                                                                                                 | 2026-09-04                                                                                       |
 |   070 | FE | [Login Password & Shared Session](../fe/user-auth/070-login-password-shared-session-2026-09-07.md) | Implemented; lint/build/Storybook PASS; tests/coverage NOT RUN theo yêu cầu; browser QA NOT RUN | 2026-09-07 |
 |   073 | BE/FE | [v3 Foundation and Cross-cutting Contract](../be/073-v3-foundation-contract-2026-09-09.md) | Implemented; contract checkpoint and review states; backend PMD/build baseline blocker and wireframe review remain | 2026-09-10 |
+|   078 | BE/FE | [One-column Score Import](../be/scorebook/078-one-column-score-import-2026-09-10.md) | Draft; contract decisions, BE/FE workstreams and wireframe ready for review | 2026-09-10 |

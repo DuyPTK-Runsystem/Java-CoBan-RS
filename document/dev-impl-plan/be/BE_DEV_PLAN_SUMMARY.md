@@ -44,6 +44,7 @@
 | 062.1 | [Class Transcript & Homeroom Accessible Classes API](../fe/scorebook/062.1-class-transcript-viewer-ui-2026-09-04.md)                                            | Query APIs for class term/annual transcripts and accessible classes for transcript viewer                                               | Completed; validation PASS | 2026-09-04 |
 |   066 | [Student Attendance History by Student ID and Transcript Integration](attendance/066-student-attendance-history-by-id-and-transcript-integration-2026-09-04.md) | GET attendance history by studentId for Admin/Office/Teacher, transcript viewer absence integration                                     | Completed; validation PASS | 2026-09-04 |
 |   073 | [v3 Foundation and Cross-cutting Contract](073-v3-foundation-contract-2026-09-09.md) | v3 page DTO boundary, contract checkpoint, fixture and BE/FE parallel foundation | Implemented; backend PMD/build blocked by baseline | 2026-09-10 |
+|   078 | [One-column Score Import](scorebook/078-one-column-score-import-2026-09-10.md) | `.xlsx` parse/preview/validate/atomic commit for one selected assessment column, optimistic locking and audit | Draft; awaiting Plan/wireframe approval | 2026-09-10 |
 
 ## Module folders
 

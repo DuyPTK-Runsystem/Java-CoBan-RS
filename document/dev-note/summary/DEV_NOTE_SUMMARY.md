@@ -107,6 +107,7 @@ NNN-short-topic-yyyy-mm-dd.md
 | 073.0 | BE/FE/Doc | [v3 TBD-001 Teacher Load Policy](../be/073.0-v3-tbd-001-teacher-load-policy-2026-09-10.md) | Documentation update; rule 19/15/12 and additive reductions recorded; source/effective date/policy version remain open; code/tests NOT RUN | 2026-09-10 |
 | 073.1 | BE/FE/Doc | [v3 TBD-005 Score Import Contract](../be/073.1-v3-tbd-005-score-import-contract-2026-09-10.md) | Documentation update; `.xlsx`, mandatory preview, single-column upload and existing-score review/update recorded; Plan 078 details remain open; code/tests NOT RUN | 2026-09-10 |
 |   073 | BE/FE | [v3 Foundation Contract](../be/073-v3-foundation-contract-2026-09-10.md) | Contract checkpoint, BE DTO test and FE review states implemented; backend PMD/build baseline blocker, browser/live NOT RUN | 2026-09-10 |
+|   078 | BE/FE | [Score import v2 bulk extension](../be/scorebook/078-score-import-v2-bulk-extension-2026-09-10.md) | Implemented as template-download + preview supplement inside v2 bulk dialog; FE gates PASS, BE test/JaCoCo/Checkstyle/bootJar PASS; PMD/build baseline blocker; browser/live NOT RUN | 2026-09-10 |
 
 Plan 057 PMD follow-up (2026-09-03): backend `test`, Checkstyle, PMD and `build` have been rerun after the approved refactor; PMD is PASS with 0 violations.
 

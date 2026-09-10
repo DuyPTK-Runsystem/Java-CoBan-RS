@@ -64,6 +64,7 @@
 | 073.0 | cross-area         | [v3 TBD-001 Teacher Load Policy](073.0-v3-tbd-001-teacher-load-policy-2026-09-10.md)                                                                            | Documentation update; rule 19/15/12 and additive reductions recorded; source/effective date/policy version remain open; code/tests NOT RUN | 2026-09-10 |
 | 073.1 | cross-area         | [v3 TBD-005 Score Import Contract](073.1-v3-tbd-005-score-import-contract-2026-09-10.md)                                                                          | Documentation update; `.xlsx`, mandatory preview, single-column upload and existing-score review/update recorded; Plan 078 details remain open; code/tests NOT RUN | 2026-09-10 |
 |   073 | cross-area         | [v3 Foundation Contract](073-v3-foundation-contract-2026-09-10.md) | BE DTO boundary, FE review state and approved v3 contract checkpoint; PMD/build baseline blocker recorded | 2026-09-10 |
+|   078 | scorebook          | [Score import v2 bulk extension](scorebook/078-score-import-v2-bulk-extension-2026-09-10.md) | Implemented; test/JaCoCo, Checkstyle and bootJar PASS; PMD/build blocked by repository baseline; live API NOT RUN | 2026-09-10 |
 
 ## Module folders
 
