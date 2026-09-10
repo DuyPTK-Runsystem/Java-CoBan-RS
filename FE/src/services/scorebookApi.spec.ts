@@ -5,11 +5,13 @@ import {
   createAssessmentColumn,
   createScorebook,
   deactivateAssessmentColumn,
+  downloadBulkScoreTemplate,
   fetchScorebook,
   fetchScorebookByClassSubject,
   fetchScoreGrid,
   openScorebook,
   publishScorebook,
+  previewBulkStudentScores,
   updateAssessmentColumn,
   upsertSkillWeight,
   upsertStudentScore,
@@ -130,5 +132,58 @@ describe('scorebookApi', () => {
       body: JSON.stringify(request),
     })
   })
-})
 
+  it('downloads the score template as a Blob with the spreadsheet media type', async () => {
+    fetchMock.mockResolvedValue(new Response('xlsx-content', { status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await downloadBulkScoreTemplate('token', 7)
+
+    expect(await result.text()).toBe('xlsx-content')
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://localhost:8081/api/v2/assessment-columns/7/scores/bulk-template',
+      expect.objectContaining({
+        method: 'GET',
+        headers: { Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', Authorization: 'Bearer token' },
+      }),
+    )
+  })
+
+  it('keeps the typed preview response and normalized items from the provisional endpoint', async () => {
+    const preview = {
+      assessmentColumnId: 7,
+      summary: { validRows: 1, errorRows: 0, newScores: 1, updatedScores: 0 },
+      rows: [{
+        rowNumber: 2,
+        studentCode: 'HS-001',
+        studentId: 11,
+        studentName: 'An',
+        oldStatus: null,
+        oldValue: null,
+        oldVersion: null,
+        newStatus: 'SCORED',
+        newValue: 8.5,
+        note: null,
+        result: 'VALID',
+        errorCode: null,
+        message: null,
+      }],
+      items: [{ studentId: 11, scoreStatus: 'SCORED', scoreValue: 8.5, note: null, expectedVersion: null }],
+    }
+    fetchMock.mockResolvedValue(jsonResponse(preview))
+    vi.stubGlobal('fetch', fetchMock)
+    const file = new File(['xlsx'], 'scores.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+
+    await expect(previewBulkStudentScores('token', 7, file)).resolves.toEqual(preview)
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://localhost:8081/api/v2/assessment-columns/7/scores/bulk/preview',
+      expect.objectContaining({
+        method: 'POST',
+        headers: { Accept: 'application/json', Authorization: 'Bearer token' },
+        body: expect.any(FormData),
+      }),
+    )
+    const requestBody = fetchMock.mock.calls[0][1].body as FormData
+    expect(requestBody.get('file')).toBe(file)
+  })
+})

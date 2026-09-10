@@ -152,12 +152,13 @@ async function toApiError(response: Response): Promise<ApiError> {
 
 async function request<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
   const token = options.token ?? (options.authenticated ? getAuthSession()?.accessToken : undefined)
+  const isFormDataBody = typeof FormData !== 'undefined' && options.body instanceof FormData
   const headers: Record<string, string> = {
     Accept: options.responseType === 'blob' ? 'text/csv' : 'application/json',
     ...options.headers,
   }
   if (token) headers.Authorization = `Bearer ${token}`
-  if (options.body !== undefined) {
+  if (options.body !== undefined && !isFormDataBody) {
     headers['Content-Type'] = 'application/json'
   }
 
@@ -166,7 +167,11 @@ async function request<T>(path: string, options: ApiRequestOptions = {}): Promis
     response = await fetch(requestUrl(configuredBaseUrl, path, options.query), {
       ...options,
       headers,
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      body: options.body === undefined
+        ? undefined
+        : isFormDataBody
+          ? options.body as FormData
+          : JSON.stringify(options.body),
     })
   } catch (cause) {
     throw new ApiError(0, 'Unable to reach the server.', { kind: 'network', cause })
