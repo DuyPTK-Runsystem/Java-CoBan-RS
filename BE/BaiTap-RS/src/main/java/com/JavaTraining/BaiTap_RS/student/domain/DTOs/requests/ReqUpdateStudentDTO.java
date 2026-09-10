@@ -2,6 +2,8 @@ package com.JavaTraining.BaiTap_RS.student.domain.DTOs.requests;
 
 import java.time.LocalDate;
 
+import com.JavaTraining.BaiTap_RS.student.domain.entity.StudentGender;
+
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -31,4 +33,11 @@ public class ReqUpdateStudentDTO {
     @DecimalMin(value = "0.0", message = "Điểm trung bình phải từ 0 đến 10")
     @DecimalMax(value = "10.0", message = "Điểm trung bình phải từ 0 đến 10")
     private Double averageScore;
+
+    private StudentGender gender;
+
+    public ReqUpdateStudentDTO(
+            String studentName, LocalDate dateOfBirth, String address, Double averageScore) {
+        this(studentName, dateOfBirth, address, averageScore, null);
+    }
 }

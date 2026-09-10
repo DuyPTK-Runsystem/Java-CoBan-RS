@@ -5,6 +5,7 @@ import Checkbox from 'primevue/checkbox'
 import DatePicker from 'primevue/datepicker'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
+import Select from 'primevue/select'
 
 import type { StudentFormValues } from '@/types/student'
 
@@ -35,6 +36,7 @@ const values = reactive<StudentFormValues>({
   studentCode: props.initialValue.studentCode ?? '',
   studentName: props.initialValue.studentName ?? '',
   dateOfBirth: props.initialValue.dateOfBirth ?? null,
+  gender: props.initialValue.gender ?? null,
   address: props.initialValue.address ?? '',
   status: props.initialValue.status ?? 'ACTIVE',
   provisionAccount: props.initialValue.provisionAccount ?? true,
@@ -53,6 +55,7 @@ watch(() => props.initialValue, (initialValue) => {
     studentCode: initialValue.studentCode ?? '',
     studentName: initialValue.studentName ?? '',
     dateOfBirth: initialValue.dateOfBirth ?? null,
+    gender: initialValue.gender ?? null,
     address: initialValue.address ?? '',
     status: initialValue.status ?? 'ACTIVE',
     provisionAccount: initialValue.provisionAccount ?? true,
@@ -197,6 +200,20 @@ function save(): void {
         :invalid="Boolean(errors.address)"
       />
       <small v-if="errors.address" class="field-error">{{ errors.address }}</small>
+    </div>
+
+    <div class="field-group">
+      <label for="student-gender">Giới tính</label>
+      <Select
+        id="student-gender"
+        v-model="values.gender"
+        :options="[{ label: 'Nam', value: 'MALE' }, { label: 'Nữ', value: 'FEMALE' }]"
+        option-label="label"
+        option-value="value"
+        placeholder="Chưa cập nhật"
+        show-clear
+        fluid
+      />
     </div>
 
     <!-- V3 Account Provisioning Section (Only in Add mode for ADMIN / ACADEMIC_OFFICE) -->

@@ -84,7 +84,7 @@ public class StudentV2Service {
         }
         Student student = new Student(request.studentName(), request.studentCode());
         student.assignInfo(new com.JavaTraining.BaiTap_RS.student.domain.entity.StudentInfo(
-                request.dateOfBirth(), request.address(), null));
+                request.dateOfBirth(), request.address(), null, request.gender()));
         Student saved = studentRepository.save(student);
         return responseMapper.response(saved, null, null);
     }
@@ -99,10 +99,11 @@ public class StudentV2Service {
         com.JavaTraining.BaiTap_RS.student.domain.entity.StudentInfo info = student.getStudentInfo();
         if (info == null) {
             student.assignInfo(new com.JavaTraining.BaiTap_RS.student.domain.entity.StudentInfo(
-                    request.dateOfBirth(), request.address(), null));
+                    request.dateOfBirth(), request.address(), null, request.gender()));
         } else {
             info.setDateOfBirth(request.dateOfBirth());
             info.setAddress(request.address());
+            info.setGender(request.gender());
         }
         return responseMapper.response(
                 student, responseMapper.currentClass(student.getId()), responseMapper.user(student.getUserId()));

@@ -49,12 +49,14 @@ final class StudentServiceSupport {
         StudentInfo info = student.getStudentInfo();
         return new ResStudentDTO(student.getId(), student.getStudentCode(), student.getStudentName(),
                 info == null ? null : info.getDateOfBirth(), info == null ? null : info.getAddress(),
-                info == null ? null : info.getAverageScore(), student.getStatus(), currentClassCode);
+                info == null ? null : info.getAverageScore(), info == null ? null : info.getGender(),
+                student.getStatus(), currentClassCode);
     }
 
     public ResStudentDTO create(ReqCreateStudentDTO request) {
         Student student = new Student(request.getStudentName(), request.getStudentCode());
-        student.assignInfo(new StudentInfo(request.getDateOfBirth(), request.getAddress(), request.getAverageScore()));
+        student.assignInfo(new StudentInfo(request.getDateOfBirth(), request.getAddress(), request.getAverageScore(),
+                request.getGender()));
         return response(repository.save(student));
     }
 
@@ -64,11 +66,13 @@ final class StudentServiceSupport {
         StudentInfo info = student.getStudentInfo();
         if (info == null) {
             student.assignInfo(
-                    new StudentInfo(request.getDateOfBirth(), request.getAddress(), request.getAverageScore()));
+                    new StudentInfo(request.getDateOfBirth(), request.getAddress(), request.getAverageScore(),
+                            request.getGender()));
         } else {
             info.setDateOfBirth(request.getDateOfBirth());
             info.setAddress(request.getAddress());
             info.setAverageScore(request.getAverageScore());
+            info.setGender(request.getGender());
         }
         return response(repository.save(student));
     }

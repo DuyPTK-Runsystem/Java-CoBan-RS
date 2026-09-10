@@ -133,6 +133,21 @@ class StudentServiceMutationTest {
     }
 
     @Test
+    void updateStudentClearsExistingGenderWhenRequestSendsNull() {
+        Student student = studentWithId();
+        student.assignInfo(new StudentInfo(DATE_OF_BIRTH, ADDRESS, AVERAGE_SCORE,
+                com.JavaTraining.BaiTap_RS.student.domain.entity.StudentGender.FEMALE));
+        Mockito.when(studentRepository.findById(STUDENT_ID)).thenReturn(Optional.of(student));
+        Mockito.when(studentRepository.save(Mockito.any(Student.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        studentService.updateStudent(STUDENT_ID, new ReqUpdateStudentDTO(
+                STUDENT_NAME, DATE_OF_BIRTH, ADDRESS, AVERAGE_SCORE, null));
+
+        Assertions.assertNull(student.getStudentInfo().getGender(), "explicit null gender must clear stored gender");
+    }
+
+    @Test
     void deleteStudentDeletesExistingStudent() {
         Student student = studentWithId();
         Mockito.when(studentRepository.findById(STUDENT_ID)).thenReturn(Optional.of(student));

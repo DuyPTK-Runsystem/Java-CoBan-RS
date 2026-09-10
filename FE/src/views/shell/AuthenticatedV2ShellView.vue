@@ -17,7 +17,7 @@ const navigation = computed<NavigationItem[]>(() => {
     { label: 'Lớp', to: '/v2/academic-catalog/classes', icon: 'pi pi-building' },
     { label: 'Môn học', to: '/v2/academic-catalog/subjects', icon: 'pi pi-book' },
     { label: 'Quản lí môn học các lớp', to: '/v2/academic-catalog/class-subjects', icon: 'pi pi-link' },
-    { label: 'Xếp lớp', to: '/v2/enrollments', icon: 'pi pi-users' },
+    { label: 'Xếp lớp', to: '/v2/enrollments', icon: 'pi pi-users', active: Boolean(route?.path?.startsWith('/v2/enrollments')) },
     { label: 'Hồ sơ giáo viên', to: '/v2/teachers', icon: 'pi pi-id-card' },
     { label: 'Phân công giảng dạy', to: '/v2/teaching-assignments', icon: 'pi pi-briefcase' },
     { label: 'Điểm danh', to: '/v2/attendance', icon: 'pi pi-calendar' },

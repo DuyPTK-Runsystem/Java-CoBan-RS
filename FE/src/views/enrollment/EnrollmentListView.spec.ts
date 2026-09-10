@@ -152,4 +152,16 @@ describe('EnrollmentListView', () => {
     expect(mocks.transferWithScores).not.toHaveBeenCalled()
     expect(wrapper.text()).toContain('Đã chuyển STU2600001-Lê Chi từ lớp Lớp 6A1 sang Lớp 6A2.')
   })
+
+  it('navigates to auto placement setup when clicking Xếp lớp tự động', async () => {
+    const pushSpy = vi.spyOn(router, 'push')
+    const wrapper = mountView()
+    await flushPromises()
+
+    const autoPlacementBtn = wrapper.findAll('button').find((b) => b.text().includes('Xếp lớp tự động'))
+    expect(autoPlacementBtn).toBeDefined()
+    await autoPlacementBtn?.trigger('click')
+
+    expect(pushSpy).toHaveBeenCalledWith({ name: 'v2-placement-new' })
+  })
 })

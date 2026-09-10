@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 
 import CapacityWarningBanner from '@/components/enrollment/CapacityWarningBanner.vue'
@@ -19,6 +20,7 @@ import { isApiError } from '@/types/api'
 import type { AcademicYear, GradeLevel, SchoolClass, Semester } from '@/types/academic'
 import type { BulkEnrollmentFormValues, CapacityWarning, ClassStudent, CreateEnrollmentFormValues, EnrollmentMutation, StudentEnrollmentHistory, TransferEnrollmentFormValues, TransferScoreAssistSnapshot, TransferWithScoresRequest, UnassignedStudent } from '@/types/enrollment'
 import type { LoadingState } from '@/types/ui'
+const router = useRouter()
 const { requireAccessToken: token } = useAuthSession()
 const academicYears = ref<AcademicYear[]>([])
 const grades = ref<GradeLevel[]>([])
@@ -324,7 +326,7 @@ async function submitTransferWithScores(request: TransferWithScoresRequest): Pro
     transferAssistError.value = isApiError(error, 403)
       ? 'Bạn không có quyền thực hiện chuyển lớp và lưu điểm.'
       : isApiError(error, 409)
-        ? 'Dữ liệu điểm hoặc enrollment đã thay đổi. Bản nháp vẫn được giữ; hãy tải lại snapshot rồi kiểm tra trước khi thử lại.'
+        ? 'Dữ liệu điểm hoặc việc xếp lớp đã thay đổi. Bản nháp vẫn được giữ; hãy tải lại dữ liệu rồi kiểm tra trước khi thử lại.'
         : messageFor(error, 'Không thể chuyển lớp và lưu điểm lớp mới.')
   } finally {
     transferAssistSaving.value = false
@@ -387,6 +389,7 @@ onMounted(() => { void loadContext() })
     </div>
     <div class="page-heading-actions">
       <Button label="Làm mới context" icon="pi pi-refresh" severity="secondary" outlined :loading="academicYearLoading || classLoading" @click="loadContext" />
+      <Button label="Xếp lớp tự động" icon="pi pi-bolt" @click="router.push({ name: 'v2-placement-new' })" />
     </div>
   </div>
   <FormAlert v-if="statusMessage" tone="success" :message="statusMessage" />

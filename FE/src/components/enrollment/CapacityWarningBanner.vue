@@ -17,7 +17,7 @@ function classLabel(classId: number): string {
 </script>
 
 <template>
-  <FormAlert v-if="!props.available" tone="info" message="Chưa có dữ liệu sĩ số hoặc cảnh báo từ backend contract." />
+  <FormAlert v-if="!props.available" tone="info" message="Chưa có dữ liệu sĩ số hoặc cảnh báo từ hệ thống." />
   <div v-else-if="props.warningCount > 0" class="form-alert form-alert-warning" role="status" aria-live="polite">
     <strong>{{ props.warningCount }} cảnh báo sĩ số</strong>
     <ul v-if="props.warnings.length" class="capacity-warning-list">

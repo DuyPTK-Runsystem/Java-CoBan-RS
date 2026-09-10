@@ -65,7 +65,7 @@ public class StudentAccountService {
         Student student = new Student(request.studentName(), request.studentCode());
         student.setUserId(savedUser.getId());
         student.assignInfo(new StudentInfo(
-                request.dateOfBirth(), request.address(), request.averageScore()));
+                request.dateOfBirth(), request.address(), request.averageScore(), request.gender()));
         Student savedStudent = studentRepository.save(student);
         return toResponse(savedStudent, savedUser);
     }
@@ -79,6 +79,7 @@ public class StudentAccountService {
                 info == null ? null : info.getDateOfBirth(),
                 info == null ? null : info.getAddress(),
                 info == null ? null : info.getAverageScore(),
+                info == null ? null : info.getGender(),
                 new ResStudentWithAccountDTO.Account(user.getId(), user.getUsername(), "STUDENT"));
     }
 }

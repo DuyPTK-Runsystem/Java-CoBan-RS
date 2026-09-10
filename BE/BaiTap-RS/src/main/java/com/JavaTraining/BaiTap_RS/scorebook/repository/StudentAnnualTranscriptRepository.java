@@ -1,6 +1,8 @@
 package com.JavaTraining.BaiTap_RS.scorebook.repository;
 
 import java.util.Optional;
+import java.util.Collection;
+import java.util.List;
 
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentAnnualTranscript;
 import jakarta.persistence.LockModeType;
@@ -25,6 +27,6 @@ public interface StudentAnnualTranscriptRepository extends JpaRepository<Student
                         @Param("studentId") Long studentId,
                         @Param("academicYearId") Long academicYearId);
 
-        java.util.List<StudentAnnualTranscript> findAllByAcademicYearIdAndStudentIdIn(
-                        Long academicYearId, java.util.Collection<Long> studentIds);
+        List<StudentAnnualTranscript> findAllByAcademicYearIdAndStudentIdIn(
+                        Long academicYearId, Collection<Long> studentIds);
 }

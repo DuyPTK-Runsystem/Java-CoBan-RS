@@ -1,4 +1,5 @@
 export type StudentAcademicStatus = 'ACTIVE' | 'INACTIVE' | 'GRADUATED'
+export type StudentGender = 'MALE' | 'FEMALE'
 
 export interface StudentAccountSummary {
   userId: number
@@ -11,6 +12,7 @@ export interface Student {
   studentCode: string
   studentName: string
   dateOfBirth: string | null
+  gender: StudentGender | null
   address: string | null
   status: StudentAcademicStatus
   currentClassCode: string | null
@@ -31,6 +33,7 @@ export interface StudentFormValues {
   studentCode: string
   studentName: string
   dateOfBirth: Date | null
+  gender: StudentGender | null
   address: string
   status: StudentAcademicStatus
   provisionAccount?: boolean
@@ -58,6 +61,7 @@ export interface StudentV2Payload {
   studentCode: string
   studentName: string
   dateOfBirth: string | null
+  gender?: StudentGender | null
   address: string | null
 }
 
@@ -65,6 +69,7 @@ export interface StudentV3CreateRequest {
   studentCode: string
   studentName: string
   dateOfBirth: string | null
+  gender?: StudentGender | null
   address?: string | null
   username?: string | null
   password?: string | null

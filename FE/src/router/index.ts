@@ -121,6 +121,18 @@ const router = createRouter({
           meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
         },
         {
+          path: 'enrollments/placement/new',
+          name: 'v2-placement-new',
+          component: () => import('@/views/enrollment/PlacementWorkspaceView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+        },
+        {
+          path: 'enrollments/placement/:placementSessionId',
+          name: 'v2-placement-session',
+          component: () => import('@/views/enrollment/PlacementWorkspaceView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+        },
+        {
           path: 'teachers',
           name: 'v2-teachers',
           component: () => import('@/views/teacher/TeacherListView.vue'),

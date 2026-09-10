@@ -72,6 +72,7 @@ public class StudentController {
 
     @PostMapping
     @ApiMessage("Tạo sinh viên")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')")
     public ResponseEntity<ResStudentDTO> createStudent(@Valid @RequestBody ReqCreateStudentDTO request) {
         DeveloperTrace.trace(/* NOPMD GuardLogStatement */
                 StudentController.class,
@@ -82,6 +83,7 @@ public class StudentController {
 
     @PutMapping("/{studentId}")
     @ApiMessage("Cập nhật sinh viên")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')")
     public ResStudentDTO updateStudent(
             @PathVariable("studentId") @Positive(message = "ID sinh viên phải lớn hơn 0") Long studentId,
             @Valid @RequestBody ReqUpdateStudentDTO request) {
@@ -93,6 +95,7 @@ public class StudentController {
 
     @DeleteMapping("/{studentId}")
     @ApiMessage("Xóa sinh viên")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')")
     public ResponseEntity<Void> deleteStudent(
             @PathVariable("studentId") @Positive(message = "ID sinh viên phải lớn hơn 0") Long studentId) {
         DeveloperTrace.trace(/* NOPMD GuardLogStatement */

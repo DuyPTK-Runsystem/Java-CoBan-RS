@@ -68,8 +68,8 @@ class AcademicServiceTest {
                                 schoolClassRepository,
                                 new SchoolClassValidator(schoolClassRepository, enrollmentRepository,
                                                 historyRepository),
-                                teacherRepository,
-                                homeroomAssignmentRepository);
+                                new SchoolClassTranscriptAccessService(schoolClassRepository, teacherRepository,
+                                                homeroomAssignmentRepository));
         }
 
         @Test
