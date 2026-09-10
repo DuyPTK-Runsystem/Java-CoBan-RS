@@ -78,3 +78,5 @@
 - `academic/`: Academic structure, semester lifecycle, lock batch, completeness evaluation and notifications.
 
 Plan 040.1: Email-only notification contract — Completed; full test, Checkstyle, PMD and build PASS. Existing IN_APP data must be preflighted before production migration.
+
+Plan 078 documentation sync (2026-09-10): cập nhật trạng thái Plan 078 trong các summary thành `Implemented`; giữ PMD/build baseline `BLOCKED` và live API `NOT RUN`.

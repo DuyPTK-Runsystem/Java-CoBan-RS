@@ -5,6 +5,10 @@
 `IMPLEMENTED - FE validation PASS; wireframe vẫn review-only`:
 [`073-v3-foundation-contract`](../../../wireframes/fe/v3/073-v3-foundation-contract/README.md).
 
+Amendment khi lập Plan 077 (`2026-09-10`): typed v3 page response riêng bị supersede;
+toàn hệ thống dùng `ResultPaginationDTO`. FE type/fixture cũ được xóa hoặc migrate trong
+implementation Plan 077.
+
 ## Mục tiêu
 
 Chuẩn bị FE boundary để phát triển song song với BE từ v3: typed contract fixtures,

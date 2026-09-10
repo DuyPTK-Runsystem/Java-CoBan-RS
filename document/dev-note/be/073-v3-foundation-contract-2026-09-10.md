@@ -59,6 +59,10 @@
 
 ## Sai lệch và bước tiếp theo
 
+Amendment sau implementation (`2026-09-10`): người dùng quyết định toàn hệ thống dùng
+`ResultPaginationDTO`. `V3PageResponse` được ghi nhận ở Dev Note này vẫn là lịch sử thực tế
+của Plan 073, nhưng contract đã bị supersede và artifact/test sẽ được xóa trong Plan 077.
+
 Theo yêu cầu người dùng, đã gỡ error code/error payload v3 đã từng được thêm trong Plan 073;
 HTTP status và `RestResponse` v2 là error contract duy nhất hiện có. Plan 074–079 phải chốt
 semantics lỗi cùng endpoint thật, chốt role matrix liên quan và bổ sung integration/browser

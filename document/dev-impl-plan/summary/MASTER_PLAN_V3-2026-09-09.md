@@ -4,7 +4,7 @@
 
 - Application version: `v3`
 - Ngày: `2026-09-09`
-- Status: `APPROVED - Plan 073 đã triển khai; backend PMD baseline và wireframe review còn mở`
+- Status: `APPROVED - Plan 073 và Plan 078 đã triển khai; Plan 077 tạm hoãn; backend PMD/build baseline, wireframe review và live validation còn mở`
 - CR: [`CR-V3-001`](../../application-doc/v3/change-request/CR-V3-001-academic-operations-and-targeted-communication.md)
 - Nguyên tắc: phát triển BE và FE song song theo vertical slice.
 
@@ -28,6 +28,9 @@ hoàn thành. BE phải cung cấp endpoint thật và contract test trong cùng
 | 078 | one-column score import | validate/preview/commit selected column, expectedVersion/audit; FE upload mapping, row errors, commit summary | wrong-column and partial-commit protection |
 | 079 | lesson log | lesson-log lifecycle, timetable linkage, authorization/audit; FE teacher entry, class history, review states | orphan prevention and edit policy |
 | 080 | cross-feature integration & release hardening | contract/integration fixtures, observability, migration/backfill readiness; FE browser walkthrough, accessibility/responsive | role matrix, mutation reload/re-query, release evidence |
+
+Plan 077: `TEMPORARILY POSTPONED` theo quyết định người dùng ngày `2026-09-10`; chưa triển
+khai code/test và không được tính là completed trong v3 delivery.
 
 ## Quy trình trong từng Plan
 
@@ -62,4 +65,4 @@ hoàn thành. BE phải cung cấp endpoint thật và contract test trong cùng
   cho mỗi lần upload và review/update các ô đã có điểm; template, row mapping, limits và
   semantics còn lại do Plan 078 chốt.
 - Xác nhận/cung cấp `TBD-002` đến `TBD-004`.
-- Phê duyệt Plan 073 và wireframe/contract checkpoint tương ứng trước khi code.
+- Plan 073 và Plan 078 đã được phê duyệt và triển khai; các gate chưa chạy vẫn phải ghi `BLOCKED` hoặc `NOT RUN` theo Dev Note.

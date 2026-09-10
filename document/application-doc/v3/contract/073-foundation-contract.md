@@ -17,9 +17,11 @@
 
 ## Envelope, pagination và lỗi
 
-Endpoint v3 mới giữ `RestResponse` hiện có. Khi trả danh sách phân trang, `data` dùng
-`V3PageResponse<T>` với các field `items`, `page` (zero-based), `pageSize`, `total` và
-`appliedFilters`. Request list dùng `search`, `filter.<name>`, `sort`, `page`, `pageSize`.
+Endpoint v3 mới giữ `RestResponse` hiện có. Theo amendment được người dùng chốt khi lập
+Plan 077, mọi danh sách phân trang dùng `ResultPaginationDTO` với `meta` gồm `page`
+(zero-based), `pageSize`, `totalPages`, `totalItems` và `result` chứa danh sách DTO.
+`V3PageResponse<T>` của implementation Plan 073 bị supersede và phải được xóa trong Plan 077.
+Request list dùng typed query với search/filter/sort/page/pageSize theo capability.
 Mỗi plan capability phải công khai filter allow-list, sort allow-list, page-size mặc định và
 giới hạn trước khi tạo endpoint; FE không được tự lọc một page đã tải.
 

@@ -4,6 +4,10 @@
 
 `IMPLEMENTED - backend PMD baseline còn mở; xem Dev Note 073`.
 
+Amendment khi lập Plan 077 (`2026-09-10`): contract `V3PageResponse<T>` bị supersede;
+toàn hệ thống dùng `ResultPaginationDTO`. Việc xóa artifact/test và migration consumer
+thuộc implementation Plan 077.
+
 ## Mục tiêu
 
 Chốt contract nền cho CR-V3-001 để BE và FE có thể phát triển song song theo vertical
