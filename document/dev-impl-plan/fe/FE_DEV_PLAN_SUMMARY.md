@@ -37,6 +37,7 @@
 
 
 |   072   | [FE Source Refactor](tooling/072-frontend-source-refactor-2026-09-08.md) | Refactor `FE/src` theo vertical slice, chuẩn hóa foundation dùng chung, giảm view/component coupling và giữ nguyên API/behavior | Completed; foundation, Student, Attendance and high-risk workspace refactors, CSS split, and complete domain directory reorganization (components/ & views/); automated and browser validation PASS | 2026-09-08 |
+|   073 | [v3 Foundation and Cross-cutting Contract](foundation/073-v3-foundation-contract-2026-09-09.md) | Typed v3 query/error/page boundary, review fixture and Storybook states | Implemented; FE validation PASS; wireframe review-only | 2026-09-10 |
 
 ## Current FE notes
 

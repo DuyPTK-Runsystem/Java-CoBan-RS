@@ -21,14 +21,15 @@ qua CR và migration/compatibility plan riêng.
 - [`modules/05-LessonLog.md`](modules/05-LessonLog.md)
 - [`data-model/README.md`](data-model/README.md)
 - [`frontend-api/README.md`](frontend-api/README.md)
+- [`contract/073-foundation-contract.md`](contract/073-foundation-contract.md)
 - [`specification.html`](specification.html) — tài liệu đặc tả HTML tổng hợp, dùng để review
 
 ## Trạng thái
 
-- Version: `v3-draft`
+- Version: `v3`
 - Ngày lập: `2026-09-09`
 - CR nền: [`CR-V3-001-academic-operations-and-targeted-communication.md`](change-request/CR-V3-001-academic-operations-and-targeted-communication.md)
-- Approval: `DRAFT - chờ người dùng phê duyệt qua agent message`
+- Approval: `APPROVED - CR-V3-001 và baseline v3 được người dùng phê duyệt qua agent message ngày 2026-09-10`
 
 Các giá trị pháp lý/chính sách chưa được cung cấp được đánh dấu `TBD`. Nội dung nghiệp vụ
 cho `TBD-001` đã được cung cấp: 19 tiết/tuần chuẩn, GVCN giảm 4 tiết và GV nữ nuôi con

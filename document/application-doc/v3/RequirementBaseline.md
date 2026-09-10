@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-- Version: `0.1-draft`
+- Version: `0.1-approved`
 - Phạm vi: trường THCS, kế thừa v2
 - Nguồn thay đổi: `CR-V3-001`
 - Các mục phụ thuộc nguồn pháp lý/chính sách chưa cung cấp: `TBD`; `TBD-001` đã có nội dung

@@ -24,7 +24,7 @@ Example:
 
 ## Plans
 
-### v3 draft plans starting from Plan 073
+### v3 plans starting from Plan 073
 
 | No. | Area | Plan | Status |
 |---:|---|---|---|
@@ -103,3 +103,4 @@ Master plan: [MASTER_PLAN_V3-2026-09-09.md](MASTER_PLAN_V3-2026-09-09.md). Plans
 |   064 | FE             | [FE E2E & Release Hardening](../fe/release/064-fe-e2e-release-hardening-2026-09-03.md)                                                                                | Draft; awaiting user approval; not implemented                                                                                             | 2026-09-03                                                                                       |
 |   066 | BE/FE          | [Student Attendance History by Student ID and Transcript Integration](../be/attendance/066-student-attendance-history-by-id-and-transcript-integration-2026-09-04.md) | Completed; validation PASS                                                                                                                 | 2026-09-04                                                                                       |
 |   070 | FE | [Login Password & Shared Session](../fe/user-auth/070-login-password-shared-session-2026-09-07.md) | Implemented; lint/build/Storybook PASS; tests/coverage NOT RUN theo yêu cầu; browser QA NOT RUN | 2026-09-07 |
+|   073 | BE/FE | [v3 Foundation and Cross-cutting Contract](../be/073-v3-foundation-contract-2026-09-09.md) | Implemented; contract checkpoint and review states; backend PMD/build baseline blocker and wireframe review remain | 2026-09-10 |

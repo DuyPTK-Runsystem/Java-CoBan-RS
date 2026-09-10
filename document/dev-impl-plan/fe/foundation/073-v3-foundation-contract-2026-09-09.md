@@ -2,7 +2,8 @@
 
 ## Status
 
-`DRAFT - chờ approval`; wireframe review: [`073-v3-foundation-contract`](../../../wireframes/fe/v3/073-v3-foundation-contract/README.md).
+`IMPLEMENTED - FE validation PASS; wireframe vẫn review-only`:
+[`073-v3-foundation-contract`](../../../wireframes/fe/v3/073-v3-foundation-contract/README.md).
 
 ## Mục tiêu
 

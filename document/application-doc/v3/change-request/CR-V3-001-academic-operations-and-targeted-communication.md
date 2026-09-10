@@ -3,7 +3,7 @@
 ## 1. Metadata
 
 - Application-document version: `v3`
-- Status: `DRAFT - chờ phê duyệt`
+- Status: `APPROVED - 2026-09-10`
 - Ngày: `2026-09-09`
 - Related master plan: `document/dev-impl-plan/summary/MASTER_PLAN_V3-2026-09-09.md`
 - Starting Developer Plan: `Plan 073`

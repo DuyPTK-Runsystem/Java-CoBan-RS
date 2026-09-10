@@ -4,7 +4,7 @@
 
 - Application version: `v3`
 - Ngày: `2026-09-09`
-- Status: `DRAFT - chờ người dùng phê duyệt`
+- Status: `APPROVED - Plan 073 đã triển khai; backend PMD baseline và wireframe review còn mở`
 - CR: [`CR-V3-001`](../../application-doc/v3/change-request/CR-V3-001-academic-operations-and-targeted-communication.md)
 - Nguyên tắc: phát triển BE và FE song song theo vertical slice.
 
