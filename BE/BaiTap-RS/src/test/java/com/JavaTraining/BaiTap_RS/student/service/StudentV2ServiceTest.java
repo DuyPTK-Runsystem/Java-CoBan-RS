@@ -127,6 +127,17 @@ class StudentV2ServiceTest {
     }
 
     @Test
+    void updateStudentClearsExistingGenderWhenRequestSendsNull() {
+        Student student = student();
+        student.getStudentInfo().setGender(com.JavaTraining.BaiTap_RS.student.domain.entity.StudentGender.FEMALE);
+        Mockito.when(studentRepository.findById(STUDENT_ID)).thenReturn(Optional.of(student));
+
+        studentService.updateStudent(STUDENT_ID, v2Request("STU1234567"));
+
+        Assertions.assertNull(student.getStudentInfo().getGender(), "explicit null gender must clear stored gender");
+    }
+
+    @Test
     void transitionStatusChangesStudentLifecycleState() {
         Student student = student();
         Mockito.when(studentRepository.findById(STUDENT_ID)).thenReturn(Optional.of(student));

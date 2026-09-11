@@ -37,8 +37,9 @@ là phase bắt buộc hoàn thành toàn bộ trước khi FE bắt đầu.
 
 - Conflict thời khóa biểu là lỗi nghiệp vụ backend, không chỉ là cảnh báo UI.
 - Xếp lớp phải lưu bộ tiêu chí, phiên bản, kết quả và lý do/vi phạm để có thể xem lại.
-- Định mức tiết/tuần của giáo viên lấy từ văn bản/quy định do chủ dự án cung cấp;
-  trước khi có nguồn chính thức, giá trị là `TBD` và không được hard-code.
+- Quy tắc nghiệp vụ `TBD-001` hiện được cung cấp là 19 tiết/tuần chuẩn; GVCN giảm 4 tiết;
+  GV nữ nuôi con dưới 12 tháng giảm thêm 3 tiết; các mức giảm được cộng dồn. Policy phải
+  được lưu theo tham số, nguồn, ngày hiệu lực và phiên bản; chưa được hard-code vào engine.
 - Import điểm phải có `scorebookId`, `assessmentColumnId`, phiên bản/optimistic lock,
   preview, validation từng dòng và audit; không được tự đoán cột.
 - Thông báo phải kiểm soát audience, quyền xem, trạng thái đọc và idempotency.
@@ -46,7 +47,8 @@ là phase bắt buộc hoàn thành toàn bộ trước khi FE bắt đầu.
 
 ## 5. Nguồn mở cần chốt
 
-- Văn bản hiện hành về định mức tiết dạy/tuần và ngoại lệ theo chức danh/nhiệm vụ.
+- Nguồn/văn bản hiện hành, ngày hiệu lực và phiên bản cho policy định mức tiết dạy/tuần;
+  nội dung nghiệp vụ `TBD-001` đã được cung cấp nhưng metadata chính thức còn mở.
 - Danh mục tiêu chí xếp lớp, trọng số, tie-breaker và cách xử lý sĩ số.
 - Quyền tạo/sửa/duyệt thời khóa biểu, thông báo và sổ đầu bài theo role/assignment.
 - Chính sách giữ dữ liệu, riêng tư và phạm vi người nhận thông báo.

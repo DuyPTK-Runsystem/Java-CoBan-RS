@@ -3,7 +3,7 @@
 ## 1. Metadata
 
 - Application-document version: `v3`
-- Status: `DRAFT - chờ phê duyệt`
+- Status: `APPROVED - 2026-09-10`
 - Ngày: `2026-09-09`
 - Related master plan: `document/dev-impl-plan/summary/MASTER_PLAN_V3-2026-09-09.md`
 - Starting Developer Plan: `Plan 073`
@@ -50,14 +50,20 @@ Không tự tạo endpoint chỉ từ tên capability.
 
 ## 6. Phụ thuộc và TBD
 
-- `TBD-001`: văn bản/quy định hiện hành về số tiết/tuần và ngoại lệ của giáo viên.
+- `TBD-001` (`PARTIALLY RESOLVED`): nội dung nghiệp vụ là 19 tiết/tuần chuẩn; GVCN giảm
+  4 tiết; GV nữ nuôi con dưới 12 tháng giảm thêm 3 tiết; các mức giảm được cộng dồn.
+  Còn thiếu văn bản/source, effective date và policy version để policy được coi là active.
 - `TBD-002`: bộ tiêu chí, trọng số, tie-breaker và policy sĩ số cho xếp lớp.
 - `TBD-003`: quyền publish timetable, gửi notification, import score và sửa lesson log.
 - `TBD-004`: retention/privacy và kênh gửi thông báo (in-app/email/push nếu có).
-- `TBD-005`: format file import và khóa định danh học sinh được phép dùng.
+- `TBD-005` (`PARTIALLY RESOLVED`): import dùng `.xlsx`, preview bắt buộc trước khi xác
+  nhận, mỗi lần upload chỉ xử lý một `assessmentColumnId`. Có thể update ô đã có điểm sau
+  khi user review giá trị cũ/mới và thông tin học sinh. Quy ước `0–10` là điểm, `11` là
+  `ABSENT`, `12` là `EXEMPTED`; chi tiết template, identity mapping, limits, blank-cell,
+  `CANCELLED` và partial-commit policy để Plan 078 chốt.
 
-Không được coi CR này là đã chốt các TBD trên. Khi có thông tin, phải tạo amendment
-hoặc cập nhật phần open decisions trước khi code phần bị ảnh hưởng.
+Các TBD chưa được chốt đầy đủ vẫn không được suy đoán. Khi có thông tin bổ sung, phải tạo
+amendment hoặc cập nhật phần open decisions trước khi code phần bị ảnh hưởng.
 
 ## 7. Acceptance criteria cấp CR
 

@@ -62,7 +62,7 @@ describe('router authentication guard', () => {
     expect(route.meta).toMatchObject({ requiresAuth: true, module: 'v2', shell: 'authenticated' })
   })
 
-  it.each(['/v2', '/v2/students', '/v2/students/new', '/v2/students/4', '/students/4/edit', '/v2/academic-years', '/v2/academic-years/1/semesters', '/v2/academic-catalog/grades', '/v2/academic-catalog/classes', '/v2/academic-catalog/subjects', '/v2/academic-catalog/class-subjects', '/v2/enrollments', '/v2/teachers', '/v2/teaching-assignments', '/v2/scorebooks', '/v2/scorebooks/operations', '/v2/score-change-requests', '/v2/class-transcripts', '/v2/retake-exams', '/v2/unknown'])('redirects STUDENT from %s to attendance', async (path) => {
+  it.each(['/v2', '/v2/students', '/v2/students/new', '/v2/students/4', '/students/4/edit', '/v2/academic-years', '/v2/academic-years/1/semesters', '/v2/academic-catalog/grades', '/v2/academic-catalog/classes', '/v2/academic-catalog/subjects', '/v2/academic-catalog/class-subjects', '/v2/enrollments', '/v2/enrollments/placement/new', '/v2/enrollments/placement/74', '/v2/teachers', '/v2/teaching-assignments', '/v2/scorebooks', '/v2/scorebooks/operations', '/v2/score-change-requests', '/v2/class-transcripts', '/v2/retake-exams', '/v2/unknown'])('redirects STUDENT from %s to attendance', async (path) => {
     saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01', roles: ['STUDENT'] } })
 
     await router.push(path)
@@ -82,6 +82,8 @@ describe('router authentication guard', () => {
     '/v2/academic-years/1/semesters',
     '/v2/academic-catalog/grades',
     '/v2/enrollments',
+    '/v2/enrollments/placement/new',
+    '/v2/enrollments/placement/74',
     '/v2/scorebooks/operations',
   ])('redirects TEACHER from restricted %s to attendance', async (path) => {
     saveAuthSession({ accessToken: 'jwt-token', user: { id: 5, username: 'teacher01', roles: ['TEACHER'] } })
@@ -89,6 +91,16 @@ describe('router authentication guard', () => {
     await router.push(path)
 
     expect(router.currentRoute.value.name).toBe('v2-attendance')
+  })
+
+  it.each(['/v2/enrollments/placement/new', '/v2/enrollments/placement/74'])('allows ADMIN and ACADEMIC_OFFICE to open %s', async (path) => {
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 1, username: 'admin01', roles: ['ADMIN'] } })
+    await router.push(path)
+    expect(router.currentRoute.value.fullPath).toBe(path)
+
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 2, username: 'office01', roles: ['ACADEMIC_OFFICE'] } })
+    await router.push(path)
+    expect(router.currentRoute.value.fullPath).toBe(path)
   })
 
   it.each(['/v2/academic-catalog/classes', '/v2/academic-catalog/subjects', '/v2/academic-catalog/class-subjects'])('allows TEACHER to read %s', async (path) => {
@@ -162,6 +174,8 @@ describe('router authentication guard', () => {
     ['/v2/academic-catalog/subjects', 'v2-academic-subjects'],
     ['/v2/academic-catalog/class-subjects', 'v2-academic-class-subjects'],
     ['/v2/enrollments', 'v2-enrollments'],
+    ['/v2/enrollments/placement/new', 'v2-placement-new'],
+    ['/v2/enrollments/placement/74', 'v2-placement-session'],
     ['/v2/attendance', 'v2-attendance'],
     ['/v2/scorebooks', 'v2-scorebooks'],
     ['/v2/transcripts', 'v2-transcripts'],

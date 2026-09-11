@@ -74,11 +74,17 @@ class ClassTranscriptQueryServiceTest {
 
         @BeforeEach
         void setUp() {
-                service = new ClassTranscriptQueryService(
-                                schoolClassRepository, semesterRepository, enrollmentRepository,
-                                studentRepository, termTranscriptRepository, annualTranscriptRepository,
-                                termResultRepository, annualResultRepository, accessGuard,
-                                termMapper, responseSupport);
+                ClassTranscriptRosterReader rosterReader = new ClassTranscriptRosterReader(
+                                enrollmentRepository, studentRepository);
+                ClassTranscriptScopeReader scopeReader = new ClassTranscriptScopeReader(
+                                schoolClassRepository, semesterRepository, accessGuard);
+                ClassTermTranscriptReader termReader = new ClassTermTranscriptReader(
+                                scopeReader, rosterReader, termTranscriptRepository, termResultRepository, termMapper);
+                ClassAnnualTranscriptReader annualReader = new ClassAnnualTranscriptReader(
+                                scopeReader, rosterReader, annualTranscriptRepository,
+                                new ClassAnnualResultReader(annualResultRepository, termResultRepository,
+                                                responseSupport));
+                service = new ClassTranscriptQueryService(termReader, annualReader);
         }
 
         @Test
@@ -158,12 +164,10 @@ class ClassTranscriptQueryServiceTest {
 
                 StudentSubjectTermResult subjectResult = Mockito.mock(StudentSubjectTermResult.class);
                 Mockito.when(subjectResult.getTermTranscriptId()).thenReturn(50L);
-                Mockito.when(subjectResult.getClassSubjectId()).thenReturn(60L);
                 Mockito.when(termResultRepository.findAllByTermTranscriptIdInOrderBySubjectIdAsc(List.of(50L)))
                                 .thenReturn(List.of(subjectResult));
 
-                Mockito.when(responseSupport.findClassSubjects(List.of(60L))).thenReturn(Map.of());
-                Mockito.when(termMapper.map(STUDENT_ID, List.of(subjectResult), Map.of())).thenReturn(List.of());
+                Mockito.when(termMapper.map(STUDENT_ID, List.of(subjectResult))).thenReturn(List.of());
 
                 ResClassTermTranscriptDTO result = service.getClassTermTranscript(CLASS_ID, SEMESTER_ID);
                 Assertions.assertEquals(1, result.students().size());

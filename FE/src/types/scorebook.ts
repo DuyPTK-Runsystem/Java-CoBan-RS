@@ -129,3 +129,52 @@ export interface BulkScoreItem extends UpsertStudentScoreRequest {
 export interface BulkUpsertStudentScoreRequest {
   items: BulkScoreItem[]
 }
+
+export type BulkScoreImportRowResult = 'VALID' | 'ERROR' | 'SKIPPED'
+
+export interface BulkScoreImportFileMetadata {
+  originalName?: string | null
+  sizeBytes?: number | null
+  sha256?: string | null
+  rowCount?: number | null
+}
+
+export interface BulkScoreImportRow {
+  rowNumber: number
+  studentCode: string | null
+  studentId: number | null
+  studentName: string | null
+  oldStatus: ScoreStatus | null
+  oldValue: number | null
+  oldVersion: number | null
+  newStatus: ScoreStatus | null
+  newValue: number | null
+  note: string | null
+  result: BulkScoreImportRowResult
+  errorCode: string | null
+  message: string | null
+}
+
+export interface BulkScoreImportSummary {
+  totalRows?: number
+  validRows: number
+  errorRows: number
+  skippedRows?: number
+  newScores: number
+  updatedScores: number
+}
+
+export interface BulkScoreImportPreview {
+  batchId?: number | null
+  status?: string | null
+  scorebookId?: number | null
+  assessmentColumnId: number
+  fileName?: string | null
+  file?: BulkScoreImportFileMetadata
+  summary: BulkScoreImportSummary
+  rows: BulkScoreImportRow[]
+  /** Provisional normalized payload returned by the preview contract. */
+  items?: BulkScoreItem[]
+  /** Alternate provisional name allowed during the contract checkpoint. */
+  normalizedItems?: BulkScoreItem[]
+}

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.ClassSubject;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Subject;
+import com.JavaTraining.BaiTap_RS.academic.repository.ClassSubjectRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.response.ResStudentTermTranscriptDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.Scorebook;
@@ -20,8 +21,17 @@ import org.springframework.stereotype.Component;
 class TranscriptTermResponseMapper {
 
     private final SubjectRepository subjectRepository;
+    private final ClassSubjectRepository classSubjectRepository;
     private final ScorebookRepository scorebookRepository;
     private final TranscriptAssessmentColumnMapper assessmentColumnMapper;
+
+    public List<ResStudentTermTranscriptDTO.ResTermSubjectResultDTO> map(
+            Long studentId, List<StudentSubjectTermResult> results) {
+        Map<Long, ClassSubject> classSubjects = classSubjectRepository.findAllById(results.stream()
+                .map(StudentSubjectTermResult::getClassSubjectId).toList()).stream()
+                .collect(Collectors.toMap(ClassSubject::getId, subject -> subject));
+        return map(studentId, results, classSubjects);
+    }
 
     public List<ResStudentTermTranscriptDTO.ResTermSubjectResultDTO> map(
             Long studentId, List<StudentSubjectTermResult> results, Map<Long, ClassSubject> classSubjects) {

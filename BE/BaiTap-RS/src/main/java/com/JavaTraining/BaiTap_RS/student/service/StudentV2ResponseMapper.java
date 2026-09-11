@@ -69,6 +69,7 @@ class StudentV2ResponseMapper {
                 student.getStudentName(),
                 info == null ? null : info.getDateOfBirth(),
                 info == null ? null : info.getAddress(),
+                info == null ? null : info.getGender(),
                 student.getStatus(),
                 currentClass == null ? null : currentClass.id(),
                 currentClass == null ? null : currentClass.code(),

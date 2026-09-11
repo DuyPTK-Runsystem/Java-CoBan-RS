@@ -35,7 +35,8 @@ const initialValue = ref<Partial<StudentFormValues>>({
   studentName: '',
   dateOfBirth: null,
   address: '',
-  status: 'ACTIVE',
+      status: 'ACTIVE',
+      gender: null,
   provisionAccount: true,
   username: '',
   password: '',
@@ -69,6 +70,7 @@ async function load(): Promise<void> {
       dateOfBirth: student.dateOfBirth ? new Date(`${student.dateOfBirth}T00:00:00`) : null,
       address: student.address ?? '',
       status: student.status ?? 'ACTIVE',
+      gender: student.gender ?? null,
     }
   } catch (error) {
     if (isApiError(error, 401)) return
@@ -108,6 +110,7 @@ async function save(values: StudentFormValues): Promise<void> {
         studentName: values.studentName.trim(),
         dateOfBirth: formatDate(values.dateOfBirth),
         address: values.address.trim() || null,
+        gender: values.gender,
       }
       await updateStudent(accessToken, studentId.value, updatePayload)
     } else {
@@ -117,6 +120,7 @@ async function save(values: StudentFormValues): Promise<void> {
           studentName: values.studentName.trim(),
           dateOfBirth: formatDate(values.dateOfBirth),
           address: values.address.trim() || null,
+          gender: values.gender,
           username: values.username?.trim() || null,
           password: values.password || null,
         }
@@ -128,6 +132,7 @@ async function save(values: StudentFormValues): Promise<void> {
           studentName: values.studentName.trim(),
           dateOfBirth: formatDate(values.dateOfBirth),
           address: values.address.trim() || null,
+          gender: values.gender,
         }
         await createStudent(accessToken, v2Payload)
       }

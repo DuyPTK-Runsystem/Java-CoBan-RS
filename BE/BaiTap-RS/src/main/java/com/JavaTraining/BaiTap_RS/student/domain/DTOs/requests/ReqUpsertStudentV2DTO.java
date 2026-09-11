@@ -2,6 +2,8 @@ package com.JavaTraining.BaiTap_RS.student.domain.DTOs.requests;
 
 import java.time.LocalDate;
 
+import com.JavaTraining.BaiTap_RS.student.domain.entity.StudentGender;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
@@ -17,5 +19,11 @@ public record ReqUpsertStudentV2DTO(
         @PastOrPresent
         LocalDate dateOfBirth,
         @Size(max = 255)
-        String address) {
+        String address,
+        StudentGender gender) {
+
+    public ReqUpsertStudentV2DTO(
+            String studentCode, String studentName, LocalDate dateOfBirth, String address) {
+        this(studentCode, studentName, dateOfBirth, address, null);
+    }
 }

@@ -61,6 +61,12 @@
 |   066 | attendance         | [Student Attendance History by Student ID and Transcript Integration](attendance/066-student-attendance-history-by-id-and-transcript-integration-2026-09-04.md) | Completed; validation PASS                                                       | 2026-09-04 |
 |   067 | workflow-skill     | [Actual Permission Matrix and FE Remaining Plans Audit](workflow-skill/067-actual-permission-matrix-and-fe-remaining-plans-audit-2026-09-04.md)                 | Completed; documentation audit PASS                                              | 2026-09-04 |
 |   068 | student            | [Student legacy to V2 remediation](../../fe/student/068-student-v2-migration-workspace-2026-09-05.md)                                                          | Amendment removed Student Gender entity/DTO/service/V20; 87 test reports with 0 failure/error; PMD/build remain baseline-blocked | 2026-09-06 |
+| 073.0 | cross-area         | [v3 TBD-001 Teacher Load Policy](073.0-v3-tbd-001-teacher-load-policy-2026-09-10.md)                                                                            | Documentation update; rule 19/15/12 and additive reductions recorded; source/effective date/policy version remain open; code/tests NOT RUN | 2026-09-10 |
+| 073.1 | cross-area         | [v3 TBD-005 Score Import Contract](073.1-v3-tbd-005-score-import-contract-2026-09-10.md)                                                                          | Documentation update; `.xlsx`, mandatory preview, single-column upload and existing-score review/update recorded; Plan 078 details remain open; code/tests NOT RUN | 2026-09-10 |
+|   073 | cross-area         | [v3 Foundation Contract](073-v3-foundation-contract-2026-09-10.md) | BE DTO boundary, FE review state and approved v3 contract checkpoint; PMD/build baseline blocker recorded | 2026-09-10 |
+|   074 | enrollment         | [Rule-based Class Placement (BE + FE)](enrollment/074-rule-based-class-placement-2026-09-11.md) | Consolidated note; BE test/Checkstyle/PMD main PASS; build FAIL only at 123 repository pmdTest violations; live/migration/browser NOT RUN | 2026-09-11 |
+| 074.1 | student            | [Student Gender Foundation (BE + FE)](student/074.1-student-gender-foundation-2026-09-11.md) | Nullable clear regression verified; BE test/checkstyle and FE gates PASS; PMD/build plus runtime/migration/browser/live remain incomplete | 2026-09-11 |
+|   078 | scorebook          | [Score import v2 bulk extension](scorebook/078-score-import-v2-bulk-extension-2026-09-10.md) | Implemented; test/JaCoCo, Checkstyle and bootJar PASS; PMD/build blocked by repository baseline; live API NOT RUN | 2026-09-10 |
 
 ## Module folders
 
@@ -74,3 +80,5 @@
 - `academic/`: Academic structure, semester lifecycle, lock batch, completeness evaluation and notifications.
 
 Plan 040.1: Email-only notification contract — Completed; full test, Checkstyle, PMD and build PASS. Existing IN_APP data must be preflighted before production migration.
+
+Plan 078 documentation sync (2026-09-10): cập nhật trạng thái Plan 078 trong các summary thành `Implemented`; giữ PMD/build baseline `BLOCKED` và live API `NOT RUN`.

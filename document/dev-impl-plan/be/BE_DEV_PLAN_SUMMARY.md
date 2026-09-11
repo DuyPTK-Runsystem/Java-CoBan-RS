@@ -43,6 +43,10 @@
 |   065 | [Published Score Entry and Reopen](scorebook/065-published-score-entry-and-reopen-2026-09-03.md)                                                                | `PUBLISHED -> OPEN`, score entry remains backend-authoritative after publish, FE lifecycle alignment                                    | Completed; validation PASS | 2026-09-03 |
 | 062.1 | [Class Transcript & Homeroom Accessible Classes API](../fe/scorebook/062.1-class-transcript-viewer-ui-2026-09-04.md)                                            | Query APIs for class term/annual transcripts and accessible classes for transcript viewer                                               | Completed; validation PASS | 2026-09-04 |
 |   066 | [Student Attendance History by Student ID and Transcript Integration](attendance/066-student-attendance-history-by-id-and-transcript-integration-2026-09-04.md) | GET attendance history by studentId for Admin/Office/Teacher, transcript viewer absence integration                                     | Completed; validation PASS | 2026-09-04 |
+|   073 | [v3 Foundation and Cross-cutting Contract](073-v3-foundation-contract-2026-09-09.md) | v3 page DTO boundary, contract checkpoint, fixture and BE/FE parallel foundation | Implemented; backend PMD/build blocked by baseline | 2026-09-10 |
+|   074 | [Rule-based Class Placement](enrollment/074-rule-based-class-placement-2026-09-10.md) | Placement session, auto-assignment support, manual-required results, capacity guard, confirm/audit | Implemented slice; focused PASS; full backend gates FAIL/BLOCKED; live/migration NOT RUN | 2026-09-11 |
+| 074.1 | [Student Gender Foundation](student/074.1-student-gender-foundation-2026-09-10.md) | Nullable student gender data, contract/profile validation and placement snapshot dependency | Implemented slice; backend runtime/migration NOT RUN; full validation incomplete | 2026-09-11 |
+|   078 | [One-column Score Import](scorebook/078-one-column-score-import-2026-09-10.md) | `.xlsx` parse/preview/validate/atomic commit for one selected assessment column, optimistic locking and audit | Draft; awaiting Plan/wireframe approval | 2026-09-10 |
 
 ## Module folders
 

@@ -4,7 +4,7 @@
 
 - Application version: `v3`
 - Ngày: `2026-09-09`
-- Status: `DRAFT - chờ người dùng phê duyệt`
+- Status: `APPROVED - Plan 073 và Plan 078 đã triển khai; Plan 077 tạm hoãn; backend PMD/build baseline, wireframe review và live validation còn mở`
 - CR: [`CR-V3-001`](../../application-doc/v3/change-request/CR-V3-001-academic-operations-and-targeted-communication.md)
 - Nguyên tắc: phát triển BE và FE song song theo vertical slice.
 
@@ -28,6 +28,9 @@ hoàn thành. BE phải cung cấp endpoint thật và contract test trong cùng
 | 078 | one-column score import | validate/preview/commit selected column, expectedVersion/audit; FE upload mapping, row errors, commit summary | wrong-column and partial-commit protection |
 | 079 | lesson log | lesson-log lifecycle, timetable linkage, authorization/audit; FE teacher entry, class history, review states | orphan prevention and edit policy |
 | 080 | cross-feature integration & release hardening | contract/integration fixtures, observability, migration/backfill readiness; FE browser walkthrough, accessibility/responsive | role matrix, mutation reload/re-query, release evidence |
+
+Plan 077: `TEMPORARILY POSTPONED` theo quyết định người dùng ngày `2026-09-10`; chưa triển
+khai code/test và không được tính là completed trong v3 delivery.
 
 ## Quy trình trong từng Plan
 
@@ -55,5 +58,11 @@ hoàn thành. BE phải cung cấp endpoint thật và contract test trong cùng
 ## Thứ tự phê duyệt cần người dùng xác nhận
 
 - Phê duyệt CR-V3-001 và baseline v3-draft để chuyển thành approved.
-- Xác nhận/ cung cấp `TBD-001` đến `TBD-005`, ưu tiên quy định tiết/tuần giáo viên.
-- Phê duyệt Plan 073 và wireframe/contract checkpoint tương ứng trước khi code.
+- `TBD-001` đã được cung cấp nội dung nghiệp vụ (19 tiết chuẩn, giảm 4 cho GVCN, giảm
+  thêm 3 cho GV nữ nuôi con dưới 12 tháng, cộng dồn); vẫn cần source, effective date và
+  policy version trước khi coi là policy active.
+- `TBD-005` đã được chốt một phần: `.xlsx`, preview bắt buộc, một `assessmentColumnId`
+  cho mỗi lần upload và review/update các ô đã có điểm; template, row mapping, limits và
+  semantics còn lại do Plan 078 chốt.
+- Xác nhận/cung cấp `TBD-002` đến `TBD-004`.
+- Plan 073 và Plan 078 đã được phê duyệt và triển khai; các gate chưa chạy vẫn phải ghi `BLOCKED` hoặc `NOT RUN` theo Dev Note.

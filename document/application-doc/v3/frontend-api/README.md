@@ -5,7 +5,9 @@ endpoint hoặc thay thế backend authorization.
 
 ## Shared response/error expectations
 
-- List response phải biểu diễn items, page, pageSize, total và applied filters khi có.
+- Mọi list response phân trang dùng `ResultPaginationDTO`: `meta` gồm `page` zero-based,
+  `pageSize`, `totalPages`, `totalItems`; `result` chứa danh sách DTO. Không tạo page
+  response riêng theo version hoặc domain.
 - Mutation lỗi cần phân biệt `400`, `401`, `403`, `404`, `409`, `422` theo contract module.
 - `401` xóa session và đưa về login; `403` giữ session và hiển thị không đủ quyền.
 - `409` phải giữ input/reload guidance, không tự retry mutation mù.

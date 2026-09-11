@@ -2,6 +2,8 @@ package com.JavaTraining.BaiTap_RS.student.domain.DTOs.requests;
 
 import java.time.LocalDate;
 
+import com.JavaTraining.BaiTap_RS.student.domain.entity.StudentGender;
+
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -28,6 +30,8 @@ public record ReqCreateStudentV3DTO(
         @DecimalMax(value = "10.0", message = "Điểm trung bình phải từ 0 đến 10")
         Double averageScore,
 
+        StudentGender gender,
+
         @Size(max = 20, message = "Tên đăng nhập tối đa 20 ký tự")
         @Pattern(regexp = "\\A\\p{ASCII}+\\z", message = "Tên đăng nhập chỉ được dùng ký tự 1-byte")
         String username,
@@ -35,4 +39,10 @@ public record ReqCreateStudentV3DTO(
         @Size(min = 6, max = 15, message = "Mật khẩu phải từ 6 đến 15 ký tự")
         @Pattern(regexp = "\\A\\p{ASCII}+\\z", message = "Mật khẩu chỉ được dùng ký tự 1-byte")
         String password) {
+
+    public ReqCreateStudentV3DTO(
+            String studentCode, String studentName, LocalDate dateOfBirth, String address,
+            Double averageScore, String username, String password) {
+        this(studentCode, studentName, dateOfBirth, address, averageScore, null, username, password);
+    }
 }

@@ -1,5 +1,8 @@
 package com.JavaTraining.BaiTap_RS.academic.repository;
 
+import java.time.LocalDate;
+import java.util.Optional;
+
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.AcademicYear;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.AcademicYearStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +18,6 @@ public interface AcademicYearRepository extends JpaRepository<AcademicYear, Long
     boolean existsByStatus(AcademicYearStatus status);
 
     boolean existsByStatusAndIdNot(AcademicYearStatus status, Long id);
+
+    Optional<AcademicYear> findTopByEndDateLessThanOrderByEndDateDesc(LocalDate startDate);
 }

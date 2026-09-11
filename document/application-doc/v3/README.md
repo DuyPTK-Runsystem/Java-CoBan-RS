@@ -21,14 +21,21 @@ qua CR và migration/compatibility plan riêng.
 - [`modules/05-LessonLog.md`](modules/05-LessonLog.md)
 - [`data-model/README.md`](data-model/README.md)
 - [`frontend-api/README.md`](frontend-api/README.md)
+- [`contract/073-foundation-contract.md`](contract/073-foundation-contract.md)
 - [`specification.html`](specification.html) — tài liệu đặc tả HTML tổng hợp, dùng để review
 
 ## Trạng thái
 
-- Version: `v3-draft`
+- Version: `v3`
 - Ngày lập: `2026-09-09`
 - CR nền: [`CR-V3-001-academic-operations-and-targeted-communication.md`](change-request/CR-V3-001-academic-operations-and-targeted-communication.md)
-- Approval: `DRAFT - chờ người dùng phê duyệt qua agent message`
+- Approval: `APPROVED - CR-V3-001 và baseline v3 được người dùng phê duyệt qua agent message ngày 2026-09-10`
 
-Các giá trị pháp lý/chính sách chưa được cung cấp được đánh dấu `TBD`, đặc biệt là
-định mức tiết dạy/tuần của giáo viên. Không được triển khai với giá trị suy đoán.
+Các giá trị pháp lý/chính sách chưa được cung cấp được đánh dấu `TBD`. Nội dung nghiệp vụ
+cho `TBD-001` đã được cung cấp: 19 tiết/tuần chuẩn, GVCN giảm 4 tiết và GV nữ nuôi con
+dưới 12 tháng giảm thêm 3 tiết, áp dụng cộng dồn. Nguồn chính thức, ngày hiệu lực và
+phiên bản policy vẫn cần được bổ sung; không hard-code policy vào engine.
+
+`TBD-005` đã được chốt một phần: import dùng `.xlsx`, có preview bắt buộc, mỗi lần upload
+chỉ xử lý một `assessmentColumnId`, và cho phép review rồi cập nhật các ô đã có điểm.
+Chi tiết template, row mapping, giới hạn file và các quy tắc còn mở được chốt trong Plan 078.

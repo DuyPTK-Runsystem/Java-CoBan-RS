@@ -2,7 +2,11 @@
 
 ## Status
 
-`DRAFT - chờ approval`; không triển khai code trước khi người dùng phê duyệt.
+`IMPLEMENTED - backend PMD baseline còn mở; xem Dev Note 073`.
+
+Amendment khi lập Plan 077 (`2026-09-10`): contract `V3PageResponse<T>` bị supersede;
+toàn hệ thống dùng `ResultPaginationDTO`. Việc xóa artifact/test và migration consumer
+thuộc implementation Plan 077.
 
 ## Mục tiêu
 
@@ -34,3 +38,16 @@ pagination/filter conventions và fixture data.
 
 CR amendment/requirement IDs, API/data decision record, role/error matrix, fixture
 catalog, matching FE wireframe/Storybook checklist và Plan 074–079 entry criteria.
+
+## Unit test plan
+
+- `V3PageResponse`: copy immutable `items`/`appliedFilters`, reject negative page/total và
+  pageSize không dương.
+- Không thêm error code/error payload v3; capability plan phải đề xuất semantics chi tiết cùng
+  API contract nếu thực sự cần.
+- FE review: 401 thể hiện rõ boundary chuyển hướng đăng nhập, còn 403/404/409 giữ state review
+  tương ứng.
+- Query serializer: chỉ ghi page/pageSize safe integer; pageSize nguồn không hợp lệ quay về
+  default do capability truyền vào, không tự suy diễn giá trị `1`.
+- Query/endpoint capability chưa tồn tại không được mock thành API integration test trong
+  Plan 073; từng Plan 074–079 phải thêm contract/integration test của endpoint thật.

@@ -12,21 +12,16 @@ import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClassStatus;
 import com.JavaTraining.BaiTap_RS.academic.repository.AcademicYearRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.GradeLevelRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
-import com.JavaTraining.BaiTap_RS.assignment.domain.entity.AssignmentStatus;
-import com.JavaTraining.BaiTap_RS.assignment.repository.HomeroomAssignmentRepository;
-import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
 import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
-import com.JavaTraining.BaiTap_RS.teacher.domain.entity.Teacher;
-import com.JavaTraining.BaiTap_RS.teacher.repository.TeacherRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 @SuppressWarnings("PMD.GuardLogStatement")
 public class SchoolClassService {
 
@@ -34,23 +29,7 @@ public class SchoolClassService {
         private final GradeLevelRepository gradeLevelRepository;
         private final SchoolClassRepository schoolClassRepository;
         private final SchoolClassValidator validator;
-        private final TeacherRepository teacherRepository;
-        private final HomeroomAssignmentRepository homeroomAssignmentRepository;
-
-        public SchoolClassService(
-                        AcademicYearRepository academicYearRepository,
-                        GradeLevelRepository gradeLevelRepository,
-                        SchoolClassRepository schoolClassRepository,
-                        SchoolClassValidator validator,
-                        TeacherRepository teacherRepository,
-                        HomeroomAssignmentRepository homeroomAssignmentRepository) {
-                this.academicYearRepository = academicYearRepository;
-                this.gradeLevelRepository = gradeLevelRepository;
-                this.schoolClassRepository = schoolClassRepository;
-                this.validator = validator;
-                this.teacherRepository = teacherRepository;
-                this.homeroomAssignmentRepository = homeroomAssignmentRepository;
-        }
+        private final SchoolClassTranscriptAccessService transcriptAccessService;
 
         @Transactional(readOnly = true)
         public List<ResSchoolClassDTO> listSchoolClasses(Long academicYearId) {
@@ -145,45 +124,7 @@ public class SchoolClassService {
                 DeveloperTrace.trace(/* NOPMD GuardLogStatement */
                                 SchoolClassService.class,
                                 "SchoolClassService.listAccessibleClassesForTranscript");
-                if (hasAnyRole("ADMIN", "ACADEMIC_OFFICE")) {
-                        return listSchoolClasses(academicYearId);
-                }
-                if (!hasAnyRole("TEACHER")) {
-                        return List.of();
-                }
-                Long currentUserId = AuditContext.currentUserId();
-                if (currentUserId == null) {
-                        return List.of();
-                }
-                Teacher teacher = teacherRepository.findByUserId(currentUserId).orElse(null);
-                if (teacher == null) {
-                        return List.of();
-                }
-                List<Long> classIds = homeroomAssignmentRepository.findClassIdsByTeacherIdAndStatus(
-                                teacher.getId(), AssignmentStatus.ACTIVE);
-                if (classIds.isEmpty()) {
-                        return List.of();
-                }
-                List<SchoolClass> classes = academicYearId == null
-                                ? schoolClassRepository.findAllByIdInOrderByClassCodeAsc(classIds)
-                                : schoolClassRepository.findAllByIdInAndAcademicYearIdOrderByClassCodeAsc(classIds,
-                                                academicYearId);
-                return classes.stream().map(this::toResponse).toList();
-        }
-
-        private boolean hasAnyRole(String... roles) {
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                if (auth == null) {
-                        return false;
-                }
-                for (String role : roles) {
-                        boolean matched = auth.getAuthorities().stream()
-                                        .anyMatch(a -> a.getAuthority().equals("ROLE_" + role));
-                        if (matched) {
-                                return true;
-                        }
-                }
-                return false;
+                return transcriptAccessService.listAccessibleClasses(academicYearId);
         }
 
         private ResSchoolClassDTO toResponse(SchoolClass schoolClass) {

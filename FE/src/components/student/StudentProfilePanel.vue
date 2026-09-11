@@ -57,6 +57,10 @@ function getRoleLabel(role?: string | null): string {
           <dd>{{ student?.address || '—' }}</dd>
         </div>
         <div class="meta-item">
+          <dt>Giới tính</dt>
+          <dd>{{ student?.gender === 'MALE' ? 'Nam' : student?.gender === 'FEMALE' ? 'Nữ' : 'Chưa cập nhật' }}</dd>
+        </div>
+        <div class="meta-item">
           <dt>Trạng thái học vụ</dt>
           <dd>
             <Tag

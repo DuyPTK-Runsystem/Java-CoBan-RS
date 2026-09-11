@@ -13,8 +13,17 @@ Lập lịch cho lớp và giáo viên theo tuần/học kỳ, kiểm tra confli
 - Slot phải thuộc calendar/semester hợp lệ và assignment phải còn hiệu lực.
 - Tổng tiết/tuần đối chiếu `TeacherLoadPolicy(version, source, effectiveFrom)`.
 
-Giá trị định mức, ngoại lệ và cách tính tiết quy đổi là `TBD-001`; không hard-code trước
-khi có văn bản hiện hành.
+Quy tắc nghiệp vụ `TBD-001` đã được cung cấp:
+
+- Định mức chuẩn: `19` tiết/tuần.
+- GVCN: giảm `4` tiết/tuần.
+- GV nữ nuôi con dưới `12` tháng tuổi: giảm thêm `3` tiết/tuần.
+- Các mức giảm được cộng dồn; trường hợp vừa là GVCN vừa thuộc diện nuôi con nhỏ còn
+  `12` tiết/tuần.
+
+Các giá trị phải được biểu diễn qua tham số của `TeacherLoadPolicy`, không hard-code vào
+engine. `source`, `effectiveFrom` và `version` của policy vẫn cần được bổ sung trước khi
+coi policy là quy định active.
 
 ## Lifecycle
 

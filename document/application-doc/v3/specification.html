@@ -112,7 +112,7 @@
 
       <section id="timetable">
         <div class="section-head"><div><h2>03 · Thời khóa biểu & tải giáo viên</h2><p>Requirement IDs: <code>FR-V3-TT-001..004</code>, <code>BR-V3-TT-001..002</code></p></div><span class="badge draft">Plan 075</span></div>
-        <div class="callout warning"><strong>TBD-001:</strong> định mức tiết/tuần và ngoại lệ phải lấy từ văn bản hiện hành được cung cấp. Không hard-code giá trị khi chưa có nguồn, effective date và policy version.</div>
+        <div class="callout warning"><strong>TBD-001 (partially resolved):</strong> 19 tiết/tuần chuẩn; GVCN giảm 4 tiết; GV nữ nuôi con dưới 12 tháng giảm thêm 3 tiết, cộng dồn. Vẫn cần source, effective date và policy version; không hard-code vào engine.</div>
         <h3>Constraint publish</h3>
         <ul><li>Lớp không có hai môn/tiết trùng slot.</li><li>Giáo viên không dạy hai lớp trùng slot.</li><li>Phòng không dùng trùng slot nếu resource phòng được áp dụng.</li><li>Slot thuộc calendar/semester hợp lệ; assignment còn hiệu lực.</li><li>Conflict là lỗi chặn <code>PUBLISHED</code>; draft có thể lưu để sửa.</li></ul>
         <div class="flow"><span class="step">DRAFT</span><span class="arrow">→</span><span class="step">VALIDATED</span><span class="arrow">→</span><span class="step">PUBLISHED</span><span class="arrow">→</span><span class="step">ARCHIVED</span></div>
@@ -172,11 +172,11 @@
       <section id="decisions">
         <div class="section-head"><div><h2>09 · Quyết định cần chốt</h2><p>Các mục này phải được cung cấp hoặc phê duyệt trước khi code phần bị ảnh hưởng.</p></div><span class="badge draft">OPEN</span></div>
         <table><thead><tr><th>ID</th><th>Nội dung</th><th>Ảnh hưởng</th></tr></thead><tbody>
-          <tr><td><code>TBD-001</code></td><td>Văn bản định mức tiết/tuần và ngoại lệ giáo viên.</td><td>Plan 075, policy validation.</td></tr>
+          <tr><td><code>TBD-001</code></td><td>Đã có rule nghiệp vụ 19/15/12 tiết và tham số giảm; còn thiếu source, effective date và policy version.</td><td>Plan 075, policy validation.</td></tr>
           <tr><td><code>TBD-002</code></td><td>Tiêu chí, trọng số, tie-breaker và sĩ số xếp lớp.</td><td>Plan 074, placement engine.</td></tr>
           <tr><td><code>TBD-003</code></td><td>Role/assignment cho publish lịch, gửi thông báo, import điểm, sửa sổ.</td><td>Plans 074–079.</td></tr>
           <tr><td><code>TBD-004</code></td><td>Retention/privacy và channel notification.</td><td>Plan 076, data model.</td></tr>
-          <tr><td><code>TBD-005</code></td><td>Format file import và khóa định danh học sinh.</td><td>Plan 078, validation contract.</td></tr>
+          <tr><td><code>TBD-005</code></td><td>Đã chốt một phần: `.xlsx`, preview bắt buộc, một <code>assessmentColumnId</code>/lần upload, review old/new và update ô đã có điểm; còn mở template, mapping, limits và semantics.</td><td>Plan 078, validation contract.</td></tr>
         </tbody></table>
         <div class="callout warning"><strong>Approval gate:</strong> CR-V3-001, baseline v3, Plan 073 và wireframe cần được người dùng phê duyệt qua agent message trước khi triển khai code.</div>
       </section>

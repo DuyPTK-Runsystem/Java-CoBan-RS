@@ -4,6 +4,8 @@ import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -43,9 +45,19 @@ public class StudentInfo {
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender", length = 20)
+    private StudentGender gender;
+
     public StudentInfo(LocalDate dateOfBirth, String address, Double averageScore) {
         this.dateOfBirth = dateOfBirth;
         this.address = address;
         this.averageScore = averageScore;
+    }
+
+    public StudentInfo(
+            LocalDate dateOfBirth, String address, Double averageScore, StudentGender gender) {
+        this(dateOfBirth, address, averageScore);
+        this.gender = gender;
     }
 }

@@ -37,6 +37,10 @@
 
 
 |   072   | [FE Source Refactor](tooling/072-frontend-source-refactor-2026-09-08.md) | Refactor `FE/src` theo vertical slice, chuẩn hóa foundation dùng chung, giảm view/component coupling và giữ nguyên API/behavior | Completed; foundation, Student, Attendance and high-risk workspace refactors, CSS split, and complete domain directory reorganization (components/ & views/); automated and browser validation PASS | 2026-09-08 |
+|   073 | [v3 Foundation and Cross-cutting Contract](foundation/073-v3-foundation-contract-2026-09-09.md) | Typed v3 query/error/page boundary, review fixture and Storybook states | Implemented; FE validation PASS; wireframe review-only | 2026-09-10 |
+|   074 | [Rule-based Class Placement UI](enrollment/074-rule-based-class-placement-ui-2026-09-10.md) | Production create/simulate/review/confirm route over the approved placement contract | Partially implemented; continuation handoff revised; production route/view and live validation pending | 2026-09-11 |
+| 074.1 | [Student Gender Foundation UI](student/074.1-student-gender-foundation-ui-2026-09-10.md) | Typed gender field in student form/profile, contract validation and review states | Implemented slice; FE validation PASS; browser/live NOT RUN | 2026-09-11 |
+|   078 | [One-column Score Import UI](scorebook/078-one-column-score-import-ui-2026-09-10.md) | Scorebook flow chọn cột/file, preview old/new, row errors, commit summary and review states | Draft; awaiting Plan/wireframe approval | 2026-09-10 |
 
 ## Current FE notes
 

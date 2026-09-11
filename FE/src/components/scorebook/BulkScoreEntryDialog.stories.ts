@@ -43,5 +43,6 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const CurrentPage: Story = {}
+export const ManualBulkMode: Story = {}
 export const Saving: Story = { args: { saving: true } }
-
+export const FileModeBeforeTemplateDownload: Story = { args: { initialMode: 'file' } }
