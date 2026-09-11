@@ -6,6 +6,7 @@ import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 
 import FormAlert from '@/components/common/FormAlert.vue'
+import SubjectFunctionalRoomPanel from '@/components/academic/SubjectFunctionalRoomPanel.vue'
 import type { Subject, SubjectFormValues, SubjectStatus, SubjectType } from '@/types/academic'
 
 const props = withDefaults(defineProps<{ visible?: boolean; mode?: 'create' | 'edit'; initialValue?: Partial<Subject> | null; saving?: boolean; errorMessage?: string }>(), { visible: false, mode: 'create', initialValue: null, saving: false, errorMessage: '' })
@@ -34,6 +35,9 @@ function save(): void { if (validate()) emit('save', { ...values, code: values.c
         <div class="field-group"><label for="subject-type">Loại môn</label><Select id="subject-type" v-model="values.subjectType" :options="typeOptions" option-label="label" option-value="value" fluid /></div>
         <div class="field-group"><label for="subject-scope">Phạm vi áp dụng</label><Select id="subject-scope" v-model="values.applicationScope" :options="scopeOptions" option-label="label" option-value="value" fluid /></div>
         <div class="field-group wide"><label for="subject-status">Trạng thái</label><Select id="subject-status" v-model="values.status" :options="statusOptions" option-label="label" option-value="value" fluid /></div>
+      </div>
+      <div v-if="props.mode === 'edit' && props.initialValue?.id" class="mt-4 pt-4 border-t border-gray-200">
+        <SubjectFunctionalRoomPanel :subject-id="props.initialValue.id" :subject-name="props.initialValue.name" />
       </div>
       <div class="form-actions"><Button type="button" label="Hủy" icon="pi pi-times" severity="secondary" outlined :disabled="props.saving" @click="close" /><Button type="submit" :label="props.mode === 'edit' ? 'Lưu thay đổi' : 'Tạo môn'" icon="pi pi-check" :loading="props.saving" /></div>
     </form>

@@ -1,7 +1,7 @@
 # BE Dev Note Summary
 
 |   No. | Module             | Note                                                                                                                                                            | Status                                                                           | Updated    |
-| ----: | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ---------- |
+|   075 | timetable          | [Thời khóa biểu & định mức tiết dạy](timetable/075-timetable-teacher-load-2026-09-11.md)                                                                        | Completed (BE + FE); BE unit tests (39/39), PMD PASS; FE lint, test, build PASS; live/migration NOT RUN | 2026-09-11 |
 |   001 | user-auth          | [Base Backend Theo Boilerplate, Rút Gọn User/Auth](user-auth/001-base-boilerplate-user-auth-2026-08-17.md)                                                      | Completed                                                                        | 2026-08-17 |
 |   002 | workflow-skill     | [Dev Note Skill and Workflow Enforcement](workflow-skill/002-dev-note-skill-workflow-2026-08-17.md)                                                             | Completed                                                                        | 2026-08-17 |
 |   003 | workflow-skill     | [Postman Collection Skill](workflow-skill/003-postman-collection-skill-2026-08-17.md)                                                                           | Completed                                                                        | 2026-08-17 |
@@ -78,6 +78,7 @@
 - `attendance/`: Attendance session foundation, exception attendance and GVCN-scope notes.
 - `scorebook/`: Scorebook lifecycle, assessment-column configuration and skill-weight foundation notes.
 - `academic/`: Academic structure, semester lifecycle, lock batch, completeness evaluation and notifications.
+- `timetable/`: Timetable head, revision, period, entry, calendar, unavailability, conflict engine, teacher load policy and functional room notes.
 
 Plan 040.1: Email-only notification contract — Completed; full test, Checkstyle, PMD and build PASS. Existing IN_APP data must be preflighted before production migration.
 

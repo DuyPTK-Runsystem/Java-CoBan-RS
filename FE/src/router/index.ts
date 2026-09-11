@@ -179,6 +179,48 @@ const router = createRouter({
           meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
         },
         {
+          path: 'functional-rooms',
+          name: 'v2-functional-rooms',
+          component: () => import('@/views/functional-room/FunctionalRoomListView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+        },
+        {
+          path: 'timetables',
+          name: 'v2-timetables',
+          component: () => import('@/views/timetable/TimetableListView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+        },
+        {
+          path: 'timetables/settings',
+          name: 'v2-timetable-settings',
+          component: () => import('@/views/timetable/TimetableSettingsView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+        },
+        {
+          path: 'timetables/unavailability',
+          name: 'v2-timetable-unavailability-admin',
+          component: () => import('@/views/timetable/TeacherUnavailabilityView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+        },
+        {
+          path: 'timetables/:timetableId',
+          name: 'v2-timetable-workspace',
+          component: () => import('@/views/timetable/TimetableWorkspaceView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+        },
+        {
+          path: 'my-timetable',
+          name: 'v2-my-timetable',
+          component: () => import('@/views/timetable/MyTimetableView.vue'),
+          meta: { allowedRoles: ['TEACHER'] },
+        },
+        {
+          path: 'my-timetable/unavailability',
+          name: 'v2-my-timetable-unavailability',
+          component: () => import('@/views/timetable/TeacherUnavailabilityView.vue'),
+          meta: { allowedRoles: ['TEACHER'] },
+        },
+        {
           // Business routes must be registered before this neutral outlet.
           path: ':pathMatch(.*)*',
           name: 'v2-outlet',

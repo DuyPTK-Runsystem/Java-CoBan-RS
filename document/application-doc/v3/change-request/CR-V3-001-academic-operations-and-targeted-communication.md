@@ -54,7 +54,7 @@ Không tự tạo endpoint chỉ từ tên capability.
   4 tiết; GV nữ nuôi con dưới 12 tháng giảm thêm 3 tiết; các mức giảm được cộng dồn.
   Còn thiếu văn bản/source, effective date và policy version để policy được coi là active.
 - `TBD-002`: bộ tiêu chí, trọng số, tie-breaker và policy sĩ số cho xếp lớp.
-- `TBD-003`: quyền publish timetable, gửi notification, import score và sửa lesson log.
+- `TBD-003` (`PARTIALLY RESOLVED` — Plan 075, 2026-09-11): ADMIN và ACADEMIC_OFFICE ngang quyền trong Plan 075, gồm publish/cấu hình/phòng chức năng/gán môn/miễn giảm/duyệt lịch bận; TEACHER được đăng ký lịch bận của mình, cần quản lý duyệt trước. Quyền notification/import/lesson log theo plan tương ứng.
 - `TBD-004`: retention/privacy và kênh gửi thông báo (in-app/email/push nếu có).
 - `TBD-005` (`PARTIALLY RESOLVED`): import dùng `.xlsx`, preview bắt buộc trước khi xác
   nhận, mỗi lần upload chỉ xử lý một `assessmentColumnId`. Có thể update ô đã có điểm sau
@@ -64,6 +64,10 @@ Không tự tạo endpoint chỉ từ tên capability.
 
 Các TBD chưa được chốt đầy đủ vẫn không được suy đoán. Khi có thông tin bổ sung, phải tạo
 amendment hoặc cập nhật phần open decisions trước khi code phần bị ảnh hưởng.
+
+### Bổ sung phạm vi Plan 075 — người dùng xác nhận 2026-09-11
+
+2 buổi/ngày, 4 tiết/buổi; chỉ gắn phòng chức năng. Bổ sung module quản lý phòng chức năng và gán phòng trong quản lý môn học. Lịch bận chờ duyệt chưa chặn TKB; chỉ bản đã duyệt có hiệu lực mới chặn. Xem Module 02 và Plan 075 cho phần đã chốt/còn mở; không coi API/schema đề xuất đã được phê duyệt.
 
 ## 7. Acceptance criteria cấp CR
 

@@ -59,6 +59,22 @@ const navigation = computed<NavigationItem[]>(() => {
   }
   if (!roles.length || roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE')) {
     items.push({ label: 'Kết quả thi lại', to: '/v2/retake-exams', icon: 'pi pi-check-square' })
+    items.push({ label: 'Phòng chức năng', to: '/v2/functional-rooms', icon: 'pi pi-home' })
+    items.push({
+      label: 'Thời khóa biểu',
+      to: '/v2/timetables',
+      icon: 'pi pi-calendar-plus',
+      active: Boolean(route?.path?.startsWith('/v2/timetables')),
+    })
+    items.push({ label: 'Lịch bận giáo viên', to: '/v2/timetables/unavailability', icon: 'pi pi-clock' })
+  }
+  if (roles.includes('TEACHER')) {
+    items.push({
+      label: 'Thời khóa biểu của tôi',
+      to: '/v2/my-timetable',
+      icon: 'pi pi-calendar',
+      active: Boolean(route?.path?.startsWith('/v2/my-timetable')),
+    })
   }
   if (isStudentWorkspace(roles)) return items.filter((item) => isStudentWorkspacePath(item.to))
   if (isTeacherWorkspace(roles)) {

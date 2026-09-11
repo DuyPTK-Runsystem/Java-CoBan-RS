@@ -22,12 +22,14 @@ hoàn thành. BE phải cung cấp endpoint thật và contract test trong cùng
 |---:|---|---|---|
 | 073 | v3 foundation & cross-cutting contract | vocabulary, role matrix, audit/error/idempotency; FE shell, query state, Storybook contract states | CR/contract checkpoint được duyệt |
 | 074 | rule-based class placement | placement session, criteria, preview/confirm, explanation/audit; FE criteria builder, preview, result review | deterministic result, capacity/data warnings |
-| 075 | timetable & teacher load | slot/assignment/conflict engine, policy version, draft/publish; FE calendar editor, conflict/load panels | no conflicting publish, policy source recorded |
+| 075 | timetable & teacher load | calendar 2 × 4, lịch bận qua duyệt, phòng chức năng/gán môn, conflict/load, draft/publish; ADMIN = ACADEMIC_OFFICE | no conflicting publish, policy source recorded |
 | 076 | targeted notifications | individual/class/school audience, read state, delivery/idempotency; FE composer/inbox/audience views | scope isolation, duplicate prevention |
 | 077 | search/filter foundation | reusable paged query contracts for lists and scorebooks; FE filter bars, URL state, empty/loading/error states | backend filtering and pagination evidence |
 | 078 | one-column score import | validate/preview/commit selected column, expectedVersion/audit; FE upload mapping, row errors, commit summary | wrong-column and partial-commit protection |
 | 079 | lesson log | lesson-log lifecycle, timetable linkage, authorization/audit; FE teacher entry, class history, review states | orphan prevention and edit policy |
 | 080 | cross-feature integration & release hardening | contract/integration fixtures, observability, migration/backfill readiness; FE browser walkthrough, accessibility/responsive | role matrix, mutation reload/re-query, release evidence |
+
+Plan 075: `DRAFT — AWAITING APPROVAL` ngày `2026-09-11`: đã soạn [plan BE](../be/timetable/075-timetable-teacher-load-2026-09-11.md), [plan FE](../fe/timetable/075-timetable-teacher-load-ui-2026-09-11.md) và [wireframe](../../wireframes/fe/timetable/075-timetable-teacher-load/README.md). D02 đã chốt ADMIN = ACADEMIC_OFFICE và teacher đăng ký lịch bận; D04 chốt 2 buổi × 4 tiết, phòng chức năng/gán môn; D09 chốt cần duyệt trước. Giờ/ngày, xử lý published, cardinality mapping và các quyết định khác còn mở; chưa triển khai code hoặc xác nhận policy active.
 
 Plan 077: `TEMPORARILY POSTPONED` theo quyết định người dùng ngày `2026-09-10`; chưa triển
 khai code/test và không được tính là completed trong v3 delivery.

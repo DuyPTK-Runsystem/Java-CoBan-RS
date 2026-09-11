@@ -33,7 +33,7 @@ Chi tiết theo module:
 
 - `FR-V3-TT-001`: Tạo, sửa, preview và publish thời khóa biểu theo học kỳ.
 - `FR-V3-TT-002`: Xem lịch theo lớp, giáo viên, phòng và tiết.
-- `FR-V3-TT-003`: Kiểm tra conflict cùng lớp, cùng giáo viên, phòng, tiết nghỉ và
+- `FR-V3-TT-003`: Kiểm tra conflict cùng lớp, cùng giáo viên, phòng chức năng, tiết nghỉ và
   assignment không hợp lệ trước khi lưu/publish.
 - `FR-V3-TT-004`: Kiểm tra tổng số tiết/tuần của giáo viên theo policy version.
 - `BR-V3-TT-001`: Conflict là lỗi chặn publish; draft có thể lưu để tiếp tục xử lý.
@@ -41,6 +41,14 @@ Chi tiết theo module:
   hiện hành của `TBD-001` là 19 tiết/tuần chuẩn, giảm 4 tiết cho GVCN và giảm thêm 3
   tiết cho GV nữ nuôi con dưới 12 tháng; các mức giảm cộng dồn và phải biểu diễn bằng
   tham số, không hard-code vào timetable engine.
+
+Bổ sung Plan 075 được người dùng xác nhận ngày 2026-09-11:
+
+- `FR-V3-TT-005`: Giáo viên đăng ký lịch bận của mình; Admin/Giáo vụ duyệt trước khi có hiệu lực chặn xếp lịch.
+- `FR-V3-TT-006`: Quản lý phòng chức năng và gán phòng chức năng trong quản lý môn học; không gán phòng thường cho TKB.
+- `BR-V3-TT-003`: Hiện có 2 buổi/ngày, 4 tiết/buổi; slot phải phân biệt buổi và tiết 1–4.
+- `BR-V3-TT-004`: ADMIN và ACADEMIC_OFFICE ngang quyền trong phạm vi Plan 075, gồm duyệt lịch bận/cấu hình/phòng/môn học/công bố/miễn giảm.
+- `BR-V3-TT-005`: Lịch bận chờ duyệt hoặc bị từ chối/rút không chặn; lịch bận đã duyệt còn hiệu lực chặn tiết trùng. Chi tiết lifecycle và bảo vệ lịch đã công bố được thiết kế tại Plan 075.
 
 ### Notifications — Thông báo theo audience
 

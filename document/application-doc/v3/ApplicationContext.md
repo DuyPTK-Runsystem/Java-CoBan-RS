@@ -50,7 +50,7 @@ là phase bắt buộc hoàn thành toàn bộ trước khi FE bắt đầu.
 - Nguồn/văn bản hiện hành, ngày hiệu lực và phiên bản cho policy định mức tiết dạy/tuần;
   nội dung nghiệp vụ `TBD-001` đã được cung cấp nhưng metadata chính thức còn mở.
 - Danh mục tiêu chí xếp lớp, trọng số, tie-breaker và cách xử lý sĩ số.
-- Quyền tạo/sửa/duyệt thời khóa biểu, thông báo và sổ đầu bài theo role/assignment.
+- Quyền thông báo và sổ đầu bài theo role/assignment còn mở. Với Plan 075, ADMIN và ACADEMIC_OFFICE đã được chốt ngang quyền; TEACHER đăng ký lịch bận cần được hai vai trò quản lý duyệt trước.
 - Chính sách giữ dữ liệu, riêng tư và phạm vi người nhận thông báo.
 
 ## 6. Bản đồ tài liệu v3
