@@ -15,8 +15,11 @@ import com.JavaTraining.BaiTap_RS.teacher.repository.TeacherRepository;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.response.ResTeacherLoadDTO;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TeacherLoadEligibility;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TeacherLoadPolicy;
+import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TeacherLoadRule;
+import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TeacherLoadRuleTriggerType;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableEntry;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TeacherLoadEligibilityRepository;
+import com.JavaTraining.BaiTap_RS.timetable.repository.TeacherLoadRuleRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,6 +43,9 @@ class TeacherLoadEvaluatorTest {
         private TeacherLoadEligibilityRepository eligibilityRepository;
 
         @Mock
+        private TeacherLoadRuleRepository ruleRepository;
+
+        @Mock
         private HomeroomAssignmentRepository homeroomRepository;
 
         @Mock
@@ -51,9 +57,9 @@ class TeacherLoadEvaluatorTest {
 
         @BeforeEach
         void setUp() {
-                evaluator = new TeacherLoadEvaluator(
+                        evaluator = new TeacherLoadEvaluator(
                                 teacherRepository, policyService, eligibilityRepository,
-                                homeroomRepository, assignmentRepository);
+                                ruleRepository, homeroomRepository, assignmentRepository);
 
                 defaultPolicy = new TeacherLoadPolicy(
                                 "QD-2026", "Quy định năm 2026",
@@ -109,6 +115,43 @@ class TeacherLoadEvaluatorTest {
         }
 
         @Test
+        void evaluateLoads_withoutOptionalPolicy_homeroomUsesDefaultReduction() {
+                Mockito.when(policyService.getActivePolicy()).thenReturn(Optional.empty());
+
+                SubjectTeachingAssignment assignment = new SubjectTeachingAssignment(
+                                1L, 100L, LocalDate.of(2026, 9, 1), null, AssignmentStatus.ACTIVE, 1L);
+                ReflectionTestUtils.setField(assignment, "id", 10L);
+                Mockito.when(assignmentRepository.findAllById(List.of(10L))).thenReturn(List.of(assignment));
+
+                Teacher teacher = new Teacher(
+                                1L, "GV100", "Giáo viên mặc định", LocalDate.of(1985, 1, 1), "FEMALE",
+                                "0900000000", "default@school.edu.vn", "Toán", LocalDate.of(2015, 9, 1),
+                                TeacherStatus.ACTIVE);
+                ReflectionTestUtils.setField(teacher, "id", 100L);
+                Mockito.when(teacherRepository.findAllById(Mockito.anySet())).thenReturn(List.of(teacher));
+
+                HomeroomAssignment homeroom = new HomeroomAssignment(
+                                1L, 100L, LocalDate.of(2026, 9, 1), null, AssignmentStatus.ACTIVE, 1L);
+                Mockito.when(homeroomRepository.findAllByTeacherIdOrderByValidFromDesc(100L))
+                                .thenReturn(List.of(homeroom));
+                Mockito.when(eligibilityRepository.findActiveByTeacherIdAndDate(Mockito.eq(100L), Mockito.any()))
+                                .thenReturn(List.of());
+
+                TimetableEntry entry = new TimetableEntry(1L, 10L, 1L, null,
+                                LocalDate.of(2026, 9, 1), LocalDate.of(2026, 12, 31));
+                ReflectionTestUtils.setField(entry, "id", 1L);
+
+                ResTeacherLoadDTO result = evaluator.evaluateLoads(
+                                List.of(entry), LocalDate.of(2026, 9, 7), LocalDate.of(2026, 9, 13), null).get(0);
+
+                Assertions.assertEquals(19, result.basePeriods());
+                Assertions.assertEquals(4, result.reductions());
+                Assertions.assertEquals(15, result.targetPeriods());
+                Assertions.assertEquals("BASELINE_DEFAULT", result.policyVersion());
+                Assertions.assertEquals("LOAD_BELOW_TARGET", result.evaluationStatus());
+        }
+
+        @Test
         void evaluateLoads_homeroomAndNursing_reducesTo12() {
                 Mockito.when(policyService.getActivePolicy()).thenReturn(Optional.of(defaultPolicy));
 
@@ -148,6 +191,44 @@ class TeacherLoadEvaluatorTest {
                 Assertions.assertEquals(19, dto.basePeriods());
                 Assertions.assertEquals(7, dto.reductions()); // 4 homeroom + 3 nursing
                 Assertions.assertEquals(12, dto.targetPeriods());
+        }
+
+        @Test
+        void evaluateLoadsCustomEligibilityRuleIsAddedWithoutCap() {
+                Mockito.when(policyService.getActivePolicy()).thenReturn(Optional.of(defaultPolicy));
+                Mockito.when(ruleRepository.findAllByPolicyIdOrderByIdAsc(1L)).thenReturn(List.of(
+                                new TeacherLoadRule(1L, "NURSING_CHILD_UNDER_12M", "Nuôi con nhỏ",
+                                        TeacherLoadRuleTriggerType.ELIGIBILITY, 3, "TT05"),
+                                new TeacherLoadRule(1L, "SENIORITY", "Thâm niên",
+                                        TeacherLoadRuleTriggerType.ELIGIBILITY, 5, "TT05")));
+
+                SubjectTeachingAssignment assignment = new SubjectTeachingAssignment(
+                                1L, 100L, LocalDate.of(2026, 9, 1), null, AssignmentStatus.ACTIVE, 1L);
+                ReflectionTestUtils.setField(assignment, "id", 10L);
+                Mockito.when(assignmentRepository.findAllById(List.of(10L))).thenReturn(List.of(assignment));
+
+                Teacher teacher = new Teacher(
+                                1L, "GV100", "Cô Trần Thị B", LocalDate.of(1985, 1, 1), "FEMALE", "0900000000",
+                                "b@school.edu.vn", "Văn", LocalDate.of(2015, 9, 1), TeacherStatus.ACTIVE);
+                ReflectionTestUtils.setField(teacher, "id", 100L);
+                Mockito.when(teacherRepository.findAllById(Mockito.anySet())).thenReturn(List.of(teacher));
+                Mockito.when(homeroomRepository.findAllByTeacherIdOrderByValidFromDesc(100L)).thenReturn(List.of());
+                TeacherLoadEligibility nursing = new TeacherLoadEligibility(100L, "NURSING_CHILD_UNDER_12M",
+                                LocalDate.of(2026, 9, 1), LocalDate.of(2026, 12, 31), "HS-1");
+                TeacherLoadEligibility seniority = new TeacherLoadEligibility(100L, "SENIORITY",
+                                LocalDate.of(2026, 9, 1), LocalDate.of(2026, 12, 31), "HS-2");
+                Mockito.when(eligibilityRepository.findActiveByTeacherIdAndDate(Mockito.eq(100L), Mockito.any()))
+                                .thenReturn(List.of(nursing, seniority));
+
+                TimetableEntry entry = new TimetableEntry(1L, 10L, 1L, null,
+                                LocalDate.of(2026, 9, 1), LocalDate.of(2026, 12, 31));
+                ReflectionTestUtils.setField(entry, "id", 1L);
+
+                ResTeacherLoadDTO result = evaluator.evaluateLoads(
+                                List.of(entry), LocalDate.of(2026, 9, 7), LocalDate.of(2026, 9, 13), null).get(0);
+
+                Assertions.assertEquals(8, result.reductions());
+                Assertions.assertEquals(11, result.targetPeriods());
         }
 
         @Test

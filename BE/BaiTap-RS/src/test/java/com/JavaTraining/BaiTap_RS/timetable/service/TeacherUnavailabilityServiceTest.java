@@ -119,7 +119,7 @@ class TeacherUnavailabilityServiceTest {
         }
 
         @Test
-        void approve_conflictWithPublishedTimetable_allowsApprovalWithWarning() {
+        void approve_conflictWithPublishedTimetable_throwsUnprocessableEntity() {
                 TeacherUnavailability unav = new TeacherUnavailability(
                                 100L, 1L, 2, null,
                                 LocalDate.of(2026, 9, 1), LocalDate.of(2026, 12, 31),
@@ -145,10 +145,10 @@ class TeacherUnavailabilityServiceTest {
                 TimetablePeriod period = new TimetablePeriod(1L, 2, SessionType.MORNING, 1,
                                 "Tiết 1", LocalTime.of(7, 0), LocalTime.of(7, 45));
                 Mockito.when(periodRepository.findById(5L)).thenReturn(Optional.of(period));
-                Mockito.when(unavailabilityRepository.save(Mockito.any())).thenReturn(unav);
 
-                ResTeacherUnavailabilityDTO res = service.approve(1L, 0L, 2L);
-                Assertions.assertEquals(TeacherUnavailabilityStatus.APPROVED, res.status());
+                AppException ex = Assertions.assertThrows(AppException.class,
+                                () -> service.approve(1L, 0L, 2L));
+                Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatus());
         }
 
         @Test

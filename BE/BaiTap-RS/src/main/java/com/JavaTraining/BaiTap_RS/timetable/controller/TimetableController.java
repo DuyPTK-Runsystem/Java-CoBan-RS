@@ -4,7 +4,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
+import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.common.contract.ResultPaginationDTO;
+import com.JavaTraining.BaiTap_RS.teacher.domain.entity.Teacher;
+import com.JavaTraining.BaiTap_RS.teacher.repository.TeacherRepository;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests.ReqCreateRevisionDTO;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests.ReqCreateTimetableDTO;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests.ReqPublishTimetableDTO;
@@ -37,7 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Validated
-@RequestMapping("/api/v3/timetables")
+@RequestMapping({ "/api/v3/timetables", "/api/v2/timetables" })
 @RequiredArgsConstructor
 @SuppressWarnings("PMD.ExcessiveImports")
 public class TimetableController {
@@ -47,6 +50,22 @@ public class TimetableController {
 
     private final TimetableService timetableService;
     private final TimetablePublishService publishService;
+    private final TeacherRepository teacherRepository;
+
+    @GetMapping("/my-timetable")
+    @PreAuthorize("hasRole('TEACHER')")
+    @ApiMessage("Lấy danh sách thời khóa biểu cá nhân của giáo viên")
+    public List<ResTimetableEntryDTO> getMyTimetable() {
+        Long userId = AuditContext.currentUserId();
+        if (userId == null) {
+            return List.of();
+        }
+        Teacher teacher = teacherRepository.findByUserId(userId).orElse(null);
+        if (teacher == null) {
+            return List.of();
+        }
+        return timetableService.getMyPublishedEntries(teacher.getId());
+    }
 
     @GetMapping
     @PreAuthorize(ROLE_ADMIN_OFFICE)

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -19,8 +20,11 @@ import com.JavaTraining.BaiTap_RS.teacher.repository.TeacherRepository;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.response.ResTeacherLoadDTO;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TeacherLoadEligibility;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TeacherLoadPolicy;
+import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TeacherLoadRule;
+import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TeacherLoadRuleTriggerType;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableEntry;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TeacherLoadEligibilityRepository;
+import com.JavaTraining.BaiTap_RS.timetable.repository.TeacherLoadRuleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -28,9 +32,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TeacherLoadEvaluator {
 
+    private static final String HOMEROOM_RULE_CODE = "HOMEROOM";
+
     private final TeacherRepository teacherRepository;
     private final TeacherLoadPolicyService policyService;
     private final TeacherLoadEligibilityRepository eligibilityRepository;
+    private final TeacherLoadRuleRepository ruleRepository;
     private final HomeroomAssignmentRepository homeroomRepository;
     private final SubjectTeachingAssignmentRepository assignmentRepository;
 
@@ -70,8 +77,22 @@ public class TeacherLoadEvaluator {
         int basePeriods = policy != null ? policy.getBasePeriods() : 19;
         int homeroomReduction = policy != null ? policy.getHomeroomReduction() : 4;
         int nursingReduction = policy != null ? policy.getNursingReduction() : 3;
-        String policyVersion = policy != null ? policy.getVersion() : "CHƯA_CÓ";
-        return new PolicyConfig(policy, basePeriods, homeroomReduction, nursingReduction, policyVersion);
+        String policyVersion = policy != null ? policy.getVersion() : "BASELINE_DEFAULT";
+        Map<String, TeacherLoadRule> rules = policy == null ? Map.of(
+                HOMEROOM_RULE_CODE, new TeacherLoadRule(null, HOMEROOM_RULE_CODE, "Giảm chủ nhiệm",
+                        TeacherLoadRuleTriggerType.HOMEROOM, homeroomReduction,
+                        "Định mức mặc định"))
+                : ruleRepository.findAllByPolicyIdOrderByIdAsc(policy.getId()).stream()
+                        .collect(Collectors.toMap(TeacherLoadRule::getRuleCode, rule -> rule, (first, second) -> first));
+        if (policy != null && rules.isEmpty()) {
+            rules = Map.of(
+                    HOMEROOM_RULE_CODE, new TeacherLoadRule(policy.getId(), HOMEROOM_RULE_CODE, "Giảm chủ nhiệm",
+                            TeacherLoadRuleTriggerType.HOMEROOM, homeroomReduction, policy.getSource()),
+                    "NURSING_CHILD_UNDER_12M", new TeacherLoadRule(policy.getId(), "NURSING_CHILD_UNDER_12M",
+                            "Nuôi con nhỏ dưới 12 tháng", TeacherLoadRuleTriggerType.ELIGIBILITY,
+                            nursingReduction, policy.getSource()));
+        }
+        return new PolicyConfig(policy, basePeriods, homeroomReduction, nursingReduction, policyVersion, rules);
     }
 
     private Map<Long, Integer> countTeacherPeriods(
@@ -101,7 +122,7 @@ public class TeacherLoadEvaluator {
         int reductions = computeReductions(teacherId, config, weekStart, weekEnd);
         int target = Math.max(0, config.basePeriods() - reductions);
         int diff = assigned - target;
-        String evalStatus = resolveEvalStatus(config.policy(), diff);
+        String evalStatus = resolveEvalStatus(diff);
 
         return new ResTeacherLoadDTO(
                 teacherId,
@@ -127,23 +148,24 @@ public class TeacherLoadEvaluator {
                         && !h.getValidFrom().isAfter(weekEnd)
                         && (h.getValidTo() == null || !h.getValidTo().isBefore(weekStart)));
         if (isHomeroom) {
-            reductions += config.homeroomReduction();
+            TeacherLoadRule homeroomRule = config.rules().get(HOMEROOM_RULE_CODE);
+            reductions += homeroomRule != null ? homeroomRule.getReductionPeriods() : config.homeroomReduction();
         }
 
         List<TeacherLoadEligibility> eligibilities = eligibilityRepository.findActiveByTeacherIdAndDate(teacherId,
                 weekStart);
-        boolean isNursing = eligibilities.stream()
-                .anyMatch(e -> "NURSING_CHILD_UNDER_12M".equalsIgnoreCase(e.getRuleCode()));
-        if (isNursing) {
-            reductions += config.nursingReduction();
-        }
+        reductions += eligibilities.stream()
+                .map(TeacherLoadEligibility::getRuleCode)
+                .map(code -> code.toUpperCase(Locale.ROOT))
+                .map(config.rules()::get)
+                .filter(Objects::nonNull)
+                .filter(rule -> rule.isActive() && rule.getTriggerType() == TeacherLoadRuleTriggerType.ELIGIBILITY)
+                .mapToInt(TeacherLoadRule::getReductionPeriods)
+                .sum();
         return reductions;
     }
 
-    private String resolveEvalStatus(TeacherLoadPolicy policy, int diff) {
-        if (policy == null) {
-            return "LOAD_UNDETERMINED";
-        }
+    private String resolveEvalStatus(int diff) {
         if (diff > 0) {
             return "LOAD_ABOVE_TARGET";
         }
@@ -158,6 +180,7 @@ public class TeacherLoadEvaluator {
             int basePeriods,
             int homeroomReduction,
             int nursingReduction,
-            String policyVersion) {
+            String policyVersion,
+            Map<String, TeacherLoadRule> rules) {
     }
 }

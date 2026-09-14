@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.GuardLogStatement"})
+@SuppressWarnings({ "PMD.TooManyMethods", "PMD.GuardLogStatement" })
 public class SemesterService {
 
     private static final Set<Integer> NOTIFICATION_OFFSETS = Set.of(
@@ -57,6 +57,16 @@ public class SemesterService {
                 "SemesterService.listByAcademicYear");
         return semesterRepository.findAllByAcademicYearIdOrderByDisplayOrderAsc(academicYearId)
                 .stream()
+                .map(semesterMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ResSemesterDTO> listAll() {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterService.class,
+                "SemesterService.listAll");
+        return semesterRepository.findAll().stream()
                 .map(semesterMapper::toResponse)
                 .toList();
     }
@@ -161,9 +171,9 @@ public class SemesterService {
     public ResSemesterCompletenessDecisionDTO evaluateCompletenessCheckpoint(
             Long semesterId,
             LocalDate checkpointDate) {
-                DeveloperTrace.trace(/* NOPMD GuardLogStatement */
-                        SemesterService.class,
-                        "SemesterService.evaluateCompletenessCheckpoint");
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SemesterService.class,
+                "SemesterService.evaluateCompletenessCheckpoint");
         Semester semester = findSemester(semesterId);
         LocalDate lockDate = calculateEffectiveLockDate(semester);
 

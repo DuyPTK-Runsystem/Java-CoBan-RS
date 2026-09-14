@@ -43,8 +43,11 @@ public class SemesterController {
     @ApiMessage("Lấy danh sách học kỳ")
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE', 'TEACHER', 'STUDENT')")
     public List<ResSemesterDTO> listByAcademicYear(
-            @RequestParam("academicYearId") @Positive Long academicYearId) {
+            @RequestParam(name = "academicYearId", required = false) Long academicYearId) {
         trace("SemesterController.listByAcademicYear");
+        if (academicYearId == null) {
+            return semesterService.listAll();
+        }
         return semesterService.listByAcademicYear(academicYearId);
     }
 

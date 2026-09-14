@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Validated
-@RequestMapping("/api/v3/timetable-calendars")
+@RequestMapping({ "/api/v3/timetable-calendars", "/api/v2/timetable-calendars" })
 @RequiredArgsConstructor
 public class TimetableCalendarController {
 

@@ -113,13 +113,6 @@ public class TimetableValidationService {
                         "Chưa thể xác định định mức cho giáo viên " + load.teacherName()
                                 + " do thiếu chính sách định mức.",
                         List.of(), null, null, null, load.teacherName(), null));
-            } else if ("LOAD_ABOVE_TARGET".equals(load.evaluationStatus())) {
-                issues.add(new ResTimetableIssueDTO(
-                        "LOAD_ABOVE_TARGET",
-                        SEVERITY_WARNING,
-                        "Giáo viên " + load.teacherName() + " được xếp " + load.assignedPeriods()
-                                + " tiết, vượt định mức " + load.targetPeriods() + " tiết.",
-                        List.of(), null, null, null, load.teacherName(), null));
             } else if ("LOAD_BELOW_TARGET".equals(load.evaluationStatus())) {
                 issues.add(new ResTimetableIssueDTO(
                         "LOAD_BELOW_TARGET",

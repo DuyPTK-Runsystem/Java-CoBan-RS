@@ -193,6 +193,34 @@ public class TimetableService {
         return result;
     }
 
+    @Transactional(readOnly = true)
+    public List<ResTimetableEntryDTO> getMyPublishedEntries(Long teacherId) {
+        List<TimetableHead> heads = headRepository.findAll();
+        List<Long> publishedRevisionIds = heads.stream()
+                .map(TimetableHead::getCurrentRevisionId)
+                .filter(Objects::nonNull)
+                .toList();
+        if (publishedRevisionIds.isEmpty()) {
+            return List.of();
+        }
+        List<TimetableEntry> entries = entryRepository.findByRevisionIdIn(publishedRevisionIds);
+        if (entries.isEmpty()) {
+            return List.of();
+        }
+        EntryLookupContext ctx = buildLookupContext(entries);
+        List<ResTimetableEntryDTO> result = new ArrayList<>();
+        for (TimetableEntry e : entries) {
+            SubjectTeachingAssignment a = ctx.assignmentMap.get(e.getAssignmentId());
+            if (a == null || !Objects.equals(a.getTeacherId(), teacherId)) {
+                continue;
+            }
+            TimetablePeriod p = ctx.periodMap.get(e.getPeriodId());
+            ClassSubject cs = ctx.classSubjectMap.get(a.getClassSubjectId());
+            result.add(toEntryDTO(e, p, a, cs, ctx));
+        }
+        return result;
+    }
+
     @Transactional
     public ResTimetableDetailDTO updateEntries(Long revisionId, ReqUpdateTimetableEntriesDTO req) {
         TimetableRevision revision = findRevision(revisionId);

@@ -1,16 +1,23 @@
 package com.JavaTraining.BaiTap_RS.timetable.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
 import com.JavaTraining.BaiTap_RS.common.contract.ResultPaginationDTO;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests.ReqCreatePolicyDTO;
+import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests.ReqCreateTeacherLoadRuleDTO;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.response.ResTeacherLoadPolicyDTO;
+import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.response.ResTeacherLoadRuleDTO;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TeacherLoadPolicy;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TeacherLoadPolicyStatus;
+import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TeacherLoadRule;
+import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TeacherLoadRuleTriggerType;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TeacherLoadPolicyRepository;
+import com.JavaTraining.BaiTap_RS.timetable.repository.TeacherLoadRuleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class TeacherLoadPolicyService {
 
     private final TeacherLoadPolicyRepository policyRepository;
+    private final TeacherLoadRuleRepository ruleRepository;
 
     @Transactional(readOnly = true)
     public ResultPaginationDTO<ResTeacherLoadPolicyDTO> pagePolicies(Pageable pageable) {
@@ -61,7 +69,30 @@ public class TeacherLoadPolicyService {
                 req.homeroomReduction(),
                 req.nursingReduction());
         policy = policyRepository.save(policy);
+        saveRules(policy, req.rules());
         return toDTO(policy);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ResTeacherLoadRuleDTO> listRules(Long policyId) {
+        TeacherLoadPolicy policy = findPolicy(policyId);
+        return rulesFor(policy).stream().map(this::toRuleDTO).toList();
+    }
+
+    @Transactional
+    public ResTeacherLoadRuleDTO addRule(Long policyId, ReqCreateTeacherLoadRuleDTO req) {
+        TeacherLoadPolicy policy = findPolicy(policyId);
+        if (policy.getStatus() == TeacherLoadPolicyStatus.ACTIVE) {
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Không thể sửa policy đang kích hoạt. Hãy tạo phiên bản mới.");
+        }
+        String code = req.ruleCode().trim().toUpperCase(Locale.ROOT);
+        if (ruleRepository.existsByPolicyIdAndRuleCode(policyId, code)) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "Mã rule đã tồn tại trong policy");
+        }
+        TeacherLoadRule rule = ruleRepository.save(new TeacherLoadRule(policyId, code,
+                req.ruleName().trim(), req.triggerType(), req.reductionPeriods(), req.source().trim()));
+        return toRuleDTO(rule);
     }
 
     @Transactional
@@ -102,6 +133,47 @@ public class TeacherLoadPolicyService {
                 p.getStatus(),
                 p.getVersionLock(),
                 p.getCreatedAt(),
-                p.getUpdatedAt());
+                p.getUpdatedAt(),
+                rulesFor(p).stream().map(this::toRuleDTO).toList());
+    }
+
+    private void saveRules(TeacherLoadPolicy policy, List<ReqCreateTeacherLoadRuleDTO> requestedRules) {
+        List<ReqCreateTeacherLoadRuleDTO> rules = requestedRules == null || requestedRules.isEmpty()
+                ? List.of(
+                        new ReqCreateTeacherLoadRuleDTO("HOMEROOM", "Giảm chủ nhiệm",
+                                TeacherLoadRuleTriggerType.HOMEROOM,
+                                policy.getHomeroomReduction(), policy.getSource()),
+                        new ReqCreateTeacherLoadRuleDTO("NURSING_CHILD_UNDER_12M",
+                                "Nuôi con nhỏ dưới 12 tháng",
+                                TeacherLoadRuleTriggerType.ELIGIBILITY, policy.getNursingReduction(), policy.getSource()))
+                : requestedRules;
+        List<String> codes = new ArrayList<>();
+        List<TeacherLoadRule> entities = rules.stream().map(req -> {
+            String code = req.ruleCode().trim().toUpperCase(Locale.ROOT);
+            if (!codes.add(code)) {
+                throw new AppException(HttpStatus.BAD_REQUEST, "Mã rule bị trùng trong policy");
+            }
+            return new TeacherLoadRule(policy.getId(), code, req.ruleName().trim(),
+                    req.triggerType(), req.reductionPeriods(), req.source().trim());
+        }).toList();
+        ruleRepository.saveAll(entities);
+    }
+
+    private List<TeacherLoadRule> rulesFor(TeacherLoadPolicy policy) {
+        List<TeacherLoadRule> rules = ruleRepository.findAllByPolicyIdOrderByIdAsc(policy.getId());
+        if (!rules.isEmpty()) {
+            return rules;
+        }
+        return List.of(
+                new TeacherLoadRule(policy.getId(), "HOMEROOM", "Giảm chủ nhiệm", TeacherLoadRuleTriggerType.HOMEROOM,
+                        policy.getHomeroomReduction(), policy.getSource()),
+                new TeacherLoadRule(policy.getId(), "NURSING_CHILD_UNDER_12M",
+                        "Nuôi con nhỏ dưới 12 tháng",
+                        TeacherLoadRuleTriggerType.ELIGIBILITY, policy.getNursingReduction(), policy.getSource()));
+    }
+
+    private ResTeacherLoadRuleDTO toRuleDTO(TeacherLoadRule rule) {
+        return new ResTeacherLoadRuleDTO(rule.getId(), rule.getPolicyId(), rule.getRuleCode(), rule.getRuleName(),
+                rule.getTriggerType(), rule.getReductionPeriods(), rule.getSource(), rule.isActive());
     }
 }

@@ -1,7 +1,9 @@
 package com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -18,5 +20,7 @@ public record ReqCreatePolicyDTO(
 
                 Integer homeroomReduction,
 
-                Integer nursingReduction) {
+                Integer nursingReduction,
+
+                List<@Valid ReqCreateTeacherLoadRuleDTO> rules) {
 }

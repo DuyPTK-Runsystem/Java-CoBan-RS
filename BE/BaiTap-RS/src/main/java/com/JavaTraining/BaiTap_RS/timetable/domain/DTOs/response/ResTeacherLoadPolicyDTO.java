@@ -2,6 +2,7 @@ package com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.response;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TeacherLoadPolicyStatus;
 
@@ -17,5 +18,6 @@ public record ResTeacherLoadPolicyDTO(
                 TeacherLoadPolicyStatus status,
                 Long versionLock,
                 LocalDateTime createdAt,
-                LocalDateTime updatedAt) {
+                LocalDateTime updatedAt,
+                List<ResTeacherLoadRuleDTO> rules) {
 }

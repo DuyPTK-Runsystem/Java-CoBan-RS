@@ -34,7 +34,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Validated
-@RequestMapping("/api/v3/teacher-unavailability")
+@RequestMapping({ "/api/v3/teacher-unavailability", "/api/v2/teacher-unavailability",
+        "/api/v2/teacher-unavailabilities" })
 @RequiredArgsConstructor
 @SuppressWarnings("PMD.ExcessiveImports")
 public class TeacherUnavailabilityController {

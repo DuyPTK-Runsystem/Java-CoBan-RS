@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Validated
-@RequestMapping("/api/v3/functional-rooms")
+@RequestMapping({ "/api/v3/functional-rooms", "/api/v2/functional-rooms" })
 @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')")
 @RequiredArgsConstructor
 public class FunctionalRoomController {

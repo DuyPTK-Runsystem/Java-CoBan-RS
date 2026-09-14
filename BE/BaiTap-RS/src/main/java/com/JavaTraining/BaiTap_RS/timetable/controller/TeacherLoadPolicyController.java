@@ -1,9 +1,13 @@
 package com.JavaTraining.BaiTap_RS.timetable.controller;
 
+import java.util.List;
+
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
 import com.JavaTraining.BaiTap_RS.common.contract.ResultPaginationDTO;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests.ReqCreatePolicyDTO;
+import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests.ReqCreateTeacherLoadRuleDTO;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.response.ResTeacherLoadPolicyDTO;
+import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.response.ResTeacherLoadRuleDTO;
 import com.JavaTraining.BaiTap_RS.timetable.service.TeacherLoadPolicyService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -40,6 +44,20 @@ public class TeacherLoadPolicyController {
     @ApiMessage("Tạo mới chính sách định mức tiết dạy")
     public ResponseEntity<ResTeacherLoadPolicyDTO> create(@Valid @RequestBody ReqCreatePolicyDTO req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(req));
+    }
+
+    @GetMapping("/{id}/rules")
+    @ApiMessage("Lấy danh sách rule miễn giảm của policy")
+    public List<ResTeacherLoadRuleDTO> listRules(@PathVariable("id") @Positive Long id) {
+        return service.listRules(id);
+    }
+
+    @PostMapping("/{id}/rules")
+    @ApiMessage("Thêm rule miễn giảm vào policy")
+    public ResponseEntity<ResTeacherLoadRuleDTO> addRule(
+            @PathVariable("id") @Positive Long id,
+            @Valid @RequestBody ReqCreateTeacherLoadRuleDTO req) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.addRule(id, req));
     }
 
     @PostMapping("/{id}/activate")
