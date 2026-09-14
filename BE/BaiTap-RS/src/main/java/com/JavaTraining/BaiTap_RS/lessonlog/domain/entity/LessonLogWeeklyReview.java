@@ -1,0 +1,4 @@
+package com.JavaTraining.BaiTap_RS.lessonlog.domain.entity;
+import java.time.*; import jakarta.persistence.*; import lombok.*;
+@Entity @Getter @Setter @NoArgsConstructor @Table(name="lesson_log_weekly_review",uniqueConstraints=@UniqueConstraint(columnNames={"class_id","semester_id","week_start"}))
+public class LessonLogWeeklyReview { @Id @GeneratedValue(strategy=GenerationType.IDENTITY) @Column(name="review_id") private Long id; @Column(nullable=false) private Long classId; @Column(nullable=false) private Long semesterId; private Long homeroomAssignmentId; @Column(nullable=false) private LocalDate weekStart; @Enumerated(EnumType.STRING) @Column(nullable=false) private WeeklyReviewStatus status=WeeklyReviewStatus.UNSIGNED; private String weeklyComment; private String weeklyGrade; private String signedSnapshotJson; private LocalDateTime signedAt; private Long signedBy; @Version private Long version=0L; }

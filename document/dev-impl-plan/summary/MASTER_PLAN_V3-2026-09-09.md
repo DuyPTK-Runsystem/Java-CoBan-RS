@@ -18,21 +18,23 @@ hoàn thành. BE phải cung cấp endpoint thật và contract test trong cùng
 
 ## Chuỗi kế hoạch đề xuất
 
-| Plan | Lát dọc | BE + FE song song | Gate chính |
-|---:|---|---|---|
-| 073 | v3 foundation & cross-cutting contract | vocabulary, role matrix, audit/error/idempotency; FE shell, query state, Storybook contract states | CR/contract checkpoint được duyệt |
-| 074 | rule-based class placement | placement session, criteria, preview/confirm, explanation/audit; FE criteria builder, preview, result review | deterministic result, capacity/data warnings |
-| 075 | timetable & teacher load | calendar 2 × 4, lịch bận qua duyệt, phòng chức năng/gán môn, conflict/load, draft/publish; ADMIN = ACADEMIC_OFFICE | no conflicting publish, policy source recorded |
-| 076 | targeted notifications | individual/class/school audience, read state, delivery/idempotency; FE composer/inbox/audience views | scope isolation, duplicate prevention |
-| 077 | search/filter foundation | reusable paged query contracts for lists and scorebooks; FE filter bars, URL state, empty/loading/error states | backend filtering and pagination evidence |
-| 078 | one-column score import | validate/preview/commit selected column, expectedVersion/audit; FE upload mapping, row errors, commit summary | wrong-column and partial-commit protection |
-| 079 | lesson log | lesson-log lifecycle, timetable linkage, authorization/audit; FE teacher entry, class history, review states | orphan prevention and edit policy |
-| 080 | cross-feature integration & release hardening | contract/integration fixtures, observability, migration/backfill readiness; FE browser walkthrough, accessibility/responsive | role matrix, mutation reload/re-query, release evidence |
+| Plan | Lát dọc                                       | BE + FE song song                                                                                                            | Gate chính                                              |
+| ---: | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+|  073 | v3 foundation & cross-cutting contract        | vocabulary, role matrix, audit/error/idempotency; FE shell, query state, Storybook contract states                           | CR/contract checkpoint được duyệt                       |
+|  074 | rule-based class placement                    | placement session, criteria, preview/confirm, explanation/audit; FE criteria builder, preview, result review                 | deterministic result, capacity/data warnings            |
+|  075 | timetable & teacher load                      | calendar 2 × 4, lịch bận qua duyệt, phòng chức năng/gán môn, conflict/load, draft/publish; ADMIN = ACADEMIC_OFFICE           | no conflicting publish, policy source recorded          |
+|  076 | targeted notifications                        | individual/class/school audience, read state, delivery/idempotency; FE composer/inbox/audience views                         | scope isolation, duplicate prevention                   |
+|  077 | search/filter foundation                      | reusable paged query contracts for lists and scorebooks; FE filter bars, URL state, empty/loading/error states               | backend filtering and pagination evidence               |
+|  078 | one-column score import                       | validate/preview/commit selected column, expectedVersion/audit; FE upload mapping, row errors, commit summary                | wrong-column and partial-commit protection              |
+|  079 | lesson log                                    | lesson-log lifecycle, timetable linkage, authorization/audit; FE teacher entry, class history, review states                 | orphan prevention and edit policy                       |
+|  080 | cross-feature integration & release hardening | contract/integration fixtures, observability, migration/backfill readiness; FE browser walkthrough, accessibility/responsive | role matrix, mutation reload/re-query, release evidence |
 
 Plan 075: `COMPLETED` ngày `2026-09-14` theo xác nhận của người dùng: implementation BE/FE và các amendment đã được ghi trong Dev Notes. FE quality gates đã có kết quả theo từng note; browser/live, migration và full backend gate vẫn được báo riêng là NOT RUN hoặc baseline blocker khi chưa có bằng chứng PASS.
 
 Plan 077: `TEMPORARILY POSTPONED` theo quyết định người dùng ngày `2026-09-10`; chưa triển
 khai code/test và không được tính là completed trong v3 delivery.
+
+Plan 079: `DESIGN/CONTRACT APPROVED — IMPLEMENTATION PENDING` ngày `2026-09-14` theo yêu cầu người dùng: đã lập [Plan BE](../be/lesson-log/079-lesson-log-lifecycle-and-audit-2026-09-14.md), [Plan FE](../fe/lesson-log/079-lesson-log-ui-2026-09-14.md) và [wireframe](../../wireframes/fe/lesson-log/079-lesson-log/README.md); đã sửa identity qua revision, lifecycle/deadline, ký lại tuần và policy; D01–D10 đã được duyệt ở mức design/contract, còn approval triển khai code BE/FE pending; JS syntax và JSDOM 12/12 PASS; browser thật NOT RUN (Chrome đang tắt).
 
 ## Quy trình trong từng Plan
 

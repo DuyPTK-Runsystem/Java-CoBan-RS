@@ -221,6 +221,30 @@ const router = createRouter({
           meta: { allowedRoles: ['TEACHER'] },
         },
         {
+          path: 'my-lesson-logs',
+          name: 'v2-my-lesson-logs',
+          component: () => import('@/views/lesson-log/TeacherLessonLogView.vue'),
+          meta: { allowedRoles: ['TEACHER'] },
+        },
+        {
+          path: 'lesson-logs',
+          name: 'v2-lesson-logs',
+          component: () => import('@/views/lesson-log/ClassLessonLogWorkspaceView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE', 'TEACHER'] },
+        },
+        {
+          path: 'lesson-logs/classes/:classId',
+          name: 'v2-lesson-log-class',
+          component: () => import('@/views/lesson-log/ClassLessonLogWorkspaceView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE', 'TEACHER'] },
+        },
+        {
+          path: 'lesson-logs/settings',
+          name: 'v2-lesson-log-settings',
+          component: () => import('@/views/lesson-log/LessonLogSettingsView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+        },
+        {
           // Business routes must be registered before this neutral outlet.
           path: ':pathMatch(.*)*',
           name: 'v2-outlet',

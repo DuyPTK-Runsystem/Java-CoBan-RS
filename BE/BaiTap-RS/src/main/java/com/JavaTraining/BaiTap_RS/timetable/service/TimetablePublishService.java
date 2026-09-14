@@ -18,13 +18,12 @@ import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableAuditRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableHeadRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetablePublishIntentRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableRevisionRepository;
-import lombok.RequiredArgsConstructor;
+import com.JavaTraining.BaiTap_RS.lessonlog.repository.LessonLogEntryRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 public class TimetablePublishService {
 
     private final TimetableHeadRepository headRepository;
@@ -33,6 +32,23 @@ public class TimetablePublishService {
     private final TimetableAuditRepository auditRepository;
     private final TimetableValidationService validationService;
     private final TimetableService timetableService;
+    private final LessonLogEntryRepository lessonLogEntryRepository;
+
+    public TimetablePublishService(TimetableHeadRepository headRepository, TimetableRevisionRepository revisionRepository,
+            TimetablePublishIntentRepository publishIntentRepository, TimetableAuditRepository auditRepository,
+            TimetableValidationService validationService, TimetableService timetableService) {
+        this(headRepository, revisionRepository, publishIntentRepository, auditRepository, validationService, timetableService, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public TimetablePublishService(TimetableHeadRepository headRepository, TimetableRevisionRepository revisionRepository,
+            TimetablePublishIntentRepository publishIntentRepository, TimetableAuditRepository auditRepository,
+            TimetableValidationService validationService, TimetableService timetableService,
+            LessonLogEntryRepository lessonLogEntryRepository) {
+        this.headRepository=headRepository; this.revisionRepository=revisionRepository;
+        this.publishIntentRepository=publishIntentRepository; this.auditRepository=auditRepository;
+        this.validationService=validationService; this.timetableService=timetableService; this.lessonLogEntryRepository=lessonLogEntryRepository;
+    }
 
     @Transactional
     public ResTimetableDetailDTO publish(Long revisionId, ReqPublishTimetableDTO req, String idempotencyKey) {
@@ -47,6 +63,12 @@ public class TimetablePublishService {
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy đầu thời khóa biểu"));
 
         validateVersions(revision, head, req);
+
+        if (lessonLogEntryRepository != null && revision.getEffectiveFrom().isBefore(LocalDate.now().plusDays(1))
+                && lessonLogEntryRepository.existsByTimetableRevisionId(revision.getId())) {
+            throw new AppException(HttpStatus.CONFLICT,
+                    "Không thể công bố hồi tố revision đã có sổ đầu bài");
+        }
 
         // 2. Re-validate atomically
         ResTimetableReviewDTO review = validationService.validateRevision(revisionId);

@@ -16,6 +16,14 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> {
 
+        @Query("""
+                select distinct schoolClass from SchoolClass schoolClass
+                join ClassSubject classSubject on classSubject.classId = schoolClass.id
+                where classSubject.semesterId = :semesterId
+                order by schoolClass.classCode asc
+                """)
+        List<SchoolClass> findAllBySemesterId(@Param("semesterId") Long semesterId);
+
         boolean existsByAcademicYearId(Long academicYearId);
 
         boolean existsByGradeLevelId(Long gradeLevelId);

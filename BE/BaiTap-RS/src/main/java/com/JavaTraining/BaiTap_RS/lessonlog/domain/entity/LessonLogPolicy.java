@@ -1,0 +1,4 @@
+package com.JavaTraining.BaiTap_RS.lessonlog.domain.entity;
+import java.time.*; import jakarta.persistence.*; import lombok.*;
+@Entity @Getter @Setter @NoArgsConstructor @Table(name="lesson_log_policy",uniqueConstraints=@UniqueConstraint(columnNames="effective_from"))
+public class LessonLogPolicy { @Id @GeneratedValue(strategy=GenerationType.IDENTITY) @Column(name="policy_id") private Long id; @Column(nullable=false) private Integer policyVersion; @Column(nullable=false) private LocalDate effectiveFrom; @Column(nullable=false) private String timezone; @Column(nullable=false) private String deadlineMode; private Integer editWindowHours; @Column(nullable=false) private boolean requireHomeroomReview=true; @Column(nullable=false,columnDefinition="json") private String rubricJson; @Version private Long version=0L; @Column(nullable=false) private Long createdBy; }

@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.JavaTraining.BaiTap_RS.lessonlog.repository.LessonLogEntryRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class TimetableCalendarService {
         private final TimetablePeriodRepository periodRepository;
         private final TimetableClosedDateRepository closedDateRepository;
         private final SemesterRepository semesterRepository;
+        private final LessonLogEntryRepository lessonLogEntryRepository;
 
         @Transactional
         public ResCalendarDTO getOrCreateCalendar(Long semesterId) {
@@ -70,6 +72,10 @@ public class TimetableCalendarService {
                 }
 
                 if (req.closedDates() != null) {
+                        req.closedDates().stream().filter(c -> lessonLogEntryRepository
+                                        .existsBySemesterIdAndLessonDate(req.semesterId(), c.closedDate()))
+                                        .findFirst().ifPresent(c -> { throw new AppException(HttpStatus.CONFLICT,
+                                                        "Không thể đóng ngày đã có sổ đầu bài: " + c.closedDate()); });
                         saveClosedDates(calendar.getId(), req.closedDates());
                 }
 
