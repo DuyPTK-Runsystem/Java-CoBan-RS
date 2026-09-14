@@ -52,12 +52,12 @@ describe('teacherUnavailabilityApi', () => {
     await withdrawTeacherUnavailability(1, 0, 'test-token')
 
     const urls = fetchMock.mock.calls.map(([url]) => url)
-    expect(urls[0]).toContain('/api/v2/teacher-unavailabilities?semesterId=1&teacherId=100&status=PENDING')
-    expect(urls[1]).toContain('/api/v2/teacher-unavailabilities')
-    expect(urls[2]).toContain('/api/v2/teacher-unavailabilities/1')
-    expect(urls[3]).toContain('/api/v2/teacher-unavailabilities/1/approve?expectedVersion=0')
-    expect(urls[4]).toContain('/api/v2/teacher-unavailabilities/1/reject')
-    expect(urls[5]).toContain('/api/v2/teacher-unavailabilities/1/withdraw?expectedVersion=0')
+    expect(urls[0]).toContain('/api/v3/teacher-unavailability?semesterId=1&teacherId=100&status=PENDING')
+    expect(urls[1]).toContain('/api/v3/teacher-unavailability')
+    expect(urls[2]).toContain('/api/v3/teacher-unavailability/1')
+    expect(urls[3]).toContain('/api/v3/teacher-unavailability/1/approve?expectedVersion=0')
+    expect(urls[4]).toContain('/api/v3/teacher-unavailability/1/reject')
+    expect(urls[5]).toContain('/api/v3/teacher-unavailability/1/withdraw?expectedVersion=0')
   })
 })
 

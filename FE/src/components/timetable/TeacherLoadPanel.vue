@@ -42,10 +42,14 @@ function getStatusLabel(status: string): string {
       <div>
         <h3 class="font-bold text-gray-900 text-base">Định mức tiết dạy giáo viên</h3>
         <p class="text-xs text-gray-500">
-          Đối chiếu số tiết thực tế với quy định (Thông tư chuẩn 19 tiết/tuần, chủ nhiệm giảm 4, nuôi con nhỏ giảm 3).
+          Số liệu và đánh giá được cung cấp bởi hệ thống theo policy đang áp dụng.
         </p>
       </div>
     </div>
+
+    <p v-if="teacherLoads.length === 0" class="text-xs text-gray-500">
+      Chưa có dữ liệu định mức từ backend để đối chiếu. Không suy diễn định mức khi thiếu policy.
+    </p>
 
     <DataTable :value="teacherLoads" :loading="loading" responsive-layout="scroll" striped-rows>
       <template #empty>

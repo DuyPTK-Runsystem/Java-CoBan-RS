@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
@@ -20,16 +20,16 @@ import {
   activateTeacherLoadPolicy,
   createTeacherLoadEligibility,
   createTeacherLoadPolicy,
-  deleteTeacherLoadEligibility,
+  revokeTeacherLoadEligibility,
   getActiveTeacherLoadPolicy,
   listTeacherLoadEligibilities,
   listTeacherLoadPolicies,
+  updateTeacherLoadEligibility,
 } from '@/services/teacherLoadApi'
-import { initTimetableCalendar } from '@/services/timetableApi'
 import { extractApiErrorMessage } from '@/types/api'
 import type { Semester } from '@/types/academic'
 import type { Teacher } from '@/types/teacher'
-import type { TeacherLoadEligibility, TeacherLoadPolicy } from '@/types/timetable'
+import type { TeacherLoadEligibility, TeacherLoadPolicy, TeacherLoadRule } from '@/types/timetable'
 import type { LoadingState } from '@/types/ui'
 
 const router = useRouter()
@@ -48,6 +48,7 @@ const semesters = ref<Semester[]>([])
 
 // Create policy dialog
 const isPolicyDialogVisible = ref(false)
+const policyDialogMode = ref<'create' | 'clone'>('create')
 const policyForm = ref({
   policyName: '',
   sourceDocument: '',
@@ -56,10 +57,12 @@ const policyForm = ref({
   homeroomReduction: 4,
   nursingChildReduction: 3,
 })
+const ruleDrafts = ref<TeacherLoadRule[]>([])
 const policySaving = ref(false)
 
 // Create eligibility dialog
 const isEligibilityDialogVisible = ref(false)
+const editingEligibilityId = ref<number | null>(null)
 const eligibilityForm = ref({
   teacherId: null as number | null,
   conditionType: 'NURSING_CHILD_UNDER_12M',
@@ -68,10 +71,23 @@ const eligibilityForm = ref({
   evidenceInfo: '',
 })
 const eligibilitySaving = ref(false)
+const eligibilityRuleOptions = computed(() => {
+  const rules = activePolicy.value?.rules.filter((rule) => rule.triggerType === 'ELIGIBILITY') ?? []
+  return rules.length > 0
+    ? rules.map((rule) => ({ label: `${rule.ruleName} (giảm ${rule.reductionPeriods} tiết)`, value: rule.ruleCode }))
+    : [{ label: 'Nuôi con nhỏ dưới 12 tháng (giảm 3 tiết)', value: 'NURSING_CHILD_UNDER_12M' }]
+})
+
+function getEligibilityRuleLabel(ruleCode: string): string {
+  const labels: Record<string, string> = {
+    NURSING_CHILD_UNDER_12M: 'Nuôi con nhỏ dưới 12 tháng',
+    HOMEROOM: 'Giáo viên chủ nhiệm',
+  }
+  return labels[ruleCode] ?? 'Điều kiện miễn giảm khác'
+}
 
 // Calendar init
 const selectedSemesterId = ref<number | null>(null)
-const calendarInitializing = ref(false)
 
 async function loadData() {
   const token = requireAccessToken()
@@ -103,12 +119,55 @@ async function handleActivatePolicy(policyId: number) {
   const token = requireAccessToken()
   if (!token) return
   try {
-    await activateTeacherLoadPolicy(policyId, token)
+    const policy = policies.value.find((item) => item.id === policyId)
+    if (!policy) return
+    await activateTeacherLoadPolicy(policyId, policy.version, token)
     successMessage.value = 'Đã kích hoạt chính sách định mức thành công'
     await loadData()
   } catch (err) {
     generalError.value = extractApiErrorMessage(err, 'Không thể kích hoạt chính sách')
   }
+}
+
+function openPolicyDialog(policy?: TeacherLoadPolicy) {
+  policyDialogMode.value = policy ? 'clone' : 'create'
+  policyForm.value = {
+    policyName: policy ? `${policy.policyName} - bản mới` : '',
+    sourceDocument: policy?.sourceDocument ?? '',
+    effectiveFrom: policy ? new Date(`${policy.effectiveFrom}T00:00:00`) : new Date(),
+    standardPeriodsHighSchool: policy?.standardPeriodsHighSchool ?? 19,
+    homeroomReduction: policy?.homeroomReduction ?? 4,
+    nursingChildReduction: policy?.nursingChildReduction ?? 3,
+  }
+  ruleDrafts.value = (policy?.rules ?? []).filter((rule) => !['HOMEROOM', 'NURSING_CHILD_UNDER_12M'].includes(rule.ruleCode))
+  isPolicyDialogVisible.value = true
+}
+
+function addRuleDraft() {
+  ruleDrafts.value.push({
+    ruleCode: '',
+    ruleName: '',
+    triggerType: 'ELIGIBILITY',
+    reductionPeriods: 0,
+    source: policyForm.value.sourceDocument,
+    active: true,
+  })
+}
+
+function removeRuleDraft(index: number) {
+  ruleDrafts.value.splice(index, 1)
+}
+
+function openEligibilityDialog(eligibility?: TeacherLoadEligibility) {
+  editingEligibilityId.value = eligibility?.id ?? null
+  eligibilityForm.value = {
+    teacherId: eligibility?.teacherId ?? null,
+    conditionType: eligibility?.ruleCode ?? 'NURSING_CHILD_UNDER_12M',
+    validFrom: eligibility ? new Date(`${eligibility.validFrom}T00:00:00`) : new Date(),
+    validTo: eligibility ? new Date(`${eligibility.validTo}T00:00:00`) : new Date(),
+    evidenceInfo: eligibility?.evidenceReference ?? '',
+  }
+  isEligibilityDialogVisible.value = true
 }
 
 function formatDateStr(d: Date): string {
@@ -131,6 +190,25 @@ async function handleSavePolicy() {
         standardPeriodsHighSchool: policyForm.value.standardPeriodsHighSchool,
         homeroomReduction: policyForm.value.homeroomReduction,
         nursingChildReduction: policyForm.value.nursingChildReduction,
+        rules: [
+          {
+            ruleCode: 'HOMEROOM',
+            ruleName: 'Giảm chủ nhiệm',
+            triggerType: 'HOMEROOM',
+            reductionPeriods: policyForm.value.homeroomReduction,
+            source: policyForm.value.sourceDocument,
+            active: true,
+          },
+          {
+            ruleCode: 'NURSING_CHILD_UNDER_12M',
+            ruleName: 'Nuôi con nhỏ dưới 12 tháng',
+            triggerType: 'ELIGIBILITY',
+            reductionPeriods: policyForm.value.nursingChildReduction,
+            source: policyForm.value.sourceDocument,
+            active: true,
+          },
+          ...ruleDrafts.value,
+        ],
       },
       token,
     )
@@ -145,23 +223,37 @@ async function handleSavePolicy() {
 }
 
 async function handleSaveEligibility() {
-  if (!eligibilityForm.value.teacherId) return
+  if (!eligibilityForm.value.teacherId) {
+    generalError.value = 'Vui lòng chọn giáo viên.'
+    return
+  }
+  if (eligibilityForm.value.validTo < eligibilityForm.value.validFrom) {
+    generalError.value = 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.'
+    return
+  }
   const token = requireAccessToken()
   if (!token) return
   eligibilitySaving.value = true
   try {
-    await createTeacherLoadEligibility(
-      {
-        teacherId: eligibilityForm.value.teacherId,
-        conditionType: eligibilityForm.value.conditionType,
+    const editingEligibility = eligibilities.value.find((item) => item.id === editingEligibilityId.value)
+    if (editingEligibility) {
+      await updateTeacherLoadEligibility(editingEligibility.id, {
+        expectedVersion: editingEligibility.version,
         validFrom: formatDateStr(eligibilityForm.value.validFrom),
         validTo: formatDateStr(eligibilityForm.value.validTo),
-        evidenceInfo: eligibilityForm.value.evidenceInfo,
-      },
-      token,
-    )
+        evidenceReference: eligibilityForm.value.evidenceInfo,
+      }, token)
+    } else {
+      await createTeacherLoadEligibility({
+        teacherId: eligibilityForm.value.teacherId,
+        ruleCode: eligibilityForm.value.conditionType,
+        validFrom: formatDateStr(eligibilityForm.value.validFrom),
+        validTo: formatDateStr(eligibilityForm.value.validTo),
+        evidenceReference: eligibilityForm.value.evidenceInfo,
+      }, token)
+    }
     isEligibilityDialogVisible.value = false
-    successMessage.value = 'Đã thêm điều kiện miễn giảm cho giáo viên'
+    successMessage.value = editingEligibility ? 'Đã cập nhật điều kiện miễn giảm' : 'Đã thêm điều kiện miễn giảm cho giáo viên'
     await loadData()
   } catch (err) {
     generalError.value = extractApiErrorMessage(err, 'Không thể thêm điều kiện miễn giảm')
@@ -174,27 +266,19 @@ async function handleDeleteEligibility(id: number) {
   const token = requireAccessToken()
   if (!token) return
   try {
-    await deleteTeacherLoadEligibility(id, token)
-    successMessage.value = 'Đã xóa điều kiện miễn giảm'
+    const eligibility = eligibilities.value.find((item) => item.id === id)
+    if (!eligibility) return
+    await revokeTeacherLoadEligibility(id, eligibility.version, token)
+    successMessage.value = 'Đã thu hồi điều kiện miễn giảm'
     await loadData()
   } catch (err) {
     generalError.value = extractApiErrorMessage(err, 'Không thể xóa điều kiện')
   }
 }
 
-async function handleInitCalendar() {
-  if (!selectedSemesterId.value) return
-  const token = requireAccessToken()
-  if (!token) return
-  calendarInitializing.value = true
-  try {
-    await initTimetableCalendar(selectedSemesterId.value, token)
-    successMessage.value = 'Đã khởi tạo khung giờ chuẩn 2 buổi × 4 tiết cho học kỳ'
-  } catch (err) {
-    generalError.value = extractApiErrorMessage(err, 'Không thể khởi tạo khung giờ')
-  } finally {
-    calendarInitializing.value = false
-  }
+function resetMessages() {
+  generalError.value = ''
+  successMessage.value = ''
 }
 
 onMounted(() => {
@@ -203,7 +287,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6 max-w-7xl mx-auto flex flex-col gap-6">
+  <div class="timetable-page p-6 max-w-7xl mx-auto flex flex-col gap-6">
     <div class="flex items-center gap-3">
       <Button icon="pi pi-arrow-left" severity="secondary" rounded text @click="router.push('/v2/timetables')" />
       <div>
@@ -252,7 +336,7 @@ onMounted(() => {
       <div v-if="activeTab === 'POLICY'" class="flex flex-col gap-6">
         <div class="flex justify-between items-center">
           <h3 class="text-lg font-bold text-gray-900">Danh sách chính sách định mức</h3>
-          <Button label="Thêm chính sách mới" icon="pi pi-plus" @click="isPolicyDialogVisible = true" />
+          <Button label="Tạo phiên bản mới" icon="pi pi-plus" @click="openPolicyDialog(); resetMessages()" />
         </div>
 
         <DataTable :value="policies" responsive-layout="scroll">
@@ -275,14 +359,16 @@ onMounted(() => {
           </Column>
           <Column header="Thao tác" style="width: 140px" class="text-right">
             <template #body="{ data }">
+              <Button v-if="data.active" label="Đang dùng" size="small" severity="success" text disabled />
               <Button
                 v-if="!data.active"
-                label="Kích hoạt"
+                label="Kích hoạt phiên bản"
                 size="small"
                 severity="primary"
                 text
-                @click="handleActivatePolicy(data.id)"
+                @click="handleActivatePolicy(data.id); resetMessages()"
               />
+              <Button v-if="data.active" icon="pi pi-copy" label="Nhân bản" size="small" text @click="openPolicyDialog(data); resetMessages()" />
             </template>
           </Column>
         </DataTable>
@@ -295,28 +381,35 @@ onMounted(() => {
             <h3 class="text-lg font-bold text-gray-900">Danh sách giáo viên được miễn giảm tiết</h3>
             <p class="text-xs text-gray-500">Các điều kiện được giảm trừ tiết dạy ngoài kiêm nhiệm chủ nhiệm (như nuôi con &lt; 12 tháng)</p>
           </div>
-          <Button label="Thêm diện miễn giảm" icon="pi pi-plus" @click="isEligibilityDialogVisible = true" />
+          <Button label="Thêm diện miễn giảm" icon="pi pi-plus" @click="openEligibilityDialog(); resetMessages()" />
         </div>
 
         <DataTable :value="eligibilities" responsive-layout="scroll">
           <Column field="teacherName" header="Giáo viên" />
           <Column header="Diện miễn giảm">
             <template #body="{ data }">
-              {{ data.conditionType === 'NURSING_CHILD_UNDER_12M' ? 'Nuôi con nhỏ dưới 12 tháng' : data.conditionType }}
+              {{ getEligibilityRuleLabel(data.ruleCode) }}
             </template>
           </Column>
           <Column header="Khoảng hiệu lực" style="width: 220px">
             <template #body="{ data }">{{ data.validFrom }} → {{ data.validTo }}</template>
           </Column>
-          <Column field="evidenceInfo" header="Minh chứng / Hồ sơ" />
+          <Column field="evidenceReference" header="Minh chứng / Hồ sơ" />
+          <Column header="Trạng thái" style="width: 130px">
+            <template #body="{ data }">
+              <Tag :value="data.status === 'REVOKED' ? 'Đã thu hồi' : 'Đang hiệu lực'" :severity="data.status === 'REVOKED' ? 'secondary' : 'success'" />
+            </template>
+          </Column>
           <Column header="Thao tác" style="width: 100px" class="text-right">
             <template #body="{ data }">
+              <Button icon="pi pi-pencil" severity="secondary" text rounded :disabled="data.status === 'REVOKED'" @click="openEligibilityDialog(data); resetMessages()" />
               <Button
+                v-if="data.status !== 'REVOKED'"
                 icon="pi pi-trash"
                 severity="danger"
                 text
                 rounded
-                @click="handleDeleteEligibility(data.id)"
+                @click="handleDeleteEligibility(data.id); resetMessages()"
               />
             </template>
           </Column>
@@ -325,9 +418,9 @@ onMounted(() => {
 
       <!-- TAB 3: CALENDAR -->
       <div v-if="activeTab === 'CALENDAR'" class="bg-white p-6 rounded-xl border border-gray-200 flex flex-col gap-4 max-w-lg">
-        <h3 class="text-lg font-bold text-gray-900">Khởi tạo khung giờ chuẩn</h3>
+        <h3 class="text-lg font-bold text-gray-900">Khung giờ học kỳ</h3>
         <p class="text-xs text-gray-600 leading-relaxed">
-          Cấu hình tự động khởi tạo 48 tiết học chuẩn (Thứ 2 đến Thứ 7, mỗi ngày 2 buổi Sáng & Chiều, mỗi buổi 4 tiết) theo quy định của nhà trường.
+          Khung giờ được đọc từ cấu hình lịch học kỳ. Màn hình này chỉ cung cấp hướng dẫn; chưa có thao tác ghi vì API PUT và biểu mẫu cấu hình đang chờ phê duyệt.
         </p>
 
         <div class="flex flex-col gap-1">
@@ -341,17 +434,12 @@ onMounted(() => {
           />
         </div>
 
-        <Button
-          label="Khởi tạo khung giờ 2 buổi × 4 tiết"
-          icon="pi pi-calendar-plus"
-          :loading="calendarInitializing"
-          @click="handleInitCalendar"
-        />
+        <small class="text-gray-600">Nếu chưa có dữ liệu, hãy liên hệ ADMIN/Phòng Đào tạo để cập nhật cấu hình lịch học kỳ.</small>
       </div>
     </div>
 
     <!-- Create Policy Dialog -->
-    <Dialog v-model:visible="isPolicyDialogVisible" header="Thêm chính sách định mức mới" modal :style="{ width: '480px' }">
+    <Dialog v-model:visible="isPolicyDialogVisible" :header="policyDialogMode === 'clone' ? 'Tạo phiên bản chính sách mới' : 'Thêm chính sách định mức mới'" modal class="timetable-dialog timetable-settings-dialog" :style="{ width: 'min(94vw, 680px)' }" :dismissable-mask="false">
       <div class="flex flex-col gap-4">
         <div class="flex flex-col gap-1">
           <label class="font-medium text-sm">Tên chính sách</label>
@@ -365,7 +453,7 @@ onMounted(() => {
           <label class="font-medium text-sm">Ngày bắt đầu áp dụng</label>
           <DatePicker v-model="policyForm.effectiveFrom" date-format="yy-mm-dd" show-icon />
         </div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="settings-form-grid grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div class="flex flex-col gap-1">
             <label class="font-medium text-xs">Tiết chuẩn THPT</label>
             <InputNumber v-model="policyForm.standardPeriodsHighSchool" :min="1" />
@@ -379,17 +467,34 @@ onMounted(() => {
             <InputNumber v-model="policyForm.nursingChildReduction" :min="0" />
           </div>
         </div>
+        <div class="settings-rule-editor flex flex-col gap-3">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <h4 class="font-semibold text-sm">Quy tắc miễn giảm bổ sung</h4>
+              <p class="text-xs text-gray-500">Các mức giảm được cộng dồn và áp dụng theo điều kiện miễn giảm.</p>
+            </div>
+            <Button label="Thêm quy tắc" icon="pi pi-plus" size="small" severity="secondary" outlined @click="addRuleDraft" />
+          </div>
+          <div v-for="(rule, index) in ruleDrafts" :key="index" class="settings-rule-row grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <InputText v-model="rule.ruleCode" placeholder="Mã quy tắc, ví dụ SENIORITY" />
+            <InputText v-model="rule.ruleName" placeholder="Tên diện miễn giảm" />
+            <Select v-model="rule.triggerType" :options="[{ label: 'Theo điều kiện miễn giảm', value: 'ELIGIBILITY' }, { label: 'Theo giáo viên chủ nhiệm', value: 'HOMEROOM' }]" option-label="label" option-value="value" />
+            <InputNumber v-model="rule.reductionPeriods" :min="0" placeholder="Số tiết giảm" />
+            <InputText v-model="rule.source" class="sm:col-span-2" placeholder="Văn bản/căn cứ của quy tắc" />
+            <Button label="Bỏ quy tắc" icon="pi pi-trash" severity="danger" text class="sm:col-span-2 justify-self-start" @click="removeRuleDraft(index)" />
+          </div>
+        </div>
       </div>
       <template #footer>
         <div class="flex justify-end gap-2 mt-4">
           <Button label="Hủy" severity="secondary" text @click="isPolicyDialogVisible = false" />
-          <Button label="Tạo chính sách" :loading="policySaving" @click="handleSavePolicy" />
+          <Button :label="policyDialogMode === 'clone' ? 'Tạo phiên bản' : 'Tạo chính sách'" :loading="policySaving" @click="handleSavePolicy" />
         </div>
       </template>
     </Dialog>
 
     <!-- Create Eligibility Dialog -->
-    <Dialog v-model:visible="isEligibilityDialogVisible" header="Thêm diện miễn giảm giáo viên" modal :style="{ width: '480px' }">
+    <Dialog v-model:visible="isEligibilityDialogVisible" :header="editingEligibilityId ? 'Sửa diện miễn giảm giáo viên' : 'Thêm diện miễn giảm giáo viên'" modal class="timetable-dialog timetable-settings-dialog" :style="{ width: 'min(94vw, 620px)' }" :dismissable-mask="false">
       <div class="flex flex-col gap-4">
         <div class="flex flex-col gap-1">
           <label class="font-medium text-sm">Giáo viên</label>
@@ -405,7 +510,7 @@ onMounted(() => {
           <label class="font-medium text-sm">Điều kiện miễn giảm</label>
           <Select
             v-model="eligibilityForm.conditionType"
-            :options="[{ label: 'Nuôi con nhỏ dưới 12 tháng (giảm 3 tiết)', value: 'NURSING_CHILD_UNDER_12M' }]"
+            :options="eligibilityRuleOptions"
             option-label="label"
             option-value="value"
           />
@@ -434,4 +539,3 @@ onMounted(() => {
     </Dialog>
   </div>
 </template>
-

@@ -267,7 +267,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6 max-w-7xl mx-auto flex flex-col gap-6">
+  <div class="timetable-page p-6 max-w-7xl mx-auto flex flex-col gap-6">
     <ConfirmDialog />
 
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -424,6 +424,7 @@ onMounted(() => {
     <!-- Reject Reason Dialog -->
     <Dialog
       v-model:visible="isRejectDialogVisible"
+      class="timetable-dialog"
       header="Từ chối đăng ký lịch bận"
       modal
       :style="{ width: '420px' }"

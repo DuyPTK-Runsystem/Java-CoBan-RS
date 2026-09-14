@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import Button from 'primevue/button'
 import DatePicker from 'primevue/datepicker'
 import Dialog from 'primevue/dialog'
+import MultiSelect from 'primevue/multiselect'
 import Select from 'primevue/select'
 
 import FormAlert from '@/components/common/FormAlert.vue'
@@ -10,6 +11,7 @@ import { useAuthSession } from '@/composables/useAuthSession'
 import { getRoomsForSubject } from '@/services/subjectFunctionalRoomApi'
 import type { FunctionalRoom } from '@/types/functionalRoom'
 import type { TimetableEntry, TimetablePeriod } from '@/types/timetable'
+import type { TeacherUnavailability } from '@/types/teacherUnavailability'
 
 export interface AssignmentOption {
   id: number
@@ -26,6 +28,8 @@ const props = defineProps<{
   entry: TimetableEntry | null
   presetPeriod: TimetablePeriod | null
   periods: TimetablePeriod[]
+  entries: TimetableEntry[]
+  teacherUnavailabilities: TeacherUnavailability[]
   assignments: AssignmentOption[]
   defaultValidFrom?: string
   defaultValidTo?: string
@@ -38,9 +42,9 @@ const emit = defineEmits<{
   (
     e: 'save',
     payload: {
-      id?: number | null
+      entryId?: number | null
       assignmentId: number
-      periodId: number
+      periodIds: number[]
       functionalRoomId?: number | null
       validFrom: string
       validTo: string
@@ -53,6 +57,7 @@ const { requireAccessToken } = useAuthSession()
 
 const selectedAssignmentId = ref<number | null>(null)
 const selectedPeriodId = ref<number | null>(null)
+const selectedPeriodIds = ref<number[]>([])
 const selectedRoomId = ref<number | null>(null)
 const validFrom = ref<Date | null>(new Date())
 const validTo = ref<Date | null>(new Date())
@@ -65,10 +70,31 @@ const isEdit = computed(() => Boolean(props.entry))
 const assignmentOptionsFormatted = computed(() => {
   return props.assignments.map((a) => ({
     id: a.id,
-    label: `${a.subjectName} · Lớp ${a.className} · GV: ${a.teacherName}`,
+    label: `${a.subjectName} · Lớp ${a.className} · GV: ${a.teacherName}${conflictLabel(a)}`,
     subjectId: a.subjectId,
   }))
 })
+
+function conflictLabel(assignment: AssignmentOption): string {
+  if (isEdit.value || selectedPeriodIds.value.length === 0) return ''
+  const selectedPeriods = new Set(selectedPeriodIds.value)
+  const conflicts = new Set<string>()
+  props.entries
+    .filter((entry) => selectedPeriods.has(entry.periodId))
+    .forEach((entry) => {
+      if (entry.classId === assignment.classId) conflicts.add('Lớp đã có tiết')
+      if (entry.teacherId === assignment.teacherId) conflicts.add('Giáo viên đã có tiết')
+    })
+  const busy = props.teacherUnavailabilities.some((item) => {
+    if (item.status !== 'APPROVED' || item.teacherId !== assignment.teacherId || !item.dayOfWeek) return false
+    return props.periods.some((period) => selectedPeriods.has(period.id)
+      && period.dayOfWeek === item.dayOfWeek
+      && period.session === item.session
+      && item.periodIndexes.split(',').some((index) => Number.parseInt(index.trim(), 10) === period.periodIndex))
+  })
+  const blockingLabel = conflicts.size ? ` · ⛔ ${Array.from(conflicts).join(', ')}` : ''
+  return `${blockingLabel}${busy ? ' · ⚠️ Giáo viên bận' : ''}`
+}
 
 const periodOptionsFormatted = computed(() => {
   const days: Record<number, string> = {
@@ -121,15 +147,21 @@ watch(
     if (props.entry) {
       selectedAssignmentId.value = props.entry.assignmentId
       selectedPeriodId.value = props.entry.periodId
+      selectedPeriodIds.value = [props.entry.periodId]
       selectedRoomId.value = props.entry.functionalRoomId ?? null
       validFrom.value = new Date(props.entry.validFrom)
       validTo.value = new Date(props.entry.validTo)
     } else {
       selectedAssignmentId.value = null
       selectedPeriodId.value = props.presetPeriod?.id ?? props.periods[0]?.id ?? null
+      selectedPeriodIds.value = props.presetPeriod?.id
+        ? [props.presetPeriod.id]
+        : (props.periods[0]?.id ? [props.periods[0].id] : [])
       selectedRoomId.value = null
       validFrom.value = props.defaultValidFrom ? new Date(props.defaultValidFrom) : new Date()
-      validTo.value = props.defaultValidTo ? new Date(props.defaultValidTo) : new Date()
+      validTo.value = props.defaultValidTo
+        ? new Date(props.defaultValidTo)
+        : new Date(validFrom.value)
     }
     errors.value = {}
   },
@@ -148,9 +180,10 @@ function validate(): boolean {
   if (!selectedAssignmentId.value) {
     errors.value.assignment = 'Vui lòng chọn phân công môn học'
   }
-  if (!selectedPeriodId.value) {
+  if (!isEdit.value && selectedPeriodIds.value.length === 0) {
     errors.value.period = 'Vui lòng chọn tiết học'
   }
+  if (isEdit.value && !selectedPeriodId.value) errors.value.period = 'Vui lòng chọn tiết học'
   if (!validFrom.value) {
     errors.value.validFrom = 'Vui lòng chọn ngày bắt đầu'
   }
@@ -166,9 +199,9 @@ function validate(): boolean {
 function handleSave() {
   if (!validate()) return
   emit('save', {
-    id: props.entry?.id ?? null,
+    entryId: props.entry?.entryId ?? props.entry?.id ?? null,
     assignmentId: selectedAssignmentId.value!,
-    periodId: selectedPeriodId.value!,
+    periodIds: isEdit.value ? [selectedPeriodId.value!] : selectedPeriodIds.value,
     functionalRoomId: selectedRoomId.value || null,
     validFrom: formatDateStr(validFrom.value!),
     validTo: formatDateStr(validTo.value!),
@@ -177,12 +210,13 @@ function handleSave() {
 
 function handleDelete() {
   if (!props.entry) return
-  emit('delete', props.entry.id)
+  emit('delete', props.entry.entryId ?? props.entry.id ?? 0)
 }
 </script>
 
 <template>
   <Dialog
+    class="timetable-dialog"
     :visible="visible"
     :header="isEdit ? 'Chỉnh sửa tiết học' : 'Thêm tiết học mới'"
     modal
@@ -210,6 +244,7 @@ function handleDelete() {
       <div class="flex flex-col gap-1">
         <label class="font-medium text-sm">Thời gian / Tiết học <span class="text-red-500">*</span></label>
         <Select
+          v-if="isEdit"
           v-model="selectedPeriodId"
           :options="periodOptionsFormatted"
           option-label="label"
@@ -219,7 +254,21 @@ function handleDelete() {
           class="w-full"
           :invalid="Boolean(errors.period)"
         />
+        <MultiSelect
+          v-else
+          v-model="selectedPeriodIds"
+          :options="periodOptionsFormatted"
+          option-label="label"
+          option-value="id"
+          placeholder="Chọn một hoặc nhiều tiết..."
+          filter
+          display="chip"
+          :max-selected-labels="3"
+          class="w-full"
+          :invalid="Boolean(errors.period)"
+        />
         <small v-if="errors.period" class="text-red-500 text-xs">{{ errors.period }}</small>
+        <small v-else-if="!isEdit" class="text-xs text-gray-500">Có thể chọn nhiều tiết cho cùng một phân công trong một lần thêm.</small>
       </div>
 
       <div v-if="availableRooms.length > 0" class="flex flex-col gap-1">
@@ -262,10 +311,9 @@ function handleDelete() {
         </div>
         <div class="flex gap-2">
           <Button label="Hủy" severity="secondary" text @click="emit('update:visible', false)" />
-          <Button :label="isEdit ? 'Lưu thay đổi' : 'Thêm tiết'" :loading="loading" @click="handleSave" />
+          <Button :label="isEdit ? 'Lưu thay đổi' : 'Thêm các tiết'" :loading="loading" @click="handleSave" />
         </div>
       </div>
     </template>
   </Dialog>
 </template>
-

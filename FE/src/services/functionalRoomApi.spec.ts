@@ -30,12 +30,12 @@ describe('functionalRoomApi', () => {
     await lookupFunctionalRooms({ subjectId: 5, status: 'ACTIVE' }, 'test-token')
 
     const urls = fetchMock.mock.calls.map(([url]) => url)
-    expect(urls[0]).toContain('/api/v2/functional-rooms?search=Lab&status=ACTIVE&page=0&size=10')
-    expect(urls[1]).toContain('/api/v2/functional-rooms/1')
-    expect(urls[2]).toContain('/api/v2/functional-rooms')
-    expect(urls[3]).toContain('/api/v2/functional-rooms/1')
-    expect(urls[4]).toContain('/api/v2/functional-rooms/1?expectedVersion=0')
-    expect(urls[5]).toContain('/api/v2/functional-rooms/lookup?subjectId=5&status=ACTIVE')
+    expect(urls[0]).toContain('/api/v3/functional-rooms?search=Lab&status=ACTIVE&page=0&size=10')
+    expect(urls[1]).toContain('/api/v3/functional-rooms/1')
+    expect(urls[2]).toContain('/api/v3/functional-rooms')
+    expect(urls[3]).toContain('/api/v3/functional-rooms/1')
+    expect(urls[4]).toContain('/api/v3/functional-rooms/1?expectedVersion=0')
+    expect(urls[5]).toContain('/api/v3/functional-rooms/lookup?subjectId=5&status=ACTIVE')
 
     expect(fetchMock.mock.calls[2][1]).toMatchObject({
       method: 'POST',

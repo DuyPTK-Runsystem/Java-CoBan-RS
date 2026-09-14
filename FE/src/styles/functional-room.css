@@ -1,0 +1,202 @@
+/* Functional Room layout primitives. Utility aliases are intentionally scoped
+   to this screen because Tailwind is not part of the FE build. */
+@scope (.functional-room-page, .functional-room-dialog) {
+  .p-6 { padding: 1.5rem; }
+  .p-4 { padding: 1rem; }
+  .p-8 { padding: 2rem; }
+  .p-1 { padding: .25rem; }
+  .mt-4 { margin-top: 1rem; }
+  .flex { display: flex; }
+  .w-full { width: 100%; }
+  .w-56 { width: 14rem; }
+  .max-w-7xl { max-width: 80rem; }
+  .mx-auto { margin-left: auto; margin-right: auto; }
+  .flex-1 { flex: 1 1 0%; }
+  .flex-col { flex-direction: column; }
+  .items-center { align-items: center; }
+  .items-start { align-items: flex-start; }
+  .justify-between { justify-content: space-between; }
+  .justify-end { justify-content: flex-end; }
+  .gap-1 { gap: .25rem; }
+  .gap-2 { gap: .5rem; }
+  .gap-4 { gap: 1rem; }
+  .gap-6 { gap: 1.5rem; }
+  .text-xs { font-size: .75rem; }
+  .text-sm { font-size: .875rem; }
+  .text-2xl { font-size: 1.5rem; }
+  .font-medium { font-weight: 500; }
+  .font-bold { font-weight: 700; }
+  .text-center { text-align: center; }
+  .text-gray-500 { color: #6b7280; }
+  .text-gray-600 { color: #4b5563; }
+  .text-gray-900 { color: #111827; }
+  .text-red-500 { color: #b91c1c; }
+  .bg-white { background: #fff; }
+  .border { border: 1px solid #e5e7eb; }
+  .border-gray-200 { border-color: #e5e7eb; }
+  .rounded-xl { border-radius: .75rem; }
+  .overflow-hidden { overflow: hidden; }
+  .shadow-sm { box-shadow: 0 1px 2px #0000000d; }
+}
+
+.subject-functional-room-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: .75rem;
+  background: #f9fafb;
+}
+
+.subject-functional-room-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.subject-functional-room-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.subject-functional-room-copy {
+  min-width: 0;
+}
+
+.subject-functional-room-copy h4 {
+  margin: 0;
+  color: #111827;
+  font-size: .875rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.subject-functional-room-copy p {
+  max-width: 44rem;
+  margin: .5rem 0 0;
+  color: #6b7280;
+  font-size: .75rem;
+  line-height: 1.5;
+}
+
+.subject-functional-room-save {
+  flex: 0 0 auto;
+}
+
+.subject-functional-room-feedback {
+  display: grid;
+  gap: .5rem;
+}
+
+.subject-functional-room-feedback :is(.form-alert, p) {
+  margin: 0;
+}
+
+.subject-functional-room-field {
+  display: flex;
+  flex-direction: column;
+  gap: .375rem;
+  min-width: 0;
+}
+
+.subject-functional-room-field label {
+  color: #374151;
+  font-size: .75rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.subject-functional-room-select {
+  width: 100%;
+  min-width: 0;
+}
+
+.subject-functional-room-select :is(.p-multiselect-label, .p-chip) {
+  min-width: 0;
+}
+
+@media (max-width: 639px) {
+  .subject-functional-room-header {
+    flex-direction: column;
+  }
+
+  .subject-functional-room-save {
+    width: 100%;
+  }
+}
+
+.functional-room-page {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.functional-room-header h1 {
+  margin: 0;
+  line-height: 1.25;
+}
+
+.functional-room-header p {
+  margin: .5rem 0 0;
+  line-height: 1.5;
+}
+
+.functional-room-toolbar {
+  align-items: stretch;
+}
+
+.functional-room-search :is(input, .p-inputtext) {
+  min-width: 0;
+}
+
+.functional-room-filter {
+  flex: 0 0 14rem;
+}
+
+.functional-room-table {
+  min-width: 0;
+}
+
+.functional-room-table .p-datatable-table-container {
+  overflow-x: auto;
+}
+
+.functional-room-table .p-datatable-thead > tr > th,
+.functional-room-table .p-datatable-tbody > tr > td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.functional-room-table .p-datatable-paginator-bottom {
+  border-top: 1px solid #e5e7eb;
+}
+
+.functional-room-dialog {
+  min-width: 0;
+}
+
+.functional-room-dialog .p-inputtext,
+.functional-room-dialog .p-select {
+  width: 100%;
+}
+
+.functional-room-dialog label {
+  line-height: 1.4;
+}
+
+@media (min-width: 640px) {
+  .functional-room-page .sm\:flex-row,
+  .functional-room-dialog .sm\:flex-row { flex-direction: row; }
+  .functional-room-page .sm\:items-center,
+  .functional-room-dialog .sm\:items-center { align-items: center; }
+}
+
+@media (max-width: 639px) {
+  .functional-room-page { padding: 1rem; gap: 1rem; }
+  .functional-room-filter { flex-basis: auto; width: 100%; }
+  .functional-room-search { max-width: none; }
+  .functional-room-header .p-button { width: 100%; }
+}

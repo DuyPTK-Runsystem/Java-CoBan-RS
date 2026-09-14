@@ -7,7 +7,7 @@ import FormAlert from '@/components/common/FormAlert.vue'
 import PageState from '@/components/common/PageState.vue'
 import TimetableWeekGrid from '@/components/timetable/TimetableWeekGrid.vue'
 import { useAuthSession } from '@/composables/useAuthSession'
-import { getMyTimetable, getTimetablePeriods } from '@/services/timetableApi'
+import { getMyTimetable } from '@/services/timetableApi'
 import { extractApiErrorMessage } from '@/types/api'
 import type { TimetableEntry, TimetablePeriod } from '@/types/timetable'
 import type { LoadingState } from '@/types/ui'
@@ -26,12 +26,10 @@ async function loadData() {
   loadingState.value = 'loading'
   generalError.value = ''
   try {
-    const [periodList, entryList] = await Promise.all([
-      getTimetablePeriods(undefined, token),
-      getMyTimetable(token),
-    ])
-    periods.value = periodList
-    entries.value = entryList
+    entries.value = await getMyTimetable(token)
+    // The calendar endpoint requires a semesterId. Entries already carry the
+    // display coordinates, so keep this view read-only without guessing one.
+    periods.value = []
     loadingState.value = 'idle'
   } catch (err) {
     loadingState.value = 'error'
@@ -45,7 +43,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6 max-w-7xl mx-auto flex flex-col gap-6">
+  <div class="timetable-page p-6 max-w-7xl mx-auto flex flex-col gap-6">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Thời khóa biểu giảng dạy của tôi</h1>
@@ -83,4 +81,3 @@ onMounted(() => {
     </div>
   </div>
 </template>
-

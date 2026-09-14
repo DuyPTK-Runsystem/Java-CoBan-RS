@@ -39,7 +39,31 @@ watch(
 )
 
 const canPublish = computed(() => {
-  return props.blockingCount === 0 && (props.timetable?.capabilities.canPublish ?? false)
+  if (!props.timetable) return false
+  if (!['DRAFT', 'VALIDATED'].includes(props.timetable.status)) return false
+  const caps = props.timetable.capabilities as unknown
+  const allowed = Array.isArray(caps)
+    ? caps.includes('PUBLISH') || caps.includes('CAN_PUBLISH')
+    : (props.timetable.capabilities?.canPublish ?? false)
+  return props.blockingCount === 0 && allowed
+})
+
+const lockReasons = computed(() => {
+  if (!props.timetable) return ['Chưa tải được thông tin thời khóa biểu.']
+  const reasons: string[] = []
+  if (!['DRAFT', 'VALIDATED'].includes(props.timetable.status)) {
+    reasons.push('Chỉ bản nháp đã kiểm tra mới có thể công bố.')
+  }
+  const caps = props.timetable.capabilities as unknown
+  const allowed = Array.isArray(caps)
+    ? caps.includes('PUBLISH') || caps.includes('CAN_PUBLISH')
+    : (props.timetable.capabilities?.canPublish ?? false)
+  if (!allowed) reasons.push('Tài khoản hiện không có quyền công bố.')
+  if (props.blockingCount > 0) reasons.push(`Còn ${props.blockingCount} lỗi chặn trong toàn bộ lịch.`)
+  if (props.timetable.status === 'PUBLISHED' || props.timetable.status === 'ARCHIVED') {
+    reasons.push('Bản lịch này đã khóa sau khi công bố; hãy tạo bản điều chỉnh.')
+  }
+  return reasons
 })
 
 function handleConfirm() {
@@ -54,6 +78,7 @@ function handleConfirm() {
 
 <template>
   <Dialog
+    class="timetable-dialog"
     :visible="visible"
     header="Công bố thời khóa biểu"
     modal
@@ -63,14 +88,16 @@ function handleConfirm() {
     <div class="flex flex-col gap-4">
       <FormAlert v-if="errorMessage" :message="errorMessage" type="error" />
 
-      <div v-if="blockingCount > 0" class="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-800">
-        <p class="font-semibold mb-1">⛔ Không thể công bố thời khóa biểu!</p>
-        <p>Hiện đang có {{ blockingCount }} lỗi chặn chưa được giải quyết (trùng giáo viên, trùng lớp hoặc trùng phòng chức năng). Vui lòng điều chỉnh lịch trước khi công bố.</p>
+      <div v-if="!canPublish" class="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-800" aria-live="polite">
+        <p class="font-semibold mb-1">⛔ Chưa thể công bố</p>
+        <ul class="list-disc pl-5 space-y-1">
+          <li v-for="reason in lockReasons" :key="reason">{{ reason }}</li>
+        </ul>
       </div>
 
       <div v-else class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800">
         <p class="font-semibold mb-1">ℹ️ Xác nhận công bố</p>
-        <p>Thời khóa biểu bản {{ timetable?.revisionNumber }} sẽ chính thức có hiệu lực từ ngày <strong>{{ timetable?.effectiveFrom }}</strong>. Sau khi công bố, bản này sẽ trở thành Read-only.</p>
+        <p>Bản {{ timetable?.revisionNumber }} sẽ có hiệu lực từ <strong>{{ timetable?.effectiveFrom }}</strong>. Sau khi công bố, bản này sẽ chỉ đọc; mọi thay đổi tiếp theo cần tạo bản điều chỉnh.</p>
       </div>
 
       <div class="bg-gray-50 p-3 rounded-lg text-xs flex flex-col gap-1 border border-gray-200 text-gray-700">
@@ -95,4 +122,3 @@ function handleConfirm() {
     </template>
   </Dialog>
 </template>
-

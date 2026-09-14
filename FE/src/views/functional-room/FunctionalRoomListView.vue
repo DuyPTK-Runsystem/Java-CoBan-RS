@@ -61,7 +61,7 @@ async function loadRooms() {
       token,
     )
     rooms.value = res.result
-    totalElements.value = res.meta.totalElements
+    totalElements.value = res.meta.totalItems ?? res.meta.totalElements ?? 0
     loadingState.value = rooms.value.length > 0 ? 'idle' : 'empty'
   } catch (err) {
     loadingState.value = 'error'
@@ -158,10 +158,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6 max-w-7xl mx-auto flex flex-col gap-6">
+  <div class="functional-room-page p-6 max-w-7xl mx-auto flex flex-col gap-6">
     <ConfirmDialog />
 
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div class="functional-room-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Quản lý phòng chức năng</h1>
         <p class="text-sm text-gray-500">Quản lý các phòng bộ môn, phòng thực hành, nhà đa năng</p>
@@ -171,8 +171,8 @@ onMounted(() => {
 
     <FormAlert v-if="generalError" :message="generalError" type="error" />
 
-    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row gap-4 justify-between">
-      <div class="flex flex-1 gap-2 max-w-md">
+    <div class="functional-room-toolbar bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row gap-4 justify-between">
+      <div class="functional-room-search flex flex-1 gap-2 max-w-md">
         <InputText
           v-model="search"
           placeholder="Tìm theo mã, tên phòng..."
@@ -181,7 +181,7 @@ onMounted(() => {
         />
         <Button icon="pi pi-search" severity="secondary" @click="handleSearch" />
       </div>
-      <div class="w-56">
+      <div class="functional-room-filter w-56">
         <Select
           v-model="selectedStatus"
           :options="statusFilterOptions"
@@ -199,7 +199,7 @@ onMounted(() => {
       @retry="loadRooms"
     />
 
-    <div v-else class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div v-else class="functional-room-table bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <DataTable
         :value="rooms"
         lazy
@@ -262,4 +262,3 @@ onMounted(() => {
     />
   </div>
 </template>
-

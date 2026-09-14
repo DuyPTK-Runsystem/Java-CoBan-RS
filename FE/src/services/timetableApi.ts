@@ -7,13 +7,14 @@ import type {
   SessionType,
   TimetableDetail,
   TimetableEntry,
+  TimetableIssue,
   TimetablePeriod,
   TimetableReview,
   TimetableSummary,
   UpdateTimetableEntriesPayload,
 } from '@/types/timetable'
 
-const basePath = '/api/v2/timetables'
+const basePath = '/api/v3/timetables'
 
 export interface GetEntriesParams {
   weekStart?: string
@@ -38,21 +39,79 @@ export function listTimetables(
   return apiClient.get<PaginatedResult<TimetableSummary>>(basePath, { token, query })
 }
 
-export function createTimetable(
+export function normalizeCapabilities(caps: unknown): TimetableCapabilities {
+  if (Array.isArray(caps)) {
+    const set = new Set(caps)
+    return {
+      canEdit: set.has('EDIT_ENTRIES') || set.has('CAN_EDIT'),
+      canValidate: set.has('VALIDATE') || set.has('CAN_VALIDATE'),
+      canPublish: set.has('PUBLISH') || set.has('CAN_PUBLISH'),
+      canRevise: set.has('CREATE_REVISION') || set.has('REVISE') || set.has('CAN_REVISE'),
+    }
+  }
+  if (typeof caps === 'object' && caps !== null) {
+    const c = caps as Record<string, boolean>
+    return {
+      canEdit: Boolean(c.canEdit),
+      canValidate: Boolean(c.canValidate),
+      canPublish: Boolean(c.canPublish),
+      canRevise: Boolean(c.canRevise),
+    }
+  }
+  return {
+    canEdit: false,
+    canValidate: false,
+    canPublish: false,
+    canRevise: false,
+  }
+}
+
+export function normalizeEntry(entry: TimetableEntry): TimetableEntry {
+  const id = entry.id ?? entry.entryId ?? 0
+  return {
+    ...entry,
+    id,
+    entryId: id,
+  }
+}
+
+export function normalizePeriod(period: TimetablePeriod & { periodId?: number; name?: string }): TimetablePeriod {
+  return {
+    ...period,
+    id: period.id ?? period.periodId ?? 0,
+    periodName: period.periodName ?? period.name ?? `Tiết ${period.periodIndex}`,
+  }
+}
+
+export function normalizeIssue(issue: TimetableIssue): TimetableIssue {
+  const ids = Array.isArray(issue.entryIds) ? issue.entryIds.filter((id): id is number => typeof id === 'number') : []
+  return { ...issue, entryIds: ids, entryId: issue.entryId ?? ids[0] ?? null }
+}
+
+export function normalizeDetail(detail: TimetableDetail): TimetableDetail {
+  return {
+    ...detail,
+    capabilities: normalizeCapabilities(detail.capabilities),
+  }
+}
+
+export async function createTimetable(
   payload: CreateTimetablePayload,
   token?: string,
 ): Promise<TimetableDetail> {
-  return apiClient.post<TimetableDetail>(basePath, payload, { token })
+  const detail = await apiClient.post<TimetableDetail>(basePath, payload, { token })
+  return normalizeDetail(detail)
 }
 
-export function getTimetableDetail(
+export async function getTimetableDetail(
   id: number,
   token?: string,
 ): Promise<TimetableDetail> {
-  return apiClient.get<TimetableDetail>(`${basePath}/${id}`, { token })
+  const detail = await apiClient.get<TimetableDetail>(`${basePath}/${id}`, { token })
+  return normalizeDetail(detail)
 }
 
-export function getTimetableEntries(
+export async function getTimetableEntries(
   revisionId: number,
   params?: GetEntriesParams,
   token?: string,
@@ -66,22 +125,24 @@ export function getTimetableEntries(
   if (params?.session) query.session = params.session
   if (params?.periodIndex !== undefined) query.periodIndex = params.periodIndex
 
-  return apiClient.get<TimetableEntry[]>(`${basePath}/revisions/${revisionId}/entries`, {
+  const entries = await apiClient.get<TimetableEntry[]>(`${basePath}/${revisionId}/entries`, {
     token,
     query,
   })
+  return Array.isArray(entries) ? entries.map(normalizeEntry) : []
 }
 
-export function updateTimetableEntries(
+export async function updateTimetableEntries(
   revisionId: number,
   payload: UpdateTimetableEntriesPayload,
   token?: string,
 ): Promise<TimetableDetail> {
-  return apiClient.put<TimetableDetail>(
-    `${basePath}/revisions/${revisionId}/entries`,
+  const detail = await apiClient.put<TimetableDetail>(
+    `${basePath}/${revisionId}/entries`,
     payload,
     { token },
   )
+  return normalizeDetail(detail)
 }
 
 export function validateTimetableRevision(
@@ -89,7 +150,7 @@ export function validateTimetableRevision(
   token?: string,
 ): Promise<TimetableReview> {
   return apiClient.post<TimetableReview>(
-    `${basePath}/revisions/${revisionId}/validate`,
+    `${basePath}/${revisionId}/validate`,
     {},
     { token },
   )
@@ -99,13 +160,13 @@ export function getTimetableReview(
   revisionId: number,
   token?: string,
 ): Promise<TimetableReview> {
-  return apiClient.get<TimetableReview>(
-    `${basePath}/revisions/${revisionId}/review`,
-    { token },
-  )
+  return apiClient.get<TimetableReview>(`${basePath}/${revisionId}/review`, { token }).then((review) => ({
+    ...review,
+    issues: Array.isArray(review.issues) ? review.issues.map(normalizeIssue) : [],
+  }))
 }
 
-export function publishTimetableRevision(
+export async function publishTimetableRevision(
   revisionId: number,
   payload: PublishTimetablePayload,
   idempotencyKey?: string,
@@ -115,47 +176,40 @@ export function publishTimetableRevision(
   if (idempotencyKey) {
     headers['Idempotency-Key'] = idempotencyKey
   }
-  return apiClient.post<TimetableDetail>(
-    `${basePath}/revisions/${revisionId}/publish`,
+  const detail = await apiClient.post<TimetableDetail>(
+    `${basePath}/${revisionId}/publish`,
     payload,
     { token, headers },
   )
+  return normalizeDetail(detail)
 }
 
-export function createTimetableRevision(
+export async function createTimetableRevision(
   revisionId: number,
   payload: CreateRevisionPayload,
   token?: string,
 ): Promise<TimetableDetail> {
-  return apiClient.post<TimetableDetail>(
-    `${basePath}/revisions/${revisionId}/revisions`,
+  const detail = await apiClient.post<TimetableDetail>(
+    `${basePath}/${revisionId}/revisions`,
     payload,
     { token },
   )
+  return normalizeDetail(detail)
 }
 
-export function getTimetablePeriods(
+export async function getTimetablePeriods(
   semesterId?: number,
   token?: string,
 ): Promise<TimetablePeriod[]> {
-  const query: Record<string, string | number | undefined> = {}
-  if (semesterId !== undefined) query.semesterId = semesterId
-
-  return apiClient.get<TimetablePeriod[]>(`${basePath}/periods`, { token, query })
+  if (!semesterId) return []
+  const res = await apiClient.get<{ periods?: TimetablePeriod[] }>('/api/v3/timetable-calendars', {
+    token,
+    query: { semesterId },
+  })
+  return Array.isArray(res?.periods) ? res.periods.map(normalizePeriod) : []
 }
 
-export function initTimetableCalendar(
-  semesterId: number,
-  token?: string,
-): Promise<TimetablePeriod[]> {
-  return apiClient.post<TimetablePeriod[]>(
-    `${basePath}/periods/init`,
-    {},
-    { token, query: { semesterId } },
-  )
+export async function getMyTimetable(token?: string): Promise<TimetableEntry[]> {
+  const entries = await apiClient.get<TimetableEntry[]>('/api/v3/timetables/my-timetable', { token })
+  return Array.isArray(entries) ? entries.map(normalizeEntry) : []
 }
-
-export function getMyTimetable(token?: string): Promise<TimetableEntry[]> {
-  return apiClient.get<TimetableEntry[]>('/api/v2/my-timetable', { token })
-}
-

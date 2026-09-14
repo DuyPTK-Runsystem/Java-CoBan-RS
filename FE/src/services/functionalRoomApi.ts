@@ -7,7 +7,7 @@ import type {
 } from '@/types/functionalRoom'
 import type { PaginatedResult } from '@/types/timetable'
 
-const basePath = '/api/v2/functional-rooms'
+const basePath = '/api/v3/functional-rooms'
 
 export interface ListRoomsParams {
   search?: string

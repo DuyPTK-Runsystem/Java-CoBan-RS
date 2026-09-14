@@ -141,10 +141,13 @@ export function closeAcademicYear(token: string, academicYearId: number): Promis
   return apiClient.post<AcademicYear>(`${academicYearsPath}/${academicYearId}/close`, undefined, { token })
 }
 
-export function fetchSemesters(token: string, academicYearId: number): Promise<Semester[]> {
+export function fetchSemesters(token: string, academicYearId?: number): Promise<Semester[]> {
+  const query = academicYearId !== undefined
+    ? new URLSearchParams({ academicYearId: String(academicYearId) })
+    : undefined
   return apiClient.get<Semester[]>(semestersPath, {
     token,
-    query: new URLSearchParams({ academicYearId: String(academicYearId) }),
+    query,
   })
 }
 

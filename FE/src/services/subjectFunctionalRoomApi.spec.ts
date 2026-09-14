@@ -19,8 +19,8 @@ describe('subjectFunctionalRoomApi', () => {
     await updateRoomsForSubject(10, { functionalRoomIds: [1, 2], expectedVersion: 0 }, 'test-token')
 
     const urls = fetchMock.mock.calls.map(([url]) => url)
-    expect(urls[0]).toContain('/api/v2/subjects/10/functional-rooms')
-    expect(urls[1]).toContain('/api/v2/subjects/10/functional-rooms')
+    expect(urls[0]).toContain('/api/v3/subjects/10/functional-rooms')
+    expect(urls[1]).toContain('/api/v3/subjects/10/functional-rooms')
 
     expect(fetchMock.mock.calls[1][1]).toMatchObject({
       method: 'PUT',

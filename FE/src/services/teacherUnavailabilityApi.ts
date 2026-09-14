@@ -7,7 +7,7 @@ import type {
   UpdateUnavailabilityPayload,
 } from '@/types/teacherUnavailability'
 
-const basePath = '/api/v2/teacher-unavailabilities'
+const basePath = '/api/v3/teacher-unavailability'
 
 export interface ListUnavailabilitiesParams {
   semesterId?: number
@@ -51,9 +51,9 @@ export function approveTeacherUnavailability(
   expectedVersion: number,
   token?: string,
 ): Promise<TeacherUnavailability> {
-  return apiClient.put<TeacherUnavailability>(
+  return apiClient.post<TeacherUnavailability>(
     `${basePath}/${id}/approve`,
-    { expectedVersion },
+    undefined,
     { token, query: { expectedVersion } },
   )
 }
@@ -63,7 +63,7 @@ export function rejectTeacherUnavailability(
   payload: RejectUnavailabilityPayload,
   token?: string,
 ): Promise<TeacherUnavailability> {
-  return apiClient.put<TeacherUnavailability>(`${basePath}/${id}/reject`, payload, { token })
+  return apiClient.post<TeacherUnavailability>(`${basePath}/${id}/reject`, payload, { token })
 }
 
 export function withdrawTeacherUnavailability(
@@ -71,9 +71,9 @@ export function withdrawTeacherUnavailability(
   expectedVersion: number,
   token?: string,
 ): Promise<TeacherUnavailability> {
-  return apiClient.put<TeacherUnavailability>(
+  return apiClient.post<TeacherUnavailability>(
     `${basePath}/${id}/withdraw`,
-    { expectedVersion },
+    undefined,
     { token, query: { expectedVersion } },
   )
 }

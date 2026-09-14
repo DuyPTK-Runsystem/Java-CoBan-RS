@@ -1,14 +1,16 @@
 export type SessionType = 'MORNING' | 'AFTERNOON'
 
-export type TimetableRevisionStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
+export type TimetableRevisionStatus = 'DRAFT' | 'VALIDATED' | 'PUBLISHED' | 'ARCHIVED'
 
 export type TimetableIssueSeverity = 'BLOCKING' | 'WARNING'
 
 export interface PaginatedMeta {
   page: number
-  size: number
+  size?: number
+  pageSize?: number
   totalPages: number
-  totalElements: number
+  totalElements?: number
+  totalItems?: number
 }
 
 export interface PaginatedResult<T> {
@@ -25,7 +27,7 @@ export interface TimetableCapabilities {
 
 export interface TimetablePeriod {
   id: number
-  semesterId: number
+  semesterId?: number
   dayOfWeek: number
   session: SessionType
   periodIndex: number
@@ -65,7 +67,8 @@ export interface TimetableDetail {
 }
 
 export interface TimetableEntry {
-  id: number
+  id?: number
+  entryId?: number
   revisionId: number
   assignmentId: number
   periodId: number
@@ -90,6 +93,7 @@ export interface TimetableIssue {
   severity: TimetableIssueSeverity
   message: string
   entryId?: number | null
+  entryIds?: number[] | null
   classId?: number | null
   className?: string | null
   teacherId?: number | null
@@ -144,17 +148,59 @@ export interface TeacherLoadPolicy {
   nursingChildReduction: number
   active: boolean
   version: number
+  rules: TeacherLoadRule[]
+}
+
+export type TeacherLoadRuleTriggerType = 'HOMEROOM' | 'ELIGIBILITY'
+
+export interface TeacherLoadRule {
+  id?: number
+  policyId?: number
+  ruleCode: string
+  ruleName: string
+  triggerType: TeacherLoadRuleTriggerType
+  reductionPeriods: number
+  source: string
+  active: boolean
+}
+
+export interface CreateTeacherLoadPolicyPayload {
+  policyName: string
+  sourceDocument: string
+  effectiveFrom: string
+  effectiveTo?: string | null
+  standardPeriodsHighSchool: number
+  homeroomReduction: number
+  nursingChildReduction: number
+  rules?: TeacherLoadRule[]
 }
 
 export interface TeacherLoadEligibility {
   id: number
   teacherId: number
   teacherName: string
-  conditionType: string
+  ruleCode: string
   validFrom: string
   validTo: string
-  evidenceInfo?: string | null
+  evidenceReference: string
+  status?: string
   version: number
+}
+
+export interface CreateTeacherLoadEligibilityPayload {
+  teacherId: number
+  ruleCode: string
+  validFrom: string
+  validTo: string
+  evidenceReference: string
+}
+
+export interface UpdateTeacherLoadEligibilityPayload {
+  expectedVersion: number
+  validFrom?: string
+  validTo?: string
+  evidenceReference?: string
+  status?: 'ACTIVE' | 'REVOKED'
 }
 
 export interface CreateTimetablePayload {
@@ -166,7 +212,7 @@ export interface CreateTimetablePayload {
 }
 
 export interface ReqEntryItem {
-  id?: number | null
+  entryId?: number | null
   assignmentId: number
   periodId: number
   functionalRoomId?: number | null
@@ -189,4 +235,3 @@ export interface CreateRevisionPayload {
   expectedVersion: number
   effectiveFrom: string
 }
-

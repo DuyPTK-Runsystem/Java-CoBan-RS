@@ -181,6 +181,7 @@ function handleSave() {
 
 <template>
   <Dialog
+    class="timetable-dialog"
     :visible="visible"
     :header="isEdit ? 'Chỉnh sửa đăng ký lịch bận' : 'Đăng ký lịch bận dạy'"
     modal

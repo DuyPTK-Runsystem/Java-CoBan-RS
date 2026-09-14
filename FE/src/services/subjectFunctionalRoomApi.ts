@@ -4,7 +4,7 @@ import type {
   UpdateSubjectFunctionalRoomsPayload,
 } from '@/types/functionalRoom'
 
-const subjectsPath = '/api/v2/subjects'
+const subjectsPath = '/api/v3/subjects'
 
 export function getRoomsForSubject(
   subjectId: number,

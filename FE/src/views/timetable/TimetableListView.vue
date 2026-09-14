@@ -90,7 +90,7 @@ async function loadTimetables() {
   try {
     const res = await listTimetables(selectedSemesterId.value, page.value, size.value, token)
     timetables.value = res.result
-    totalElements.value = res.meta.totalElements
+    totalElements.value = res.meta.totalItems ?? res.meta.totalElements ?? 0
     loadingState.value = res.result.length > 0 ? 'idle' : 'empty'
   } catch (err) {
     loadingState.value = 'error'
@@ -149,7 +149,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6 max-w-7xl mx-auto flex flex-col gap-6">
+  <div class="timetable-page p-6 max-w-7xl mx-auto flex flex-col gap-6">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Quản lý Thời khóa biểu</h1>
@@ -229,6 +229,7 @@ onMounted(() => {
     <!-- Create Dialog -->
     <Dialog
       v-model:visible="isCreateDialogVisible"
+      class="timetable-dialog"
       header="Khởi tạo Thời khóa biểu mới"
       modal
       :style="{ width: '480px' }"
@@ -262,4 +263,3 @@ onMounted(() => {
     </Dialog>
   </div>
 </template>
-

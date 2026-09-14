@@ -78,15 +78,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col gap-4">
-    <div class="flex justify-between items-center">
-      <div>
-        <h4 class="font-semibold text-gray-900 text-sm">Phòng chức năng sử dụng cho môn học</h4>
-        <p class="text-xs text-gray-500">
+  <section class="subject-functional-room-panel" aria-labelledby="subject-functional-room-title">
+    <div class="subject-functional-room-header">
+      <div class="subject-functional-room-copy">
+        <h4 id="subject-functional-room-title">Phòng chức năng sử dụng cho môn học</h4>
+        <p>
           Chỉ các môn học có phòng chức năng được chọn mới yêu cầu phòng khi xếp thời khóa biểu.
         </p>
       </div>
       <Button
+        class="subject-functional-room-save"
         label="Lưu cấu hình"
         size="small"
         :loading="saving"
@@ -95,22 +96,24 @@ onMounted(() => {
       />
     </div>
 
-    <FormAlert v-if="error" :message="error" type="error" />
-    <FormAlert v-if="successMessage" :message="successMessage" type="success" />
+    <div class="subject-functional-room-feedback" aria-live="polite">
+      <FormAlert v-if="error" :message="error" tone="error" />
+      <FormAlert v-if="successMessage" :message="successMessage" tone="success" />
+    </div>
 
-    <div class="flex flex-col gap-1">
-      <label class="font-medium text-xs text-gray-700">Chọn phòng chức năng áp dụng:</label>
+    <div class="subject-functional-room-field">
+      <label for="subject-functional-room-select">Chọn phòng chức năng áp dụng:</label>
       <MultiSelect
         v-model="selectedRoomIds"
+        input-id="subject-functional-room-select"
         :options="availableRooms"
         option-label="name"
         option-value="id"
         placeholder="Chọn các phòng bộ môn phù hợp..."
         :loading="loading"
         display="chip"
-        class="w-full"
+        class="subject-functional-room-select"
       />
     </div>
-  </div>
+  </section>
 </template>
-

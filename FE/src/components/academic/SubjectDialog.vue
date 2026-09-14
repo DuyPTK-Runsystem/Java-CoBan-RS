@@ -36,7 +36,7 @@ function save(): void { if (validate()) emit('save', { ...values, code: values.c
         <div class="field-group"><label for="subject-scope">Phạm vi áp dụng</label><Select id="subject-scope" v-model="values.applicationScope" :options="scopeOptions" option-label="label" option-value="value" fluid /></div>
         <div class="field-group wide"><label for="subject-status">Trạng thái</label><Select id="subject-status" v-model="values.status" :options="statusOptions" option-label="label" option-value="value" fluid /></div>
       </div>
-      <div v-if="props.mode === 'edit' && props.initialValue?.id" class="mt-4 pt-4 border-t border-gray-200">
+      <div v-if="props.mode === 'edit' && props.initialValue?.id" class="subject-functional-room-section">
         <SubjectFunctionalRoomPanel :subject-id="props.initialValue.id" :subject-name="props.initialValue.name" />
       </div>
       <div class="form-actions"><Button type="button" label="Hủy" icon="pi pi-times" severity="secondary" outlined :disabled="props.saving" @click="close" /><Button type="submit" :label="props.mode === 'edit' ? 'Lưu thay đổi' : 'Tạo môn'" icon="pi pi-check" :loading="props.saving" /></div>

@@ -91,7 +91,7 @@ function handleCancel() {
     :style="{ width: '480px' }"
     @update:visible="emit('update:visible', $event)"
   >
-    <div class="flex flex-col gap-4">
+    <div class="functional-room-dialog flex flex-col gap-4">
       <FormAlert v-if="errorMessage" :message="errorMessage" type="error" />
 
       <div class="flex flex-col gap-1">
@@ -141,4 +141,3 @@ function handleCancel() {
     </template>
   </Dialog>
 </template>
-
