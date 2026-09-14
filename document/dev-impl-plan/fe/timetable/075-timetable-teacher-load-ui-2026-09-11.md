@@ -3,10 +3,14 @@
 ## 1. Trạng thái và nguồn
 
 - Version **v3**, ngày **2026-09-11**.
-- **DRAFT — chờ duyệt; chưa triển khai FE/BE**.
+- **COMPLETED — người dùng xác nhận hoàn tất Plan 075 ngày 2026-09-14**.
 - Contract, quyết định D01–D10, test nghiệp vụ: [Plan BE](../../be/timetable/075-timetable-teacher-load-2026-09-11.md).
 - Review: [README wireframe](../../../wireframes/fe/timetable/075-timetable-teacher-load/README.md), [mở HTML](../../../wireframes/fe/timetable/075-timetable-teacher-load/index.html).
 - Requirement: FR-V3-TT-001..004, BR-V3-TT-001..002. HTML dùng dữ liệu minh họa, không chứng minh thuật toán hoặc quyền production.
+
+### Closure note — 2026-09-14
+
+Các lát FE đã triển khai và được ghi trong Dev Notes 075.1–075.13, gồm workspace TKB, thêm nhiều tiết, lọc theo lớp/giáo viên/phòng, lịch bận và responsive conflict panel. FE gates đã chạy theo từng amendment; browser/live vẫn NOT RUN nếu Dev Note không có bằng chứng.
 
 ## 2. Hiện trạng và phạm vi
 
@@ -116,4 +120,4 @@ Sửa `FE/src/router/index.ts`, route specs và `FE/src/views/shell/Authenticate
 - Validation trong FE: `npm run lint`, `npm run test`, `npm run test:coverage`, `npm run build`, `npm run build-storybook`; `git diff --check` từ root.
 - Browser/live: ADMIN/giáo vụ tạo lịch thật, thêm tiết trùng GV/lớp/phòng, lưu nháp rồi sửa, kiểm tra policy và publish; reload; hai tab gây 409; revise giữ lịch cũ theo ngày; teacher xem lịch và đăng ký lịch bận mình, không sửa/duyệt người khác; Giáo vụ/Admin duyệt hoặc từ chối; pending không chặn, approved chặn; ADMIN/ACADEMIC_OFFICE cùng CRUD phòng/mapping/settings; Student không có mục mới. Không lấy jsdom/HTML làm evidence live.
 
-FE dựng fixture sau 075.0 được duyệt, song song BE 075.1–075.3; phải tích hợp API thật và production route trong cùng plan. Acceptance không đạt nếu chỉ có review component. Hiện implementation/quality/browser-live đều **NOT RUN**; wireframe review **PENDING**. Dev Note phải cập nhật riêng từng gate, không gộp thành PASS.
+FE dựng fixture sau 075.0 được duyệt, song song BE 075.1–075.3; phải tích hợp API thật và production route trong cùng plan. Acceptance không đạt nếu chỉ có review component. Trạng thái implementation và quality hiện được ghi theo Dev Notes 075.1–075.13; browser/live vẫn **NOT RUN** nếu chưa có bằng chứng. Dev Note cập nhật riêng từng gate, không gộp thành PASS.

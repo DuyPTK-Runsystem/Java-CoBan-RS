@@ -29,7 +29,7 @@ hoàn thành. BE phải cung cấp endpoint thật và contract test trong cùng
 | 079 | lesson log | lesson-log lifecycle, timetable linkage, authorization/audit; FE teacher entry, class history, review states | orphan prevention and edit policy |
 | 080 | cross-feature integration & release hardening | contract/integration fixtures, observability, migration/backfill readiness; FE browser walkthrough, accessibility/responsive | role matrix, mutation reload/re-query, release evidence |
 
-Plan 075: `DRAFT — AWAITING APPROVAL` ngày `2026-09-11`: đã soạn [plan BE](../be/timetable/075-timetable-teacher-load-2026-09-11.md), [plan FE](../fe/timetable/075-timetable-teacher-load-ui-2026-09-11.md) và [wireframe](../../wireframes/fe/timetable/075-timetable-teacher-load/README.md). D02 đã chốt ADMIN = ACADEMIC_OFFICE và teacher đăng ký lịch bận; D04 chốt 2 buổi × 4 tiết, phòng chức năng/gán môn; D09 chốt cần duyệt trước. Giờ/ngày, xử lý published, cardinality mapping và các quyết định khác còn mở; chưa triển khai code hoặc xác nhận policy active.
+Plan 075: `COMPLETED` ngày `2026-09-14` theo xác nhận của người dùng: implementation BE/FE và các amendment đã được ghi trong Dev Notes. FE quality gates đã có kết quả theo từng note; browser/live, migration và full backend gate vẫn được báo riêng là NOT RUN hoặc baseline blocker khi chưa có bằng chứng PASS.
 
 Plan 077: `TEMPORARILY POSTPONED` theo quyết định người dùng ngày `2026-09-10`; chưa triển
 khai code/test và không được tính là completed trong v3 delivery.

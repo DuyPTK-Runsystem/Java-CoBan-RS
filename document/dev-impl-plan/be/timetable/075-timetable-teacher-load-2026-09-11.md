@@ -3,7 +3,7 @@
 ## 1. Trạng thái, mục tiêu và nguồn
 
 - Application-document version: **v3**; ngày lập: **2026-09-11**.
-- Status: **DRAFT — chờ duyệt contract, wireframe và quyết định mở; chưa triển khai**.
+- Status: **COMPLETED — người dùng xác nhận hoàn tất Plan 075 ngày 2026-09-14**.
 - Người dùng yêu cầu viết plan + wireframe và xác nhận v3. Đây là authorization soạn tài liệu, chưa phải approval triển khai.
 - Đồng hành: [Plan FE](../../fe/timetable/075-timetable-teacher-load-ui-2026-09-11.md), [wireframe](../../../wireframes/fe/timetable/075-timetable-teacher-load/README.md).
 - Đọc theo thứ tự: [ApplicationContext](../../../application-doc/v3/ApplicationContext.md), [RequirementBaseline](../../../application-doc/v3/RequirementBaseline.md), [CR-V3-001](../../../application-doc/v3/change-request/CR-V3-001-academic-operations-and-targeted-communication.md), [Module 02](../../../application-doc/v3/modules/02-TimetableAndTeachingLoad.md), [data boundary](../../../application-doc/v3/data-model/README.md), [FE API boundary](../../../application-doc/v3/frontend-api/README.md), [Master Plan](../../summary/MASTER_PLAN_V3-2026-09-09.md).
@@ -194,4 +194,7 @@ Chạy trong `BE/BaiTap-RS`: `./gradlew test jacocoTestReport checkstyleMain che
 
 Rủi ro chính: lịch sử bị ghi đè (revision bất biến), publish race (scope lock + revalidate), lộ điều kiện miễn giảm (authorization/projection), lịch lớn (query theo tuần + index, kiểm tra toàn scope ở publish), policy thiếu nguồn (không active), assignment thay đổi làm lịch vô hiệu (D08). Không claim xử lý xong các rủi ro khi chỉ có fixture.
 
-Acceptance: 2 buổi × 4 tiết/ngày; teacher đăng ký lịch bận self qua phê duyệt ADMIN/ACADEMIC_OFFICE theo D09; ADMIN/ACADEMIC_OFFICE ngang quyền; quản lý phòng chức năng/gán môn và kiểm tra trùng phòng; tạo/sửa/tải lại nháp thật; đủ bốn bộ lọc; lưu conflict nhưng không công bố được; 19/15/16/12 được tính từ policy; metadata chính thức được lưu; direct API đúng quyền; version/idempotency/concurrent publish được kiểm thử; revision giữ lịch sử; FE route thật tích hợp BE; browser thao tác và reload có evidence. Mọi gate implementation hiện **NOT RUN**. Plan chỉ được đánh dấu completed khi acceptance thực sự đạt, không chỉ có wireframe/Storybook.
+Acceptance baseline: 2 buổi × 4 tiết/ngày; teacher đăng ký lịch bận self qua phê duyệt ADMIN/ACADEMIC_OFFICE theo D09; ADMIN/ACADEMIC_OFFICE ngang quyền; quản lý phòng chức năng/gán môn và kiểm tra trùng phòng; tạo/sửa/tải lại nháp thật; đủ bốn bộ lọc; lưu conflict nhưng không công bố được; 19/15/16/12 được tính từ policy; metadata chính thức được lưu; direct API đúng quyền; version/idempotency/concurrent publish được kiểm thử; revision giữ lịch sử; FE route thật tích hợp BE. Các kết quả và giới hạn thực tế được ghi trong Dev Notes 075.1–075.13; browser/live, migration và full backend gate không có bằng chứng PASS và vẫn giữ NOT RUN hoặc baseline blocker. Plan đã được người dùng xác nhận COMPLETED ngày 2026-09-14.
+### Closure note — 2026-09-14
+
+Plan 075 được xác nhận hoàn tất theo phê duyệt của người dùng. BE/FE implementation và các amendment đã được ghi trong Dev Notes 075.1–075.13. FE lint/test/build/Storybook đã có các kết quả PASS tương ứng; browser/live, migration và full backend quality gate được giữ trạng thái NOT RUN hoặc baseline blocker theo Dev Notes, không được suy diễn thành PASS.

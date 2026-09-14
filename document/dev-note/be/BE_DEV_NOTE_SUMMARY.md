@@ -1,6 +1,10 @@
 # BE Dev Note Summary
 
+| 075.11 | timetable | [Baseline định mức giáo viên mặc định](timetable/075.11-baseline-teacher-load-2026-09-14.md) | Baseline 19 tiết + giảm GVCN 4 tiết không phụ thuộc policy bổ sung; focused test/PMD PASS; full test/build FAIL do baseline OOM và pmdTest | 2026-09-14 |
+
 |   No. | Module             | Note                                                                                                                                                            | Status                                                                           | Updated    |
+| 075.1 | timetable          | [Khắc phục lỗi truy cập Phòng chức năng, TKB & Lịch bận GV (Office/Teacher)](timetable/075.1-timetable-office-access-and-ui-fix-2026-09-14.md)                   | Completed (BE + FE); Dual-mapping, DTO/type sync; BE tests/PMD PASS; FE test/build PASS | 2026-09-14 |
+| 075.9 | timetable          | [Mở rộng rule miễn giảm định mức](timetable/075.9-teacher-load-rule-extensibility-2026-09-14.md) | Rule table/seed/evaluator/API implemented; focused test, PMD main PASS; full test has baseline InvalidJwt failure; browser/live NOT RUN | 2026-09-14 |
 |   075 | timetable          | [Thời khóa biểu & định mức tiết dạy](timetable/075-timetable-teacher-load-2026-09-11.md)                                                                        | Completed (BE + FE); BE unit tests (39/39), PMD PASS; FE lint, test, build PASS; live/migration NOT RUN | 2026-09-11 |
 |   001 | user-auth          | [Base Backend Theo Boilerplate, Rút Gọn User/Auth](user-auth/001-base-boilerplate-user-auth-2026-08-17.md)                                                      | Completed                                                                        | 2026-08-17 |
 |   002 | workflow-skill     | [Dev Note Skill and Workflow Enforcement](workflow-skill/002-dev-note-skill-workflow-2026-08-17.md)                                                             | Completed                                                                        | 2026-08-17 |
