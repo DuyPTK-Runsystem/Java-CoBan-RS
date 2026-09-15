@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { LessonLogEntry, CalendarDay, SessionType } from '@/types/lessonLog'
+import type { ClassWeekItem, CalendarDay, SessionType } from '@/types/lessonLog'
 import LessonLogStatusBadge from './LessonLogStatusBadge.vue'
-const props = defineProps<{ days: CalendarDay[]; entries: LessonLogEntry[] }>()
-const emit = defineEmits<{ select: [entry: LessonLogEntry] }>()
+const props = defineProps<{ days: CalendarDay[]; entries: ClassWeekItem[] }>()
+const emit = defineEmits<{ select: [entry: ClassWeekItem] }>()
 const sessions: SessionType[] = ['MORNING', 'AFTERNOON']
 function find(day: CalendarDay, session: SessionType, period: number) { return props.entries.find((e) => e.lessonDate === day.date && e.session === session && e.periodIndex === period) }
 </script>
@@ -13,7 +13,7 @@ function find(day: CalendarDay, session: SessionType, period: number) { return p
       <template v-for="period in [1, 2, 3, 4]" :key="`${session}-${period}`">
         <div class="matrix-cell matrix-label">{{ session === 'MORNING' ? 'Sáng' : 'Chiều' }} · tiết {{ period }}</div>
         <div v-for="day in props.days" :key="`${day.date}-${session}-${period}`" class="matrix-cell matrix-slot" :class="{ 'matrix-off': day.kind !== 'SCHOOL_DAY' }">
-          <button v-if="find(day, session, period)" type="button" class="matrix-entry" @click="emit('select', find(day, session, period)!)"><strong>{{ find(day, session, period)?.subjectName }}</strong><LessonLogStatusBadge :status="find(day, session, period)!.status" /></button>
+          <button v-if="find(day, session, period)" type="button" class="matrix-entry" :disabled="find(day, session, period)!.status === 'UNLOGGED'" @click="emit('select', find(day, session, period)!)"><strong>{{ find(day, session, period)?.subjectName || 'Tiết đã phân công' }}</strong><LessonLogStatusBadge :status="find(day, session, period)!.status" /></button>
           <span v-else class="matrix-empty">{{ day.kind === 'SCHOOL_DAY' ? 'Chưa ghi' : day.kind === 'HOLIDAY' ? 'Nghỉ' : 'Ngoài kỳ' }}</span>
         </div>
       </template>

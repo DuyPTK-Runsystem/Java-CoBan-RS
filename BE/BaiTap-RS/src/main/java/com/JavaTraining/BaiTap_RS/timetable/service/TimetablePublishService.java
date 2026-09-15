@@ -59,7 +59,8 @@ public class TimetablePublishService {
 
         TimetableRevision revision = revisionRepository.findById(revisionId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy bản thời khóa biểu"));
-        TimetableHead head = headRepository.findById(revision.getTimetableId())
+        TimetableHead head = headRepository
+                .findByIdAndSemesterIdForUpdate(revision.getTimetableId(), revision.getSemesterId())
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy đầu thời khóa biểu"));
 
         validateVersions(revision, head, req);
@@ -135,6 +136,12 @@ public class TimetablePublishService {
         final LocalDate effectiveFrom = revision.getEffectiveFrom();
         revisionRepository.findById(head.getCurrentRevisionId()).ifPresent(prevRev -> {
             if (prevRev.getStatus() == TimetableRevisionStatus.PUBLISHED) {
+                if (lessonLogEntryRepository != null && effectiveFrom != null
+                        && lessonLogEntryRepository.existsByTimetableRevisionIdAndLessonDateGreaterThanEqual(
+                                prevRev.getId(), effectiveFrom)) {
+                    throw new AppException(HttpStatus.CONFLICT,
+                            "Không thể thay đổi mốc hiệu lực: revision đã có sổ đầu bài từ ngày này trở đi");
+                }
                 prevRev.setStatus(TimetableRevisionStatus.ARCHIVED);
                 if (effectiveFrom != null) {
                     prevRev.setEffectiveTo(effectiveFrom.minusDays(1));

@@ -14,6 +14,8 @@ import com.JavaTraining.BaiTap_RS.assignment.repository.HomeroomAssignmentReposi
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
 import com.JavaTraining.BaiTap_RS.teacher.domain.entity.Teacher;
+import com.JavaTraining.BaiTap_RS.lessonlog.domain.entity.WeeklyReviewStatus;
+import com.JavaTraining.BaiTap_RS.lessonlog.repository.LessonLogWeeklyReviewRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,14 +28,25 @@ public class HomeroomAssignmentService {
     private final HomeroomAssignmentRepository homeroomRepository;
     private final HomeroomAssignmentGuard guard;
     private final AssignmentAuditService auditService;
+    private final LessonLogWeeklyReviewRepository weeklyReviewRepository;
 
     public HomeroomAssignmentService(
             HomeroomAssignmentRepository homeroomRepository,
             HomeroomAssignmentGuard guard,
             AssignmentAuditService auditService) {
+        this(homeroomRepository, guard, auditService, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public HomeroomAssignmentService(
+            HomeroomAssignmentRepository homeroomRepository,
+            HomeroomAssignmentGuard guard,
+            AssignmentAuditService auditService,
+            LessonLogWeeklyReviewRepository weeklyReviewRepository) {
         this.homeroomRepository = homeroomRepository;
         this.guard = guard;
         this.auditService = auditService;
+        this.weeklyReviewRepository = weeklyReviewRepository;
     }
 
     @Transactional
@@ -60,6 +73,7 @@ public class HomeroomAssignmentService {
                 AssignmentStatus.ACTIVE,
                 AuditContext.currentUserId()));
         auditService.writeHomeroomAudit("HOMEROOM_ASSIGNMENT_CREATED", null, assignment);
+        invalidateSignedWeeks(classId, assignment.getValidFrom(), assignment.getValidTo());
         return toResponse(assignment);
     }
 
@@ -91,6 +105,7 @@ public class HomeroomAssignmentService {
                 AssignmentStatus.ACTIVE,
                 AuditContext.currentUserId()));
         auditService.writeHomeroomAudit("HOMEROOM_ASSIGNMENT_REPLACED", current, replacement);
+        invalidateSignedWeeks(schoolClass.getId(), current.getValidFrom(), replacement.getValidTo());
         return toResponse(replacement);
     }
 
@@ -109,6 +124,7 @@ public class HomeroomAssignmentService {
         assignment.setStatus(AssignmentStatus.ENDED);
         assignment.setValidTo(request.validTo());
         auditService.writeHomeroomAudit("HOMEROOM_ASSIGNMENT_ENDED", assignment, assignment);
+        invalidateSignedWeeks(assignment.getClassId(), assignment.getValidFrom(), assignment.getValidTo());
         return toResponse(assignment);
     }
 
@@ -144,6 +160,21 @@ public class HomeroomAssignmentService {
                 assignment.getValidTo(),
                 assignment.getStatus(),
                 assignment.getAssignedBy());
+    }
+
+    private void invalidateSignedWeeks(Long classId, LocalDate from, LocalDate to) {
+        if (weeklyReviewRepository == null) {
+            return;
+        }
+        LocalDate end = endDate(to);
+        weeklyReviewRepository.findByClassId(classId).stream()
+                .filter(review -> review.getStatus() == WeeklyReviewStatus.SIGNED)
+                .filter(review -> !review.getWeekStart().plusDays(6).isBefore(from)
+                                && !review.getWeekStart().isAfter(end))
+                .forEach(review -> {
+                    review.setStatus(WeeklyReviewStatus.STALE);
+                    weeklyReviewRepository.save(review);
+                });
     }
 
 }

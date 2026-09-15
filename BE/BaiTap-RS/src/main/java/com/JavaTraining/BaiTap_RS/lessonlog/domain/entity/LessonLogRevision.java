@@ -18,30 +18,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "lesson_log_revision")
 public class LessonLogRevision {
 
-    public LessonLogRevision(Long entryId, String action, Long actorId, String reason,
-            String beforeStateJson, String afterStateJson) {
-        this.entryId = entryId;
-        this.action = action;
-        this.actorId = actorId;
-        this.reason = reason;
-        this.beforeStateJson = beforeStateJson;
-        this.afterStateJson = afterStateJson;
-        this.createdAt = LocalDateTime.now();
-    }
-
-    public LessonLogRevision(Long entryId, Long weeklyReviewId, Long policyId, String action,
-            Long actorId, String reason, String beforeStateJson, String afterStateJson) {
-        this.entryId = entryId;
-        this.weeklyReviewId = weeklyReviewId;
-        this.policyId = policyId;
-        this.action = action;
-        this.actorId = actorId;
-        this.reason = reason;
-        this.beforeStateJson = beforeStateJson;
-        this.afterStateJson = afterStateJson;
-        this.createdAt = LocalDateTime.now();
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "revision_id")
@@ -75,4 +51,42 @@ public class LessonLogRevision {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    public LessonLogRevision(Long entryId, String action, Long actorId, String reason,
+            String beforeStateJson, String afterStateJson) {
+        this.entryId = entryId;
+        this.action = action;
+        this.actorId = actorId;
+        this.reason = reason;
+        this.beforeStateJson = beforeStateJson;
+        this.afterStateJson = afterStateJson;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public LessonLogRevision(Long entryId, Long weeklyReviewId, Long policyId, String action,
+            Long actorId, String reason, String beforeStateJson, String afterStateJson) {
+        this.entryId = entryId;
+        this.weeklyReviewId = weeklyReviewId;
+        this.policyId = policyId;
+        this.action = action;
+        this.actorId = actorId;
+        this.reason = reason;
+        this.beforeStateJson = beforeStateJson;
+        this.afterStateJson = afterStateJson;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    // JPA field access requires mutable fields; protected setters keep the audit
+    // record writeable only to the persistence layer and entity package.
+    protected void setEntryId(Long entryId) { this.entryId = entryId; }
+    protected void setWeeklyReviewId(Long weeklyReviewId) { this.weeklyReviewId = weeklyReviewId; }
+    protected void setPolicyId(Long policyId) { this.policyId = policyId; }
+    protected void setAction(String action) { this.action = action; }
+    protected void setActorId(Long actorId) { this.actorId = actorId; }
+    protected void setReason(String reason) { this.reason = reason; }
+    protected void setBeforeStateJson(String beforeStateJson) { this.beforeStateJson = beforeStateJson; }
+    protected void setAfterStateJson(String afterStateJson) { this.afterStateJson = afterStateJson; }
+    protected void setCorrelationId(String correlationId) { this.correlationId = correlationId; }
+    protected void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
 }

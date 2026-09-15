@@ -1,6 +1,7 @@
 # BE Dev Note Summary
 
 | 075.11 | timetable | [Baseline định mức giáo viên mặc định](timetable/075.11-baseline-teacher-load-2026-09-14.md) | Baseline 19 tiết + giảm GVCN 4 tiết không phụ thuộc policy bổ sung; focused test/PMD PASS; full test/build FAIL do baseline OOM và pmdTest | 2026-09-14 |
+| 079 | lesson-log | [Implementation sổ đầu bài](lesson-log/079-lesson-log-backend-2026-09-14.md) | V24 schema, UNLOGGED occurrence, historical roster/TKB, lifecycle/audit/weekly snapshot, timetable guard/head lock; compile + focused 21/21 PASS (LessonLog 12, publish 5, calendar 2, roster 2); Checkstyle PASS với 987 warning severity warning; full test FAIL (462 tests, 8 OOM Spring context); pmdMain FAIL (64); build phase cuối NOT RUN, lần trước FAIL do PMD/full test; MySQL/Flyway NOT RUN | 2026-09-15 |
 
 |   No. | Module             | Note                                                                                                                                                            | Status                                                                           | Updated    |
 | 075.1 | timetable          | [Khắc phục lỗi truy cập Phòng chức năng, TKB & Lịch bận GV (Office/Teacher)](timetable/075.1-timetable-office-access-and-ui-fix-2026-09-14.md)                   | Completed (BE + FE); Dual-mapping, DTO/type sync; BE tests/PMD PASS; FE test/build PASS | 2026-09-14 |

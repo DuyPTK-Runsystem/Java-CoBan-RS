@@ -2,6 +2,7 @@ package com.JavaTraining.BaiTap_RS.timetable.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDate;
 
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableRevision;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableRevisionStatus;
@@ -25,4 +26,17 @@ public interface TimetableRevisionRepository extends JpaRepository<TimetableRevi
     Page<TimetableRevision> findBySemesterId(Long semesterId, Pageable pageable);
 
     List<TimetableRevision> findBySemesterIdAndStatus(Long semesterId, TimetableRevisionStatus status);
+
+    @Query("""
+            select revision from TimetableRevision revision
+            where revision.semesterId = :semesterId
+              and revision.status in :statuses
+              and revision.effectiveFrom <= :date
+              and (revision.effectiveTo is null or revision.effectiveTo >= :date)
+            order by revision.effectiveFrom desc, revision.revisionNumber desc
+            """)
+    List<TimetableRevision> findEffectiveBySemesterAndDate(
+            @Param("semesterId") Long semesterId,
+            @Param("date") LocalDate date,
+            @Param("statuses") List<TimetableRevisionStatus> statuses);
 }

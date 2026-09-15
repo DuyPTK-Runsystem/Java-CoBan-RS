@@ -1,4 +1,4 @@
-export type LessonLogStatus = 'DRAFT' | 'SUBMITTED' | 'REVIEWED' | 'AMENDED'
+export type LessonLogStatus = 'DRAFT' | 'SUBMITTED' | 'REVIEWED' | 'AMENDED' | 'UNLOGGED'
 export type CompletionStatus = 'ON_SCHEDULE' | 'BEHIND_SCHEDULE' | 'AHEAD_OF_SCHEDULE'
 export type LessonGrade = 'A' | 'B' | 'C' | 'D'
 export type SessionType = 'MORNING' | 'AFTERNOON'
@@ -10,21 +10,21 @@ export interface LessonLogPolicy { policyId: number; policyVersion: number; vers
 export interface LessonLogEntry {
   entryId: number
   timetableEntryId: number
-  timetableRevisionId: number
-  assignmentId: number
-  semesterId?: number
+  timetableRevisionId: number | null
+  assignmentId: number | null
+  semesterId: number | null
   lessonDate: string
   classId: number
-  subjectId: number
-  assignedTeacherId: number
-  className: string
-  subjectName: string
-  teacherName: string
+  subjectId: number | null
+  assignedTeacherId: number | null
+  className: string | null
+  subjectName: string | null
+  teacherName: string | null
   functionalRoomName?: string | null
   session: SessionType
   periodIndex: number
-  lessonEndsAt: string
-  editWindowExpiresAt: string
+  lessonEndsAt: string | null
+  editWindowExpiresAt: string | null
   title: string | null
   content: string | null
   completionStatus: CompletionStatus | null
@@ -36,28 +36,37 @@ export interface LessonLogEntry {
   grade: LessonGrade | null
   status: LessonLogStatus
   version: number
-  policyId: number
+  policyId: number | null
   rubric: RubricItem[]
-  rosterCountSnapshot: number
+  rosterCountSnapshot: number | null
   canTeacherEdit: boolean
   canSubmit: boolean
   canReview: boolean
   canAmend: boolean
-  canLateRecord?: boolean
+  canLateRecord: boolean
   blockedReason: string | null
-  submittedAt?: string
-  submittedBy?: string
-  reviewedAt?: string
-  reviewedBy?: string
-  reviewComment?: string
+  submittedAt?: string | null
+  submittedBy?: number | null
+  reviewedAt?: string | null
+  reviewedBy?: number | null
+  reviewComment?: string | null
 }
-export interface ScheduleItem extends Omit<LessonLogEntry, 'entryId' | 'status' | 'version' | 'canTeacherEdit' | 'canSubmit' | 'canReview' | 'canAmend' | 'blockedReason'> { entry: LessonLogEntry | null; canCreate: boolean; canLateRecord: boolean; blockedReason: string | null }
+export interface ScheduleItem {
+  entryId: number; timetableEntryId: number; timetableRevisionId: number | null; assignmentId: number | null
+  classId: number; subjectId: number | null; assignedTeacherId: number | null; semesterId: number
+  className: string | null; subjectName: string | null; teacherName: string | null; functionalRoomName: string | null
+  lessonDate: string; session: SessionType; periodIndex: number; lessonEndsAt: string
+  editWindowExpiresAt: string | null; status: LessonLogStatus; version: number; policyId: number | null
+  rosterCountSnapshot: number | null; canCreate: boolean; canLateRecord: boolean; blockedReason: string | null
+  entry: LessonLogEntry | null
+}
 export interface TeacherDailyScheduleResponse { date: string; timezone: string; items: ScheduleItem[] }
 export interface CalendarDay { date: string; label: string; kind: 'SCHOOL_DAY' | 'HOLIDAY' | 'OUTSIDE_SEMESTER' }
 export interface WeeklySummary { scheduled: number; unlogged: number; draft: number; submitted: number; reviewed: number; amended: number; gradeCounts: Record<LessonGrade, number> }
 export interface ExpectedEntry { entryId: number; version: number }
 export interface WeeklyReview { reviewId: number | null; version: number; status: WeeklyReviewStatus; comment: string | null; grade: LessonGrade | null; signedAt: string | null; signedBy: string | null; signedSnapshot: unknown | null; expectedEntries: ExpectedEntry[]; canSignWeek: boolean; blockedReasons: string[]; requiresReason?: boolean }
-export interface ClassWeeklyLessonLogResponse { classId: number; className: string; semesterId: number; weekStart: string; weekEnd: string; calendarDays: CalendarDay[]; items: LessonLogEntry[]; summary: WeeklySummary; weeklyReview: WeeklyReview }
+export type ClassWeekItem = LessonLogEntry
+export interface ClassWeeklyLessonLogResponse { classId: number; className?: string | null; semesterId: number; weekStart: string; weekEnd: string; calendarDays: CalendarDay[]; items: ClassWeekItem[]; summary: WeeklySummary; weeklyReview: WeeklyReview | null }
 export interface LessonLogRevision { revisionId: number; action: string; actorName: string; createdAt: string; reason: string | null; beforeState: unknown; afterState: unknown }
 export interface LessonLogRequestFields { title?: string | null; content?: string | null; completionStatus?: CompletionStatus | null; presentCount?: number | null; absentCount?: number | null; absentStudentNotes?: string | null; comments?: string | null; homework?: string | null; grade?: LessonGrade | null }
 export interface LessonLogPolicyPayload { expectedVersion: number; effectiveFrom: string; timezone: string; deadlineMode: DeadlineMode; editWindowHours?: number | null; requireHomeroomReview: boolean; rubric: RubricItem[]; reason: string }

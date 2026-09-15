@@ -1,6 +1,6 @@
 # Dev Note Summary
 
-| 079 | Summary | [Review và sửa Plan / Wireframe Sổ đầu bài](079-lesson-log-plan-wireframe-2026-09-14.md) | Identity lịch sử, deadline, ký lại tuần, policy/audit; D01–D10 design/contract APPROVED; JS + JSDOM 12/12 PASS; links PASS; browser NOT RUN; implementation BE/FE approval PENDING | 2026-09-14 |
+| 079 | BE/FE | [Implementation sổ đầu bài](079-lesson-log-plan-wireframe-2026-09-14.md) ([BE](../be/lesson-log/079-lesson-log-backend-2026-09-14.md), [FE](../fe/lesson-log/079-lesson-log-frontend-2026-09-14.md)) | Implementation slice delivered: occurrence UNLOGGED, historical roster/TKB, lifecycle/audit/weekly snapshot, timetable guards/head lock, FE contract; FE gates PASS (541/541, coverage 85.21%/73.29%/69.23%); BE compile + focused 21/21 PASS (LessonLog 12, publish 5, calendar 2, roster 2); Checkstyle PASS (987 warning severity warning); full test FAIL (462 tests, 8 OOM Spring context); pmdMain FAIL (64); build phase cuối NOT RUN, lần trước FAIL do PMD/full test; MySQL/Flyway/browser/live NOT RUN | 2026-09-15 |
 
 | 075.13 | FE Timetable | [Thêm nhiều tiết học trong một lượt](../fe/timetable/075.13-bulk-timetable-entry-selection-2026-09-14.md) | Dialog chọn nhiều tiết; giữ luồng `+` cũ; batch upserts; lint/test/build/diff check PASS; browser/live NOT RUN | 2026-09-14 |
 

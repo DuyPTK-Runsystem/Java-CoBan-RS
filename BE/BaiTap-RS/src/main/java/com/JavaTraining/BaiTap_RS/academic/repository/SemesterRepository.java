@@ -40,4 +40,7 @@ public interface SemesterRepository extends JpaRepository<Semester, Long> {
     Optional<Semester> findByIdForUpdate(@Param("id") Long id);
 
     List<Semester> findAllByStatusIn(List<SemesterStatus> statuses);
+
+    List<Semester> findByStartDateLessThanEqualAndEndDateGreaterThanEqual(
+            LocalDate date, LocalDate sameDate);
 }

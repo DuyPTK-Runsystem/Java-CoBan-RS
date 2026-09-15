@@ -6,6 +6,9 @@ public interface LessonLogEntryRepository extends JpaRepository<LessonLogEntry,L
  List<LessonLogEntry> findByClassIdAndSemesterIdAndLessonDateBetweenOrderByLessonDateAscPeriodIndexAsc(Long c,Long s,LocalDate from,LocalDate to);
  List<LessonLogEntry> findByAssignedTeacherIdAndLessonDateBetweenOrderByLessonDateAscPeriodIndexAsc(Long t,LocalDate from,LocalDate to);
  boolean existsByTimetableRevisionId(Long revisionId);
+ boolean existsByTimetableRevisionIdAndLessonDateGreaterThanEqual(Long revisionId, LocalDate lessonDate);
  boolean existsBySemesterIdAndLessonDate(Long semesterId, LocalDate lessonDate);
  boolean existsBySemesterIdAndLessonDateBetween(Long semesterId, LocalDate from, LocalDate to);
+ boolean existsBySemesterId(Long semesterId);
+ List<LessonLogEntry> findBySemesterId(Long semesterId);
 }

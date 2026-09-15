@@ -17,6 +17,7 @@ import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableAuditRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableHeadRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetablePublishIntentRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableRevisionRepository;
+import com.JavaTraining.BaiTap_RS.lessonlog.repository.LessonLogEntryRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,13 +50,16 @@ class TimetablePublishServiceTest {
         @Mock
         private TimetableService timetableService;
 
+        @Mock
+        private LessonLogEntryRepository lessonLogEntryRepository;
+
         private TimetablePublishService publishService;
 
         @BeforeEach
         void setUp() {
                 publishService = new TimetablePublishService(
                                 headRepository, revisionRepository, publishIntentRepository,
-                                auditRepository, validationService, timetableService);
+                                auditRepository, validationService, timetableService, lessonLogEntryRepository);
         }
 
         @Test
@@ -100,7 +104,7 @@ class TimetablePublishServiceTest {
                 TimetableHead head = new TimetableHead(1L);
                 ReflectionTestUtils.setField(head, "id", 1L);
                 ReflectionTestUtils.setField(head, "version", 0L);
-                Mockito.when(headRepository.findById(1L)).thenReturn(Optional.of(head));
+                Mockito.when(headRepository.findByIdAndSemesterIdForUpdate(1L, 1L)).thenReturn(Optional.of(head));
 
                 // Validation returns 2 blocking issues
                 ResTimetableReviewDTO review = new ResTimetableReviewDTO(
@@ -127,7 +131,7 @@ class TimetablePublishServiceTest {
                 ReflectionTestUtils.setField(head, "id", 1L);
                 ReflectionTestUtils.setField(head, "version", 0L);
                 head.setCurrentRevisionId(10L);
-                Mockito.when(headRepository.findById(1L)).thenReturn(Optional.of(head));
+                Mockito.when(headRepository.findByIdAndSemesterIdForUpdate(1L, 1L)).thenReturn(Optional.of(head));
 
                 // Previous revision 10 is PUBLISHED
                 TimetableRevision prevRev = new TimetableRevision(1L, 1L, 1,
@@ -158,7 +162,44 @@ class TimetablePublishServiceTest {
                 Assertions.assertEquals(20L, head.getCurrentRevisionId());
 
                 // Publish intent & audit recorded
+                Mockito.verify(headRepository).findByIdAndSemesterIdForUpdate(1L, 1L);
                 Mockito.verify(auditRepository).save(Mockito.any());
                 Mockito.verify(publishIntentRepository).save(Mockito.any());
+        }
+
+        @Test
+        void publish_previousRevisionHasLogsAtNewEffectiveFrom_throwsConflictWithoutClosingIt() {
+                TimetableRevision revision = new TimetableRevision(1L, 1L, 2,
+                                LocalDate.of(2026, 10, 1), LocalDate.of(2026, 12, 31), null);
+                ReflectionTestUtils.setField(revision, "id", 20L);
+                ReflectionTestUtils.setField(revision, "version", 0L);
+                Mockito.when(revisionRepository.findById(20L)).thenReturn(Optional.of(revision));
+
+                TimetableHead head = new TimetableHead(1L);
+                ReflectionTestUtils.setField(head, "id", 1L);
+                ReflectionTestUtils.setField(head, "version", 0L);
+                head.setCurrentRevisionId(10L);
+                Mockito.when(headRepository.findByIdAndSemesterIdForUpdate(1L, 1L)).thenReturn(Optional.of(head));
+
+                TimetableRevision previous = new TimetableRevision(1L, 1L, 1,
+                                LocalDate.of(2026, 9, 1), LocalDate.of(2026, 12, 31), null);
+                ReflectionTestUtils.setField(previous, "id", 10L);
+                previous.setStatus(TimetableRevisionStatus.PUBLISHED);
+                Mockito.when(revisionRepository.findById(10L)).thenReturn(Optional.of(previous));
+                Mockito.when(lessonLogEntryRepository.existsByTimetableRevisionIdAndLessonDateGreaterThanEqual(
+                                10L, LocalDate.of(2026, 10, 1))).thenReturn(true);
+                Mockito.when(validationService.validateRevision(20L)).thenReturn(
+                                new ResTimetableReviewDTO(20L, 0L, LocalDateTime.now(),
+                                                TimetableRevisionStatus.DRAFT, 0, 0, List.of(), List.of()));
+
+                AppException ex = Assertions.assertThrows(AppException.class,
+                                () -> publishService.publish(20L, new ReqPublishTimetableDTO(0L, 0L), null));
+
+                Assertions.assertEquals(HttpStatus.CONFLICT, ex.getStatus());
+                Assertions.assertEquals(TimetableRevisionStatus.PUBLISHED, previous.getStatus());
+                Assertions.assertEquals(LocalDate.of(2026, 12, 31), previous.getEffectiveTo());
+                Assertions.assertEquals(TimetableRevisionStatus.DRAFT, revision.getStatus());
+                Mockito.verify(revisionRepository, Mockito.never()).save(previous);
+                Mockito.verify(headRepository, Mockito.never()).save(Mockito.any());
         }
 }

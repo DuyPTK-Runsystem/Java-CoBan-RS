@@ -5,4 +5,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 
 public record ReqTransitionLessonLogDTO(@NotNull @PositiveOrZero Long expectedVersion, String comment,
-        @NotBlank String reason) { }
+        @NotBlank String reason, String title, String content, String completionStatus, String grade,
+        @PositiveOrZero Integer presentCount, @PositiveOrZero Integer absentCount, String comments,
+        String absentStudentNotes, String homework) {
+    public ReqTransitionLessonLogDTO(Long expectedVersion, String comment, String reason) {
+        this(expectedVersion, comment, reason, null, null, null, null, null, null, null, null, null);
+    }
+}

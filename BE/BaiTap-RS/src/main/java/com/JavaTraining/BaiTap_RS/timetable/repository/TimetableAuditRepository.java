@@ -12,4 +12,6 @@ public interface TimetableAuditRepository extends JpaRepository<TimetableAudit, 
     List<TimetableAudit> findByTimetableIdOrderByCreatedAtDesc(Long timetableId);
 
     List<TimetableAudit> findByRevisionIdOrderByCreatedAtDesc(Long revisionId);
+
+    boolean existsByRevisionIdAndAction(Long revisionId, String action);
 }
