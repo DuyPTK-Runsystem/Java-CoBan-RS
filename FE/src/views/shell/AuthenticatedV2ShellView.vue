@@ -29,6 +29,7 @@ const navigation = computed<NavigationItem[]>(() => {
   if (!isNonStudent) {
     items.push({ label: 'Bảng điểm', to: '/v2/transcripts', icon: 'pi pi-table' })
   }
+  items.push({ label: 'Thông báo', to: '/v2/notifications', icon: 'pi pi-bell', active: Boolean(route?.path?.startsWith('/v2/notifications')) })
 
   if (isNonStudent) {
     const isStudentActive = Boolean(route?.path?.startsWith('/v2/students'))

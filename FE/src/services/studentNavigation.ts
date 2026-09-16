@@ -1,6 +1,6 @@
 import type { UserRole } from '@/types/user'
 
-export const studentWorkspacePaths = ['/v2/attendance', '/v2/transcripts'] as const
+export const studentWorkspacePaths = ['/v2/attendance', '/v2/transcripts', '/v2/notifications'] as const
 
 export function isStudentWorkspace(roles: UserRole[]): boolean {
   return roles.includes('STUDENT')

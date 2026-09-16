@@ -2,7 +2,7 @@
 
 |   No. | Module | Note | Status | Updated |
 | --- | --- | --- | --- | --- |
-| 076 | notification | [Targeted Notification v3 UI](notification/076-targeted-notification-frontend-2026-09-15.md) | Inbox, Detail, Manage, Composer và sidebar “Thông báo”; STUDENT inbox route; focused navigation 2 files/83 tests PASS, lint/build PASS; browser smoke PASS; latest full FE test 109 files/574 tests có 1 unhandled baseline error; coverage/Storybook NOT RUN | 2026-09-16 |
+| 076 | notification | [Targeted Notification v3 UI](notification/076-targeted-notification-frontend-2026-09-15.md) | Inbox, Detail, Manage, Composer và sidebar “Thông báo”; semantic layout/state consistency amendment; STUDENT inbox route; focused 8 files/113 tests PASS, lint/build PASS; inbox browser smoke PASS; latest full FE test 109 files/574 tests có 1 unhandled baseline error; coverage/Storybook NOT RUN | 2026-09-16 |
 | 075.13 | Timetable | [Thêm nhiều tiết học trong một lượt](timetable/075.13-bulk-timetable-entry-selection-2026-09-14.md) | Dialog chọn nhiều tiết; giữ luồng `+` cũ; batch upserts; lint/test/build/diff check PASS; browser/live NOT RUN | 2026-09-14 |
 | 075.12 | Timetable | [Sửa thêm tiết TKB và hiển thị lịch bận giáo viên](timetable/075.12-timetable-entry-and-teacher-busy-slots-2026-09-14.md) | Assignment dùng được nhiều slot; thêm/sửa sau VALIDATED; tô slot lịch bận APPROVED; lint/test/coverage/build/Storybook/diff check PASS; browser/live NOT RUN | 2026-09-14 |
 | 075.10 | Timetable | [Việt hóa giao diện Plan 075 và amendment](timetable/075.10-vietnamese-ui-copy-2026-09-14.md) | Việt hóa copy cấu hình định mức và fallback nhãn điều kiện; lint/test/build PASS; browser/live NOT RUN | 2026-09-14 |

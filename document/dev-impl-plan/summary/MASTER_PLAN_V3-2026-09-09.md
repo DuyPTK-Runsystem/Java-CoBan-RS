@@ -36,6 +36,8 @@ khai code/test và không được tính là completed trong v3 delivery.
 
 Plan 079: `DESIGN/CONTRACT APPROVED — IMPLEMENTATION PENDING` ngày `2026-09-14` theo yêu cầu người dùng: đã lập [Plan BE](../be/lesson-log/079-lesson-log-lifecycle-and-audit-2026-09-14.md), [Plan FE](../fe/lesson-log/079-lesson-log-ui-2026-09-14.md) và [wireframe](../../wireframes/fe/lesson-log/079-lesson-log/README.md); đã sửa identity qua revision, lifecycle/deadline, ký lại tuần và policy; D01–D10 đã được duyệt ở mức design/contract, còn approval triển khai code BE/FE pending; JS syntax và JSDOM 12/12 PASS; browser thật NOT RUN (Chrome đang tắt).
 
+Plan 076: `IMPLEMENTED SLICE — VALIDATION INCOMPLETE` ngày `2026-09-16`; audience `INDIVIDUAL`/`CLASS`/`SCHOOL`, single-school `DEFAULT_SCHOOL` (FE gửi, BE validate), `IN_APP` only, immediate publish, full-payload + actor idempotency fingerprint và inbox visibility filters đã được ghi nhận. Privacy option A đã chốt và Terra đã triển khai enforcement: recipient không thấy `targetReference`/internal IDs, chỉ `ADMIN`/`ACADEMIC_OFFICE` xem targeting details. Focused BE suites 30+14+5 = 49 PASS; notification PMD 0; backend full test 511 completed/12 failed do `OutOfMemoryError` trong integration tests Auth/Student/JWT; repository còn 9 LessonLog PMD baseline violations; Flyway/H2 chain 4 tests PASS; full JaCoCo, MySQL/runtime migration và browser/live NOT RUN. Notification email v2 vẫn độc lập.
+
 ## Quy trình trong từng Plan
 
 1. Contract slice: update v3 requirement/API/data decision and fixture shape.

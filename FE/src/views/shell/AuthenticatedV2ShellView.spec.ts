@@ -37,7 +37,7 @@ describe('AuthenticatedV2ShellView.vue', () => {
     clearAuthSession()
   })
 
-  it('shows exactly Attendance and Transcript tabs for STUDENT role', () => {
+  it('shows Attendance, Transcript, and Notification tabs for STUDENT role', () => {
     saveAuthSession({
       accessToken: 'token-stu',
       user: {
@@ -62,9 +62,37 @@ describe('AuthenticatedV2ShellView.vue', () => {
     expect(wrapper.findAll('[data-to]').map((item) => [item.attributes('data-to'), item.text()])).toEqual([
       ['/v2/attendance', 'Điểm danh'],
       ['/v2/transcripts', 'Bảng điểm'],
+      ['/v2/notifications', 'Thông báo'],
     ])
     expect(wrapper.find('[data-to="/v2/transcripts"]').exists()).toBe(true)
+    expect(wrapper.find('[data-to="/v2/notifications"]').attributes('data-active')).toBe('false')
     expect(wrapper.find('[data-to="/v2/class-transcripts"]').exists()).toBe(false)
+  })
+
+  it('marks the Notification tab active for STUDENT on the inbox route', () => {
+    mocks.currentPath = '/v2/notifications'
+    saveAuthSession({
+      accessToken: 'token-stu-notification',
+      user: {
+        id: 6,
+        username: 'student_notification',
+        roles: ['STUDENT'],
+      },
+    })
+
+    const wrapper = mount(AuthenticatedV2ShellView, {
+      global: {
+        stubs: {
+          RouterView: true,
+          AuthenticatedLayout: {
+            props: ['navigation'],
+            template: '<div class="mock-layout"><span v-for="item in navigation" :key="item.to" :data-to="item.to" :data-active="String(item.active)">{{ item.label }}</span></div>',
+          },
+        },
+      },
+    })
+
+    expect(wrapper.find('[data-to="/v2/notifications"]').attributes('data-active')).toBe('true')
   })
 
   it('hides Transcript tab and shows Class Transcript tab for TEACHER role', () => {

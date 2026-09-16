@@ -71,7 +71,7 @@ describe('router authentication guard', () => {
     expect(getAuthSession()?.user.roles).toEqual(['STUDENT'])
   })
 
-  it.each(['/v2/attendance', '/v2/transcripts', '/v2/transcripts?year=1', '/v2/attendance/'])('allows STUDENT to open %s', async (path) => {
+  it.each(['/v2/attendance', '/v2/transcripts', '/v2/transcripts?year=1', '/v2/attendance/', '/v2/notifications'])('allows STUDENT to open %s', async (path) => {
     saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01', roles: ['STUDENT'] } })
     await router.push(path)
     expect(router.currentRoute.value.fullPath).toBe(path)
@@ -177,6 +177,7 @@ describe('router authentication guard', () => {
     ['/v2/enrollments/placement/new', 'v2-placement-new'],
     ['/v2/enrollments/placement/74', 'v2-placement-session'],
     ['/v2/attendance', 'v2-attendance'],
+    ['/v2/notifications', 'v2-notifications-inbox'],
     ['/v2/scorebooks', 'v2-scorebooks'],
     ['/v2/transcripts', 'v2-transcripts'],
     ['/v2/retake-exams', 'v2-retake-exams'],

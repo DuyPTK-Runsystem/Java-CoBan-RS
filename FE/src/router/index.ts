@@ -48,6 +48,10 @@ const router = createRouter({
       redirect: (to) => `/v2/students/${to.params.studentId}/edit`,
     },
     {
+      path: '/notifications',
+      redirect: '/v2/notifications',
+    },
+    {
       path: '/v2',
       component: () => import('@/views/shell/AuthenticatedV2ShellView.vue'),
       meta: { requiresAuth: true, module: 'v2', shell: 'authenticated' },
@@ -243,6 +247,28 @@ const router = createRouter({
           name: 'v2-lesson-log-settings',
           component: () => import('@/views/lesson-log/LessonLogSettingsView.vue'),
           meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+        },
+        {
+          path: 'notifications',
+          name: 'v2-notifications-inbox',
+          component: () => import('@/views/notification/NotificationInboxView.vue'),
+        },
+        {
+          path: 'notifications/manage',
+          name: 'v2-notifications-manage',
+          component: () => import('@/views/notification/NotificationManagementView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+        },
+        {
+          path: 'notifications/compose',
+          name: 'v2-notifications-compose',
+          component: () => import('@/views/notification/NotificationComposerView.vue'),
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+        },
+        {
+          path: 'notifications/:notificationId',
+          name: 'v2-notifications-detail',
+          component: () => import('@/views/notification/NotificationDetailView.vue'),
         },
         {
           // Business routes must be registered before this neutral outlet.
