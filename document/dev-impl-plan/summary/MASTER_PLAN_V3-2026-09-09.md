@@ -31,10 +31,12 @@ hoàn thành. BE phải cung cấp endpoint thật và contract test trong cùng
 
 Plan 075: `COMPLETED` ngày `2026-09-14` theo xác nhận của người dùng: implementation BE/FE và các amendment đã được ghi trong Dev Notes. FE quality gates đã có kết quả theo từng note; browser/live, migration và full backend gate vẫn được báo riêng là NOT RUN hoặc baseline blocker khi chưa có bằng chứng PASS.
 
+Plan 074: `IMPLEMENTED SLICE — VALIDATION INCOMPLETE` ngày `2026-09-17`: production route/view BE/FE đã có; focused/automated gates theo Dev Note PASS, nhưng backend full build còn fail ở `pmdTest`, migration/runtime và browser/live chưa chạy.
+
 Plan 077: `TEMPORARILY POSTPONED` theo quyết định người dùng ngày `2026-09-10`; chưa triển
 khai code/test và không được tính là completed trong v3 delivery.
 
-Plan 079: `DESIGN/CONTRACT APPROVED — IMPLEMENTATION PENDING` ngày `2026-09-14` theo yêu cầu người dùng: đã lập [Plan BE](../be/lesson-log/079-lesson-log-lifecycle-and-audit-2026-09-14.md), [Plan FE](../fe/lesson-log/079-lesson-log-ui-2026-09-14.md) và [wireframe](../../wireframes/fe/lesson-log/079-lesson-log/README.md); đã sửa identity qua revision, lifecycle/deadline, ký lại tuần và policy; D01–D10 đã được duyệt ở mức design/contract, còn approval triển khai code BE/FE pending; JS syntax và JSDOM 12/12 PASS; browser thật NOT RUN (Chrome đang tắt).
+Plan 079: `IMPLEMENTED SLICE — VALIDATION INCOMPLETE` ngày `2026-09-17`: BE/FE đã triển khai lifecycle, timetable linkage, roster snapshot, audit, weekly review và policy; BE focused 21/21, compile/checkstyle PASS và FE automated gates PASS. Full BE test/PMD/build còn lỗi hoặc chưa chạy; migration và browser/live NOT RUN.
 
 Plan 076: `IMPLEMENTED SLICE — VALIDATION INCOMPLETE` ngày `2026-09-16`; audience `INDIVIDUAL`/`CLASS`/`SCHOOL`, single-school `DEFAULT_SCHOOL` (FE gửi, BE validate), `IN_APP` only, immediate publish, full-payload + actor idempotency fingerprint và inbox visibility filters đã được ghi nhận. Privacy option A đã chốt và Terra đã triển khai enforcement: recipient không thấy `targetReference`/internal IDs, chỉ `ADMIN`/`ACADEMIC_OFFICE` xem targeting details. Focused BE suites 30+14+5 = 49 PASS; notification PMD 0; backend full test 511 completed/12 failed do `OutOfMemoryError` trong integration tests Auth/Student/JWT; repository còn 9 LessonLog PMD baseline violations; Flyway/H2 chain 4 tests PASS; full JaCoCo, MySQL/runtime migration và browser/live NOT RUN. Notification email v2 vẫn độc lập.
 

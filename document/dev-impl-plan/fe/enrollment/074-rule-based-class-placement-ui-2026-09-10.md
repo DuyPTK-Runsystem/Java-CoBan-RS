@@ -3,12 +3,12 @@
 ## 1. Trạng thái và mục đích bàn giao
 
 - Application-document version: `v3`.
-- Status: `APPROVED — PARTIALLY IMPLEMENTED; production integration handoff ready`.
+- Status: `IMPLEMENTED SLICE — production route/view integrated; validation incomplete`.
 - Ngày lập: `2026-09-10`.
 - Ngày review lại: `2026-09-11`.
 - Đi cùng [Plan 074 BE](../../be/enrollment/074-rule-based-class-placement-2026-09-10.md), [Dev Note hợp nhất](../../../dev-note/be/enrollment/074-rule-based-class-placement-2026-09-11.md) và [wireframe review](../../../wireframes/fe/enrollment/074-rule-based-class-placement/README.md).
 
-Plan này là nguồn bàn giao để hoàn thiện **production route/view** cho Plan 074. Phần FE hiện có mới là contract service, types, fixture và review component; chưa có màn hình mà giáo vụ có thể mở để tạo, mô phỏng và xác nhận phiên xếp lớp.
+Plan này ghi nhận trạng thái triển khai production route/view của Plan 074. FE đã có màn hình để giáo vụ tạo, mô phỏng, review và xác nhận phiên xếp lớp; các gate runtime/live còn được báo riêng theo bằng chứng thực tế.
 
 Không lập thêm plan mới cho phần còn thiếu. Agent triển khai phải cập nhật Dev Note 074 hợp nhất sau khi hoàn thành và chỉ báo `Completed` khi toàn bộ acceptance criteria dưới đây có bằng chứng.
 

@@ -3,7 +3,7 @@
 ## Trạng thái và approval gate
 
 - Application-document version: `v3`.
-- Status: `Approved; implemented slice; validation incomplete`.
+- Status: `IMPLEMENTED SLICE — validation incomplete; not COMPLETED`.
 - Ngày lập: `2026-09-10`.
 - Đi cùng [Plan 074 FE](../../fe/enrollment/074-rule-based-class-placement-ui-2026-09-10.md) và [wireframe](../../../wireframes/fe/enrollment/074-rule-based-class-placement/README.md).
 - Điều kiện mở code: người dùng duyệt plan/wireframe và Plan 074.1 được duyệt/triển khai. P1–P6 đã được user chốt ngày `2026-09-10`. Không dùng fixture wireframe làm contract.
