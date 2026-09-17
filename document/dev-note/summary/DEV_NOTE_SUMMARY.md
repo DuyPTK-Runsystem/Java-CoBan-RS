@@ -1,5 +1,7 @@
 # Dev Note Summary
 
+- 076.12 BE/FE notification email channel: [implementation note](../be/notification/076.12-v3-notification-email-channel-2026-09-17.md) — added v3 EMAIL delivery with receipt status, migration V27 and FE channel selection; focused backend/FE tests, PMD, Checkstyle and JaCoCo PASS; full backend/build/SMTP/browser NOT RUN (2026-09-17).
+
 - 076.11 BE/FE teacher notification sender scope: [implementation note](../be/notification/076.11-teacher-notification-sender-scope-2026-09-17.md) — enabled teacher notification sending with sender ownership checks and FE routes; focused BE/FE tests, FE lint/build and production compilation PASS; full BE test OOM, PMD baseline FAIL, browser NOT RUN (2026-09-17).
 - 076.10 FE notification sender read tracking removal: [implementation note](../fe/notification/076.10-notification-sender-read-tracking-removal-2026-09-17.md) — removed sender/manager read-tracking metadata and supporting expiry/aggregate copy while preserving recipient state; focused test, lint, build and diff check PASS; browser NOT RUN (2026-09-17).
 - 076.8 FE notification audience selection checkmark: [implementation note](../fe/notification/076.8-notification-audience-selection-checkmark-2026-09-17.md) — removed the redundant blue tick beside recipient content and kept one PrimeVue Checkbox tick in the leading area; lint/build/diff check PASS; tests/browser NOT RUN (2026-09-17).

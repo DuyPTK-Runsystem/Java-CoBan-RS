@@ -47,8 +47,10 @@ public class NotificationRequestValidator {
     }
 
     public void validateChannel(NotificationChannel channel) {
-        if (channel != null && channel != NotificationChannel.IN_APP) {
-            throw new AppException(HttpStatus.UNPROCESSABLE_ENTITY, "Notification v3 chỉ hỗ trợ kênh IN_APP");
+        if (channel != null
+                && channel != NotificationChannel.IN_APP
+                && channel != NotificationChannel.EMAIL) {
+            throw new AppException(HttpStatus.UNPROCESSABLE_ENTITY, "Kênh notification v3 không hợp lệ");
         }
     }
 

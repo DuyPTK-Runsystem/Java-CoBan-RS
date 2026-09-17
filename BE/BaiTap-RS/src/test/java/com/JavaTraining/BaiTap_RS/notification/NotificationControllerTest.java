@@ -12,6 +12,7 @@ import com.JavaTraining.BaiTap_RS.notification.domain.DTOs.requests.ReqPublishNo
 import com.JavaTraining.BaiTap_RS.notification.domain.DTOs.response.ResNotificationDTO;
 import com.JavaTraining.BaiTap_RS.notification.domain.DTOs.response.ResNotificationReceiptDTO;
 import com.JavaTraining.BaiTap_RS.notification.domain.entity.NotificationAudienceType;
+import com.JavaTraining.BaiTap_RS.notification.domain.entity.NotificationChannel;
 import com.JavaTraining.BaiTap_RS.notification.domain.entity.NotificationStatus;
 import com.JavaTraining.BaiTap_RS.notification.service.NotificationService;
 import com.JavaTraining.BaiTap_RS.security.UserPrincipal;
@@ -220,13 +221,13 @@ class NotificationControllerTest {
     }
 
     @Test
-    void requestJsonRejectsNonInAppChannelAtDeserializationBoundary() {
+    void requestJsonAcceptsEmailChannelAtDeserializationBoundary() throws JsonProcessingException {
         String payload = "{\"title\":\"Email\",\"body\":\"Không hợp lệ\","
                 + "\"audienceType\":\"SCHOOL\",\"channel\":\"EMAIL\"}";
 
-        Assertions.assertThrows(
-                JsonProcessingException.class,
-                () -> new ObjectMapper().readValue(payload, ReqCreateNotificationDTO.class));
+        ReqCreateNotificationDTO request = new ObjectMapper().readValue(payload, ReqCreateNotificationDTO.class);
+
+        Assertions.assertEquals(NotificationChannel.EMAIL, request.getChannel());
     }
 
     @Test

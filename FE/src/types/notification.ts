@@ -2,7 +2,7 @@ export type NotificationAudienceType = 'INDIVIDUAL' | 'CLASS' | 'SCHOOL'
 
 export type NotificationStatus = 'DRAFT' | 'SCHEDULED' | 'PUBLISHED' | 'CANCELLED' | 'EXPIRED'
 
-export type NotificationChannel = 'IN_APP'
+export type NotificationChannel = 'IN_APP' | 'EMAIL'
 
 /** The deployed application has one school scope; keep this as a plain constant. */
 export const DEFAULT_SCHOOL = 'DEFAULT_SCHOOL' as const
@@ -38,6 +38,8 @@ export interface NotificationItem {
   readAt?: string | null
 }
 
+export type NotificationDeliveryStatus = 'PENDING' | 'SENT' | 'FAILED'
+
 export interface NotificationReceipt {
   id: number
   notificationId: number
@@ -45,6 +47,9 @@ export interface NotificationReceipt {
   recipientUserId?: number | null
   accessScope: string
   readAt?: string | null
+  deliveryStatus?: NotificationDeliveryStatus | null
+  deliveryError?: string | null
+  deliveredAt?: string | null
   createdAt: string
 }
 
@@ -56,6 +61,8 @@ export interface ReqCreateNotificationDTO {
   recipientUserIds?: number[]
   /** The single-school scope sent by the composer; the backend remains authoritative. */
   schoolScope: string
+  /** Null/omitted keeps the backward-compatible IN_APP default. */
+  channel?: NotificationChannel
   expiresAt?: string | null
   /** Same full payload + key is idempotent; a reused key with a different payload is a conflict. */
   idempotencyKey?: string

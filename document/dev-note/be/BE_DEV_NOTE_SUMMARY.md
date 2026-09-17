@@ -1,5 +1,7 @@
 # BE Dev Note Summary
 
+| 076.12 | notification | [v3 notification email channel](notification/076.12-v3-notification-email-channel-2026-09-17.md) | EMAIL delivery, receipt status and V27 migration; focused tests/PMD/Checkstyle/JaCoCo PASS; full backend/build/SMTP NOT RUN | 2026-09-17 |
+
 |   No. | Module             | Note                                                                                                                                                            | Status                                                                           | Updated    |
 | --- | --- | --- | --- | --- |
 | 076.11 | notification | [Teacher notification sender scope](notification/076.11-teacher-notification-sender-scope-2026-09-17.md) | Teacher create/manage/publish/cancel enabled with sender ownership checks; focused BE tests and production compilation PASS; full test OOM, PMD baseline FAIL, browser NOT RUN | 2026-09-17 |

@@ -2,10 +2,11 @@
 import { ref } from 'vue'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
+import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
 import NotificationAudienceSelector from './NotificationAudienceSelector.vue'
 import { DEFAULT_SCHOOL } from '@/types/notification'
-import type { NotificationAudienceType, ReqCreateNotificationDTO } from '@/types/notification'
+import type { NotificationAudienceType, NotificationChannel, ReqCreateNotificationDTO } from '@/types/notification'
 
 const props = withDefaults(
   defineProps<{
@@ -23,6 +24,7 @@ const emit = defineEmits<{
 
 const title = ref('')
 const body = ref('')
+const channel = ref<NotificationChannel>('IN_APP')
 const audienceType = ref<NotificationAudienceType>('SCHOOL')
 const targetReference = ref('')
 const recipientUserIds = ref<number[]>([])
@@ -72,6 +74,10 @@ function handleSubmit(): void {
     schoolScope: DEFAULT_SCHOOL,
   }
 
+  if (channel.value === 'EMAIL') {
+    payload.channel = channel.value
+  }
+
   if (audienceType.value === 'CLASS') {
     payload.targetReference = targetReference.value.trim()
   } else if (audienceType.value === 'INDIVIDUAL') {
@@ -119,6 +125,21 @@ function handleSubmit(): void {
     </div>
 
     <form v-else class="notification-form" @submit.prevent="handleSubmit">
+      <div class="field-group">
+        <label for="notification-channel">Kênh gửi</label>
+        <Select
+          id="notification-channel"
+          v-model="channel"
+          :options="[
+            { label: 'Trong ứng dụng', value: 'IN_APP' },
+            { label: 'Email', value: 'EMAIL' },
+          ]"
+          option-label="label"
+          option-value="value"
+          :disabled="props.loading"
+        />
+      </div>
+
       <div class="field-group">
         <label>
           Tiêu đề <span class="required-mark">*</span>

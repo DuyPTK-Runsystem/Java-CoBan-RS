@@ -45,6 +45,9 @@ public class NotificationDraftService {
                 resolveTargetReference(request),
                 actorUserId,
                 request.getSchoolScope());
+        notification.setChannel(request.getChannel() == null
+                ? com.JavaTraining.BaiTap_RS.notification.domain.entity.NotificationChannel.IN_APP
+                : request.getChannel());
         applyOptionalFields(notification, request, fingerprint);
 
         Notification saved = idempotencyService.save(notification);

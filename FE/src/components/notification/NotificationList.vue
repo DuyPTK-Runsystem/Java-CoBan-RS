@@ -2,7 +2,7 @@
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import NotificationStatusBadge from './NotificationStatusBadge.vue'
-import type { NotificationAudienceType, NotificationItem } from '@/types/notification'
+import type { NotificationAudienceType, NotificationChannel, NotificationItem } from '@/types/notification'
 
 const props = withDefaults(
   defineProps<{
@@ -25,6 +25,11 @@ const audienceLabels: Record<NotificationAudienceType, string> = {
   INDIVIDUAL: 'Cá nhân',
   CLASS: 'Lớp học',
   SCHOOL: 'Toàn trường',
+}
+
+const channelLabels: Record<NotificationChannel, string> = {
+  IN_APP: 'Trong ứng dụng',
+  EMAIL: 'Email',
 }
 
 function formatDate(isoStr?: string | null): string {
@@ -73,6 +78,7 @@ function formatDate(isoStr?: string | null): string {
           </h3>
           <NotificationStatusBadge v-if="props.isManageView" :status="item.status" />
           <Tag :value="audienceLabels[item.audienceType] ?? item.audienceType" severity="info" />
+          <Tag :value="channelLabels[item.channel] ?? item.channel" severity="secondary" />
         </div>
 
         <p class="notification-card-body">{{ item.body }}</p>

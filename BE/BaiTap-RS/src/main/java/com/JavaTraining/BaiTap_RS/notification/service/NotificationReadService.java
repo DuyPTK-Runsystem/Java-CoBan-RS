@@ -47,6 +47,9 @@ public class NotificationReadService {
                 null,
                 receipt.getAccessScope(),
                 receipt.getReadAt(),
+                receipt.getDeliveryStatus(),
+                receipt.getDeliveryError(),
+                receipt.getDeliveredAt(),
                 receipt.getCreatedAt());
     }
 }

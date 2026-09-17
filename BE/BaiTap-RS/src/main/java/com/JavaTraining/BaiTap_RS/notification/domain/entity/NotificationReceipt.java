@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -44,6 +46,16 @@ public class NotificationReceipt {
 
     @Column(name = "read_at")
     private LocalDateTime readAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "delivery_status", length = 30)
+    private NotificationDeliveryStatus deliveryStatus;
+
+    @Column(name = "delivery_error", length = 1000)
+    private String deliveryError;
+
+    @Column(name = "delivered_at")
+    private LocalDateTime deliveredAt;
 
     @Version
     @Column(name = "version", nullable = false)

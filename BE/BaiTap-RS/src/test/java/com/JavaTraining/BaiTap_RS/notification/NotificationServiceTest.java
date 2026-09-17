@@ -1,6 +1,7 @@
 package com.JavaTraining.BaiTap_RS.notification;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -16,6 +17,7 @@ import com.JavaTraining.BaiTap_RS.notification.domain.DTOs.response.ResNotificat
 import com.JavaTraining.BaiTap_RS.notification.domain.entity.Notification;
 import com.JavaTraining.BaiTap_RS.notification.domain.entity.NotificationAudienceType;
 import com.JavaTraining.BaiTap_RS.notification.domain.entity.NotificationChannel;
+import com.JavaTraining.BaiTap_RS.notification.domain.entity.NotificationDeliveryStatus;
 import com.JavaTraining.BaiTap_RS.notification.domain.entity.NotificationReceipt;
 import com.JavaTraining.BaiTap_RS.notification.domain.entity.NotificationStatus;
 import com.JavaTraining.BaiTap_RS.notification.repository.NotificationIndividualAudienceProjectionRepository;
@@ -24,6 +26,10 @@ import com.JavaTraining.BaiTap_RS.notification.repository.NotificationReceiptRep
 import com.JavaTraining.BaiTap_RS.notification.service.NotificationAudienceService;
 import com.JavaTraining.BaiTap_RS.notification.service.NotificationAuditService;
 import com.JavaTraining.BaiTap_RS.notification.service.NotificationService;
+import com.JavaTraining.BaiTap_RS.teacher.domain.entity.Teacher;
+import com.JavaTraining.BaiTap_RS.teacher.repository.TeacherRepository;
+import com.JavaTraining.BaiTap_RS.user.domain.entity.User;
+import com.JavaTraining.BaiTap_RS.user.repository.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -42,6 +48,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.MailSendException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,6 +81,15 @@ class NotificationServiceTest {
         @Mock
         private NotificationIndividualAudienceProjectionRepository individualAudienceProjectionRepository;
 
+        @Mock
+        private TeacherRepository teacherRepository;
+
+        @Mock
+        private UserRepository userRepository;
+
+        @Mock
+        private JavaMailSender mailSender;
+
         private NotificationService notificationService;
 
         private NotificationService managerNotificationService() {
@@ -82,6 +100,20 @@ class NotificationServiceTest {
                                 notificationAuditService,
                                 schoolClassRepository,
                                 individualAudienceProjectionRepository);
+        }
+
+        private NotificationService emailNotificationService(JavaMailSender sender) {
+                return new NotificationService(
+                                notificationRepository,
+                                notificationReceiptRepository,
+                                notificationAudienceService,
+                                notificationAuditService,
+                                schoolClassRepository,
+                                individualAudienceProjectionRepository,
+                                teacherRepository,
+                                userRepository,
+                                sender,
+                                "no-reply@school.edu.vn");
         }
 
         @BeforeEach
@@ -141,10 +173,24 @@ class NotificationServiceTest {
         }
 
         @Test
-        void v3ChannelEnumExposesInAppOnly() {
+        void v3ChannelEnumExposesInAppAndEmail() {
                 Assertions.assertArrayEquals(
-                                new NotificationChannel[] {NotificationChannel.IN_APP},
+                                new NotificationChannel[] {NotificationChannel.IN_APP, NotificationChannel.EMAIL},
                                 NotificationChannel.values());
+        }
+
+        @Test
+        void createDraftEmailStoresEmailChannel() {
+                ReqCreateNotificationDTO request = ReqCreateNotificationDTO.builder()
+                                .title("Thông báo qua email")
+                                .body("Nội dung email")
+                                .audienceType(NotificationAudienceType.SCHOOL)
+                                .channel(NotificationChannel.EMAIL)
+                                .schoolScope("DEFAULT_SCHOOL")
+                                .build();
+                Notification captured = createAndCaptureDraft(request, 1L);
+
+                Assertions.assertEquals(NotificationChannel.EMAIL, captured.getChannel());
         }
 
         @Test
@@ -487,6 +533,208 @@ class NotificationServiceTest {
                 Assertions.assertEquals(NotificationStatus.PUBLISHED, notification.getStatus());
                 Mockito.verify(notificationReceiptRepository).saveAll(ArgumentMatchers.anyList());
                 Mockito.verify(notificationAuditService).auditPublish(1L, notification, 2);
+        }
+
+        @Test
+        void publishInAppDoesNotSendEmailAndLeavesDeliveryStatusUnset() {
+                Notification notification = new Notification(
+                                "Thông báo trong ứng dụng",
+                                "Nội dung in-app",
+                                NotificationAudienceType.INDIVIDUAL,
+                                "2",
+                                1L,
+                                "DEFAULT_SCHOOL");
+                ReflectionTestUtils.setField(notification, "id", 16L);
+                List<NotificationReceipt> receipts = List.of(new NotificationReceipt(16L, 2L, "INDIVIDUAL"));
+
+                Mockito.when(notificationRepository.findById(16L)).thenReturn(Optional.of(notification));
+                Mockito.when(notificationAudienceService.resolveAudienceUserIds(notification, null))
+                                .thenReturn(Set.of(2L));
+                Mockito.when(notificationReceiptRepository.existsByNotificationIdAndRecipientUserId(16L, 2L))
+                                .thenReturn(false);
+                Mockito.when(notificationReceiptRepository.saveAll(ArgumentMatchers.anyList())).thenReturn(receipts);
+                Mockito.when(notificationRepository.save(ArgumentMatchers.any(Notification.class)))
+                                .thenReturn(notification);
+
+                ResNotificationDTO result = emailNotificationService(mailSender).publish(16L, null, 1L);
+
+                Assertions.assertEquals(NotificationStatus.PUBLISHED, result.getStatus());
+                Assertions.assertNull(receipts.get(0).getDeliveryStatus());
+                Mockito.verifyNoInteractions(mailSender, teacherRepository, userRepository);
+        }
+
+        @Test
+        void publishEmailSendsTitleAndBodyAndMarksReceiptSent() {
+                Notification notification = new Notification(
+                                "Tiêu đề email",
+                                "Nội dung email",
+                                NotificationAudienceType.INDIVIDUAL,
+                                "2",
+                                1L,
+                                "DEFAULT_SCHOOL");
+                notification.setChannel(NotificationChannel.EMAIL);
+                ReflectionTestUtils.setField(notification, "id", 17L);
+                List<NotificationReceipt> receipts = List.of(new NotificationReceipt(17L, 2L, "INDIVIDUAL"));
+                Teacher teacher = Mockito.mock(Teacher.class);
+                Mockito.when(teacher.getEmail()).thenReturn(" teacher@example.edu.vn ");
+
+                Mockito.when(notificationRepository.findById(17L)).thenReturn(Optional.of(notification));
+                Mockito.when(notificationAudienceService.resolveAudienceUserIds(notification, null))
+                                .thenReturn(Set.of(2L));
+                Mockito.when(notificationReceiptRepository.existsByNotificationIdAndRecipientUserId(17L, 2L))
+                                .thenReturn(false);
+                Mockito.when(notificationReceiptRepository.saveAll(ArgumentMatchers.anyList())).thenReturn(receipts);
+                Mockito.when(notificationRepository.save(ArgumentMatchers.any(Notification.class)))
+                                .thenReturn(notification);
+                Mockito.when(teacherRepository.findByUserId(2L)).thenReturn(Optional.of(teacher));
+
+                emailNotificationService(mailSender).publish(17L, null, 1L);
+
+                ArgumentCaptor<SimpleMailMessage> messageCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
+                Mockito.verify(mailSender).send(messageCaptor.capture());
+                SimpleMailMessage message = messageCaptor.getValue();
+                Assertions.assertArrayEquals(new String[] {"teacher@example.edu.vn"}, message.getTo());
+                Assertions.assertEquals("Tiêu đề email", message.getSubject());
+                Assertions.assertEquals("Nội dung email", message.getText());
+                Assertions.assertEquals(NotificationDeliveryStatus.SENT, receipts.get(0).getDeliveryStatus());
+                Assertions.assertNull(receipts.get(0).getDeliveryError());
+                Assertions.assertNotNull(receipts.get(0).getDeliveredAt());
+        }
+
+        @Test
+        void publishEmailMarksMissingOrInvalidRecipientAsFailedWithoutSending() {
+                Notification notification = new Notification(
+                                "Thiếu email",
+                                "Nội dung",
+                                NotificationAudienceType.INDIVIDUAL,
+                                "3",
+                                1L,
+                                "DEFAULT_SCHOOL");
+                notification.setChannel(NotificationChannel.EMAIL);
+                ReflectionTestUtils.setField(notification, "id", 18L);
+                List<NotificationReceipt> receipts = List.of(new NotificationReceipt(18L, 3L, "INDIVIDUAL"));
+                User user = Mockito.mock(User.class);
+                Mockito.when(user.getUsername()).thenReturn("username-without-email");
+
+                Mockito.when(notificationRepository.findById(18L)).thenReturn(Optional.of(notification));
+                Mockito.when(notificationAudienceService.resolveAudienceUserIds(notification, null))
+                                .thenReturn(Set.of(3L));
+                Mockito.when(notificationReceiptRepository.existsByNotificationIdAndRecipientUserId(18L, 3L))
+                                .thenReturn(false);
+                Mockito.when(notificationReceiptRepository.saveAll(ArgumentMatchers.anyList())).thenReturn(receipts);
+                Mockito.when(notificationRepository.save(ArgumentMatchers.any(Notification.class)))
+                                .thenReturn(notification);
+                Mockito.when(teacherRepository.findByUserId(3L)).thenReturn(Optional.empty());
+                Mockito.when(userRepository.findById(3L)).thenReturn(Optional.of(user));
+
+                ResNotificationDTO result = emailNotificationService(mailSender).publish(18L, null, 1L);
+
+                Assertions.assertEquals(NotificationStatus.PUBLISHED, result.getStatus());
+                Assertions.assertEquals(NotificationDeliveryStatus.FAILED, receipts.get(0).getDeliveryStatus());
+                Assertions.assertTrue(receipts.get(0).getDeliveryError().contains("chưa có email hợp lệ"));
+                Assertions.assertNull(receipts.get(0).getDeliveredAt());
+                Mockito.verifyNoInteractions(mailSender);
+        }
+
+        @Test
+        void publishEmailWithMissingSenderMarksReceiptFailedAndStillPublishes() {
+                Notification notification = new Notification(
+                                "Thiếu sender",
+                                "Nội dung",
+                                NotificationAudienceType.INDIVIDUAL,
+                                "4",
+                                1L,
+                                "DEFAULT_SCHOOL");
+                notification.setChannel(NotificationChannel.EMAIL);
+                ReflectionTestUtils.setField(notification, "id", 19L);
+                List<NotificationReceipt> receipts = List.of(new NotificationReceipt(19L, 4L, "INDIVIDUAL"));
+                Mockito.when(notificationRepository.findById(19L)).thenReturn(Optional.of(notification));
+                Mockito.when(notificationAudienceService.resolveAudienceUserIds(notification, null))
+                                .thenReturn(Set.of(4L));
+                Mockito.when(notificationReceiptRepository.existsByNotificationIdAndRecipientUserId(19L, 4L))
+                                .thenReturn(false);
+                Mockito.when(notificationReceiptRepository.saveAll(ArgumentMatchers.anyList())).thenReturn(receipts);
+                Mockito.when(notificationRepository.save(ArgumentMatchers.any(Notification.class)))
+                                .thenReturn(notification);
+
+                ResNotificationDTO result = emailNotificationService(null).publish(19L, null, 1L);
+
+                Assertions.assertEquals(NotificationStatus.PUBLISHED, result.getStatus());
+                Assertions.assertEquals(NotificationDeliveryStatus.FAILED, receipts.get(0).getDeliveryStatus());
+                Assertions.assertTrue(receipts.get(0).getDeliveryError().contains("chưa được cấu hình"));
+        }
+
+        @Test
+        void publishEmailIsolatesSenderFailureAcrossRecipients() {
+                Notification notification = new Notification(
+                                "Fan-out email",
+                                "Nội dung fan-out",
+                                NotificationAudienceType.INDIVIDUAL,
+                                "5,6",
+                                1L,
+                                "DEFAULT_SCHOOL");
+                notification.setChannel(NotificationChannel.EMAIL);
+                ReflectionTestUtils.setField(notification, "id", 21L);
+                NotificationReceipt first = new NotificationReceipt(21L, 5L, "INDIVIDUAL");
+                NotificationReceipt second = new NotificationReceipt(21L, 6L, "INDIVIDUAL");
+                List<NotificationReceipt> receipts = List.of(first, second);
+                Teacher firstTeacher = Mockito.mock(Teacher.class);
+                Teacher secondTeacher = Mockito.mock(Teacher.class);
+                Mockito.when(firstTeacher.getEmail()).thenReturn("ok@example.edu.vn");
+                Mockito.when(secondTeacher.getEmail()).thenReturn("fail@example.edu.vn");
+
+                Mockito.when(notificationRepository.findById(21L)).thenReturn(Optional.of(notification));
+                Mockito.when(notificationAudienceService.resolveAudienceUserIds(notification, null))
+                                .thenReturn(new LinkedHashSet<>(List.of(5L, 6L)));
+                Mockito.when(notificationReceiptRepository.existsByNotificationIdAndRecipientUserId(21L, 5L))
+                                .thenReturn(false);
+                Mockito.when(notificationReceiptRepository.existsByNotificationIdAndRecipientUserId(21L, 6L))
+                                .thenReturn(false);
+                Mockito.when(notificationReceiptRepository.saveAll(ArgumentMatchers.anyList())).thenReturn(receipts);
+                Mockito.when(notificationRepository.save(ArgumentMatchers.any(Notification.class)))
+                                .thenReturn(notification);
+                Mockito.when(teacherRepository.findByUserId(5L)).thenReturn(Optional.of(firstTeacher));
+                Mockito.when(teacherRepository.findByUserId(6L)).thenReturn(Optional.of(secondTeacher));
+                Mockito.doAnswer(invocation -> {
+                        SimpleMailMessage message = invocation.getArgument(0);
+                        if ("fail@example.edu.vn".equals(message.getTo()[0])) {
+                                throw new MailSendException("SMTP unavailable");
+                        }
+                        return null;
+                }).when(mailSender).send(ArgumentMatchers.any(SimpleMailMessage.class));
+
+                ResNotificationDTO result = emailNotificationService(mailSender).publish(21L, null, 1L);
+
+                Assertions.assertEquals(NotificationStatus.PUBLISHED, result.getStatus());
+                Assertions.assertEquals(NotificationDeliveryStatus.SENT, first.getDeliveryStatus());
+                Assertions.assertEquals(NotificationDeliveryStatus.FAILED, second.getDeliveryStatus());
+                Assertions.assertTrue(second.getDeliveryError().contains("SMTP unavailable"));
+                Mockito.verify(mailSender, Mockito.times(2)).send(ArgumentMatchers.any(SimpleMailMessage.class));
+        }
+
+        @Test
+        void publishingAlreadyPublishedEmailDoesNotResendOrDuplicateReceipts() {
+                Notification notification = new Notification(
+                                "Đã gửi email",
+                                "Nội dung",
+                                NotificationAudienceType.SCHOOL,
+                                null,
+                                1L,
+                                "DEFAULT_SCHOOL");
+                notification.setChannel(NotificationChannel.EMAIL);
+                notification.setStatus(NotificationStatus.PUBLISHED);
+                ReflectionTestUtils.setField(notification, "id", 22L);
+                Mockito.when(notificationRepository.findById(22L)).thenReturn(Optional.of(notification));
+
+                ResNotificationDTO result = emailNotificationService(mailSender).publish(22L, null, 1L);
+
+                Assertions.assertEquals(NotificationStatus.PUBLISHED, result.getStatus());
+                Mockito.verifyNoInteractions(
+                                notificationReceiptRepository,
+                                notificationAudienceService,
+                                teacherRepository,
+                                userRepository,
+                                mailSender);
         }
 
         @Test
@@ -995,6 +1243,25 @@ class NotificationServiceTest {
                 // Mark again should not crash and preserve readAt
                 ResNotificationReceiptDTO resSecond = notificationService.markAsRead(70L, 10L);
                 Assertions.assertNotNull(resSecond.getReadAt());
+        }
+
+        @Test
+        void markAsReadReturnsEmailDeliveryStatusAndError() {
+                NotificationReceipt receipt = new NotificationReceipt(71L, 10L, "INDIVIDUAL");
+                receipt.setDeliveryStatus(NotificationDeliveryStatus.FAILED);
+                receipt.setDeliveryError("SMTP unavailable");
+                ReflectionTestUtils.setField(receipt, "id", 101L);
+
+                Mockito.when(notificationReceiptRepository.findByNotificationIdAndRecipientUserId(71L, 10L))
+                                .thenReturn(Optional.of(receipt));
+                Mockito.when(notificationReceiptRepository.save(ArgumentMatchers.any(NotificationReceipt.class)))
+                                .thenAnswer(invocation -> invocation.getArgument(0));
+
+                ResNotificationReceiptDTO result = notificationService.markAsRead(71L, 10L);
+
+                Assertions.assertEquals(NotificationDeliveryStatus.FAILED, result.getDeliveryStatus());
+                Assertions.assertEquals("SMTP unavailable", result.getDeliveryError());
+                Assertions.assertNull(result.getDeliveredAt());
         }
 
         @Test

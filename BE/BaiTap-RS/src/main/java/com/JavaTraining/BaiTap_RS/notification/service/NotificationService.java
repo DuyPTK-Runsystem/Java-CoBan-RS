@@ -1,87 +1,62 @@
 package com.JavaTraining.BaiTap_RS.notification.service;
 
+import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
 import com.JavaTraining.BaiTap_RS.common.contract.ResultPaginationDTO;
 import com.JavaTraining.BaiTap_RS.notification.domain.DTOs.requests.ReqCreateNotificationDTO;
 import com.JavaTraining.BaiTap_RS.notification.domain.DTOs.requests.ReqPublishNotificationDTO;
 import com.JavaTraining.BaiTap_RS.notification.domain.DTOs.response.ResNotificationDTO;
 import com.JavaTraining.BaiTap_RS.notification.domain.DTOs.response.ResNotificationReceiptDTO;
+import com.JavaTraining.BaiTap_RS.notification.repository.NotificationIndividualAudienceProjectionRepository;
 import com.JavaTraining.BaiTap_RS.notification.repository.NotificationReceiptRepository;
 import com.JavaTraining.BaiTap_RS.notification.repository.NotificationRepository;
-import com.JavaTraining.BaiTap_RS.notification.repository.NotificationIndividualAudienceProjectionRepository;
-import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
+import com.JavaTraining.BaiTap_RS.teacher.repository.TeacherRepository;
+import com.JavaTraining.BaiTap_RS.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class NotificationService {
+    private final NotificationServiceOperations operations;
 
-    private final NotificationDraftService draftService;
-    private final NotificationLifecycleService lifecycleService;
-    private final NotificationQueryService queryService;
-    private final NotificationReadService readService;
+    public NotificationService(NotificationRepository repo, NotificationReceiptRepository receiptRepo,
+            NotificationAudienceService audienceService, NotificationAuditService auditService) {
+        this(repo, receiptRepo, audienceService, auditService, null, null, null);
+    }
 
-    public NotificationService(
-            NotificationRepository notificationRepository,
-            NotificationReceiptRepository notificationReceiptRepository,
-            NotificationAudienceService notificationAudienceService,
-            NotificationAuditService notificationAuditService) {
-        this(
-                notificationRepository,
-                notificationReceiptRepository,
-                notificationAudienceService,
-                notificationAuditService,
-                null,
-                null);
+    public NotificationService(NotificationRepository repo, NotificationReceiptRepository receiptRepo,
+            NotificationAudienceService audienceService, NotificationAuditService auditService,
+            SchoolClassRepository schoolClassRepository,
+            NotificationIndividualAudienceProjectionRepository projection) {
+        this(repo, receiptRepo, audienceService, auditService, schoolClassRepository, projection, null);
+    }
+
+    public NotificationService(NotificationRepository repo, NotificationReceiptRepository receiptRepo,
+            NotificationAudienceService audienceService, NotificationAuditService auditService,
+            SchoolClassRepository schoolClassRepository,
+            NotificationIndividualAudienceProjectionRepository projection,
+            TeacherRepository teacherRepository, UserRepository userRepository,
+            JavaMailSender mailSender, String fromEmail) {
+        this(repo, receiptRepo, audienceService, auditService, schoolClassRepository, projection,
+                new NotificationEmailDeliveryService(teacherRepository, userRepository, mailSender, fromEmail));
     }
 
     @Autowired
-    public NotificationService(
-            NotificationRepository notificationRepository,
-            NotificationReceiptRepository notificationReceiptRepository,
-            NotificationAudienceService notificationAudienceService,
-            NotificationAuditService notificationAuditService,
+    public NotificationService(NotificationRepository repo, NotificationReceiptRepository receiptRepo,
+            NotificationAudienceService audienceService, NotificationAuditService auditService,
             SchoolClassRepository schoolClassRepository,
-            NotificationIndividualAudienceProjectionRepository individualAudienceProjectionRepository) {
-        NotificationResponseMapper responseMapper = new NotificationResponseMapper();
-        NotificationAudienceDetailService audienceDetailService = schoolClassRepository == null
-                || individualAudienceProjectionRepository == null
-                ? null
-                : new NotificationAudienceDetailService(
-                        notificationReceiptRepository,
-                        schoolClassRepository,
-                        individualAudienceProjectionRepository);
-        NotificationRequestValidator requestValidator = new NotificationRequestValidator();
-        NotificationIdempotencyService idempotencyService =
-                new NotificationIdempotencyService(notificationRepository);
-        this.draftService = new NotificationDraftService(
-                notificationAuditService,
-                requestValidator,
-                idempotencyService,
-                responseMapper,
-                notificationAudienceService);
-        this.lifecycleService = new NotificationLifecycleService(
-                notificationRepository,
-                notificationReceiptRepository,
-                notificationAudienceService,
-                notificationAuditService,
-                responseMapper,
-                requestValidator);
-        this.queryService = new NotificationQueryService(
-                notificationRepository,
-                notificationReceiptRepository,
-                responseMapper,
-                audienceDetailService);
-        this.readService = new NotificationReadService(
-                notificationReceiptRepository,
-                notificationRepository,
-                notificationAuditService);
+            NotificationIndividualAudienceProjectionRepository projection,
+            NotificationEmailDeliveryService emailDeliveryService) {
+        this.operations = new NotificationServiceOperations(new NotificationServiceWiring(
+                repo, receiptRepo, audienceService, auditService, schoolClassRepository, projection,
+                emailDeliveryService));
     }
 
     @Transactional
     public ResNotificationDTO createDraft(ReqCreateNotificationDTO request, Long actorUserId) {
-        return draftService.createDraft(request, actorUserId);
+        return operations.createDraft(request, actorUserId);
     }
 
     @Transactional
@@ -90,9 +65,9 @@ public class NotificationService {
     }
 
     @Transactional
-    public ResNotificationDTO publish(
-            Long id, ReqPublishNotificationDTO request, Long actorUserId, boolean canManageAll) {
-        return lifecycleService.publish(id, request, actorUserId, canManageAll);
+    public ResNotificationDTO publish(Long id, ReqPublishNotificationDTO request, Long actorUserId,
+            boolean canManageAll) {
+        return operations.publish(id, request, actorUserId, canManageAll);
     }
 
     @Transactional
@@ -102,13 +77,12 @@ public class NotificationService {
 
     @Transactional
     public ResNotificationDTO cancel(Long id, Long actorUserId, boolean canManageAll) {
-        return lifecycleService.cancel(id, actorUserId, canManageAll);
+        return operations.cancel(id, actorUserId, canManageAll);
     }
 
     @Transactional(readOnly = true)
-    public ResultPaginationDTO<ResNotificationDTO> getInbox(
-            Long actorUserId, Boolean unreadOnly, Pageable pageable) {
-        return queryService.getInbox(actorUserId, unreadOnly, pageable);
+    public ResultPaginationDTO<ResNotificationDTO> getInbox(Long actorUserId, Boolean unreadOnly, Pageable pageable) {
+        return operations.getInbox(actorUserId, unreadOnly, pageable);
     }
 
     @Transactional(readOnly = true)
@@ -117,18 +91,18 @@ public class NotificationService {
     }
 
     @Transactional(readOnly = true)
-    public ResultPaginationDTO<ResNotificationDTO> getManagedNotifications(
-            Long actorUserId, Pageable pageable, boolean canManageAll) {
-        return queryService.getManagedNotifications(actorUserId, pageable, canManageAll);
+    public ResultPaginationDTO<ResNotificationDTO> getManagedNotifications(Long actorUserId, Pageable pageable,
+            boolean canManageAll) {
+        return operations.getManagedNotifications(actorUserId, pageable, canManageAll);
     }
 
     @Transactional(readOnly = true)
     public ResNotificationDTO getNotificationDetail(Long id, Long actorUserId, boolean isManager) {
-        return queryService.getNotificationDetail(id, actorUserId, isManager);
+        return operations.getNotificationDetail(id, actorUserId, isManager);
     }
 
     @Transactional
     public ResNotificationReceiptDTO markAsRead(Long id, Long actorUserId) {
-        return readService.markAsRead(id, actorUserId);
+        return operations.markAsRead(id, actorUserId);
     }
 }

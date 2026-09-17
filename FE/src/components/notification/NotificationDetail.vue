@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import NotificationStatusBadge from './NotificationStatusBadge.vue'
-import type { NotificationAudienceType, NotificationItem } from '@/types/notification'
+import type { NotificationAudienceType, NotificationChannel, NotificationItem } from '@/types/notification'
 
 const props = withDefaults(
   defineProps<{
@@ -30,6 +30,11 @@ const audienceLabels: Record<NotificationAudienceType, string> = {
   INDIVIDUAL: 'Cá nhân',
   CLASS: 'Lớp học',
   SCHOOL: 'Toàn trường',
+}
+
+const channelLabels: Record<NotificationChannel, string> = {
+  IN_APP: 'Trong ứng dụng',
+  EMAIL: 'Email',
 }
 
 const audienceDetails = computed(() => props.notification.audienceDetails ?? null)
@@ -142,6 +147,7 @@ const hasRecipientReadState = computed(() => (
           :value="audienceLabels[props.notification.audienceType] ?? props.notification.audienceType"
           severity="info"
         />
+        <Tag :value="channelLabels[props.notification.channel] ?? props.notification.channel" severity="secondary" />
         <Tag
           v-if="props.notification.read !== null && props.notification.read !== undefined"
           :value="props.notification.read ? 'Đã đọc' : 'Chưa đọc'"

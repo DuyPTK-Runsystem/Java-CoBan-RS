@@ -15,7 +15,7 @@ class NotificationMigrationTest {
     private static final String MIGRATION_LOCATION = "classpath:db/migration";
 
     @Test
-    void v26EnforcesNotificationV3ConstraintsAfterV25() throws Exception {
+    void v27EnablesEmailChannelAndDeliveryContractAfterV26() throws Exception {
         JdbcDataSource dataSource = dataSource("flyway-notification-school-scope");
         Flyway.configure().dataSource(dataSource).locations(MIGRATION_LOCATION).load().migrate();
 
@@ -27,6 +27,15 @@ class NotificationMigrationTest {
                     """)) {
                 Assertions.assertTrue(resultSet.next());
                 Assertions.assertEquals(-164191837, resultSet.getInt(1));
+            }
+
+            try (ResultSet resultSet = statement.executeQuery("""
+                    SELECT COUNT(*)
+                    FROM flyway_schema_history
+                    WHERE version = '27' AND success = TRUE
+                    """)) {
+                Assertions.assertTrue(resultSet.next());
+                Assertions.assertEquals(1, resultSet.getInt(1));
             }
 
             try (ResultSet resultSet = statement.executeQuery("""
@@ -47,7 +56,27 @@ class NotificationMigrationTest {
                 Assertions.assertTrue(resultSet.next());
                 String checkClause = resultSet.getString(1);
                 Assertions.assertTrue(checkClause.contains("IN_APP"));
-                Assertions.assertFalse(checkClause.contains("EMAIL"));
+                Assertions.assertTrue(checkClause.contains("EMAIL"));
+            }
+
+            try (ResultSet resultSet = statement.executeQuery("""
+                    SELECT COUNT(*)
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'notification_receipt'
+                      AND COLUMN_NAME IN ('delivery_status', 'delivery_error', 'delivered_at')
+                    """)) {
+                Assertions.assertTrue(resultSet.next());
+                Assertions.assertEquals(3, resultSet.getInt(1));
+            }
+
+            try (ResultSet resultSet = statement.executeQuery("""
+                    SELECT COUNT(*)
+                    FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+                    WHERE TABLE_NAME = 'notification_receipt'
+                      AND CONSTRAINT_NAME = 'ck_notification_receipt_delivery_status'
+                    """)) {
+                Assertions.assertTrue(resultSet.next());
+                Assertions.assertEquals(1, resultSet.getInt(1));
             }
 
             try (ResultSet resultSet = statement.executeQuery("""

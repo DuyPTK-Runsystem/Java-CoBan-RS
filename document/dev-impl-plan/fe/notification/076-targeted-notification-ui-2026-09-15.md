@@ -28,7 +28,7 @@ suy diễn authorization hoặc membership; FE gửi `schoolScope: DEFAULT_SCHOO
 
 ### Out-of-scope
 
-- Email/push UI và SMTP retry; không thay đổi `SemesterNotificationPanel` v2.
+- Push UI và SMTP retry; không thay đổi `SemesterNotificationPanel` v2.
 - Scheduler UI nếu D09 chưa được duyệt.
 - FE tự lọc membership, tự tính school scope hoặc tự cấp quyền.
 - Claim browser/live PASS từ fixture/jsdom.
@@ -139,6 +139,8 @@ mutation lỗi.
 | Browser/live integration | **NOT RUN** | Chưa chạy authenticated browser walkthrough |
 
 FE pagination dùng metadata zero-based `page/pageSize/totalPages/totalItems`; service serialize
-`pageSize` thành query `size` theo backend boundary. Không đánh dấu Plan 076 là `COMPLETED` khi
+`pageSize` thành query `size` theo backend boundary. Amendment v3 cho phép composer chọn
+`IN_APP` (mặc định, field có thể bỏ trống) hoặc `EMAIL`; delivery failure được backend lưu
+theo receipt, FE không tự retry SMTP. Không đánh dấu Plan 076 là `COMPLETED` khi
 backend full test/build và repository PMD còn FAIL; các runtime/migration gate chưa chạy. Luồng notification email
 v2 không thuộc scope Plan 076.

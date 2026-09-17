@@ -49,7 +49,7 @@ module mới, kênh mặc định đề xuất là `IN_APP`; email/push vẫn th
 |---|---|---|
 | D01 | Quyền tạo/xuất bản | `ADMIN`, `ACADEMIC_OFFICE`; `TEACHER` chỉ đọc ở slice đầu |
 | D02 | Resolution `CLASS`/`SCHOOL` | **Đã triển khai**: snapshot recipient tại thời điểm publish; không tự thêm membership về sau |
-| D03 | Channel | **Đã chốt**: chỉ `IN_APP` cho v3; email/push để phase riêng |
+| D03 | Channel | **Amendment đã approved**: `IN_APP` (mặc định) và `EMAIL`; push để phase riêng |
 | D04 | Lifecycle | **Đã triển khai theo slice immediate**: draft/published/expired/cancelled; future publishAt trả lỗi |
 | D05 | School scope | **Đã chốt**: FE gửi `DEFAULT_SCHOOL`; BE validate đúng hằng số này vì app chỉ phục vụ một school |
 | D06 | Content policy | Chốt giới hạn title/body, plain text hay cho phép link/HTML |
@@ -175,3 +175,15 @@ notification v2 vẫn hoạt động độc lập.
 Không đánh dấu Plan 076 là `COMPLETED` khi full test, repository PMD và build còn FAIL; các gate
 migration/browser/live vẫn chưa chạy.
 Notification email v2 (`semester_completeness_notification`) nằm ngoài scope và không bị thay đổi.
+
+### Amendment — v3 EMAIL delivery
+
+- `ReqCreateNotificationDTO.channel` nhận `IN_APP` hoặc `EMAIL`; bỏ trống/null vẫn là `IN_APP`.
+- Publish vẫn resolve `INDIVIDUAL`, `CLASS`, `SCHOOL` như hiện tại và luôn tạo receipt/inbox.
+- Với `EMAIL`, title/body được gửi độc lập đến từng recipient bằng Spring Mail. Mỗi receipt ghi
+  `PENDING`, `SENT` hoặc `FAILED`; lỗi sender/config/email/SMTP được cô lập theo recipient và không
+  hủy publish của recipient khác.
+- Schema chỉ mở rộng constraint channel và thêm ba cột delivery trên receipt ở V27; không có outbox
+  hoặc thay đổi migration của notification v2.
+- Schema hiện tại chỉ có `teacher.email` và username có thể là email; student/app user không có email
+  sẽ được ghi `FAILED` rõ ràng thay vì suy đoán địa chỉ.
