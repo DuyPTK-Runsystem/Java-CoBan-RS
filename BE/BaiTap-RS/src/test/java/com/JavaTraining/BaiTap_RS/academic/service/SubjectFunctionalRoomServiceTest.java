@@ -104,6 +104,25 @@ class SubjectFunctionalRoomServiceTest {
         service.updateRoomsForSubject(10L, req);
 
         Mockito.verify(mappingRepository).deleteBySubjectId(10L);
+        Mockito.verify(mappingRepository).flush();
+        Mockito.verify(mappingRepository).saveAll(Mockito.anyList());
+    }
+
+    @Test
+    void updateRoomsForSubject_replacesExistingSetWithoutRetainedMappingConflict() {
+        Mockito.when(subjectRepository.existsById(10L)).thenReturn(true);
+        FunctionalRoom room1 = new FunctionalRoom("LAB_01", "Lab 1");
+        FunctionalRoom room2 = new FunctionalRoom("LAB_02", "Lab 2");
+        ReflectionTestUtils.setField(room1, "id", 1L);
+        ReflectionTestUtils.setField(room2, "id", 2L);
+        Mockito.when(roomRepository.findById(1L)).thenReturn(Optional.of(room1));
+        Mockito.when(roomRepository.findById(2L)).thenReturn(Optional.of(room2));
+
+        ReqUpdateSubjectFunctionalRoomsDTO req = new ReqUpdateSubjectFunctionalRoomsDTO(List.of(1L, 2L), null);
+        service.updateRoomsForSubject(10L, req);
+
+        Mockito.verify(mappingRepository).deleteBySubjectId(10L);
+        Mockito.verify(mappingRepository).flush();
         Mockito.verify(mappingRepository).saveAll(Mockito.anyList());
     }
 

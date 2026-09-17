@@ -79,11 +79,19 @@ const eligibilityRuleOptions = computed(() => {
 })
 
 function getEligibilityRuleLabel(ruleCode: string): string {
+  const configuredRule = activePolicy.value?.rules.find((rule) => rule.ruleCode === ruleCode)
+  if (configuredRule) {
+    return `${configuredRule.ruleName} (giảm ${configuredRule.reductionPeriods} tiết)`
+  }
   const labels: Record<string, string> = {
     NURSING_CHILD_UNDER_12M: 'Nuôi con nhỏ dưới 12 tháng',
     HOMEROOM: 'Giáo viên chủ nhiệm',
   }
-  return labels[ruleCode] ?? 'Điều kiện miễn giảm khác'
+  return labels[ruleCode] ?? `${ruleCode || 'Điều kiện miễn giảm khác'}`
+}
+
+function getSupplementalRules(policy: TeacherLoadPolicy): TeacherLoadRule[] {
+  return policy.rules.filter((rule) => !['HOMEROOM', 'NURSING_CHILD_UNDER_12M'].includes(rule.ruleCode))
 }
 
 // Calendar init
@@ -239,6 +247,7 @@ async function handleSaveEligibility() {
     if (editingEligibility) {
       await updateTeacherLoadEligibility(editingEligibility.id, {
         expectedVersion: editingEligibility.version,
+        ruleCode: eligibilityForm.value.conditionType,
         validFrom: formatDateStr(eligibilityForm.value.validFrom),
         validTo: formatDateStr(eligibilityForm.value.validTo),
         evidenceReference: eligibilityForm.value.evidenceInfo,
@@ -351,6 +360,16 @@ onMounted(() => {
           </Column>
           <Column header="Nuôi con nhỏ" style="width: 120px" class="text-center">
             <template #body="{ data }">-{{ data.nursingChildReduction }} tiết</template>
+          </Column>
+          <Column header="Miễn giảm bổ sung" style="min-width: 250px">
+            <template #body="{ data }">
+              <div v-if="getSupplementalRules(data).length" class="flex flex-col gap-1">
+                <span v-for="rule in getSupplementalRules(data)" :key="rule.ruleCode">
+                  {{ rule.ruleName || rule.ruleCode }}: -{{ rule.reductionPeriods }} tiết
+                </span>
+              </div>
+              <span v-else class="text-gray-500">Không có</span>
+            </template>
           </Column>
           <Column header="Trạng thái" style="width: 140px">
             <template #body="{ data }">

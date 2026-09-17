@@ -3,7 +3,7 @@ package com.JavaTraining.BaiTap_RS.lessonlog.service;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.JavaTraining.BaiTap_RS.common.contract.ResultPaginationDTO;
@@ -14,57 +14,63 @@ import com.JavaTraining.BaiTap_RS.lessonlog.domain.DTOs.response.LessonLogPolicy
 import com.JavaTraining.BaiTap_RS.lessonlog.domain.DTOs.response.LessonLogRevisionResponse;
 import com.JavaTraining.BaiTap_RS.lessonlog.domain.DTOs.response.LessonLogScheduleResponse;
 import com.JavaTraining.BaiTap_RS.lessonlog.domain.entity.LessonLogRevision;
+import com.JavaTraining.BaiTap_RS.academic.domain.entity.Semester;
 
-import lombok.RequiredArgsConstructor;
+class LessonLogReadFacade {
+    protected LessonLogSourceResolver sourceResolver;
+    protected LessonLogEntryLifecycleService lifecycleService;
+    @Autowired
+    private LessonLogQueryService queryService;
 
-/** Facade for lesson-log read use cases. */
-@Service
-@RequiredArgsConstructor
-public class LessonLogQueryService {
-    private final LessonLogEntryReadService entryReadService;
-    private final LessonLogScheduleReadService scheduleReadService;
-    private final LessonLogClassWeekReadService classWeekReadService;
-    private final LessonLogRevisionReadService revisionReadService;
-    private final LessonLogPolicyService policyService;
+    protected LocalDate homeroomScopeDate(LocalDate weekStart, Semester semester) {
+        LocalDate weekEnd = weekStart.plusDays(6);
+        if (semester.getEndDate() != null && weekEnd.isAfter(semester.getEndDate())) {
+            return semester.getEndDate();
+        }
+        if (semester.getStartDate() != null && weekEnd.isBefore(semester.getStartDate())) {
+            return semester.getStartDate();
+        }
+        return weekEnd;
+    }
 
     @Transactional(readOnly = true)
     public LessonLogEntryResponse get(Long entryId) {
-        return entryReadService.get(entryId);
+        return queryService.get(entryId);
     }
 
     @Transactional(readOnly = true)
     public ResultPaginationDTO<LessonLogRevision> revisions(Long entryId, int page, int size) {
-        return entryReadService.revisions(entryId, page, size);
+        return queryService.revisions(entryId, page, size);
     }
 
     @Transactional(readOnly = true)
     public LessonLogScheduleResponse mySchedule(LocalDate date) {
-        return scheduleReadService.mySchedule(date);
+        return queryService.mySchedule(date);
     }
 
     @Transactional(readOnly = true)
     public List<LessonLogClassResponse> classes(Long semesterId) {
-        return scheduleReadService.classes(semesterId);
+        return queryService.classes(semesterId);
     }
 
     @Transactional(readOnly = true)
     public LessonLogClassWeekResponse classWeek(Long classId, Long semesterId, LocalDate weekStart) {
-        return classWeekReadService.classWeek(classId, semesterId, weekStart);
+        return queryService.classWeek(classId, semesterId, weekStart);
     }
 
     @Transactional(readOnly = true)
     public ResultPaginationDTO<LessonLogRevisionResponse> weeklyRevisions(Long classId, Long semesterId,
             LocalDate weekStart, int page, int size) {
-        return revisionReadService.weeklyRevisions(classId, semesterId, weekStart, page, size);
+        return queryService.weeklyRevisions(classId, semesterId, weekStart, page, size);
     }
 
     @Transactional(readOnly = true)
     public ResultPaginationDTO<LessonLogRevisionResponse> policyRevisions(int page, int size) {
-        return revisionReadService.policyRevisions(page, size);
+        return queryService.policyRevisions(page, size);
     }
 
     @Transactional(readOnly = true)
     public LessonLogPolicyResponse getPolicy(LocalDate date) {
-        return policyService.getPolicy(date);
+        return queryService.getPolicy(date);
     }
 }

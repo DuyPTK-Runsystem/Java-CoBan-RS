@@ -13,7 +13,7 @@ function find(day: CalendarDay, session: SessionType, period: number) { return p
       <template v-for="period in [1, 2, 3, 4]" :key="`${session}-${period}`">
         <div class="matrix-cell matrix-label">{{ session === 'MORNING' ? 'Sáng' : 'Chiều' }} · tiết {{ period }}</div>
         <div v-for="day in props.days" :key="`${day.date}-${session}-${period}`" class="matrix-cell matrix-slot" :class="{ 'matrix-off': day.kind !== 'SCHOOL_DAY' }">
-          <button v-if="find(day, session, period)" type="button" class="matrix-entry" :disabled="find(day, session, period)!.status === 'UNLOGGED'" @click="emit('select', find(day, session, period)!)"><strong>{{ find(day, session, period)?.subjectName || 'Tiết đã phân công' }}</strong><LessonLogStatusBadge :status="find(day, session, period)!.status" /></button>
+          <button v-if="find(day, session, period)" type="button" class="matrix-entry" :aria-label="`${find(day, session, period)?.status === 'UNLOGGED' ? 'Ghi' : 'Mở'} sổ đầu bài ${find(day, session, period)?.subjectName || 'tiết đã phân công'}`" @click="emit('select', find(day, session, period)!)"><strong>{{ find(day, session, period)?.subjectName || 'Tiết đã phân công' }}</strong><LessonLogStatusBadge :status="find(day, session, period)!.status" /></button>
           <span v-else class="matrix-empty">{{ day.kind === 'SCHOOL_DAY' ? 'Chưa ghi' : day.kind === 'HOLIDAY' ? 'Nghỉ' : 'Ngoài kỳ' }}</span>
         </div>
       </template>

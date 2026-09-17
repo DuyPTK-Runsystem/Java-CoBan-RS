@@ -61,6 +61,9 @@ public class TeacherLoadEligibilityService {
     }
 
     private void applyUpdates(TeacherLoadEligibility record, ReqUpdateEligibilityDTO req) {
+        if (req.ruleCode() != null) {
+            record.setRuleCode(req.ruleCode());
+        }
         if (req.validFrom() != null) {
             record.setValidFrom(req.validFrom());
         }

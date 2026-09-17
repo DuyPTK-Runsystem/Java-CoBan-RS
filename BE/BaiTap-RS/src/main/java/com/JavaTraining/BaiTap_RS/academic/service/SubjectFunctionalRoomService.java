@@ -54,6 +54,10 @@ public class SubjectFunctionalRoomService {
             validateRoomActive(roomId);
         }
         mappingRepository.deleteBySubjectId(subjectId);
+        // Ensure the old mapping rows are deleted before inserting the replacement set.
+        // Without an explicit flush, Hibernate may execute the inserts first and hit
+        // uk_subject_functional_room when a mapping is retained (for example [1] -> [1, 2]).
+        mappingRepository.flush();
         List<SubjectFunctionalRoom> newMappings = roomIds.stream().distinct()
                 .map(roomId -> new SubjectFunctionalRoom(subjectId, roomId))
                 .toList();

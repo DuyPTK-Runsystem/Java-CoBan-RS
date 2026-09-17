@@ -197,6 +197,7 @@ export interface CreateTeacherLoadEligibilityPayload {
 
 export interface UpdateTeacherLoadEligibilityPayload {
   expectedVersion: number
+  ruleCode?: string
   validFrom?: string
   validTo?: string
   evidenceReference?: string

@@ -15,4 +15,18 @@ describe('LessonLogWeeklyMatrix', () => {
     await wrapper.find('.matrix-entry').trigger('click')
     expect(wrapper.emitted('select')?.[0]?.[0]).toMatchObject({ entryId: 101 })
   })
+
+  it('emits an unlogged occurrence so the parent can open the entry dialog', async () => {
+    const unlogged = { ...weeklyFixture.items[0], entryId: 0, status: 'UNLOGGED' as const, canTeacherEdit: true }
+    const wrapper = mount(LessonLogWeeklyMatrix, { props: { days: weeklyFixture.calendarDays, entries: [unlogged] } })
+
+    await wrapper.find('.matrix-entry').trigger('click')
+
+    expect(wrapper.emitted('select')?.[0]?.[0]).toMatchObject({
+      entryId: 0,
+      lessonDate: unlogged.lessonDate,
+      session: unlogged.session,
+      periodIndex: unlogged.periodIndex,
+    })
+  })
 })
