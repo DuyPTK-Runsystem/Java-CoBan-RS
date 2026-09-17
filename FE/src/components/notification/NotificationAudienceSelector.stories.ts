@@ -20,14 +20,27 @@ export const AudienceSchool: Story = {
 export const AudienceClass: Story = {
   args: {
     audienceType: 'CLASS',
-    targetReference: '10A1',
+    targetReference: '101',
   },
 }
 
 export const AudienceIndividual: Story = {
   args: {
     audienceType: 'INDIVIDUAL',
-    targetReference: '2, 5, 10',
+    recipientUserIds: [2, 5, 10],
   },
 }
 
+export const AudienceIndividualFiltered: Story = {
+  args: {
+    audienceType: 'INDIVIDUAL',
+    recipientUserIds: [2, 5],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Multi-select người nhận với tìm kiếm tên, role, lớp học sinh và lớp giáo viên; filter chỉ ảnh hưởng lookup, không đi vào payload composer.',
+      },
+    },
+  },
+}

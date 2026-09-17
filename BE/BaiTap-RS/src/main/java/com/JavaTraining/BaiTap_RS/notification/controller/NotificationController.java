@@ -31,7 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v3/notifications")
 public class NotificationController {
 
-    private static final String ROLE_ADMIN_OR_ACADEMIC_OFFICE = "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE')";
+    private static final String ROLE_NOTIFICATION_SENDER =
+            "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE', 'TEACHER')";
 
     private final NotificationService notificationService;
 
@@ -40,7 +41,7 @@ public class NotificationController {
     }
 
     @PostMapping
-    @PreAuthorize(ROLE_ADMIN_OR_ACADEMIC_OFFICE)
+    @PreAuthorize(ROLE_NOTIFICATION_SENDER)
     @ApiMessage("Tạo dự thảo thông báo")
     public ResponseEntity<ResNotificationDTO> create(
             @Valid @RequestBody ReqCreateNotificationDTO request,
@@ -61,13 +62,14 @@ public class NotificationController {
     }
 
     @GetMapping("/manage")
-    @PreAuthorize(ROLE_ADMIN_OR_ACADEMIC_OFFICE)
+    @PreAuthorize(ROLE_NOTIFICATION_SENDER)
     @ApiMessage("Lấy danh sách thông báo quản lý")
     public ResultPaginationDTO<ResNotificationDTO> manage(
             @RequestParam(name = "page", defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(name = "size", defaultValue = "20") @Positive @Max(2000) int size,
             @AuthenticationPrincipal UserPrincipal principal) {
-        return notificationService.getManagedNotifications(principal.getId(), PageRequest.of(page, size));
+        return notificationService.getManagedNotifications(
+                principal.getId(), PageRequest.of(page, size), hasOfficeRole(principal));
     }
 
     @GetMapping("/{id}")
@@ -76,28 +78,27 @@ public class NotificationController {
     public ResNotificationDTO detail(
             @PathVariable("id") @Positive Long id,
             @AuthenticationPrincipal UserPrincipal principal) {
-        boolean isManager = principal.getRoleCodes().contains("ADMIN")
-                || principal.getRoleCodes().contains("ACADEMIC_OFFICE");
-        return notificationService.getNotificationDetail(id, principal.getId(), isManager);
+        return notificationService.getNotificationDetail(
+                id, principal.getId(), hasOfficeRole(principal));
     }
 
     @PostMapping("/{id}/publish")
-    @PreAuthorize(ROLE_ADMIN_OR_ACADEMIC_OFFICE)
+    @PreAuthorize(ROLE_NOTIFICATION_SENDER)
     @ApiMessage("Xuất bản thông báo")
     public ResNotificationDTO publish(
             @PathVariable("id") @Positive Long id,
             @Valid @RequestBody(required = false) ReqPublishNotificationDTO request,
             @AuthenticationPrincipal UserPrincipal principal) {
-        return notificationService.publish(id, request, principal.getId());
+        return notificationService.publish(id, request, principal.getId(), hasOfficeRole(principal));
     }
 
     @PostMapping("/{id}/cancel")
-    @PreAuthorize(ROLE_ADMIN_OR_ACADEMIC_OFFICE)
+    @PreAuthorize(ROLE_NOTIFICATION_SENDER)
     @ApiMessage("Hủy thông báo")
     public ResNotificationDTO cancel(
             @PathVariable("id") @Positive Long id,
             @AuthenticationPrincipal UserPrincipal principal) {
-        return notificationService.cancel(id, principal.getId());
+        return notificationService.cancel(id, principal.getId(), hasOfficeRole(principal));
     }
 
     @PostMapping("/{id}/read")
@@ -107,5 +108,10 @@ public class NotificationController {
             @PathVariable("id") @Positive Long id,
             @AuthenticationPrincipal UserPrincipal principal) {
         return notificationService.markAsRead(id, principal.getId());
+    }
+
+    private boolean hasOfficeRole(UserPrincipal principal) {
+        return principal.getRoleCodes().contains("ADMIN")
+                || principal.getRoleCodes().contains("ACADEMIC_OFFICE");
     }
 }

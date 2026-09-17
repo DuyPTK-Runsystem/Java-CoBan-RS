@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClass;
+import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
 import com.JavaTraining.BaiTap_RS.common.contract.ResultPaginationDTO;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
 import com.JavaTraining.BaiTap_RS.notification.domain.DTOs.requests.ReqCreateNotificationDTO;
@@ -16,8 +18,9 @@ import com.JavaTraining.BaiTap_RS.notification.domain.entity.NotificationAudienc
 import com.JavaTraining.BaiTap_RS.notification.domain.entity.NotificationChannel;
 import com.JavaTraining.BaiTap_RS.notification.domain.entity.NotificationReceipt;
 import com.JavaTraining.BaiTap_RS.notification.domain.entity.NotificationStatus;
-import com.JavaTraining.BaiTap_RS.notification.repository.NotificationReceiptRepository;
+import com.JavaTraining.BaiTap_RS.notification.repository.NotificationIndividualAudienceProjectionRepository;
 import com.JavaTraining.BaiTap_RS.notification.repository.NotificationRepository;
+import com.JavaTraining.BaiTap_RS.notification.repository.NotificationReceiptRepository;
 import com.JavaTraining.BaiTap_RS.notification.service.NotificationAudienceService;
 import com.JavaTraining.BaiTap_RS.notification.service.NotificationAuditService;
 import com.JavaTraining.BaiTap_RS.notification.service.NotificationService;
@@ -28,12 +31,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.mockito.ArgumentMatchers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -63,7 +66,23 @@ class NotificationServiceTest {
         @Mock
         private NotificationAuditService notificationAuditService;
 
+        @Mock
+        private SchoolClassRepository schoolClassRepository;
+
+        @Mock
+        private NotificationIndividualAudienceProjectionRepository individualAudienceProjectionRepository;
+
         private NotificationService notificationService;
+
+        private NotificationService managerNotificationService() {
+                return new NotificationService(
+                                notificationRepository,
+                                notificationReceiptRepository,
+                                notificationAudienceService,
+                                notificationAuditService,
+                                schoolClassRepository,
+                                individualAudienceProjectionRepository);
+        }
 
         @BeforeEach
         void setUp() {
@@ -574,6 +593,26 @@ class NotificationServiceTest {
         }
 
         @Test
+        void teacherCannotPublishAnotherSenderNotification() {
+                Notification notification = new Notification(
+                                "Thông báo của người khác",
+                                "Nội dung",
+                                NotificationAudienceType.SCHOOL,
+                                null,
+                                1L,
+                                "DEFAULT_SCHOOL");
+                ReflectionTestUtils.setField(notification, "id", 42L);
+                Mockito.when(notificationRepository.findById(42L)).thenReturn(Optional.of(notification));
+
+                AppException ex = Assertions.assertThrows(
+                                AppException.class,
+                                () -> notificationService.publish(42L, null, 2L, false));
+
+                Assertions.assertEquals(HttpStatus.FORBIDDEN, ex.getStatus());
+                Mockito.verifyNoInteractions(notificationAudienceService, notificationReceiptRepository);
+        }
+
+        @Test
         void publishExpiredTimestampThrowsUnprocessableEntity() {
                 Notification notification = new Notification(
                                 "Thông báo hết hạn",
@@ -655,6 +694,26 @@ class NotificationServiceTest {
                 AppException ex = Assertions.assertThrows(AppException.class,
                                 () -> notificationService.cancel(41L, 1L));
                 Assertions.assertEquals(HttpStatus.CONFLICT, ex.getStatus());
+        }
+
+        @Test
+        void teacherCannotCancelAnotherSenderNotification() {
+                Notification notification = new Notification(
+                                "Thông báo của người khác",
+                                "Nội dung",
+                                NotificationAudienceType.SCHOOL,
+                                null,
+                                1L,
+                                "DEFAULT_SCHOOL");
+                ReflectionTestUtils.setField(notification, "id", 43L);
+                Mockito.when(notificationRepository.findById(43L)).thenReturn(Optional.of(notification));
+
+                AppException ex = Assertions.assertThrows(
+                                AppException.class,
+                                () -> notificationService.cancel(43L, 2L, false));
+
+                Assertions.assertEquals(HttpStatus.FORBIDDEN, ex.getStatus());
+                Mockito.verify(notificationRepository, Mockito.never()).save(Mockito.any(Notification.class));
         }
 
         @Test
@@ -838,6 +897,7 @@ class NotificationServiceTest {
                 ResNotificationDTO response = notificationService.getNotificationDetail(61L, 9L, false);
 
                 Assertions.assertNull(response.getTargetReference());
+                Assertions.assertNull(response.getAudienceDetails());
                 Assertions.assertNull(response.getSenderId());
                 Assertions.assertNull(response.getIdempotencyKey());
                 String json = new ObjectMapper()
@@ -849,7 +909,7 @@ class NotificationServiceTest {
         }
 
         @Test
-        void managerResponsesRetainTargetingDetails() {
+        void managerResponsesHideRawTargetReferenceAndExposeClassAudienceDetails() {
                 Notification notification = new Notification(
                                 "Quản lý",
                                 "Nội dung",
@@ -861,12 +921,24 @@ class NotificationServiceTest {
                 ReflectionTestUtils.setField(notification, "id", 62L);
 
                 Mockito.when(notificationRepository.findById(62L)).thenReturn(Optional.of(notification));
+                SchoolClass schoolClass = Mockito.mock(SchoolClass.class);
+                Mockito.when(schoolClass.getClassName()).thenReturn("Lớp 10A1");
+                Mockito.when(schoolClassRepository.findById(101L)).thenReturn(Optional.of(schoolClass));
+                Mockito.when(notificationReceiptRepository.findByNotificationId(62L))
+                                .thenReturn(List.of(
+                                                new NotificationReceipt(62L, 9L, "CLASS"),
+                                                new NotificationReceipt(62L, 10L, "CLASS")));
 
-                ResNotificationDTO response = notificationService.getNotificationDetail(62L, 1L, true);
+                ResNotificationDTO response = managerNotificationService().getNotificationDetail(62L, 1L, true);
 
-                Assertions.assertEquals("101", response.getTargetReference());
+                Assertions.assertNull(response.getTargetReference());
                 Assertions.assertEquals(1L, response.getSenderId());
                 Assertions.assertEquals("MANAGER-KEY", response.getIdempotencyKey());
+                Assertions.assertNotNull(response.getAudienceDetails());
+                Assertions.assertEquals(NotificationAudienceType.CLASS, response.getAudienceDetails().audienceType());
+                Assertions.assertEquals("Lớp 10A1", response.getAudienceDetails().displayLabel());
+                Assertions.assertEquals(2, response.getAudienceDetails().recipientCount());
+                Assertions.assertTrue(response.getAudienceDetails().displayDataAvailable());
         }
 
         @Test
@@ -894,6 +966,7 @@ class NotificationServiceTest {
                                 .get(0);
 
                 Assertions.assertNull(response.getTargetReference());
+                Assertions.assertNull(response.getAudienceDetails());
                 Assertions.assertNull(response.getSenderId());
                 Assertions.assertNull(response.getIdempotencyKey());
                 String json = new ObjectMapper()

@@ -13,20 +13,24 @@ public class NotificationDraftService {
     private final NotificationRequestValidator requestValidator;
     private final NotificationIdempotencyService idempotencyService;
     private final NotificationResponseMapper responseMapper;
+    private final NotificationAudienceService audienceService;
 
     public NotificationDraftService(
             NotificationAuditService notificationAuditService,
             NotificationRequestValidator requestValidator,
             NotificationIdempotencyService idempotencyService,
-            NotificationResponseMapper responseMapper) {
+            NotificationResponseMapper responseMapper,
+            NotificationAudienceService audienceService) {
         this.notificationAuditService = notificationAuditService;
         this.requestValidator = requestValidator;
         this.idempotencyService = idempotencyService;
         this.responseMapper = responseMapper;
+        this.audienceService = audienceService;
     }
 
     public ResNotificationDTO createDraft(ReqCreateNotificationDTO request, Long actorUserId) {
         requestValidator.validateCreateRequest(request);
+        audienceService.validateCreateAudience(request);
         String fingerprint = idempotencyService.buildFingerprint(request);
         Notification existing = idempotencyService.findExisting(
                 request.getIdempotencyKey(), fingerprint, actorUserId);
@@ -52,9 +56,12 @@ public class NotificationDraftService {
         if (request.getAudienceType() == NotificationAudienceType.INDIVIDUAL
                 && request.getRecipientUserIds() != null
                 && !request.getRecipientUserIds().isEmpty()) {
-            return request.getRecipientUserIds().stream()
+            return audienceService.canonicalizeRecipientIds(request.getRecipientUserIds()).stream()
                     .map(String::valueOf)
                     .collect(Collectors.joining(","));
+        }
+        if (request.getAudienceType() == NotificationAudienceType.CLASS) {
+            return audienceService.canonicalizeClassReference(request.getTargetReference());
         }
         return request.getTargetReference();
     }

@@ -16,7 +16,7 @@ import Button from 'primevue/button'
 
 const route = useRoute()
 const router = useRouter()
-const { requireAccessToken, roles } = useAuthSession()
+const { requireAccessToken, roles, session } = useAuthSession()
 
 const notificationId = Number(route.params.notificationId)
 const notification = ref<NotificationItem | null>(null)
@@ -24,9 +24,7 @@ const loading = ref(true)
 const submitting = ref(false)
 const errorMessage = ref('')
 
-const canManage = ref(
-  roles.value.includes('ADMIN') || roles.value.includes('ACADEMIC_OFFICE'),
-)
+const canManage = ref(roles.value.includes('ADMIN') || roles.value.includes('ACADEMIC_OFFICE'))
 const conflictRequiresReload = ref(false)
 
 async function loadDetail(): Promise<void> {
@@ -42,7 +40,11 @@ async function loadDetail(): Promise<void> {
   try {
     const token = requireAccessToken()
     if (!token) return
-    notification.value = await fetchNotification(token, notificationId)
+    const loadedNotification = await fetchNotification(token, notificationId)
+    notification.value = loadedNotification
+    canManage.value = roles.value.includes('ADMIN')
+      || roles.value.includes('ACADEMIC_OFFICE')
+      || loadedNotification.senderId === session.value?.user.id
   } catch (err: unknown) {
     if (isApiError(err, 401)) return
     errorMessage.value = isApiError(err, 403)

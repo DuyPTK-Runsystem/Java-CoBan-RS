@@ -7,6 +7,9 @@ import com.JavaTraining.BaiTap_RS.notification.domain.DTOs.response.ResNotificat
 import com.JavaTraining.BaiTap_RS.notification.domain.DTOs.response.ResNotificationReceiptDTO;
 import com.JavaTraining.BaiTap_RS.notification.repository.NotificationReceiptRepository;
 import com.JavaTraining.BaiTap_RS.notification.repository.NotificationRepository;
+import com.JavaTraining.BaiTap_RS.notification.repository.NotificationIndividualAudienceProjectionRepository;
+import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +27,31 @@ public class NotificationService {
             NotificationReceiptRepository notificationReceiptRepository,
             NotificationAudienceService notificationAudienceService,
             NotificationAuditService notificationAuditService) {
+        this(
+                notificationRepository,
+                notificationReceiptRepository,
+                notificationAudienceService,
+                notificationAuditService,
+                null,
+                null);
+    }
+
+    @Autowired
+    public NotificationService(
+            NotificationRepository notificationRepository,
+            NotificationReceiptRepository notificationReceiptRepository,
+            NotificationAudienceService notificationAudienceService,
+            NotificationAuditService notificationAuditService,
+            SchoolClassRepository schoolClassRepository,
+            NotificationIndividualAudienceProjectionRepository individualAudienceProjectionRepository) {
         NotificationResponseMapper responseMapper = new NotificationResponseMapper();
+        NotificationAudienceDetailService audienceDetailService = schoolClassRepository == null
+                || individualAudienceProjectionRepository == null
+                ? null
+                : new NotificationAudienceDetailService(
+                        notificationReceiptRepository,
+                        schoolClassRepository,
+                        individualAudienceProjectionRepository);
         NotificationRequestValidator requestValidator = new NotificationRequestValidator();
         NotificationIdempotencyService idempotencyService =
                 new NotificationIdempotencyService(notificationRepository);
@@ -32,7 +59,8 @@ public class NotificationService {
                 notificationAuditService,
                 requestValidator,
                 idempotencyService,
-                responseMapper);
+                responseMapper,
+                notificationAudienceService);
         this.lifecycleService = new NotificationLifecycleService(
                 notificationRepository,
                 notificationReceiptRepository,
@@ -43,7 +71,8 @@ public class NotificationService {
         this.queryService = new NotificationQueryService(
                 notificationRepository,
                 notificationReceiptRepository,
-                responseMapper);
+                responseMapper,
+                audienceDetailService);
         this.readService = new NotificationReadService(
                 notificationReceiptRepository,
                 notificationRepository,
@@ -57,12 +86,23 @@ public class NotificationService {
 
     @Transactional
     public ResNotificationDTO publish(Long id, ReqPublishNotificationDTO request, Long actorUserId) {
-        return lifecycleService.publish(id, request, actorUserId);
+        return publish(id, request, actorUserId, true);
+    }
+
+    @Transactional
+    public ResNotificationDTO publish(
+            Long id, ReqPublishNotificationDTO request, Long actorUserId, boolean canManageAll) {
+        return lifecycleService.publish(id, request, actorUserId, canManageAll);
     }
 
     @Transactional
     public ResNotificationDTO cancel(Long id, Long actorUserId) {
-        return lifecycleService.cancel(id, actorUserId);
+        return cancel(id, actorUserId, true);
+    }
+
+    @Transactional
+    public ResNotificationDTO cancel(Long id, Long actorUserId, boolean canManageAll) {
+        return lifecycleService.cancel(id, actorUserId, canManageAll);
     }
 
     @Transactional(readOnly = true)
@@ -73,7 +113,13 @@ public class NotificationService {
 
     @Transactional(readOnly = true)
     public ResultPaginationDTO<ResNotificationDTO> getManagedNotifications(Long actorUserId, Pageable pageable) {
-        return queryService.getManagedNotifications(pageable);
+        return getManagedNotifications(actorUserId, pageable, true);
+    }
+
+    @Transactional(readOnly = true)
+    public ResultPaginationDTO<ResNotificationDTO> getManagedNotifications(
+            Long actorUserId, Pageable pageable, boolean canManageAll) {
+        return queryService.getManagedNotifications(actorUserId, pageable, canManageAll);
     }
 
     @Transactional(readOnly = true)

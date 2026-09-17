@@ -1,12 +1,16 @@
 import { apiClient } from '@/services/apiClient'
 import type {
   NotificationInboxQuery,
+  NotificationAudienceLookupQuery,
+  NotificationClassAudience,
+  NotificationIndividualAudience,
   NotificationItem,
   NotificationManageQuery,
   NotificationPage,
   NotificationReceipt,
   ReqCreateNotificationDTO,
   ReqPublishNotificationDTO,
+  ResultPaginationDTO,
 } from '@/types/notification'
 
 function notificationPage(response: NotificationPage): NotificationPage {
@@ -27,6 +31,48 @@ function paginationParams(page: number | undefined, pageSize: number | undefined
   // Spring Pageable names the request-size parameter `size`; the response contract calls it `pageSize`.
   if (pageSize !== undefined) params.set('size', String(pageSize))
   return params
+}
+
+function audienceLookupParams(query: NotificationAudienceLookupQuery = {}): URLSearchParams {
+  const params = paginationParams(query.page, query.pageSize)
+  const search = query.q?.trim()
+  if (search) params.set('q', search)
+  if (query.roleCode) params.set('roleCode', query.roleCode)
+  if (query.studentClassId != null) params.set('studentClassId', String(query.studentClassId))
+  if (query.teacherClassId != null) params.set('teacherClassId', String(query.teacherClassId))
+  return params
+}
+
+function audiencePage<T>(response: ResultPaginationDTO<T>): ResultPaginationDTO<T> {
+  return {
+    result: response.result,
+    meta: {
+      page: response.meta.page,
+      pageSize: response.meta.pageSize,
+      totalPages: response.meta.totalPages,
+      totalItems: response.meta.totalItems,
+    },
+  }
+}
+
+export function fetchNotificationClassAudiences(
+  token: string,
+  query: NotificationAudienceLookupQuery = {},
+): Promise<ResultPaginationDTO<NotificationClassAudience>> {
+  return apiClient.get<ResultPaginationDTO<NotificationClassAudience>>(
+    '/api/v3/notifications/audiences/classes',
+    { token, query: audienceLookupParams(query) },
+  ).then(audiencePage)
+}
+
+export function fetchNotificationIndividualAudiences(
+  token: string,
+  query: NotificationAudienceLookupQuery = {},
+): Promise<ResultPaginationDTO<NotificationIndividualAudience>> {
+  return apiClient.get<ResultPaginationDTO<NotificationIndividualAudience>>(
+    '/api/v3/notifications/audiences/individuals',
+    { token, query: audienceLookupParams(query) },
+  ).then(audiencePage)
 }
 
 export function fetchNotificationInbox(

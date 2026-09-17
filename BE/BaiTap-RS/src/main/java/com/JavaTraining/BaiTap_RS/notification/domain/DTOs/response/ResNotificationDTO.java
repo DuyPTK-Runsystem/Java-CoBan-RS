@@ -26,6 +26,8 @@ public class ResNotificationDTO {
     private NotificationAudienceType audienceType;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String targetReference;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private ResNotificationAudienceDetailsDTO audienceDetails;
     private String schoolScope;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long senderId;

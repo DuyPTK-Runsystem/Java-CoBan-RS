@@ -70,15 +70,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="notification-view" data-testid="notification-management-view">
-    <header class="page-heading">
-      <div>
+  <div class="notification-view notification-management-view" data-testid="notification-management-view">
+    <header class="page-heading notification-management-heading">
+      <div class="notification-management-heading-copy">
         <p class="eyebrow">THÔNG BÁO</p>
         <h1>Quản lý thông báo</h1>
-        <p>Quản lý, soạn thảo và theo dõi trạng thái các thông báo toàn trường.</p>
+        <p>Soạn thảo và theo dõi vòng đời thông báo toàn trường.</p>
       </div>
 
-      <div class="page-heading-actions">
+      <div class="page-heading-actions notification-management-actions">
         <Button
           label="Soạn thông báo mới"
           icon="pi pi-plus"
@@ -145,3 +145,44 @@ onMounted(() => {
     </section>
   </div>
 </template>
+
+<style scoped>
+.notification-management-view {
+  display: grid;
+  gap: 20px;
+}
+
+.notification-management-heading {
+  align-items: center;
+  margin-bottom: 0;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.notification-management-heading-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.notification-management-heading-copy .eyebrow,
+.notification-management-heading-copy h1,
+.notification-management-heading-copy p:last-child {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.notification-management-actions {
+  gap: 8px;
+}
+
+@media (max-width: 680px) {
+  .notification-management-heading {
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .notification-management-actions {
+    justify-content: flex-start;
+  }
+}
+</style>

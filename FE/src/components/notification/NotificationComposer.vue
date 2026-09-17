@@ -25,6 +25,7 @@ const title = ref('')
 const body = ref('')
 const audienceType = ref<NotificationAudienceType>('SCHOOL')
 const targetReference = ref('')
+const recipientUserIds = ref<number[]>([])
 const isPreview = ref(false)
 const errorMessage = ref('')
 let idempotencyKey: string | null = null
@@ -49,31 +50,18 @@ function handleSubmit(): void {
     return
   }
   if (audienceType.value === 'CLASS' && !targetReference.value.trim()) {
-    errorMessage.value = 'Vui lòng nhập mã lớp học nhận thông báo'
+    errorMessage.value = 'Vui lòng chọn lớp học nhận thông báo'
     return
   }
   if (
     audienceType.value === 'CLASS'
     && (!/^\d+$/.test(targetReference.value.trim()) || Number(targetReference.value) <= 0)
   ) {
-    errorMessage.value = 'Mã lớp học phải là số nguyên dương'
+    errorMessage.value = 'Lớp học đã chọn không hợp lệ'
     return
   }
-  if (audienceType.value === 'INDIVIDUAL' && !targetReference.value.trim()) {
-    errorMessage.value = 'Vui lòng nhập danh sách User ID nhận thông báo'
-    return
-  }
-
-  const rawRecipientIds = targetReference.value
-    .split(',')
-    .map((value) => value.trim())
-    .filter(Boolean)
-  const recipientIds = rawRecipientIds.map(Number)
-  if (
-    audienceType.value === 'INDIVIDUAL'
-    && (recipientIds.length === 0 || recipientIds.some((id) => !Number.isSafeInteger(id) || id <= 0))
-  ) {
-    errorMessage.value = 'Danh sách User ID phải là các số nguyên dương, cách nhau bởi dấu phẩy'
+  if (audienceType.value === 'INDIVIDUAL' && recipientUserIds.value.length === 0) {
+    errorMessage.value = 'Vui lòng chọn ít nhất một người nhận'
     return
   }
 
@@ -87,7 +75,7 @@ function handleSubmit(): void {
   if (audienceType.value === 'CLASS') {
     payload.targetReference = targetReference.value.trim()
   } else if (audienceType.value === 'INDIVIDUAL') {
-    payload.recipientUserIds = [...new Set(recipientIds)]
+    payload.recipientUserIds = [...new Set(recipientUserIds.value)]
   }
 
   const fingerprint = JSON.stringify(payload)
@@ -121,7 +109,11 @@ function handleSubmit(): void {
     </div>
 
     <div v-if="isPreview" class="notification-preview">
-      <div class="notification-preview-audience">Đối tượng: {{ audienceType }} ({{ targetReference || 'Toàn trường' }})</div>
+      <div class="notification-preview-audience">
+        Đối tượng: {{ audienceType }}
+        <span v-if="audienceType === 'INDIVIDUAL'">({{ recipientUserIds.length }} người đã chọn)</span>
+        <span v-else>({{ targetReference || 'Toàn trường' }})</span>
+      </div>
       <h3>{{ title || '(Chưa có tiêu đề)' }}</h3>
       <p>{{ body || '(Chưa có nội dung)' }}</p>
     </div>
@@ -153,6 +145,7 @@ function handleSubmit(): void {
       <NotificationAudienceSelector
         v-model:audience-type="audienceType"
         v-model:target-reference="targetReference"
+        v-model:recipient-user-ids="recipientUserIds"
         :disabled="props.loading"
       />
 

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -27,14 +28,24 @@ public class NotificationQueryService {
     private final NotificationRepository notificationRepository;
     private final NotificationReceiptRepository notificationReceiptRepository;
     private final NotificationResponseMapper responseMapper;
+    private final NotificationAudienceDetailService audienceDetailService;
 
     public NotificationQueryService(
             NotificationRepository notificationRepository,
             NotificationReceiptRepository notificationReceiptRepository,
             NotificationResponseMapper responseMapper) {
+        this(notificationRepository, notificationReceiptRepository, responseMapper, null);
+    }
+
+    public NotificationQueryService(
+            NotificationRepository notificationRepository,
+            NotificationReceiptRepository notificationReceiptRepository,
+            NotificationResponseMapper responseMapper,
+            NotificationAudienceDetailService audienceDetailService) {
         this.notificationRepository = notificationRepository;
         this.notificationReceiptRepository = notificationReceiptRepository;
         this.responseMapper = responseMapper;
+        this.audienceDetailService = audienceDetailService;
     }
 
     public ResultPaginationDTO<ResNotificationDTO> getInbox(
@@ -62,7 +73,14 @@ public class NotificationQueryService {
     }
 
     public ResultPaginationDTO<ResNotificationDTO> getManagedNotifications(Pageable pageable) {
-        Page<Notification> page = notificationRepository.findBySchoolScope(DEFAULT_SCHOOL_SCOPE, pageable);
+        return getManagedNotifications(null, pageable, true);
+    }
+
+    public ResultPaginationDTO<ResNotificationDTO> getManagedNotifications(
+            Long actorUserId, Pageable pageable, boolean canManageAll) {
+        Page<Notification> page = canManageAll
+                ? notificationRepository.findBySchoolScope(DEFAULT_SCHOOL_SCOPE, pageable)
+                : notificationRepository.findBySenderId(actorUserId, pageable);
         List<ResNotificationDTO> results = page.getContent().stream()
                 .map(notification -> responseMapper.toResponse(notification, null, null, true))
                 .toList();
@@ -77,11 +95,16 @@ public class NotificationQueryService {
         }
         Optional<NotificationReceipt> receiptOpt = notificationReceiptRepository
                 .findByNotificationIdAndRecipientUserId(id, actorUserId);
-        validateDetailAccess(notification, actorUserId, isManager, receiptOpt, id);
+        boolean canManage = isManager || Objects.equals(notification.getSenderId(), actorUserId);
+        validateDetailAccess(notification, actorUserId, canManage, receiptOpt, id);
 
         LocalDateTime readAt = receiptOpt.map(NotificationReceipt::getReadAt).orElse(null);
         Boolean read = receiptOpt.map(receipt -> receipt.getReadAt() != null).orElse(null);
-        return responseMapper.toResponse(notification, read, readAt, isManager);
+        ResNotificationDTO response = responseMapper.toResponse(notification, read, readAt, canManage);
+        if (canManage && audienceDetailService != null) {
+            response.setAudienceDetails(audienceDetailService.resolve(notification));
+        }
+        return response;
     }
 
     private void validateDetailAccess(

@@ -7,6 +7,15 @@ export type NotificationChannel = 'IN_APP'
 /** The deployed application has one school scope; keep this as a plain constant. */
 export const DEFAULT_SCHOOL = 'DEFAULT_SCHOOL' as const
 
+/** Manager-only, display-safe audience metadata returned by the v3 detail contract. */
+export interface NotificationAudienceDetails {
+  audienceType?: NotificationAudienceType | null
+  displayLabel?: string | null
+  recipientCount?: number | null
+  recipientDisplayNames?: string[] | null
+  displayDataAvailable?: boolean
+}
+
 export interface NotificationItem {
   id: number
   title: string
@@ -14,6 +23,7 @@ export interface NotificationItem {
   channel: NotificationChannel
   status: NotificationStatus
   audienceType: NotificationAudienceType
+  audienceDetails?: NotificationAudienceDetails | null
   targetReference?: string | null
   schoolScope?: string | null
   /** Backend omits senderId for recipient-facing responses. */
@@ -51,6 +61,32 @@ export interface ReqCreateNotificationDTO {
   idempotencyKey?: string
 }
 
+export interface NotificationClassAudience {
+  classId: number
+  classCode: string
+  className: string
+  academicYearId: number
+  eligibleRecipientCount: number
+}
+
+export interface NotificationIndividualAudience {
+  userId: number
+  displayName: string
+  studentCode?: string | null
+  username?: string | null
+  roleCodes?: NotificationRoleCode[]
+  studentClass?: NotificationAudienceClassContext | null
+  teacherClasses?: NotificationAudienceClassContext[]
+}
+
+export type NotificationRoleCode = 'STUDENT' | 'TEACHER' | 'ACADEMIC_OFFICE' | 'ADMIN'
+
+export interface NotificationAudienceClassContext {
+  classId: number
+  classCode: string
+  className: string
+}
+
 export interface ReqPublishNotificationDTO {
   expectedVersion?: number
 }
@@ -76,6 +112,15 @@ export interface NotificationInboxQuery {
 }
 
 export interface NotificationManageQuery {
+  page?: number
+  pageSize?: number
+}
+
+export interface NotificationAudienceLookupQuery {
+  q?: string
+  roleCode?: NotificationRoleCode
+  studentClassId?: number
+  teacherClassId?: number
   page?: number
   pageSize?: number
 }

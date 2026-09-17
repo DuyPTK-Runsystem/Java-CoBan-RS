@@ -257,13 +257,13 @@ const router = createRouter({
           path: 'notifications/manage',
           name: 'v2-notifications-manage',
           component: () => import('@/views/notification/NotificationManagementView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE', 'TEACHER'] },
         },
         {
           path: 'notifications/compose',
           name: 'v2-notifications-compose',
           component: () => import('@/views/notification/NotificationComposerView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE', 'TEACHER'] },
         },
         {
           path: 'notifications/:notificationId',

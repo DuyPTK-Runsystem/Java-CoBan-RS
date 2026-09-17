@@ -111,6 +111,14 @@ describe('router authentication guard', () => {
     expect(router.currentRoute.value.fullPath).toBe(path)
   })
 
+  it.each(['/v2/notifications/manage', '/v2/notifications/compose'])('allows TEACHER to send notifications via %s', async (path) => {
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 5, username: 'teacher01', roles: ['TEACHER'] } })
+
+    await router.push(path)
+
+    expect(router.currentRoute.value.fullPath).toBe(path)
+  })
+
   it('renders a nested v2 child through the authenticated layout outlet', async () => {
     saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'student01', roles: ['ADMIN'] } })
 

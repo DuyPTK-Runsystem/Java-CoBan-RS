@@ -21,7 +21,8 @@ public class NotificationResponseMapper {
                 .channel(notification.getChannel())
                 .status(effectiveStatus)
                 .audienceType(notification.getAudienceType())
-                .targetReference(includeTargetingDetails ? notification.getTargetReference() : null)
+                // targetReference contains internal class/user ids and must never cross the API boundary.
+                .targetReference(null)
                 .schoolScope(notification.getSchoolScope())
                 .senderId(includeTargetingDetails ? notification.getSenderId() : null)
                 .publishAt(notification.getPublishAt())

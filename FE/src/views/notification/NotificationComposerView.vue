@@ -5,6 +5,7 @@ import FormAlert from '@/components/common/FormAlert.vue'
 import NotificationComposer from '@/components/notification/NotificationComposer.vue'
 import { useAuthSession } from '@/composables/useAuthSession'
 import { createNotificationDraft } from '@/services/notificationApi'
+import { extractApiErrorMessage, isApiError } from '@/types/api'
 import type { ReqCreateNotificationDTO } from '@/types/notification'
 
 const router = useRouter()
@@ -18,10 +19,17 @@ async function handleSubmit(payload: ReqCreateNotificationDTO): Promise<void> {
   errorMessage.value = ''
   try {
     const token = requireAccessToken()
+    if (!token) return
     const created = await createNotificationDraft(token, payload)
     router.push(`/v2/notifications/${created.id}`)
   } catch (err: unknown) {
-    errorMessage.value = err instanceof Error ? err.message : 'Không thể lưu bản nháp thông báo'
+    if (isApiError(err, 400) || isApiError(err, 422)) {
+      errorMessage.value = extractApiErrorMessage(err, 'Thông tin đối tượng nhận không còn hợp lệ. Vui lòng kiểm tra lại lựa chọn.')
+    } else if (isApiError(err, 409)) {
+      errorMessage.value = extractApiErrorMessage(err, 'Yêu cầu lưu bản nháp đang xung đột. Vui lòng thử lại.')
+    } else {
+      errorMessage.value = extractApiErrorMessage(err, 'Không thể lưu bản nháp thông báo')
+    }
   } finally {
     loading.value = false
   }

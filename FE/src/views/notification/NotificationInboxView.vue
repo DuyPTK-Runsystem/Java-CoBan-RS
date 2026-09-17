@@ -31,7 +31,9 @@ const pageState = computed<LoadingState>(() => {
   return totalItems.value === 0 ? 'empty' : 'success'
 })
 
-const canManage = computed(() => roles.value.includes('ADMIN') || roles.value.includes('ACADEMIC_OFFICE'))
+const canManage = computed(() => roles.value.includes('ADMIN')
+  || roles.value.includes('ACADEMIC_OFFICE')
+  || roles.value.includes('TEACHER'))
 
 async function loadInbox(): Promise<void> {
   loading.value = true

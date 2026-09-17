@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import NotificationStatusBadge from './NotificationStatusBadge.vue'
@@ -31,6 +32,41 @@ const audienceLabels: Record<NotificationAudienceType, string> = {
   SCHOOL: 'Toàn trường',
 }
 
+const audienceDetails = computed(() => props.notification.audienceDetails ?? null)
+
+const audienceTargetValue = computed(() => {
+  const displayLabel = audienceDetails.value?.displayLabel?.trim()
+  if (displayLabel) return displayLabel
+
+  const audienceType = audienceDetails.value?.audienceType ?? props.notification.audienceType
+  return audienceLabels[audienceType] ?? 'Đối tượng nhận'
+})
+
+const recipientCountLabel = computed(() => {
+  const count = audienceDetails.value?.recipientCount
+  if (!Number.isSafeInteger(count) || count < 0) return ''
+  return `${new Intl.NumberFormat('vi-VN').format(count)} người nhận`
+})
+
+const recipientDisplayNames = computed(() => (
+  (audienceDetails.value?.recipientDisplayNames ?? [])
+    .filter((name): name is string => typeof name === 'string')
+    .map((name) => name.trim())
+    .filter(Boolean)
+))
+
+const audienceMetadataHint = computed(() => {
+  const details = audienceDetails.value
+  if (!details) return 'Chưa có thông tin chi tiết về đối tượng nhận.'
+  if (details.displayDataAvailable === false) {
+    return 'Thông tin người nhận chưa được cung cấp đầy đủ.'
+  }
+  if (!details.displayLabel?.trim() && !recipientCountLabel.value && !recipientDisplayNames.value.length) {
+    return 'Chưa có thông tin chi tiết về đối tượng nhận.'
+  }
+  return ''
+})
+
 function formatDate(isoStr?: string | null): string {
   if (!isoStr) return '—'
   const d = new Date(isoStr)
@@ -42,6 +78,20 @@ function formatDate(isoStr?: string | null): string {
     year: 'numeric',
   })
 }
+
+const readStatusValue = computed(() => {
+  if (props.notification.readAt) {
+    return `Đã đọc lúc ${formatDate(props.notification.readAt)}`
+  }
+  if (props.notification.read === false) {
+    return 'Chưa đọc'
+  }
+  return 'Chưa xác định'
+})
+
+const hasRecipientReadState = computed(() => (
+  props.notification.read !== null && props.notification.read !== undefined
+) || Boolean(props.notification.readAt))
 </script>
 
 <template>
@@ -111,22 +161,21 @@ function formatDate(isoStr?: string | null): string {
         </strong>
       </div>
       <div>
-        <span>Hạn thông báo</span>
-        <strong>
-          {{ formatDate(props.notification.expiresAt) }}
-        </strong>
+        <span>Đối tượng nhận</span>
+        <strong>{{ audienceTargetValue }}</strong>
+        <small v-if="recipientCountLabel" class="notification-meta-hint">
+          {{ recipientCountLabel }}
+        </small>
+        <small v-if="recipientDisplayNames.length" class="notification-meta-hint">
+          Người nhận: {{ recipientDisplayNames.join(', ') }}
+        </small>
+        <small v-if="audienceMetadataHint" class="notification-meta-hint">
+          {{ audienceMetadataHint }}
+        </small>
       </div>
-      <div>
-        <span>Đối tượng nhận cụ thể</span>
-        <strong>
-          {{ props.notification.targetReference || '—' }}
-        </strong>
-      </div>
-      <div>
-        <span>Trạng thái đọc</span>
-        <strong>
-          {{ props.notification.readAt ? formatDate(props.notification.readAt) : (props.notification.read === false ? 'Chưa đọc' : '—') }}
-        </strong>
+      <div v-if="!props.canManage && hasRecipientReadState">
+        <span>Trạng thái của bạn</span>
+        <strong>{{ readStatusValue }}</strong>
       </div>
     </div>
 
@@ -165,7 +214,7 @@ function formatDate(isoStr?: string | null): string {
 
 .notification-detail-meta {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   padding: 16px;
   border-radius: 8px;
@@ -186,6 +235,12 @@ function formatDate(isoStr?: string | null): string {
 .notification-detail-meta strong {
   color: #334155;
   font-weight: 600;
+}
+
+.notification-meta-hint {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 18px;
 }
 
 .notification-detail-body {

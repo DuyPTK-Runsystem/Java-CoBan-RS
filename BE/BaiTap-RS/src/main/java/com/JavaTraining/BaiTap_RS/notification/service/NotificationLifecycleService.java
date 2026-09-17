@@ -3,6 +3,7 @@ package com.JavaTraining.BaiTap_RS.notification.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
@@ -42,7 +43,13 @@ public class NotificationLifecycleService {
     }
 
     public ResNotificationDTO publish(Long id, ReqPublishNotificationDTO request, Long actorUserId) {
+        return publish(id, request, actorUserId, true);
+    }
+
+    public ResNotificationDTO publish(
+            Long id, ReqPublishNotificationDTO request, Long actorUserId, boolean canManageAll) {
         Notification notification = findNotification(id);
+        validateMutationAccess(notification, actorUserId, canManageAll);
         if (notification.getStatus() == NotificationStatus.PUBLISHED) {
             return responseMapper.toResponse(notification, null, null, true);
         }
@@ -60,7 +67,12 @@ public class NotificationLifecycleService {
     }
 
     public ResNotificationDTO cancel(Long id, Long actorUserId) {
+        return cancel(id, actorUserId, true);
+    }
+
+    public ResNotificationDTO cancel(Long id, Long actorUserId, boolean canManageAll) {
         Notification notification = findNotification(id);
+        validateMutationAccess(notification, actorUserId, canManageAll);
         if (notification.getStatus() == NotificationStatus.CANCELLED) {
             return responseMapper.toResponse(notification, null, null, true);
         }
@@ -80,6 +92,12 @@ public class NotificationLifecycleService {
     private Notification findNotification(Long id) {
         return notificationRepository.findById(id)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, NOT_FOUND_PREFIX + id));
+    }
+
+    private void validateMutationAccess(Notification notification, Long actorUserId, boolean canManageAll) {
+        if (!canManageAll && !Objects.equals(notification.getSenderId(), actorUserId)) {
+            throw new AppException(HttpStatus.FORBIDDEN, "Bạn không có quyền quản lý thông báo này");
+        }
     }
 
     private void validatePublishState(Notification notification, ReqPublishNotificationDTO request) {

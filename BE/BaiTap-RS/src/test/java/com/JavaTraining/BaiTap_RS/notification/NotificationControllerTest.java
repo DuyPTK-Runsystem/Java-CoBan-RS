@@ -98,12 +98,12 @@ class NotificationControllerTest {
         ResultPaginationDTO<ResNotificationDTO> expected = new ResultPaginationDTO<>(
                 new ResultPaginationDTO.Meta(0, 20, 0, 0), List.of());
 
-        Mockito.when(notificationService.getManagedNotifications(1L, pageable)).thenReturn(expected);
+        Mockito.when(notificationService.getManagedNotifications(1L, pageable, true)).thenReturn(expected);
 
         ResultPaginationDTO<ResNotificationDTO> res = controller.manage(0, 20, adminPrincipal);
 
         Assertions.assertEquals(expected, res);
-        Mockito.verify(notificationService).getManagedNotifications(1L, pageable);
+        Mockito.verify(notificationService).getManagedNotifications(1L, pageable, true);
     }
 
     @Test
@@ -121,23 +121,23 @@ class NotificationControllerTest {
     void publishDelegatesToService() {
         ReqPublishNotificationDTO req = ReqPublishNotificationDTO.builder().build();
         ResNotificationDTO expected = ResNotificationDTO.builder().id(5L).status(NotificationStatus.PUBLISHED).build();
-        Mockito.when(notificationService.publish(5L, req, 1L)).thenReturn(expected);
+        Mockito.when(notificationService.publish(5L, req, 1L, true)).thenReturn(expected);
 
         ResNotificationDTO res = controller.publish(5L, req, adminPrincipal);
 
         Assertions.assertEquals(expected, res);
-        Mockito.verify(notificationService).publish(5L, req, 1L);
+        Mockito.verify(notificationService).publish(5L, req, 1L, true);
     }
 
     @Test
     void cancelDelegatesToService() {
         ResNotificationDTO expected = ResNotificationDTO.builder().id(5L).status(NotificationStatus.CANCELLED).build();
-        Mockito.when(notificationService.cancel(5L, 1L)).thenReturn(expected);
+        Mockito.when(notificationService.cancel(5L, 1L, true)).thenReturn(expected);
 
         ResNotificationDTO res = controller.cancel(5L, adminPrincipal);
 
         Assertions.assertEquals(expected, res);
-        Mockito.verify(notificationService).cancel(5L, 1L);
+        Mockito.verify(notificationService).cancel(5L, 1L, true);
     }
 
     @Test
@@ -187,7 +187,7 @@ class NotificationControllerTest {
     @Test
     void publishDirectUnitPropagatesConflictStatus() {
         ReqPublishNotificationDTO req = ReqPublishNotificationDTO.builder().build();
-        Mockito.when(notificationService.publish(9L, req, 1L))
+        Mockito.when(notificationService.publish(9L, req, 1L, true))
                 .thenThrow(new AppException(HttpStatus.CONFLICT, "version conflict"));
 
         AppException ex = Assertions.assertThrows(
@@ -227,5 +227,24 @@ class NotificationControllerTest {
         Assertions.assertThrows(
                 JsonProcessingException.class,
                 () -> new ObjectMapper().readValue(payload, ReqCreateNotificationDTO.class));
+    }
+
+    @Test
+    void notificationMutationsAllowTeacherRole() throws NoSuchMethodException {
+        Assertions.assertEquals(
+                "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE', 'TEACHER')",
+                NotificationController.class.getMethod(
+                        "create", ReqCreateNotificationDTO.class, UserPrincipal.class)
+                        .getAnnotation(PreAuthorize.class).value());
+        Assertions.assertEquals(
+                "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE', 'TEACHER')",
+                NotificationController.class.getMethod(
+                        "publish", Long.class, ReqPublishNotificationDTO.class, UserPrincipal.class)
+                        .getAnnotation(PreAuthorize.class).value());
+        Assertions.assertEquals(
+                "hasAnyRole('ADMIN', 'ACADEMIC_OFFICE', 'TEACHER')",
+                NotificationController.class.getMethod(
+                        "cancel", Long.class, UserPrincipal.class)
+                        .getAnnotation(PreAuthorize.class).value());
     }
 }
