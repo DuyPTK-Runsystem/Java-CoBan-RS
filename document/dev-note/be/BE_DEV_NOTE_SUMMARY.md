@@ -1,5 +1,7 @@
 # BE Dev Note Summary
 
+- 081: [Seed data v2 và CR v3](../summary/081-seed-data-v2-v3-2026-09-18.md) — seed integration 5/5 PASS, baseline 16 lớp/160 học sinh, placement, notification, functional-room, scorebook và V27 H2 compatibility; full test còn 7 lỗi OOM/context nền, PMD main còn 1 lỗi baseline.
+
 | 076.12 | notification | [v3 notification email channel](notification/076.12-v3-notification-email-channel-2026-09-17.md) | EMAIL delivery, receipt status and V27 migration; focused tests/PMD/Checkstyle/JaCoCo PASS; full backend/build/SMTP NOT RUN | 2026-09-17 |
 
 |   No. | Module             | Note                                                                                                                                                            | Status                                                                           | Updated    |

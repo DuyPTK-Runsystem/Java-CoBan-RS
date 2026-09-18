@@ -101,21 +101,32 @@ public class DemoAcademicCatalogSeeder {
                 schoolClassRepository.findAllByAcademicYearIdOrderByClassCodeAsc(academicYear.getId()));
         for (int level = 6; level <= 9; level++) {
             final int currentLevel = level;
-            for (int section = 1; section <= 2; section++) {
+            for (int section = 1; section <= 4; section++) {
                 String code = currentLevel + "A" + section;
-                if (classes.stream().noneMatch(existing -> code.equals(existing.getClassCode()))) {
-                    classes.add(schoolClassRepository.save(new SchoolClass(
-                            academicYear.getId(),
-                            grades.get(currentLevel).getId(),
-                            code,
-                            "Lớp " + code,
-                            40,
-                            SchoolClassStatus.ACTIVE)));
-                }
+                SchoolClass schoolClass = ensureClass(classes, academicYear, grades.get(currentLevel), code);
+                schoolClass.setCapacity(10);
+                classes.removeIf(existing -> code.equals(existing.getClassCode()));
+                classes.add(schoolClassRepository.save(schoolClass));
             }
         }
         classes.sort(Comparator.comparing(SchoolClass::getClassCode));
         return classes;
+    }
+
+    private SchoolClass ensureClass(
+            List<SchoolClass> classes,
+            AcademicYear academicYear,
+            GradeLevel grade,
+            String code) {
+        return classes.stream()
+                .filter(existing -> code.equals(existing.getClassCode()))
+                .findFirst()
+                .orElseGet(() -> createClass(academicYear, grade, code));
+    }
+
+    private SchoolClass createClass(AcademicYear academicYear, GradeLevel grade, String code) {
+        return schoolClassRepository.save(new SchoolClass(
+                academicYear.getId(), grade.getId(), code, "Lớp " + code, 10, SchoolClassStatus.ACTIVE));
     }
 
     public Map<String, Subject> seedSubjects() {
