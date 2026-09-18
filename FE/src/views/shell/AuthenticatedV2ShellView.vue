@@ -55,7 +55,6 @@ const navigation = computed<NavigationItem[]>(() => {
       active: isClassTranscriptActive,
     })
     items.push({ label: 'Sổ điểm', to: '/v2/scorebooks', icon: 'pi pi-book' })
-    items.push({ label: 'Vận hành tính điểm', to: '/v2/scorebooks/operations', icon: 'pi pi-cog' })
     items.push({ label: 'Yêu cầu sửa điểm', to: '/v2/score-change-requests', icon: 'pi pi-file-edit' })
   }
   if (!roles.length || roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE')) {
@@ -67,7 +66,6 @@ const navigation = computed<NavigationItem[]>(() => {
       icon: 'pi pi-calendar-plus',
       active: Boolean(route?.path?.startsWith('/v2/timetables')),
     })
-    items.push({ label: 'Lịch bận giáo viên', to: '/v2/timetables/unavailability', icon: 'pi pi-clock' })
   }
   if (roles.includes('TEACHER')) {
     items.push({

@@ -74,11 +74,13 @@ public class LessonLogEntryCommandService {
     @Transactional
     public LessonLogEntryResponse amend(Long id, ReqTransitionLessonLogDTO request,
             Function<LessonLogEntry, LessonLogEntryResponse> mapper) {
+        LessonLogActorAuthorization.assertManager();
         LessonLogEntry entry = load(id);
         assertOpenSemester(entry.getSemesterId());
         version(entry.getVersion(), request.expectedVersion());
-        if (entry.getStatus() == LessonLogStatus.DRAFT) {
-            throw error(HttpStatus.UNPROCESSABLE_ENTITY, "Không điều chỉnh bản nháp");
+        if (entry.getStatus() == LessonLogStatus.DRAFT && (entry.getEditWindowExpiresAt() == null
+                || LocalDateTime.now(ZONE).isBefore(entry.getEditWindowExpiresAt()))) {
+            throw error(HttpStatus.UNPROCESSABLE_ENTITY, "Bản nháp chưa quá hạn, giáo viên phải hoàn thiện trong thời hạn");
         }
         return mapper.apply(lifecycle.amend(entry, request));
     }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import ConfirmDialog from 'primevue/confirmdialog'
@@ -37,6 +38,7 @@ import type { LoadingState } from '@/types/ui'
 
 const confirm = useConfirm()
 const { roles, requireAccessToken } = useAuthSession()
+const route = useRoute()
 
 const isTeacherRole = computed(() => {
   return roles.value.includes('TEACHER') && !roles.value.includes('ADMIN') && !roles.value.includes('ACADEMIC_OFFICE')
@@ -275,18 +277,35 @@ onMounted(() => {
         <h1 class="text-2xl font-bold text-gray-900">
           {{ isTeacherRole ? 'Đăng ký lịch bận giảng dạy' : 'Quản lý lịch bận giáo viên' }}
         </h1>
-        <p class="text-sm text-gray-500">
-          {{ isTeacherRole
-            ? 'Đăng ký các buổi hoặc tiết không thể dạy để tổ học vụ sắp xếp thời khóa biểu'
-            : 'Xem và phê duyệt các yêu cầu đăng ký lịch bận từ giáo viên' }}
+        <p v-if="isTeacherRole" class="text-sm text-gray-500">
+          Đăng ký các buổi hoặc tiết không thể dạy để tổ học vụ sắp xếp thời khóa biểu
         </p>
       </div>
       <Button label="Đăng ký lịch bận" icon="pi pi-plus" @click="openCreateDialog" />
     </div>
 
+    <nav v-if="!isTeacherRole" class="flex flex-wrap gap-2 rounded-xl bg-gray-100 p-1" aria-label="Các chức năng thời khóa biểu">
+      <RouterLink
+        to="/v2/timetables"
+        class="px-4 py-2 text-sm font-semibold rounded-lg transition"
+        :class="route.path === '/v2/timetables' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-600 hover:bg-white/70'"
+      >
+        <i class="pi pi-calendar-plus mr-2" aria-hidden="true" />
+        Danh sách thời khóa biểu
+      </RouterLink>
+      <RouterLink
+        to="/v2/timetables/unavailability"
+        class="px-4 py-2 text-sm font-semibold rounded-lg transition"
+        :class="route.path === '/v2/timetables/unavailability' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-600 hover:bg-white/70'"
+      >
+        <i class="pi pi-clock mr-2" aria-hidden="true" />
+        Lịch bận giáo viên
+      </RouterLink>
+    </nav>
+
     <FormAlert v-if="generalError" :message="generalError" type="error" />
 
-    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-4 items-center">
+    <div class="teacher-unavailability-filter bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-4 items-center mt-2">
       <div class="w-64">
         <Select
           v-model="selectedSemesterId"
@@ -326,7 +345,7 @@ onMounted(() => {
       @retry="loadList"
     />
 
-    <div v-else class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div v-else class="teacher-unavailability-table bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <DataTable :value="unavailabilities" responsive-layout="scroll">
         <template #empty>
           <div class="p-8 text-center text-gray-500">Không có đơn đăng ký lịch bận nào</div>

@@ -44,6 +44,6 @@ public class LessonLogWeeklySignPersistenceService {
         LessonLogWeeklyReview savedReview = weeks.save(review);
         audits.save(new LessonLogRevision(null, savedReview.getId(), null, "SIGN_WEEK", AuditContext.currentUserId(),
                 request.reason(), beforeState, weeklyReviewService.state(review)));
-        return support.response(savedReview, true, null);
+        return support.response(savedReview, true, null, entries);
     }
 }

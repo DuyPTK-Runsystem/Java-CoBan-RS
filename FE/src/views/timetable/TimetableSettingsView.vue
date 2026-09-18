@@ -14,7 +14,6 @@ import Tag from 'primevue/tag'
 import FormAlert from '@/components/common/FormAlert.vue'
 import PageState from '@/components/common/PageState.vue'
 import { useAuthSession } from '@/composables/useAuthSession'
-import { fetchSemesters } from '@/services/academicApi'
 import { fetchTeachers } from '@/services/teacherApi'
 import {
   activateTeacherLoadPolicy,
@@ -27,7 +26,6 @@ import {
   updateTeacherLoadEligibility,
 } from '@/services/teacherLoadApi'
 import { extractApiErrorMessage } from '@/types/api'
-import type { Semester } from '@/types/academic'
 import type { Teacher } from '@/types/teacher'
 import type { TeacherLoadEligibility, TeacherLoadPolicy, TeacherLoadRule } from '@/types/timetable'
 import type { LoadingState } from '@/types/ui'
@@ -35,7 +33,7 @@ import type { LoadingState } from '@/types/ui'
 const router = useRouter()
 const { requireAccessToken } = useAuthSession()
 
-const activeTab = ref<'POLICY' | 'ELIGIBILITY' | 'CALENDAR'>('POLICY')
+const activeTab = ref<'POLICY' | 'ELIGIBILITY'>('POLICY')
 const loadingState = ref<LoadingState>('loading')
 const generalError = ref('')
 const successMessage = ref('')
@@ -44,7 +42,6 @@ const activePolicy = ref<TeacherLoadPolicy | null>(null)
 const policies = ref<TeacherLoadPolicy[]>([])
 const eligibilities = ref<TeacherLoadEligibility[]>([])
 const teachers = ref<Teacher[]>([])
-const semesters = ref<Semester[]>([])
 
 // Create policy dialog
 const isPolicyDialogVisible = ref(false)
@@ -94,28 +91,22 @@ function getSupplementalRules(policy: TeacherLoadPolicy): TeacherLoadRule[] {
   return policy.rules.filter((rule) => !['HOMEROOM', 'NURSING_CHILD_UNDER_12M'].includes(rule.ruleCode))
 }
 
-// Calendar init
-const selectedSemesterId = ref<number | null>(null)
-
 async function loadData() {
   const token = requireAccessToken()
   if (!token) return
   loadingState.value = 'loading'
   generalError.value = ''
   try {
-    const [actPol, polList, eligList, teacherList, semList] = await Promise.all([
+    const [actPol, polList, eligList, teacherList] = await Promise.all([
       getActiveTeacherLoadPolicy(token).catch(() => null),
       listTeacherLoadPolicies(token),
       listTeacherLoadEligibilities(undefined, token),
       fetchTeachers(token),
-      fetchSemesters(token),
     ])
     activePolicy.value = actPol
     policies.value = polList
     eligibilities.value = eligList
     teachers.value = teacherList
-    semesters.value = semList
-    if (semList.length > 0) selectedSemesterId.value = semList[0].id
     loadingState.value = 'idle'
   } catch (err) {
     loadingState.value = 'error'
@@ -301,7 +292,6 @@ onMounted(() => {
       <Button icon="pi pi-arrow-left" severity="secondary" rounded text @click="router.push('/v2/timetables')" />
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Cấu hình Thời khóa biểu & Định mức</h1>
-        <p class="text-sm text-gray-500">Quản lý chính sách định mức tiết dạy, diện miễn giảm và khung giờ học</p>
       </div>
     </div>
 
@@ -309,27 +299,20 @@ onMounted(() => {
     <FormAlert v-if="successMessage" :message="successMessage" type="success" />
 
     <!-- Tabs -->
-    <div class="flex gap-2 border-b border-gray-200 pb-2">
+    <div class="timetable-subtab-strip">
       <button
-        class="px-4 py-2 text-sm font-semibold rounded-lg transition"
-        :class="[activeTab === 'POLICY' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100']"
+        class="timetable-subtab"
+        :class="{ 'is-active': activeTab === 'POLICY' }"
         @click="activeTab = 'POLICY'"
       >
         Chính sách định mức
       </button>
       <button
-        class="px-4 py-2 text-sm font-semibold rounded-lg transition"
-        :class="[activeTab === 'ELIGIBILITY' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100']"
+        class="timetable-subtab"
+        :class="{ 'is-active': activeTab === 'ELIGIBILITY' }"
         @click="activeTab = 'ELIGIBILITY'"
       >
         Xác nhận miễn giảm
-      </button>
-      <button
-        class="px-4 py-2 text-sm font-semibold rounded-lg transition"
-        :class="[activeTab === 'CALENDAR' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100']"
-        @click="activeTab = 'CALENDAR'"
-      >
-        Khung giờ học kỳ
       </button>
     </div>
 
@@ -398,7 +381,6 @@ onMounted(() => {
         <div class="flex justify-between items-center">
           <div>
             <h3 class="text-lg font-bold text-gray-900">Danh sách giáo viên được miễn giảm tiết</h3>
-            <p class="text-xs text-gray-500">Các điều kiện được giảm trừ tiết dạy ngoài kiêm nhiệm chủ nhiệm (như nuôi con &lt; 12 tháng)</p>
           </div>
           <Button label="Thêm diện miễn giảm" icon="pi pi-plus" @click="openEligibilityDialog(); resetMessages()" />
         </div>
@@ -433,27 +415,6 @@ onMounted(() => {
             </template>
           </Column>
         </DataTable>
-      </div>
-
-      <!-- TAB 3: CALENDAR -->
-      <div v-if="activeTab === 'CALENDAR'" class="bg-white p-6 rounded-xl border border-gray-200 flex flex-col gap-4 max-w-lg">
-        <h3 class="text-lg font-bold text-gray-900">Khung giờ học kỳ</h3>
-        <p class="text-xs text-gray-600 leading-relaxed">
-          Khung giờ được đọc từ cấu hình lịch học kỳ. Màn hình này chỉ cung cấp hướng dẫn; chưa có thao tác ghi vì API PUT và biểu mẫu cấu hình đang chờ phê duyệt.
-        </p>
-
-        <div class="flex flex-col gap-1">
-          <label class="font-medium text-sm">Chọn học kỳ áp dụng</label>
-          <Select
-            v-model="selectedSemesterId"
-            :options="semesters"
-            option-label="name"
-            option-value="id"
-            placeholder="Chọn học kỳ"
-          />
-        </div>
-
-        <small class="text-gray-600">Nếu chưa có dữ liệu, hãy liên hệ ADMIN/Phòng Đào tạo để cập nhật cấu hình lịch học kỳ.</small>
       </div>
     </div>
 

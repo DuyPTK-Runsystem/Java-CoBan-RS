@@ -52,11 +52,18 @@ public class LessonLogWeeklyCommandSupport {
         }
     }
 
-    public WeeklyReviewResponse response(LessonLogWeeklyReview review, boolean canSign, String blockedReason) {
+    public WeeklyReviewResponse response(LessonLogWeeklyReview review, boolean canSign, String blockedReason,
+            List<LessonLogEntry> entries) {
         return new WeeklyReviewResponse(review.getId(), review.getClassId(), review.getSemesterId(), review.getWeekStart(),
                 review.getWeekStart().plusDays(6), review.getStatus(), review.getWeeklyComment(), review.getWeeklyGrade(),
                 review.getVersion(), review.getSignedAt(), review.getSignedBy(), canSign, blockedReason,
-                review.getSignedSnapshotJson());
+                review.getSignedSnapshotJson(), entries.stream()
+                        .sorted(java.util.Comparator.comparing(LessonLogEntry::getLessonDate)
+                                .thenComparing(LessonLogEntry::getSession)
+                                .thenComparing(LessonLogEntry::getPeriodIndex)
+                                .thenComparing(LessonLogEntry::getId))
+                        .map(entry -> new WeeklyReviewResponse.ExpectedEntry(entry.getId(), entry.getVersion()))
+                        .toList());
     }
 
     public LocalDate homeroomScopeDate(LocalDate weekStart, Semester semester) {

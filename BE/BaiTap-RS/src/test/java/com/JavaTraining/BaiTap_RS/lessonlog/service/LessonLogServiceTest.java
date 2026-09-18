@@ -29,6 +29,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.authentication.TestingAuthenticationToken;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD")
@@ -39,6 +41,7 @@ class LessonLogServiceTest {
     @Spy @InjectMocks LessonLogWeeklyReviewService weeklyReviewService;
     @Spy @InjectMocks LessonLogWeeklySnapshotService weeklySnapshotService;
     @Spy @InjectMocks LessonLogWeeklySigningPolicyService weeklySigningPolicy;
+    @Spy @InjectMocks LessonLogWeeklyCommandSupport weeklyCommandSupport;
     @Spy @InjectMocks LessonLogEntryEditor entryEditor;
     @Spy @InjectMocks LessonLogAuditService auditService;
     @Spy @InjectMocks LessonLogEntryLifecycleService lifecycleService;
@@ -83,6 +86,11 @@ class LessonLogServiceTest {
                 LocalDate.now().minusDays(10), LocalDate.now().plusDays(10), null);
         ReflectionTestUtils.setField(revision, "id", 2L);
         lenient().when(timetableRevisions.findById(2L)).thenReturn(Optional.of(revision));
+    }
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test void submit_requiresCompleteCountsAndTransitions() throws Exception {
@@ -154,6 +162,7 @@ class LessonLogServiceTest {
 
     @Test
     void amend_appliesAllEditableFieldsBeforeCompletionAndAuditsBothStates() throws Exception {
+        managerAuthentication();
         LessonLogEntry e = entry();
         e.setStatus(LessonLogStatus.SUBMITTED);
         e.setTitle("Cũ");
@@ -180,6 +189,67 @@ class LessonLogServiceTest {
         assertEquals("Nhận xét mới", e.getComments());
         verify(audits).save(argThat(a -> "AMEND".equals(a.getAction())
                 && a.getAfterStateJson() != null && a.getBeforeStateJson() != null));
+    }
+
+    @Test
+    void overdueDraftCanBeCompletedByAmendAndAuditedAsAmended() {
+        managerAuthentication();
+        LessonLogEntry e = entry();
+        e.setStatus(LessonLogStatus.DRAFT);
+        e.setEditWindowExpiresAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")).minusMinutes(1));
+        e.setRosterCountSnapshot(10);
+        when(entries.findById(7L)).thenReturn(Optional.of(e));
+        when(entries.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(audits.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.amend(7L, new ReqTransitionLessonLogDTO(0L, null, "Bổ sung quá hạn",
+                "Tiết học", "Nội dung", "ON_SCHEDULE", "A", 10, 0, null, null, null));
+
+        assertEquals(LessonLogStatus.AMENDED, result.status());
+        verify(audits).save(argThat(audit -> "AMEND".equals(audit.getAction())
+                && "Bổ sung quá hạn".equals(audit.getReason())));
+    }
+
+    @Test
+    void draftBeforeDeadlineCannotBeAmended() {
+        managerAuthentication();
+        LessonLogEntry e = entry();
+        e.setStatus(LessonLogStatus.DRAFT);
+        when(entries.findById(7L)).thenReturn(Optional.of(e));
+
+        AppException ex = assertThrows(AppException.class, () -> service.amend(7L,
+                new ReqTransitionLessonLogDTO(0L, null, "Chưa đến hạn", "Tiết học", "Nội dung",
+                        "ON_SCHEDULE", "A", 10, 0, null, null, null)));
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatus());
+        verify(entries, never()).save(any());
+        verifyNoInteractions(audits);
+    }
+
+    @Test
+    void amendRequiresManagerEvenWhenVersionMatches() {
+        AppException ex = assertThrows(AppException.class, () -> service.amend(7L,
+                new ReqTransitionLessonLogDTO(0L, null, "Lý do", "Tiết học", "Nội dung",
+                        "ON_SCHEDULE", "A", 10, 0, null, null, null)));
+
+        assertEquals(HttpStatus.FORBIDDEN, ex.getStatus());
+        verifyNoInteractions(audits);
+    }
+
+    @Test
+    void weeklyResponseExposesCurrentExpectedEntryVersions() {
+        LessonLogWeeklyReview review = new LessonLogWeeklyReview();
+        ReflectionTestUtils.setField(review, "id", 91L);
+        review.setClassId(5L);
+        review.setSemesterId(4L);
+        review.setWeekStart(LocalDate.of(2026, 9, 7));
+        LessonLogEntry first = entry();
+        first.setVersion(3L);
+
+        var response = weeklyCommandSupport.response(review, false, "Tuần chưa kết thúc", List.of(first));
+
+        assertEquals(List.of(new com.JavaTraining.BaiTap_RS.lessonlog.domain.DTOs.response.WeeklyReviewResponse.ExpectedEntry(7L, 3L)),
+                response.expectedEntries());
     }
 
     @Test
@@ -325,5 +395,10 @@ class LessonLogServiceTest {
     private Semester semester(SemesterStatus status) {
         return new Semester(1L, "HK1", "Học kỳ 1", 1, LocalDate.now().minusDays(10),
                 LocalDate.now().plusDays(10), null, status);
+    }
+
+    private void managerAuthentication() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new TestingAuthenticationToken("academic-office", "", "ROLE_ACADEMIC_OFFICE"));
     }
 }

@@ -28,13 +28,26 @@ public final class LessonLogEntryAuthorization {
     }
 
     public static boolean canAmend(LessonLogEntry entry) {
-        return LessonLogActorAuthorization.isManager() && entry.getStatus() != LessonLogStatus.DRAFT && isOpen(entry);
+        if (!LessonLogActorAuthorization.isManager()) {
+            return false;
+        }
+        return switch (entry.getStatus()) {
+        case DRAFT -> isExpired(entry);
+        case SUBMITTED, REVIEWED, AMENDED -> true;
+        default -> false;
+        };
     }
 
     public static boolean isOpen(LessonLogEntry entry) {
         boolean finalized = entry.getStatus() == LessonLogStatus.REVIEWED
                 || entry.getStatus() == LessonLogStatus.AMENDED;
-        return !finalized && LocalDateTime.now(BUSINESS_ZONE).isBefore(entry.getEditWindowExpiresAt());
+        return !finalized && entry.getEditWindowExpiresAt() != null
+                && LocalDateTime.now(BUSINESS_ZONE).isBefore(entry.getEditWindowExpiresAt());
+    }
+
+    private static boolean isExpired(LessonLogEntry entry) {
+        return entry.getEditWindowExpiresAt() != null
+                && !LocalDateTime.now(BUSINESS_ZONE).isBefore(entry.getEditWindowExpiresAt());
     }
 
     public static String blockedReason(LessonLogEntry entry, TeacherRepository teachers) {

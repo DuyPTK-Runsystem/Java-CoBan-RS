@@ -60,6 +60,7 @@ public class LessonLogCreationService {
 
     @Transactional
     public LessonLogEntry lateRecord(ReqLateRecordLessonLogDTO request) {
+        LessonLogActorAuthorization.assertManager();
         LessonLogSource source = sourceResolver.resolve(request.timetableEntryId(), request.lessonDate());
         String session = source.period().getSession().name();
         assertEntryDoesNotExist(source, request.lessonDate(), session, "Tiết này đã có sổ đầu bài");

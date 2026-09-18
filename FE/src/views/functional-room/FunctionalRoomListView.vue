@@ -164,7 +164,6 @@ onMounted(() => {
     <div class="functional-room-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Quản lý phòng chức năng</h1>
-        <p class="text-sm text-gray-500">Quản lý các phòng bộ môn, phòng thực hành, nhà đa năng</p>
       </div>
       <Button label="Thêm phòng chức năng" icon="pi pi-plus" @click="openCreateDialog" />
     </div>
@@ -230,9 +229,9 @@ onMounted(() => {
             <span class="text-sm text-gray-600">{{ data.updatedAt ? new Date(data.updatedAt).toLocaleDateString('vi-VN') : '—' }}</span>
           </template>
         </Column>
-        <Column header="Thao tác" style="width: 120px" class="text-right">
+        <Column header="Thao tác" style="width: 128px" class="text-right">
           <template #body="{ data }">
-            <div class="flex justify-end gap-1">
+            <div class="functional-room-actions flex justify-end">
               <Button
                 icon="pi pi-pencil"
                 severity="secondary"
@@ -262,3 +261,5 @@ onMounted(() => {
     />
   </div>
 </template>
+
+<style src="@/styles/functional-room.css"></style>

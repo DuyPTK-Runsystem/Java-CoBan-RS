@@ -31,8 +31,9 @@ public class LessonLogResponseService {
         return mappingService.rubric(policy);
     }
 
-    public WeeklyReviewResponse weekly(LessonLogWeeklyReview review, boolean canSign, String blockedReason) {
-        return auditService.weekly(review, canSign, blockedReason);
+    public WeeklyReviewResponse weekly(LessonLogWeeklyReview review, boolean canSign, String blockedReason,
+            List<LessonLogEntry> entries) {
+        return auditService.weekly(review, canSign, blockedReason, entries);
     }
 
     public ResultPaginationDTO<LessonLogRevisionResponse> auditPage(Page<LessonLogRevision> page) {

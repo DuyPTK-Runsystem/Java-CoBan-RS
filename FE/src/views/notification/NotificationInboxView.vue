@@ -103,9 +103,7 @@ onMounted(() => {
   <div class="notification-view" data-testid="notification-inbox-view">
     <header class="page-heading">
       <div>
-        <p class="eyebrow">THÔNG BÁO</p>
         <h1>Thông báo của tôi</h1>
-        <p>Xem các thông báo được gửi đến bạn.</p>
       </div>
       <div class="page-heading-actions">
         <Button
@@ -132,7 +130,6 @@ onMounted(() => {
       <div class="section-heading notification-section-heading">
         <div>
           <h2>Hộp thư thông báo</h2>
-          <p class="section-caption">Lọc theo trạng thái đọc để tìm thông báo nhanh hơn.</p>
         </div>
         <div class="notification-filter" role="group" aria-label="Lọc thông báo">
           <Button label="Tất cả" :severity="!unreadOnly ? 'primary' : 'secondary'" :outlined="unreadOnly" @click="unreadOnly = false" />

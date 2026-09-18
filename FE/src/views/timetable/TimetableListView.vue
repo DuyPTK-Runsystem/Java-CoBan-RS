@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
@@ -20,6 +20,7 @@ import type { TimetableRevisionStatus, TimetableSummary } from '@/types/timetabl
 import type { LoadingState } from '@/types/ui'
 
 const router = useRouter()
+const route = useRoute()
 const { requireAccessToken } = useAuthSession()
 
 const semesters = ref<Semester[]>([])
@@ -153,7 +154,6 @@ onMounted(() => {
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Quản lý Thời khóa biểu</h1>
-        <p class="text-sm text-gray-500">Xây dựng, kiểm tra và công bố thời khóa biểu theo học kỳ</p>
       </div>
       <div class="flex gap-2">
         <Button label="Cấu hình hệ thống" icon="pi pi-cog" severity="secondary" @click="router.push('/v2/timetables/settings')" />
@@ -161,9 +161,28 @@ onMounted(() => {
       </div>
     </div>
 
+    <nav class="flex flex-wrap gap-2 rounded-xl bg-gray-100 p-1" aria-label="Các chức năng thời khóa biểu">
+      <RouterLink
+        to="/v2/timetables"
+        class="px-4 py-2 text-sm font-semibold rounded-lg transition"
+        :class="route.path === '/v2/timetables' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-600 hover:bg-white/70'"
+      >
+        <i class="pi pi-calendar-plus mr-2" aria-hidden="true" />
+        Danh sách thời khóa biểu
+      </RouterLink>
+      <RouterLink
+        to="/v2/timetables/unavailability"
+        class="px-4 py-2 text-sm font-semibold rounded-lg transition"
+        :class="route.path === '/v2/timetables/unavailability' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-600 hover:bg-white/70'"
+      >
+        <i class="pi pi-clock mr-2" aria-hidden="true" />
+        Lịch bận giáo viên
+      </RouterLink>
+    </nav>
+
     <FormAlert v-if="generalError" :message="generalError" type="error" />
 
-    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-4 items-center justify-between">
+    <div class="timetable-list-filter bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-4 items-center justify-between">
       <div class="w-72">
         <Select
           v-model="selectedSemesterId"
@@ -183,7 +202,7 @@ onMounted(() => {
       @retry="loadTimetables"
     />
 
-    <div v-else class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div v-else class="timetable-list-results bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <DataTable :value="timetables" responsive-layout="scroll">
         <template #empty>
           <div class="p-8 text-center text-gray-500">

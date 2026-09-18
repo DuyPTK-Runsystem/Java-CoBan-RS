@@ -43,6 +43,12 @@ public final class LessonLogActorAuthorization {
         }
     }
 
+    public static void assertManager() {
+        if (!isManager()) {
+            throw new AppException(HttpStatus.FORBIDDEN, "Chỉ giáo vụ hoặc quản trị viên được phép thao tác");
+        }
+    }
+
     public static Long teacherIdForUser(TeacherRepository teachers, Long userId) {
         return userId == null ? null : teachers.findByUserId(userId).map(Teacher::getId).orElse(null);
     }

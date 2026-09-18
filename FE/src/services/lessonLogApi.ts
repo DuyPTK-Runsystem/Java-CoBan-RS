@@ -37,6 +37,16 @@ function parseJson(value: string | null | undefined): unknown {
   if (!value) return null
   try { return JSON.parse(value) as unknown } catch { return value }
 }
+function expectedEntries(value: unknown): Array<{ entryId: number; version: number }> {
+  if (!Array.isArray(value)) return []
+  return value.flatMap((item) => {
+    if (!item || typeof item !== 'object') return []
+    const candidate = item as { entryId?: unknown; version?: unknown }
+    return typeof candidate.entryId === 'number' && typeof candidate.version === 'number'
+      ? [{ entryId: candidate.entryId, version: candidate.version }]
+      : []
+  })
+}
 function revision(value: RawRevision): LessonLogRevision {
   return { revisionId: value.revisionId, entryId: value.entryId ?? 0, weeklyReviewId: value.weeklyReviewId ?? null, policyId: value.policyId ?? null, action: value.action, actorName: value.actorName ?? (value.actorId == null ? 'Hệ thống' : `Người dùng #${value.actorId}`), createdAt: value.createdAt, reason: value.reason ?? null, beforeState: value.beforeState ?? parseJson(value.beforeStateJson), afterState: value.afterState ?? parseJson(value.afterStateJson) }
 }
@@ -54,13 +64,7 @@ function summary(items: Array<Pick<LessonLogEntry, 'status' | 'grade'>>): Weekly
 function weekly(value: RawWeeklyReview | null | undefined): WeeklyReview | null {
   if (!value) return null
   const signedSnapshot = value.signedSnapshot ?? parseJson(value.signedSnapshotJson)
-  const snapshotEntries = Array.isArray(signedSnapshot) ? signedSnapshot : (signedSnapshot && typeof signedSnapshot === 'object' && Array.isArray((signedSnapshot as { entries?: unknown }).entries) ? (signedSnapshot as { entries: unknown[] }).entries : [])
-  const snapshot = snapshotEntries.flatMap((item) => {
-    if (!item || typeof item !== 'object') return []
-    const candidate = item as { entryId?: unknown; version?: unknown }
-    return typeof candidate.entryId === 'number' && typeof candidate.version === 'number' ? [{ entryId: candidate.entryId, version: candidate.version }] : []
-  })
-  return { reviewId: value.reviewId ?? null, version: value.version, status: value.status, comment: value.weeklyComment ?? value.comment ?? null, grade: (value.weeklyGrade ?? value.grade ?? null) as WeeklyReview['grade'], signedAt: value.signedAt ?? null, signedBy: value.signedBy == null ? null : String(value.signedBy), signedSnapshot, expectedEntries: value.expectedEntries ?? snapshot, canSignWeek: value.canSignWeek ?? false, blockedReasons: value.blockedReason ? [value.blockedReason] : (value.blockedReasons ?? []), requiresReason: value.requiresReason ?? value.status === 'STALE' }
+  return { reviewId: value.reviewId ?? null, version: value.version, status: value.status, comment: value.weeklyComment ?? value.comment ?? null, grade: (value.weeklyGrade ?? value.grade ?? null) as WeeklyReview['grade'], signedAt: value.signedAt ?? null, signedBy: value.signedBy == null ? null : String(value.signedBy), signedSnapshot, expectedEntries: expectedEntries(value.expectedEntries), canSignWeek: value.canSignWeek ?? false, blockedReasons: value.blockedReason ? [value.blockedReason] : (value.blockedReasons ?? []), requiresReason: value.requiresReason ?? value.status === 'STALE' }
 }
 function classWeekItem(value: RawClassWeekItem): ClassWeekItem { return entry(value) }
 function schedule(value: { date: string; timezone: string; items: RawScheduleItem[] }): TeacherDailyScheduleResponse {

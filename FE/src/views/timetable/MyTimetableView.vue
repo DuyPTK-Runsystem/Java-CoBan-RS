@@ -47,7 +47,6 @@ onMounted(() => {
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Thời khóa biểu giảng dạy của tôi</h1>
-        <p class="text-sm text-gray-500">Xem lịch dạy đã được công bố của bạn và quản lý lịch bận</p>
       </div>
       <Button
         label="Đăng ký lịch bận"

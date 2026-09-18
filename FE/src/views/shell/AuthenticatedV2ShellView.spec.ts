@@ -185,7 +185,7 @@ describe('AuthenticatedV2ShellView.vue', () => {
     expect(classTransItem.attributes('data-active')).toBe('true')
   })
 
-  it('shows Calculation Operations tab for ADMIN and ACADEMIC_OFFICE roles', () => {
+  it('hides Calculation Operations tab for ACADEMIC_OFFICE role', () => {
     saveAuthSession({
       accessToken: 'token-office',
       user: {
@@ -207,7 +207,7 @@ describe('AuthenticatedV2ShellView.vue', () => {
       },
     })
 
-    expect(wrapper.find('[data-to="/v2/scorebooks/operations"]').exists()).toBe(true)
+    expect(wrapper.find('[data-to="/v2/scorebooks/operations"]').exists()).toBe(false)
   })
 
   it('hides Calculation Operations tab for STUDENT and TEACHER roles', () => {

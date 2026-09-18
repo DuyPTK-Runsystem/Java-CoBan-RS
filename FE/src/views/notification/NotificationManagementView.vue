@@ -73,22 +73,18 @@ onMounted(() => {
   <div class="notification-view notification-management-view" data-testid="notification-management-view">
     <header class="page-heading notification-management-heading">
       <div class="notification-management-heading-copy">
-        <p class="eyebrow">THÔNG BÁO</p>
         <h1>Quản lý thông báo</h1>
-        <p>Soạn thảo và theo dõi vòng đời thông báo toàn trường.</p>
       </div>
 
       <div class="page-heading-actions notification-management-actions">
         <Button
           label="Soạn thông báo mới"
           icon="pi pi-plus"
-          size="small"
           @click="router.push({ name: 'v2-notifications-compose' })"
         />
         <Button
           icon="pi pi-refresh"
           label="Làm mới"
-          size="small"
           severity="secondary"
           outlined
           aria-label="Làm mới danh sách thông báo"
@@ -104,7 +100,6 @@ onMounted(() => {
       <div class="section-heading">
         <div>
           <h2>Danh sách thông báo</h2>
-          <p class="section-caption">Theo dõi bản nháp, thông báo đã phát hành và trạng thái vòng đời.</p>
         </div>
         <span v-if="totalItems > 0" class="field-hint">{{ totalItems }} thông báo</span>
       </div>
@@ -149,7 +144,7 @@ onMounted(() => {
 <style scoped>
 .notification-management-view {
   display: grid;
-  gap: 20px;
+  gap: 28px;
 }
 
 .notification-management-heading {

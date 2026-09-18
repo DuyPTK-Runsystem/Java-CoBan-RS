@@ -58,7 +58,7 @@ public class LessonLogClassWeekReadService {
         com.JavaTraining.BaiTap_RS.lessonlog.domain.DTOs.response.WeeklyReviewResponse weeklyReview = review == null ? null : responseService.weekly(review,
                 !hasUnloggedEntries && weeklySigningPolicy.canSign(review, loggedEntries, semester, weekStart),
                 hasUnloggedEntries ? "Tuần còn tiết chưa ghi"
-                        : weeklySigningPolicy.blockedReason(loggedEntries, semester, weekStart));
+                        : weeklySigningPolicy.blockedReason(loggedEntries, semester, weekStart), loggedEntries);
         return new LessonLogClassWeekResponse(classId, semesterId, weekStart, weekStart.plusDays(6),
                 scheduleService.calendarDays(semester, weekStart), resolvedEntries, weeklyReview);
     }

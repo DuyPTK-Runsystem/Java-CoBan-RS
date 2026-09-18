@@ -612,10 +612,10 @@ onMounted(() => {
     </div>
 
     <!-- Mode tabs -->
-    <div class="flex flex-wrap gap-2 border-b border-gray-200 pb-2" role="tablist" aria-label="Nội dung thời khóa biểu">
+    <div class="timetable-subtab-strip" role="tablist" aria-label="Nội dung thời khóa biểu">
       <button
-        class="px-4 py-2 text-sm font-semibold rounded-lg transition"
-        :class="[activeTab === 'GRID' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100']"
+        class="timetable-subtab"
+        :class="{ 'is-active': activeTab === 'GRID' }"
         role="tab"
         :aria-selected="activeTab === 'GRID'"
         @click="activeTab = 'GRID'"
@@ -623,8 +623,8 @@ onMounted(() => {
         Lịch tuần
       </button>
       <button
-        class="px-4 py-2 text-sm font-semibold rounded-lg transition"
-        :class="[activeTab === 'LOAD' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100']"
+        class="timetable-subtab"
+        :class="{ 'is-active': activeTab === 'LOAD' }"
         role="tab"
         :aria-selected="activeTab === 'LOAD'"
         @click="activeTab = 'LOAD'"
