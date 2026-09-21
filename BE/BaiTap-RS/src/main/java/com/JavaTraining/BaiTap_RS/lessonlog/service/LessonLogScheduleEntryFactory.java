@@ -60,16 +60,12 @@ public class LessonLogScheduleEntryFactory {
         return new ScheduleValues(logged == null ? 0L : logged.getId(),
                 logged == null ? expiresAt : logged.getEditWindowExpiresAt(),
                 logged == null ? LessonLogStatus.UNLOGGED : logged.getStatus(),
-                logged == null ? 0L : logged.getVersion(), policyId(logged),
+                logged == null ? 0L : logged.getVersion(), logged == null ? null : logged.getPolicyId(),
                 rosterCount(logged, classSubject, lessonEndsAt, rosterCounter),
                 canWrite(semester, closed, lessonEndsAt, expiresAt) && logged == null,
                 lateRecordAllowed(logged, policy, semester, closed, expiresAt),
                 blockedReason(logged, closed, lessonEndsAt, expiresAt, semester),
                 logged == null ? null : mapper.apply(logged));
-    }
-
-    private Long policyId(LessonLogEntry logged) {
-        return logged == null ? null : logged.getPolicyId();
     }
 
     private int rosterCount(LessonLogEntry logged, ClassSubject classSubject, LocalDateTime lessonEndsAt,
@@ -81,7 +77,7 @@ public class LessonLogScheduleEntryFactory {
     private boolean lateRecordAllowed(LessonLogEntry logged, LessonLogPolicy policy, Semester semester,
             boolean closed, LocalDateTime expiresAt) {
         return LessonLogActorAuthorization.isManager() && logged == null && policy != null && expiresAt != null
-                && !currentTime().isBefore(expiresAt)
+                && !LocalDateTime.now(ZONE).isBefore(expiresAt)
                 && semesterOpen(semester) && !closed;
     }
 
@@ -93,8 +89,8 @@ public class LessonLogScheduleEntryFactory {
         LessonLogPolicy policy = policyService.findEffectivePolicy(date).orElse(null);
         LocalDateTime expiresAt = policy == null ? null : policyService.editWindowExpiresAt(policy, lessonEndsAt);
         boolean canLateRecord = LessonLogActorAuthorization.isManager()
-                && expiresAt != null && !currentTime().isBefore(expiresAt)
-                && semesterOpen(semester) && !calendarClosed(semester, date);
+                && expiresAt != null && !LocalDateTime.now(ZONE).isBefore(expiresAt)
+                && semesterOpen(semester) && !calendarCatalog.closedOn(semester.getId(), date);
         String blockedReason = unloggedBlockedReason(policy, semester, date, expiresAt);
         return new LessonLogEntryResponse(0L, timetableEntry.getId(), revision.getId(), assignment.getId(), semester.getId(),
                 date, classSubject.getClassId(), classSubject.getSubjectId(), assignment.getTeacherId(),
@@ -107,16 +103,12 @@ public class LessonLogScheduleEntryFactory {
     }
 
     private boolean canWrite(Semester semester, boolean closed, LocalDateTime lessonEndsAt, LocalDateTime expiresAt) {
-        return semesterOpen(semester) && !closed && !lessonEndsAt.isAfter(currentTime()) && expiresAt != null
-                && currentTime().isBefore(expiresAt);
+        return semesterOpen(semester) && !closed && !lessonEndsAt.isAfter(LocalDateTime.now(ZONE)) && expiresAt != null
+                && LocalDateTime.now(ZONE).isBefore(expiresAt);
     }
 
     private boolean semesterOpen(Semester semester) {
         return semester.getStatus() != SemesterStatus.CLOSED && semester.getStatus() != SemesterStatus.LOCKED;
-    }
-
-    private boolean calendarClosed(Semester semester, LocalDate date) {
-        return calendarCatalog.closedOn(semester.getId(), date);
     }
 
     private String unloggedBlockedReason(LessonLogPolicy policy, Semester semester, LocalDate date,
@@ -127,10 +119,10 @@ public class LessonLogScheduleEntryFactory {
         if (!semesterOpen(semester)) {
             return "Học kỳ đã đóng";
         }
-        if (calendarClosed(semester, date)) {
+        if (calendarCatalog.closedOn(semester.getId(), date)) {
             return "Ngày học đã đóng";
         }
-        if (currentTime().isBefore(expiresAt)) {
+        if (LocalDateTime.now(ZONE).isBefore(expiresAt)) {
             return "Chưa đến hạn ghi bổ sung";
         }
         return LessonLogActorAuthorization.isManager() ? null : "Cần giáo vụ ghi bổ sung";
@@ -144,20 +136,16 @@ public class LessonLogScheduleEntryFactory {
         if (closed) {
             return "Ngày học đã đóng";
         }
-        if (lessonEndsAt.isAfter(currentTime())) {
+        if (lessonEndsAt.isAfter(LocalDateTime.now(ZONE))) {
             return "Tiết chưa kết thúc";
         }
         if (expiresAt == null) {
             return "Chưa cấu hình policy sổ đầu bài";
         }
-        if (!currentTime().isBefore(expiresAt)) {
+        if (!LocalDateTime.now(ZONE).isBefore(expiresAt)) {
             return LessonLogActorAuthorization.isManager() ? null : "Cần giáo vụ ghi bổ sung";
         }
         return semesterOpen(semester) ? null : "Học kỳ đã đóng";
-    }
-
-    private LocalDateTime currentTime() {
-        return LocalDateTime.now(ZONE);
     }
 
     private record ScheduleValues(Long id, LocalDateTime editWindowExpiresAt, LessonLogStatus status, Long version,
