@@ -14,16 +14,29 @@ const popupVisible = ref(false)
 const popupStatus = ref<'success' | 'failure'>('success')
 const popupMessage = ref('')
 
+function localizedRegistrationError(error: unknown, fallback: string): string {
+  const message = error instanceof Error ? error.message.trim() : ''
+  const knownTranslations: Record<string, string> = {
+    'Username already exists.': 'Tên đăng nhập đã tồn tại.',
+    'Unable to register. Please try again.': fallback,
+    'Unauthorized': 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn.',
+  }
+
+  if (knownTranslations[message]) return knownTranslations[message]
+  if (message && /[À-ỹ]/u.test(message)) return message
+  return fallback
+}
+
 async function handleSubmit(values: RegisterValues): Promise<void> {
   submitting.value = true
   try {
     await register(values)
     popupStatus.value = 'success'
-    popupMessage.value = 'Registration completed successfully. You can now log in.'
+    popupMessage.value = 'Đăng ký thành công. Bạn có thể đăng nhập ngay.'
     popupVisible.value = true
   } catch (error) {
     popupStatus.value = 'failure'
-    popupMessage.value = error instanceof Error ? error.message : 'Unable to register. Please try again.'
+    popupMessage.value = localizedRegistrationError(error, 'Đăng ký không thành công. Vui lòng thử lại.')
     popupVisible.value = true
   } finally {
     submitting.value = false
@@ -45,8 +58,8 @@ async function closePopup(): Promise<void> {
       <div class="auth-heading">
         <span class="brand-mark" aria-hidden="true">AC</span>
         <p class="eyebrow">Academic Core</p>
-        <h1 id="register-title">Create your account</h1>
-        <p>Set up access to the student management workspace.</p>
+        <h1 id="register-title">Tạo tài khoản</h1>
+        <p>Đăng ký quyền truy cập không gian quản lý học sinh.</p>
       </div>
       <RegisterForm :submitting="submitting" @submit="handleSubmit" @back="router.push('/login')" />
     </section>
@@ -55,11 +68,11 @@ async function closePopup(): Promise<void> {
       modal
       :closable="false"
       :close-on-escape="false"
-      :header="popupStatus === 'success' ? 'Registration successful' : 'Registration failed'"
+      :header="popupStatus === 'success' ? 'Đăng ký thành công' : 'Đăng ký thất bại'"
     >
       <p class="dialog-message" role="status">{{ popupMessage }}</p>
       <template #footer>
-        <Button label="Close" @click="closePopup" />
+        <Button label="Đóng" @click="closePopup" />
       </template>
     </Dialog>
   </main>

@@ -30,16 +30,19 @@ public class DemoDataSeeder implements ApplicationRunner {
     private final DemoAcademicCatalogSeeder catalogSeeder;
     private final DemoAcademicApplicabilitySeeder applicabilitySeeder;
     private final DemoAssignmentSeeder assignmentSeeder;
+    private final DemoTimetableSeeder timetableSeeder;
 
     public DemoDataSeeder(
             DemoIdentitySeeder identitySeeder,
             DemoAcademicCatalogSeeder catalogSeeder,
             DemoAcademicApplicabilitySeeder applicabilitySeeder,
-            DemoAssignmentSeeder assignmentSeeder) {
+            DemoAssignmentSeeder assignmentSeeder,
+            DemoTimetableSeeder timetableSeeder) {
         this.identitySeeder = identitySeeder;
         this.catalogSeeder = catalogSeeder;
         this.applicabilitySeeder = applicabilitySeeder;
         this.assignmentSeeder = assignmentSeeder;
+        this.timetableSeeder = timetableSeeder;
     }
 
     @Override
@@ -57,5 +60,6 @@ public class DemoDataSeeder implements ApplicationRunner {
         identitySeeder.seedEnrollments(students, classes, academicYear);
         List<ClassSubject> classSubjects = applicabilitySeeder.seedClassSubjects(classes, semesters, subjects);
         assignmentSeeder.seed(classes, semesters, classSubjects, teachers, academicOffice.getId());
+        timetableSeeder.seed(classes, semesters);
     }
 }

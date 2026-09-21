@@ -77,13 +77,13 @@ function submit(): void {
     <div class="selection-summary"><span class="selection-summary-label">Học sinh</span><strong>{{ props.student?.studentCode || 'Chưa chọn' }}</strong><p class="selection-student-name">{{ props.student?.studentName }}</p></div>
     <form class="form-stack" novalidate @submit.prevent="submit">
       <div class="field-group">
-        <label for="transfer-target-class">Lớp đích</label>
-        <Select id="transfer-target-class" v-model="targetClassId" :options="availableClasses" option-label="classCode" option-value="id" placeholder="Chọn lớp đích" :disabled="props.saving" :invalid="Boolean(errors.targetClassId)" fluid />
+        <label for="transfer-target-class">Lớp đích <span class="required-mark" aria-hidden="true">*</span></label>
+        <Select id="transfer-target-class" v-model="targetClassId" :options="availableClasses" option-label="classCode" option-value="id" placeholder="Chọn lớp đích" :disabled="props.saving" :invalid="Boolean(errors.targetClassId)" aria-required="true" fluid />
         <small v-if="errors.targetClassId" class="field-error">{{ errors.targetClassId }}</small>
       </div>
       <div class="field-group">
-        <label for="transfer-effective-at">Ngày hiệu lực</label>
-        <DatePicker id="transfer-effective-at" v-model="effectiveAt" show-time show-seconds hour-format="24" date-format="dd/mm/yy" show-icon fluid :disabled="props.saving" :invalid="Boolean(errors.effectiveAt)" />
+        <label for="transfer-effective-at">Ngày hiệu lực <span class="required-mark" aria-hidden="true">*</span></label>
+        <DatePicker id="transfer-effective-at" v-model="effectiveAt" show-time show-seconds hour-format="24" date-format="dd/mm/yy" show-icon fluid :disabled="props.saving" :invalid="Boolean(errors.effectiveAt)" aria-required="true" />
         <small v-if="errors.effectiveAt" class="field-error">{{ errors.effectiveAt }}</small>
       </div>
       <div class="field-group">
@@ -95,3 +95,4 @@ function submit(): void {
     </form>
   </Dialog>
 </template>
+<style scoped>.required-mark { color: var(--error, #ba1a1a); }</style>

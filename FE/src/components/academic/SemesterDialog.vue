@@ -110,30 +110,30 @@ function save(): void {
     <form class="form-stack" novalidate @submit.prevent="save">
       <div class="form-grid-two">
         <div class="field-group">
-          <label for="semester-code">Mã học kỳ</label>
-          <Select id="semester-code" v-model="values.code" :options="semesterCodeOptions" editable maxlength="20" placeholder="Ví dụ: HK1" :invalid="Boolean(errors.code)" fluid />
+          <label for="semester-code">Mã học kỳ <span class="required-mark" aria-hidden="true">*</span></label>
+          <Select id="semester-code" v-model="values.code" :options="semesterCodeOptions" editable maxlength="20" placeholder="Ví dụ: HK1" :invalid="Boolean(errors.code)" fluid aria-required="true" />
           <small v-if="errors.code" class="field-error">{{ errors.code }}</small>
         </div>
         <div class="field-group">
-          <label for="semester-order">Trong năm học, đây là học kì thứ</label>
-          <InputNumber id="semester-order" v-model="values.displayOrder" :min="1" :use-grouping="false" :invalid="Boolean(errors.displayOrder)" fluid />
+          <label for="semester-order">Trong năm học, đây là học kì thứ <span class="required-mark" aria-hidden="true">*</span></label>
+          <InputNumber id="semester-order" v-model="values.displayOrder" :min="1" :use-grouping="false" :invalid="Boolean(errors.displayOrder)" fluid aria-required="true" />
           <small v-if="errors.displayOrder" class="field-error">{{ errors.displayOrder }}</small>
         </div>
       </div>
       <div class="field-group">
-        <label for="semester-name">Tên học kỳ</label>
-        <InputText id="semester-name" v-model="values.name" maxlength="100" placeholder="Ví dụ: Học kỳ I" :invalid="Boolean(errors.name)" />
+        <label for="semester-name">Tên học kỳ <span class="required-mark" aria-hidden="true">*</span></label>
+        <InputText id="semester-name" v-model="values.name" maxlength="100" placeholder="Ví dụ: Học kỳ I" :invalid="Boolean(errors.name)" aria-required="true" />
         <small v-if="errors.name" class="field-error">{{ errors.name }}</small>
       </div>
       <div class="form-grid-two">
         <div class="field-group">
-          <label for="semester-start">Ngày bắt đầu</label>
-          <DatePicker id="semester-start" v-model="startDateModel" date-format="dd/mm/yy" placeholder="dd/mm/yyyy" show-icon fluid :invalid="Boolean(errors.startDate)" />
+          <label for="semester-start">Ngày bắt đầu <span class="required-mark" aria-hidden="true">*</span></label>
+          <DatePicker id="semester-start" v-model="startDateModel" date-format="dd/mm/yy" placeholder="dd/mm/yyyy" show-icon fluid :invalid="Boolean(errors.startDate)" aria-required="true" />
           <small v-if="errors.startDate" class="field-error">{{ errors.startDate }}</small>
         </div>
         <div class="field-group">
-          <label for="semester-end">Ngày kết thúc</label>
-          <DatePicker id="semester-end" v-model="endDateModel" date-format="dd/mm/yy" placeholder="dd/mm/yyyy" show-icon fluid :invalid="Boolean(errors.endDate)" />
+          <label for="semester-end">Ngày kết thúc <span class="required-mark" aria-hidden="true">*</span></label>
+          <DatePicker id="semester-end" v-model="endDateModel" date-format="dd/mm/yy" placeholder="dd/mm/yyyy" show-icon fluid :invalid="Boolean(errors.endDate)" aria-required="true" />
           <small v-if="errors.endDate" class="field-error">{{ errors.endDate }}</small>
         </div>
       </div>

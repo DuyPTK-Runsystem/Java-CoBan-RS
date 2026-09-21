@@ -82,8 +82,8 @@ function submit(): void {
     <p class="form-intro">Kiểm tra thông tin điểm hiện tại, sau đó nhập giá trị cần đề nghị và lý do điều chỉnh.</p>
 
     <div class="field-group"><label for="score-change-status">Trạng thái đề xuất</label><Select id="score-change-status" v-model="status" :options="statusOptions" option-label="label" option-value="value" fluid :disabled="props.disabled" /></div>
-    <div class="field-group"><label for="score-change-value">Điểm mới <span v-if="status === 'SCORED'" aria-hidden="true">*</span></label><InputNumber id="score-change-value" v-model="value" :min="0" :max="10" :min-fraction-digits="0" :max-fraction-digits="2" placeholder="Nhập điểm từ 0 đến 10" fluid :disabled="props.disabled || status !== 'SCORED'" :invalid="Boolean(validation.value)" :aria-describedby="validation.value ? 'score-change-value-error' : 'score-change-value-hint'" /><small v-if="validation.value" id="score-change-value-error" class="field-error">{{ validation.value }}</small><small v-else id="score-change-value-hint" class="field-hint">Chỉ nhập điểm khi trạng thái là “Có điểm”.</small></div>
-    <div class="field-group"><label for="score-change-reason">Lý do sửa điểm <span aria-hidden="true">*</span></label><Textarea id="score-change-reason" v-model="reason" rows="4" maxlength="1000" placeholder="Ví dụ: Nhập nhầm điểm theo phiếu chấm..." fluid :disabled="props.disabled" :invalid="Boolean(validation.reason)" /><small v-if="validation.reason" class="field-error">{{ validation.reason }}</small><small v-else class="field-hint">Nêu rõ nguyên nhân để người duyệt có đủ thông tin đối chiếu.</small></div>
+    <div class="field-group"><label for="score-change-value">Điểm mới <span v-if="status === 'SCORED'" class="required-mark" aria-hidden="true">*</span></label><InputNumber id="score-change-value" v-model="value" :min="0" :max="10" :min-fraction-digits="0" :max-fraction-digits="2" placeholder="Nhập điểm từ 0 đến 10" fluid :disabled="props.disabled || status !== 'SCORED'" :invalid="Boolean(validation.value)" :aria-required="status === 'SCORED'" :aria-describedby="validation.value ? 'score-change-value-error' : 'score-change-value-hint'" /><small v-if="validation.value" id="score-change-value-error" class="field-error">{{ validation.value }}</small><small v-else id="score-change-value-hint" class="field-hint">Chỉ nhập điểm khi trạng thái là “Có điểm”.</small></div>
+    <div class="field-group"><label for="score-change-reason">Lý do sửa điểm <span class="required-mark" aria-hidden="true">*</span></label><Textarea id="score-change-reason" v-model="reason" rows="4" maxlength="1000" placeholder="Ví dụ: Nhập nhầm điểm theo phiếu chấm..." fluid :disabled="props.disabled" :invalid="Boolean(validation.reason)" aria-required="true" /><small v-if="validation.reason" class="field-error">{{ validation.reason }}</small><small v-else class="field-hint">Nêu rõ nguyên nhân để người duyệt có đủ thông tin đối chiếu.</small></div>
     <div class="dialog-actions"><Button type="button" label="Đóng" severity="secondary" text :disabled="props.loading" @click="emit('cancel')" /><Button type="submit" label="Gửi yêu cầu" icon="pi pi-send" :loading="props.loading" :disabled="props.disabled" /></div>
   </form>
 </template>
@@ -97,6 +97,7 @@ function submit(): void {
 .form-intro { margin: -2px 0 0; color: var(--p-text-muted-color); font-size: .875rem; line-height: 1.45; }
 .field-group { display: flex; flex-direction: column; gap: 6px; }
 .field-group label { font-weight: 600; }
+.required-mark { color: var(--p-red-600); }
 .field-hint, .field-error { font-size: .8125rem; line-height: 1.35; }
 .field-hint { color: var(--p-text-muted-color); }
 .field-error { color: var(--p-red-600); }

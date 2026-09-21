@@ -29,7 +29,7 @@ export const Filled: Story = {
 
 export const PasswordMismatch: Story = {
   args: {
-    errorMessage: 'Passwords do not match.',
+    errorMessage: 'Mật khẩu xác nhận không khớp.',
     initialValues: {
       userName: 'academic.admin',
       password: 'secret12',

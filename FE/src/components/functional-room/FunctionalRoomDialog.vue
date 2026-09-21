@@ -92,7 +92,7 @@ function handleCancel() {
     @update:visible="emit('update:visible', $event)"
   >
     <div class="functional-room-dialog flex flex-col gap-4">
-      <FormAlert v-if="errorMessage" :message="errorMessage" type="error" />
+      <FormAlert v-if="errorMessage" :message="errorMessage" tone="error" />
 
       <div class="flex flex-col gap-1">
         <label for="room-code" class="font-medium text-sm">Mã phòng <span class="text-red-500">*</span></label>

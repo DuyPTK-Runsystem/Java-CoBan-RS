@@ -374,7 +374,7 @@ onMounted(async () => {
     </div>
 
     <!-- ALERT ERROR -->
-    <FormAlert v-if="errorMessage" :message="errorMessage" type="error" />
+    <FormAlert v-if="errorMessage" :message="errorMessage" tone="error" />
 
     <!-- FORBIDDEN ERROR -->
     <EmptyState

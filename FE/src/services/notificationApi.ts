@@ -13,6 +13,8 @@ import type {
   ResultPaginationDTO,
 } from '@/types/notification'
 
+export const NOTIFICATION_READ_EVENT = 'notification:read'
+
 function notificationPage(response: NotificationPage): NotificationPage {
   return {
     result: response.result,
@@ -88,6 +90,14 @@ export function fetchNotificationInbox(
   }).then(notificationPage)
 }
 
+export function fetchUnreadNotificationCount(token: string): Promise<number> {
+  return fetchNotificationInbox(token, {
+    unreadOnly: true,
+    page: 0,
+    pageSize: 1,
+  }).then((response) => Math.max(response.meta.totalItems, 0))
+}
+
 export function fetchManagedNotifications(
   token: string,
   query: NotificationManageQuery = {},
@@ -149,5 +159,8 @@ export function markNotificationRead(
     `/api/v3/notifications/${notificationId}/read`,
     {},
     { token },
-  )
+  ).then((receipt) => {
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event(NOTIFICATION_READ_EVENT))
+    return receipt
+  })
 }

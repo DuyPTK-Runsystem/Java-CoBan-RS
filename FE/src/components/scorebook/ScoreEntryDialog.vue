@@ -118,7 +118,7 @@ function requestChange(): void {
         <Select id="score-status" v-model="status" :options="statuses" option-label="label" option-value="value" fluid :disabled="props.readOnly" />
       </div>
       <div v-if="status === 'SCORED'" class="field-group">
-        <label for="score-value">Điểm (0–10)</label>
+        <label for="score-value">Điểm (0–10) <span v-if="status === 'SCORED'" class="required-mark" aria-hidden="true">*</span></label>
         <InputNumber
           id="score-value"
           v-model="value"
@@ -130,6 +130,7 @@ function requestChange(): void {
           inputmode="decimal"
           fluid
           :disabled="props.readOnly"
+          :aria-required="status === 'SCORED'"
           @focus="scoreFocused = true"
           @blur="handleScoreBlur"
         />
@@ -161,6 +162,10 @@ function requestChange(): void {
 .score-entry-actions {
   align-items: center;
   flex-wrap: nowrap;
+}
+
+.required-mark {
+  color: var(--error, #ba1a1a);
 }
 
 .score-entry-actions-spacer {

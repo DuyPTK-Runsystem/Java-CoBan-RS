@@ -16,8 +16,8 @@ describe('LoginForm', () => {
 
     await wrapper.get('form').trigger('submit')
 
-    expect(wrapper.text()).toContain('User name is required.')
-    expect(wrapper.text()).toContain('Password is required.')
+    expect(wrapper.text()).toContain('Tên đăng nhập là bắt buộc.')
+    expect(wrapper.text()).toContain('Mật khẩu là bắt buộc.')
     expect(wrapper.emitted('submit')).toBeUndefined()
   })
 

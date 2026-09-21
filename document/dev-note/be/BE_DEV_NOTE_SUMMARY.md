@@ -1,6 +1,11 @@
 # BE Dev Note Summary
 
-- 081: [Seed data v2 và CR v3](../summary/081-seed-data-v2-v3-2026-09-18.md) — amendment full assignment: 16 GVCN, HK1 `168`/`376`, HK2 `172`/`388`, tổng `340`; `CONG_NGHE` bị loại ở khối 9 HK2; tải cứng GVCN `[15,24]`, GVBM `[19,24]`, tối đa 2 môn/GV. Focused test/JaCoCo/Checkstyle PASS; full test `551/99` và build/PMD còn baseline blocker. Chi tiết: [assignment A.6](bootstrap/081-seed-assignment-a6-2026-09-21.md).
+| 082 | notification/security/scorebook | [Delivery outcome and Vietnamese error copy](notification/082-delivery-outcome-and-security-copy-2026-09-21.md) | Delivery/security/scorebook status copy localized; focused tests/checkstyleMain/pmdMain and diff check PASS; full build FAIL at baseline pmdTest 276 violations and 99/553 Spring-context test failures in DemoIdentitySeeder | 2026-09-21 |
+
+- 081: [Seed data v2 và CR v3](../summary/081-seed-data-v2-v3-2026-09-18.md) — amendment full assignment: 16 GVCN, HK1 `168`/`376`, HK2 `172`/`388`, tổng `340`; `CONG_NGHE` bị loại ở khối 9 HK2; tải cứng GVCN `[15,24]`, GVBM `[19,24]`, tối đa 2 môn/GV; bảng username A.3.1 dùng hậu tố lớp compact khớp DB. Row data chi tiết: [thư mục seed Plan 081](../summary/081-seed-data-v2-v3-2026-09-18/). Focused test/JaCoCo/Checkstyle PASS; full test `551/99` và build/PMD còn baseline blocker. Chi tiết: [assignment A.6](bootstrap/081-seed-assignment-a6-2026-09-21.md).
+
+- 081 timetable design: [Lịch đủ bốn khối HK1/HK2](timetable/081-full-timetable-design-2026-09-21.md) — 16 lớp, T2–T6, hai buổi SHCN đều đủ 4 tiết, không buổi 1 tiết, không xung đột lớp/GV/phòng; cần 2 phòng Tin và 1 phòng Nghề dùng chung; không cần T7 hay fallback 3 tiết. Constraint audit PASS; code/test/build NOT RUN vì chỉ thay đổi tài liệu.
+- 081 seed khối 7: [Xếp lớp và seed TKB](bootstrap/081-seed-grade7-enrollment-timetable-2026-09-21.md) — 40 học sinh vào `7A1`–`7A4`; TKB HK1/HK2 đã wire vào demo seeder; compile và focused test/JaCoCo PASS; full backend gates chưa chạy.
 
 | 076.12 | notification | [v3 notification email channel](notification/076.12-v3-notification-email-channel-2026-09-17.md) | EMAIL delivery, receipt status and V27 migration; focused tests/PMD/Checkstyle/JaCoCo PASS; full backend/build/SMTP NOT RUN | 2026-09-17 |
 

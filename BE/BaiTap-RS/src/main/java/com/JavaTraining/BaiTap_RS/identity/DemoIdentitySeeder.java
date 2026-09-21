@@ -164,11 +164,31 @@ public class DemoIdentitySeeder {
         for (int index = 0; index < students.size(); index++) {
             Student student = students.get(index);
             SchoolClass schoolClass = orderedClasses.get(index / 10);
-            if (enrollmentRepository.findByStudentIdAndAcademicYearId(
-                    student.getId(), academicYear.getId()).isEmpty()) {
-                enrollmentRepository.save(createEnrollment(student, schoolClass, academicYear, enrolledAt));
-            }
+            boolean targetedGradeSevenStudent = isTargetedGradeSevenStudent(student);
+            enrollmentRepository.findByStudentIdAndAcademicYearId(student.getId(), academicYear.getId())
+                    .ifPresentOrElse(
+                            enrollment -> ensureEnrollment(enrollment, schoolClass, targetedGradeSevenStudent),
+                            () -> enrollmentRepository.save(createEnrollment(
+                                    student, schoolClass, academicYear, enrolledAt)));
         }
+    }
+
+    private boolean isTargetedGradeSevenStudent(Student student) {
+        return student.getStudentCode().compareTo("STU2600041") >= 0
+                && student.getStudentCode().compareTo("STU2600080") <= 0;
+    }
+
+    private void ensureEnrollment(
+            StudentYearEnrollment enrollment,
+            SchoolClass expectedClass,
+            boolean targetedGradeSevenStudent) {
+        if (!targetedGradeSevenStudent) {
+            return;
+        }
+        enrollment.setCurrentClassId(expectedClass.getId());
+        enrollment.setStatus(EnrollmentStatus.ACTIVE);
+        enrollment.setCompletedAt(null);
+        enrollmentRepository.save(enrollment);
     }
 
     private User ensureUser(String username, String rawPassword, String roleCode) {

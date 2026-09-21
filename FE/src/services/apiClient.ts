@@ -111,13 +111,13 @@ function kindForStatus(status: number): ApiErrorKind {
 }
 
 function fallbackMessage(status: number): string {
-  if (status === 400) return 'The request is invalid.'
-  if (status === 401) return 'Authentication is required.'
-  if (status === 403) return 'You do not have permission to perform this action.'
-  if (status === 404) return 'The requested resource was not found.'
-  if (status === 409) return 'The request conflicts with existing data.'
-  if (status >= 500) return 'The server could not complete the request.'
-  return 'The request could not be completed.'
+  if (status === 400) return 'Yêu cầu không hợp lệ.'
+  if (status === 401) return 'Bạn cần đăng nhập để tiếp tục.'
+  if (status === 403) return 'Bạn không có quyền thực hiện thao tác này.'
+  if (status === 404) return 'Không tìm thấy tài nguyên được yêu cầu.'
+  if (status === 409) return 'Yêu cầu bị xung đột với dữ liệu hiện có.'
+  if (status >= 500) return 'Máy chủ không thể hoàn tất yêu cầu.'
+  return 'Không thể hoàn tất yêu cầu.'
 }
 
 function safePayloadMessage(payload: ErrorPayload | null, status: number, details: ReturnType<typeof normalizeErrors>): string {
@@ -174,7 +174,7 @@ async function request<T>(path: string, options: ApiRequestOptions = {}): Promis
           : JSON.stringify(options.body),
     })
   } catch (cause) {
-    throw new ApiError(0, 'Unable to reach the server.', { kind: 'network', cause })
+    throw new ApiError(0, 'Không thể kết nối đến máy chủ.', { kind: 'network', cause })
   }
 
   if (!response.ok) {

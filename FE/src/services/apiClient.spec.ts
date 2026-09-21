@@ -94,15 +94,15 @@ describe('apiClient', () => {
     await expect(apiClient.get('/api/v2/private', { authenticated: true })).rejects.toMatchObject({
       status: 403,
       kind: 'forbidden',
-      message: 'You do not have permission to perform this action.',
+      message: 'Bạn không có quyền thực hiện thao tác này.',
     })
     expect(getAuthSession()?.accessToken).toBe('valid-token')
   })
 
   it.each([
-    [404, 'not-found', 'The requested resource was not found.'],
-    [409, 'conflict', 'The request conflicts with existing data.'],
-    [500, 'server', 'The server could not complete the request.'],
+    [404, 'not-found', 'Không tìm thấy tài nguyên được yêu cầu.'],
+    [409, 'conflict', 'Yêu cầu bị xung đột với dữ liệu hiện có.'],
+    [500, 'server', 'Máy chủ không thể hoàn tất yêu cầu.'],
   ] as const)('keeps status and stable fallback for %s', async (status, kind, message) => {
     fetchMock.mockResolvedValue(new Response(status === 500 ? JSON.stringify({ message: 'java.lang.StackTrace: secret' }) : null, { status }))
     vi.stubGlobal('fetch', fetchMock)

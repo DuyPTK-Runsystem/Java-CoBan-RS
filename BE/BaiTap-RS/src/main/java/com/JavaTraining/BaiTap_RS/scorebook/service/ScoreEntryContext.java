@@ -63,7 +63,7 @@ public class ScoreEntryContext {
                 .orElseThrow(() -> notFound("Không tìm thấy sổ điểm"));
         if (scorebook.getStatus() != ScorebookStatus.OPEN
                 && scorebook.getStatus() != ScorebookStatus.PUBLISHED) {
-            throw conflict("Sổ điểm phải ở trạng thái OPEN hoặc PUBLISHED để nhập điểm");
+            throw conflict("Sổ điểm phải ở trạng thái đang mở hoặc đã công bố để nhập điểm");
         }
         return scorebook;
     }

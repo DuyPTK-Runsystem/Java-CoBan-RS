@@ -227,9 +227,9 @@ async function dispatchNotifications(semester: Semester): Promise<void> {
   notificationActionLoading.value = true
   notificationError.value = ''
   try {
-    await dispatchSemesterNotifications(token, semester.id)
+    const result = await dispatchSemesterNotifications(token, semester.id)
+    if (selectedSemester.value?.id === semester.id) notifications.value = result
     await loadNotifications(semester)
-    statusMessage.value = 'Đã hoàn tất yêu cầu gửi email.'
   } catch (error) {
     if (isApiError(error, 401)) return
     notificationError.value = extractApiErrorMessage(error, 'Không thể gửi email nhắc điểm.')
@@ -257,9 +257,9 @@ async function retryNotifications(semester: Semester): Promise<void> {
   notificationActionLoading.value = true
   notificationError.value = ''
   try {
-    await retryFailedSemesterNotifications(token, semester.id)
+    const result = await retryFailedSemesterNotifications(token, semester.id)
+    if (selectedSemester.value?.id === semester.id) notifications.value = result
     await loadNotifications(semester)
-    statusMessage.value = 'Đã hoàn tất yêu cầu thử gửi lại email.'
   } catch (error) {
     if (isApiError(error, 401)) return
     notificationError.value = extractApiErrorMessage(error, 'Không thể thử gửi lại email.')

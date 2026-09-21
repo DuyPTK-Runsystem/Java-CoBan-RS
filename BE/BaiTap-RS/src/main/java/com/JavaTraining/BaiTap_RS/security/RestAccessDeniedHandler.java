@@ -34,8 +34,8 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         RestResponse<Void> body = RestResponse.failure(
                 HttpServletResponse.SC_FORBIDDEN,
-                "Forbidden",
-                "Access is denied");
+                "Không có quyền",
+                "Bạn không có quyền thực hiện thao tác này");
         objectMapper.writeValue(response.getOutputStream(), body);
     }
 }

@@ -215,4 +215,37 @@ class SemesterNotificationDispatchServiceTest {
                 Assertions.assertEquals(NotificationStatus.FAILED, captor.getValue().getStatus(),
                                 "unconfigured email sender must not be reported as sent");
         }
+
+        @Test
+        void marksNotificationFailedWhenRecipientEmailIsBlank() {
+                SemesterRecipientInfo recip = new SemesterRecipientInfo(
+                                " ",
+                                "SUBJECT_TEACHER",
+                                10L,
+                                "Thầy A",
+                                "Tiêu đề",
+                                "Nội dung",
+                                List.of("Issue 1"));
+
+                Mockito.when(recipientResolverService.resolveRecipients(Mockito.eq(1L), Mockito.eq("t-7d"),
+                                Mockito.any(), Mockito.any())).thenReturn(List.of(recip));
+                Mockito.when(notificationRepository
+                                .findBySemesterIdAndCheckpointCodeAndRecipientEmailAndNotificationChannel(
+                                                1L, "t-7d", " ", NotificationChannel.EMAIL))
+                                .thenReturn(Optional.empty());
+
+                List<ResSemesterNotificationDTO> dtos = dispatchService.dispatchNotifications(
+                                1L,
+                                "t-7d",
+                                100L,
+                                new SemesterCompletenessSummaryDTO(false, 0, 0, 0, 1, 0, 0, 0, List.of("Issue 1")),
+                                List.of());
+
+                Assertions.assertEquals(1, dtos.size(), "blank recipient must remain visible in the outcome list");
+                Assertions.assertEquals(NotificationStatus.FAILED, dtos.get(0).status(),
+                                "blank recipient must be marked as failed");
+                Assertions.assertTrue(dtos.get(0).errorMessage().contains("địa chỉ email"),
+                                "blank recipient must expose a localized validation error");
+                Mockito.verify(mailSender, Mockito.never()).send(Mockito.any(SimpleMailMessage.class));
+        }
 }

@@ -12,8 +12,11 @@ const mocks = vi.hoisted(() => ({
   updateSemester: vi.fn(),
   activateSemester: vi.fn(),
   getSemesterCompletenessReport: vi.fn(),
+  fetchSemesterNotifications: vi.fn(),
   lockSemester: vi.fn(),
   reopenSemester: vi.fn(),
+  dispatchSemesterNotifications: vi.fn(),
+  retryFailedSemesterNotifications: vi.fn(),
   confirmRequire: vi.fn(),
 }))
 
@@ -24,8 +27,11 @@ vi.mock('@/services/academicApi', () => ({
   updateSemester: mocks.updateSemester,
   activateSemester: mocks.activateSemester,
   getSemesterCompletenessReport: mocks.getSemesterCompletenessReport,
+  fetchSemesterNotifications: mocks.fetchSemesterNotifications,
   lockSemester: mocks.lockSemester,
   reopenSemester: mocks.reopenSemester,
+  dispatchSemesterNotifications: mocks.dispatchSemesterNotifications,
+  retryFailedSemesterNotifications: mocks.retryFailedSemesterNotifications,
 }))
 
 vi.mock('primevue/useconfirm', () => ({
@@ -77,13 +83,16 @@ const semesterDialogStub = {
   `,
 }
 const statusDialogStub = {
-  props: ['visible', 'report', 'loading'],
-  emits: ['lock', 'reopen', 'update:visible'],
+  props: ['visible', 'report', 'loading', 'notifications'],
+  emits: ['lock', 'reopen', 'dispatchNotifications', 'retryNotifications', 'update:visible'],
   template: `
     <div v-if="visible" data-testid="status-dialog">
       <span data-testid="report-loaded">{{ report ? report.reportStatus : 'none' }}</span>
+      <span data-testid="notification-count">{{ notifications.length }}</span>
       <button data-testid="status-lock" @click="$emit('lock')">Lock</button>
       <button data-testid="status-reopen" @click="$emit('reopen')">Reopen</button>
+      <button data-testid="dispatch-notifications" @click="$emit('dispatchNotifications')">Dispatch</button>
+      <button data-testid="retry-notifications" @click="$emit('retryNotifications')">Retry</button>
     </div>
   `,
 }
@@ -119,8 +128,11 @@ describe('SemesterListView', () => {
     mocks.updateSemester.mockReset().mockResolvedValue(semester)
     mocks.activateSemester.mockReset().mockResolvedValue(semester)
     mocks.getSemesterCompletenessReport.mockReset().mockResolvedValue(report)
+    mocks.fetchSemesterNotifications.mockReset().mockResolvedValue([])
     mocks.lockSemester.mockReset().mockResolvedValue({ ...semester, status: 'LOCKED' })
     mocks.reopenSemester.mockReset().mockResolvedValue(semester)
+    mocks.dispatchSemesterNotifications.mockReset().mockResolvedValue([])
+    mocks.retryFailedSemesterNotifications.mockReset().mockResolvedValue([])
     mocks.confirmRequire.mockReset()
     await router.push({ name: 'v2-semesters', params: { academicYearId: 1 } })
   })
@@ -164,5 +176,34 @@ describe('SemesterListView', () => {
     await flushPromises()
 
     expect(mocks.reopenSemester).toHaveBeenCalledWith('jwt-token', 11, { reason: 'Rà soát bổ sung dữ liệu điểm' })
+  })
+
+  it('keeps per-recipient dispatch outcomes instead of showing unconditional success', async () => {
+    const failedNotification = {
+      id: 7,
+      semesterId: 11,
+      recipientEmail: 'teacher@school.edu.vn',
+      recipientRole: 'SUBJECT_TEACHER',
+      status: 'FAILED',
+      subject: 'Nhắc nhập điểm',
+      attemptCount: 1,
+      sentAt: null,
+      errorMessage: 'SMTP không phản hồi',
+      createdAt: '2026-09-21T08:00:00',
+      updatedAt: '2026-09-21T08:00:00',
+    }
+    mocks.fetchSemesterNotifications.mockResolvedValue([failedNotification])
+    mocks.dispatchSemesterNotifications.mockResolvedValue([failedNotification])
+    const wrapper = mountView()
+    await flushPromises()
+    await wrapper.get('[data-testid="view-status"]').trigger('click')
+    await flushPromises()
+    await wrapper.get('[data-testid="dispatch-notifications"]').trigger('click')
+    expect(mocks.confirmRequire).toHaveBeenCalled()
+    mocks.confirmRequire.mock.calls.at(-1)?.[0].accept()
+    await flushPromises()
+
+    expect(mocks.dispatchSemesterNotifications).toHaveBeenCalledWith('jwt-token', 11)
+    expect(wrapper.get('[data-testid="notification-count"]').text()).toBe('1')
   })
 })
