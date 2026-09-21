@@ -7,7 +7,9 @@ import java.util.Optional;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.AcademicYear;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.ClassSubject;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.ClassSubjectStatus;
+import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClass;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Semester;
+import com.JavaTraining.BaiTap_RS.academic.domain.entity.Subject;
 import com.JavaTraining.BaiTap_RS.academic.repository.AcademicYearRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.ClassSubjectRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
@@ -41,7 +43,6 @@ import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings({
         "PMD.ExcessiveImports",
         "PMD.CouplingBetweenObjects",
-        "PMD.LambdaCanBeMethodReference",
         "PMD.AvoidInstantiatingObjectsInLoops"
 })
 public class DemoScorebookSeeder implements ApplicationRunner {
@@ -136,11 +137,11 @@ public class DemoScorebookSeeder implements ApplicationRunner {
         Optional<Long> classId = schoolClassRepository
                 .findAllByAcademicYearIdOrderByClassCodeAsc(academicYear.get().getId()).stream()
                 .filter(item -> CLASS_CODE.equals(item.getClassCode()))
-                .map(item -> item.getId())
+                .map(SchoolClass::getId)
                 .findFirst();
         Optional<Long> subjectId = subjectRepository.findAllByOrderByCodeAsc().stream()
                 .filter(item -> SUBJECT_CODE.equals(item.getCode()))
-                .map(item -> item.getId())
+                .map(Subject::getId)
                 .findFirst();
         if (semester.isEmpty() || classId.isEmpty() || subjectId.isEmpty()) {
             return Optional.empty();
