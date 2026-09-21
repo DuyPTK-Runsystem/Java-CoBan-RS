@@ -1,6 +1,6 @@
 # BE Dev Note Summary
 
-- 081: [Seed data v2 và CR v3](../summary/081-seed-data-v2-v3-2026-09-18.md) — seed integration 5/5 PASS, baseline 16 lớp/160 học sinh, placement, notification, functional-room, scorebook và V27 H2 compatibility; full test còn 7 lỗi OOM/context nền, PMD main còn 1 lỗi baseline.
+- 081: [Seed data v2 và CR v3](../summary/081-seed-data-v2-v3-2026-09-18.md) — amendment full assignment: 16 GVCN, HK1 `168`/`376`, HK2 `172`/`388`, tổng `340`; `CONG_NGHE` bị loại ở khối 9 HK2; tải cứng GVCN `[15,24]`, GVBM `[19,24]`, tối đa 2 môn/GV. Focused test/JaCoCo/Checkstyle PASS; full test `551/99` và build/PMD còn baseline blocker. Chi tiết: [assignment A.6](bootstrap/081-seed-assignment-a6-2026-09-21.md).
 
 | 076.12 | notification | [v3 notification email channel](notification/076.12-v3-notification-email-channel-2026-09-17.md) | EMAIL delivery, receipt status and V27 migration; focused tests/PMD/Checkstyle/JaCoCo PASS; full backend/build/SMTP NOT RUN | 2026-09-17 |
 
@@ -82,6 +82,7 @@
 |   074 | enrollment         | [Rule-based Class Placement (BE + FE)](enrollment/074-rule-based-class-placement-2026-09-11.md) | Consolidated note; BE test/Checkstyle/PMD main PASS; build FAIL only at 123 repository pmdTest violations; live/migration/browser NOT RUN | 2026-09-11 |
 | 074.1 | student            | [Student Gender Foundation (BE + FE)](student/074.1-student-gender-foundation-2026-09-11.md) | Nullable clear regression verified; BE test/checkstyle and FE gates PASS; PMD/build plus runtime/migration/browser/live remain incomplete | 2026-09-11 |
 |   078 | scorebook          | [Score import v2 bulk extension](scorebook/078-score-import-v2-bulk-extension-2026-09-10.md) | Implemented; test/JaCoCo, Checkstyle and bootJar PASS; PMD/build blocked by repository baseline; live API NOT RUN | 2026-09-10 |
+|   081 | bootstrap          | [Seed assignment theo Phụ lục A.4/A.6](bootstrap/081-seed-assignment-a6-2026-09-21.md) | 16 homerooms and full 340 class-subject assignments across HK1/HK2; focused test/JaCoCo/Checkstyle PASS; full test `551/99`, PMD and build remain baseline-blocked | 2026-09-21 |
 
 ## Module folders
 

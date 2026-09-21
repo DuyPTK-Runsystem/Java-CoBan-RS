@@ -6,7 +6,7 @@
 
 - 075.12 FE Teacher unavailability: [implementation note](../fe/timetable/075.12-timetable-entry-and-teacher-busy-slots-2026-09-14.md) — removed the management-header description, preserved the teacher instruction, and added filter-to-table spacing; build/diff check/Chrome reload smoke PASS, lint blocked by two existing NotificationComposer warnings (2026-09-18).
 
-- 081: [Bộ dữ liệu seed v2 và CR v3](081-seed-data-v2-v3-2026-09-18.md) — seed focused 5/5 PASS; baseline, placement, notification, functional-room, scorebook và V27 H2 compatibility đã triển khai; full test còn 7 lỗi OOM/context nền, PMD main còn 1 lỗi baseline (2026-09-18).
+- 081: [Bộ dữ liệu seed v2 và CR v3](081-seed-data-v2-v3-2026-09-18.md) — amendment full assignment đã chốt: 16 GVCN; HK1 `168` rows/`376` tiết, HK2 `172`/`388`, tổng `340`; Công nghệ loại khối 9 HK2; bound tải GVCN `[15,24]`, GVBM `[19,24]`, tối đa 2 môn/GV. Focused test/JaCoCo/Checkstyle PASS; full test `551/99`, PMD/build còn baseline blocker (2026-09-21). Chi tiết [Dev Note](../be/bootstrap/081-seed-assignment-a6-2026-09-21.md).
 
 - 076.12 BE/FE notification email channel: [implementation note](../be/notification/076.12-v3-notification-email-channel-2026-09-17.md) — added v3 EMAIL delivery with receipt status, migration V27 and FE channel selection; focused backend/FE tests, PMD, Checkstyle and JaCoCo PASS; full backend/build/SMTP/browser NOT RUN (2026-09-17).
 
