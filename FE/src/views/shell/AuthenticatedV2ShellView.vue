@@ -79,7 +79,6 @@ const navigation = computed<NavigationItem[]>(() => {
   }
   if (roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE')) {
     items.push({ label: 'Sổ đầu bài', to: '/v2/lesson-logs', icon: 'pi pi-book', active: Boolean(route?.path?.startsWith('/v2/lesson-logs')) })
-    items.push({ label: 'Chính sách sổ đầu bài', to: '/v2/lesson-logs/settings', icon: 'pi pi-sliders-h', active: route?.path === '/v2/lesson-logs/settings' })
   }
   if (isStudentWorkspace(roles)) return items.filter((item) => isStudentWorkspacePath(item.to))
   if (isTeacherWorkspace(roles)) {
