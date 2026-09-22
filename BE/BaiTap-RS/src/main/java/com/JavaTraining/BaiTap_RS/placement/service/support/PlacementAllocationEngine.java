@@ -37,7 +37,7 @@ public class PlacementAllocationEngine {
         state.allocateRegular(eligible);
         eligible.stream().filter(candidate -> !state.handledStudentIds.contains(candidate.getStudentId()))
                 .forEach(candidate -> state.manual(candidate,
-                CAPACITY_CODE, PlacementIssueSeverity.BLOCKING, "Không còn chỗ trong profile lớp đích"));
+                CAPACITY_CODE, PlacementIssueSeverity.WARNING, "Không còn chỗ trong profile lớp đích"));
         return state.results();
     }
 

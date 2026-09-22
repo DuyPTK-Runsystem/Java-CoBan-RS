@@ -25,6 +25,9 @@ describe('PlacementWorkspaceReview', () => {
     expect(wrapper.text()).not.toContain('capacity')
     expect(wrapper.text()).not.toContain('AUTO_ASSIGNED')
     expect(wrapper.text()).not.toContain('MANUAL_REQUIRED')
+    expect(wrapper.text()).not.toContain('XẾP LỚP TỰ ĐỘNG')
+    expect(wrapper.text()).not.toContain('Vượt sĩ số cho phép là lỗi chặn khi xếp lớp tự động.')
+    expect(wrapper.text()).not.toContain('Thiếu dữ liệu hoặc bằng điểm ở ngưỡng không được chọn ngầm.')
 
     // Find the exact confirm button by text
     const confirmBtn = wrapper.findAll('button').find((b) => b.text().includes('Xác nhận phần tự động'))
@@ -54,6 +57,41 @@ describe('PlacementWorkspaceReview', () => {
     expect(confirmBtn?.attributes('disabled')).toBeDefined()
     expect(wrapper.text()).toContain('Phiên có lỗi chặn xếp lớp (vượt sĩ số cho phép)')
     expect(wrapper.text()).not.toContain('capacity')
+  })
+
+  it('keeps confirmation available when capacity overflow is only a warning', () => {
+    const session = {
+      ...placementReviewFixture,
+      status: 'READY_FOR_CONFIRM' as const,
+      results: [
+        {
+          id: 1,
+          studentId: 1,
+          targetClassId: 81,
+          resultStatus: 'AUTO_ASSIGNED' as const,
+          score: 8.5,
+          issueCode: null,
+          issueSeverity: null,
+          explanation: 'assigned',
+        },
+        {
+          id: 2,
+          studentId: 2,
+          targetClassId: null,
+          resultStatus: 'MANUAL_REQUIRED' as const,
+          score: 7.5,
+          issueCode: 'CAPACITY_EXCEEDED',
+          issueSeverity: 'WARNING' as const,
+          explanation: 'Không còn chỗ; giáo vụ xếp thủ công.',
+        },
+      ],
+    }
+    const wrapper = mount(PlacementWorkspaceReview, { props: { session } })
+    const confirmBtn = wrapper.findAll('button').find((b) => b.text().includes('Xác nhận phần tự động'))
+
+    expect(confirmBtn?.attributes('disabled')).toBeUndefined()
+    expect(wrapper.text()).toContain('Có dữ liệu cần xử lý thủ công.')
+    expect(wrapper.text()).not.toContain('Phiên có lỗi chặn xếp lớp')
   })
 
   it('preserves a forbidden review state', () => {

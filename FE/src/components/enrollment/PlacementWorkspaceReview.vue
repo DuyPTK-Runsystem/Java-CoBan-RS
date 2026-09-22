@@ -107,7 +107,6 @@ function getTargetClassName(targetClassId: number | null): string {
   <section class="placement-review" aria-label="Workspace xếp lớp theo quy tắc">
     <header class="page-heading placement-review__heading">
       <div>
-        <p class="eyebrow">XẾP LỚP TỰ ĐỘNG</p>
         <h1>Xếp lớp theo quy tắc</h1>
         <p v-if="props.session" class="section-caption">{{ scopeDescription }}</p>
       </div>
@@ -198,7 +197,6 @@ function getTargetClassName(targetClassId: number | null): string {
         <div class="section-heading">
           <div>
             <h2>Kết quả mô phỏng</h2>
-            <p class="section-caption">Thiếu dữ liệu hoặc bằng điểm ở ngưỡng không được chọn ngầm.</p>
           </div>
         </div>
 
@@ -266,7 +264,6 @@ function getTargetClassName(targetClassId: number | null): string {
           :disabled="props.session.status === 'CONFIRMED' || props.session.status === 'CANCELLED' || props.saving"
           @click="emit('cancel')"
         />
-        <span class="section-caption">Vượt sĩ số cho phép là lỗi chặn khi xếp lớp tự động.</span>
       </footer>
     </template>
   </section>

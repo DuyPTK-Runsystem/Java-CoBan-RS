@@ -140,7 +140,7 @@ describe('PlacementWorkspaceView', () => {
     mocks.fetchPlacementResults.mockReset().mockResolvedValue(sampleResultsPage)
     mocks.confirmPlacementSession.mockReset().mockResolvedValue({ ...sampleSession, status: 'CONFIRMED', version: 3 })
     mocks.cancelPlacementSession.mockReset().mockResolvedValue({ ...sampleSession, status: 'CANCELLED', version: 3 })
-    mocks.getStudent.mockReset().mockResolvedValue({ studentId: 101, studentCode: 'HS101', fullName: 'Nguyễn Văn A' })
+    mocks.getStudent.mockReset().mockResolvedValue({ studentId: 101, studentCode: 'HS101', studentName: 'Nguyễn Văn A' })
   })
 
   afterEach(() => {
@@ -190,12 +190,23 @@ describe('PlacementWorkspaceView', () => {
 
   it('renders review mode on /v2/enrollments/placement/:placementSessionId and hydrates students', async () => {
     await router.push({ name: 'v2-placement-session', params: { placementSessionId: '74' } })
-    mountView()
+    const wrapper = mountView()
     await flushPromises()
 
     expect(mocks.getPlacementSession).toHaveBeenCalledWith('jwt-token', 74)
     expect(mocks.fetchPlacementResults).toHaveBeenCalledWith('jwt-token', 74, 0, 20)
     expect(mocks.getStudent).toHaveBeenCalledWith('jwt-token', 101)
+
+    const view = wrapper.vm as unknown as {
+      studentsCache: Record<number, { studentCode: string; studentName: string }>
+      handleViewReason: (result: typeof sampleResultsPage.result[number]) => void
+    }
+    expect(view.studentsCache[101]).toEqual({ studentCode: 'HS101', studentName: 'Nguyễn Văn A' })
+
+    view.handleViewReason(sampleResultsPage.result[0])
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('HS101 - Nguyễn Văn A')
+    expect(wrapper.text()).not.toContain('Học sinh #101')
   })
 
   it('executes simulation with current session version and reloads results', async () => {

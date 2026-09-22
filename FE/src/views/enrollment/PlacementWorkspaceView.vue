@@ -168,7 +168,7 @@ async function hydrateStudents(studentIds: number[]): Promise<void> {
         const student = await getStudent(accessToken, studentId)
         studentsCache.value[studentId] = {
           studentCode: student.studentCode,
-          studentName: student.fullName,
+          studentName: student.studentName,
         }
       } catch {
         // Leave unmapped, fallback to "Học sinh #id"

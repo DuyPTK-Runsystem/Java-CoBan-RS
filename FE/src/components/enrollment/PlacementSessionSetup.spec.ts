@@ -55,6 +55,7 @@ describe('PlacementSessionSetup', () => {
     })
 
     expect(wrapper.text()).toContain('Tạo phiên xếp lớp tự động')
+    expect(wrapper.text()).not.toContain('XẾP LỚP TỰ ĐỘNG')
     expect(wrapper.text()).toContain('8A1')
     expect(wrapper.text()).toContain('8A2')
     expect(wrapper.text()).toContain('HS101')

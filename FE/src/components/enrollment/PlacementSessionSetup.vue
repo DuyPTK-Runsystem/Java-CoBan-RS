@@ -209,7 +209,6 @@ function validateAndSubmit(): void {
   <div class="placement-setup-form">
     <header class="page-heading">
       <div>
-        <p class="eyebrow">XẾP LỚP TỰ ĐỘNG</p>
         <h1>Tạo phiên xếp lớp tự động</h1>
         <p class="section-caption">Cấu hình năm học, khối, lớp đích theo cách phân lớp và danh sách học sinh cần xếp lớp.</p>
       </div>
