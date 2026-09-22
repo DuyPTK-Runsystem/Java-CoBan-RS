@@ -1,24 +1,34 @@
 package com.JavaTraining.BaiTap_RS.bootstrap;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.JavaTraining.BaiTap_RS.academic.domain.entity.AcademicYear;
+import com.JavaTraining.BaiTap_RS.academic.domain.entity.AcademicYearStatus;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.ClassSubject;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectApplicability;
+import com.JavaTraining.BaiTap_RS.academic.repository.AcademicYearRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.ClassSubjectRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.GradeLevelRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SemesterRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectApplicabilityRepository;
+import com.JavaTraining.BaiTap_RS.academic.repository.SubjectFunctionalRoomRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectRepository;
 import com.JavaTraining.BaiTap_RS.assignment.domain.entity.AssignmentStatus;
 import com.JavaTraining.BaiTap_RS.assignment.domain.entity.SubjectTeachingAssignment;
 import com.JavaTraining.BaiTap_RS.assignment.repository.HomeroomAssignmentRepository;
 import com.JavaTraining.BaiTap_RS.assignment.repository.SubjectTeachingAssignmentRepository;
+import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.EnrollmentStatus;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.StudentYearEnrollment;
 import com.JavaTraining.BaiTap_RS.enrollment.repository.StudentYearEnrollmentRepository;
+import com.JavaTraining.BaiTap_RS.functionalroom.domain.entity.FunctionalRoom;
+import com.JavaTraining.BaiTap_RS.functionalroom.domain.entity.RoomStatus;
 import com.JavaTraining.BaiTap_RS.functionalroom.repository.FunctionalRoomRepository;
 import com.JavaTraining.BaiTap_RS.notification.domain.entity.NotificationStatus;
 import com.JavaTraining.BaiTap_RS.notification.repository.NotificationReceiptRepository;
@@ -29,11 +39,34 @@ import com.JavaTraining.BaiTap_RS.placement.repository.PlacementCandidateReposit
 import com.JavaTraining.BaiTap_RS.placement.repository.PlacementResultRepository;
 import com.JavaTraining.BaiTap_RS.placement.repository.PlacementSessionRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.ScoreStatus;
+import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.CalculationResultSource;
+import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.CalculationStatus;
+import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentAnnualTranscript;
+import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentScore;
+import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentSubjectAnnualResult;
+import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentSubjectTermResult;
+import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentTermTranscript;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.AssessmentColumnRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.ScorebookRepository;
+import com.JavaTraining.BaiTap_RS.scorebook.repository.StudentAnnualTranscriptRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.StudentScoreRepository;
+import com.JavaTraining.BaiTap_RS.scorebook.repository.StudentSubjectAnnualResultRepository;
+import com.JavaTraining.BaiTap_RS.scorebook.repository.StudentSubjectTermResultRepository;
+import com.JavaTraining.BaiTap_RS.scorebook.repository.StudentTermTranscriptRepository;
+import com.JavaTraining.BaiTap_RS.student.domain.entity.Student;
 import com.JavaTraining.BaiTap_RS.student.repository.StudentRepository;
 import com.JavaTraining.BaiTap_RS.teacher.repository.TeacherRepository;
+import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableAudit;
+import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableEntry;
+import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetablePeriod;
+import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableRevision;
+import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableRevisionStatus;
+import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableAuditRepository;
+import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableCalendarRepository;
+import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableEntryRepository;
+import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableHeadRepository;
+import com.JavaTraining.BaiTap_RS.timetable.repository.TimetablePeriodRepository;
+import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableRevisionRepository;
 import com.JavaTraining.BaiTap_RS.user.repository.UserRepository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -86,6 +119,9 @@ class DemoDataSeederIntegrationTest {
     private SemesterRepository semesterRepository;
 
     @Autowired
+    private AcademicYearRepository academicYearRepository;
+
+    @Autowired
     private HomeroomAssignmentRepository homeroomAssignmentRepository;
 
     @Autowired
@@ -128,6 +164,9 @@ class DemoDataSeederIntegrationTest {
     private FunctionalRoomRepository functionalRoomRepository;
 
     @Autowired
+    private SubjectFunctionalRoomRepository subjectFunctionalRoomRepository;
+
+    @Autowired
     private ScorebookRepository scorebookRepository;
 
     @Autowired
@@ -137,29 +176,79 @@ class DemoDataSeederIntegrationTest {
     private StudentScoreRepository studentScoreRepository;
 
     @Autowired
+    private StudentAnnualTranscriptRepository annualTranscriptRepository;
+
+    @Autowired
+    private StudentTermTranscriptRepository termTranscriptRepository;
+
+    @Autowired
+    private StudentSubjectTermResultRepository termResultRepository;
+
+    @Autowired
+    private StudentSubjectAnnualResultRepository annualResultRepository;
+
+    @Autowired
+    private TimetableHeadRepository timetableHeadRepository;
+
+    @Autowired
+    private TimetableRevisionRepository timetableRevisionRepository;
+
+    @Autowired
+    private TimetableEntryRepository timetableEntryRepository;
+
+    @Autowired
+    private TimetableAuditRepository timetableAuditRepository;
+
+    @Autowired
+    private TimetableCalendarRepository timetableCalendarRepository;
+
+    @Autowired
+    private TimetablePeriodRepository timetablePeriodRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Test
     void seedsDeterministicIdentityAcademicAndAssignmentFixture() {
         runAllDemoSeeders();
 
+        AcademicYear currentAcademicYear = academicYearRepository.findAll().stream()
+                .filter(year -> "2026-2027".equals(year.getCode()))
+                .findFirst()
+                .orElseThrow();
+        List<StudentYearEnrollment> currentEnrollments = enrollmentRepository.findAll().stream()
+                .filter(enrollment -> currentAcademicYear.getId().equals(enrollment.getAcademicYearId()))
+                .toList();
+        Set<Long> currentClassIds = schoolClassRepository.findAll().stream()
+                .filter(schoolClass -> currentAcademicYear.getId().equals(schoolClass.getAcademicYearId()))
+                .map(schoolClass -> schoolClass.getId())
+                .collect(Collectors.toSet());
+        Set<Long> currentSemesterIds = semesterRepository
+                .findAllByAcademicYearIdOrderByDisplayOrderAsc(currentAcademicYear.getId()).stream()
+                .map(semester -> semester.getId())
+                .collect(Collectors.toSet());
+        List<ClassSubject> currentClassSubjects = classSubjectRepository.findAll().stream()
+                .filter(classSubject -> currentClassIds.contains(classSubject.getClassId()))
+                .toList();
         assertTrue(userRepository.count() == 182
                 && teacherRepository.count() == 20
                 && studentRepository.count() == 160
-                && enrollmentRepository.count() == 160
-                && schoolClassRepository.count() == 16
-                && enrollmentRepository.findAll().stream()
+                && enrollmentRepository.count() == 200
+                && schoolClassRepository.count() == 20
+                && currentEnrollments.size() == 120
+                && currentEnrollments.stream()
                 .collect(Collectors.groupingBy(StudentYearEnrollment::getCurrentClassId, Collectors.counting()))
-                .size() == 16
-                && enrollmentRepository.findAll().stream()
+                .size() == 12
+                && currentEnrollments.stream()
                 .collect(Collectors.groupingBy(StudentYearEnrollment::getCurrentClassId, Collectors.counting()))
                 .values().stream().allMatch(count -> count == 10)
                 && schoolClassRepository.findAll().stream().allMatch(schoolClass -> schoolClass.getCapacity() == 10)
                 && homeroomAssignmentRepository.count() == 16
                 && applicabilityRepository.findAll().stream()
+                .filter(applicability -> currentSemesterIds.contains(applicability.getSemesterId()))
                 .filter(applicability -> "ACTIVE".equals(applicability.getStatus().name()))
-                .count() == 87
-                && classSubjectRepository.count() == 340
+                .count() == 107
+                && currentClassSubjects.size() == 340
                 && teachingAssignmentRepository.count() == 340
                 && userRepository.findByUsername(ADMIN_USERNAME)
                 .filter(user -> passwordEncoder.matches(ADMIN_PASSWORD, user.getPassword()))
@@ -168,7 +257,7 @@ class DemoDataSeederIntegrationTest {
                 .filter(user -> passwordEncoder.matches(DEFAULT_PASSWORD, user.getPassword())
                         && user.getRoles().stream().anyMatch(role -> "ACADEMIC_OFFICE".equals(role.getCode())))
                 .isPresent()
-                && userRepository.findByUsername("nguyen.minh.khang61")
+                && userRepository.findByUsername("nguyen.minh.anh61")
                 .filter(user -> passwordEncoder.matches(DEFAULT_PASSWORD, user.getPassword())
                         && user.getRoles().stream().anyMatch(role -> "STUDENT".equals(role.getCode())))
                 .isPresent()
@@ -185,6 +274,14 @@ class DemoDataSeederIntegrationTest {
                 && studentRepository.findAll().stream()
                 .allMatch(student -> student.getUserId() != null && student.getStudentInfo() != null),
                 "demo fixture counts, credentials, and identity links must be deterministic");
+
+        List<String> studentNames = studentRepository.findAll().stream()
+                .map(Student::getStudentName)
+                .toList();
+        assertEquals(160, studentNames.stream().distinct().count(),
+                "all demo student names must be distinct");
+        assertTrue(studentNames.contains("Lý Minh Anh"));
+        assertTrue(studentNames.contains("Lý Bảo Nhi"));
 
         Map<String, TeacherFixture> expectedTeachers = canonicalTeachers();
         Map<String, TeacherFixture> actualTeachers = teacherRepository.findAll().stream()
@@ -210,7 +307,20 @@ class DemoDataSeederIntegrationTest {
     void seedsFullAcademicScopeAndTeachingAssignmentsForBothSemesters() {
         runAllDemoSeeders();
 
+        AcademicYear currentAcademicYear = academicYearRepository.findAll().stream()
+                .filter(year -> "2026-2027".equals(year.getCode()))
+                .findFirst()
+                .orElseThrow();
+        Set<Long> currentClassIds = schoolClassRepository.findAll().stream()
+                .filter(schoolClass -> currentAcademicYear.getId().equals(schoolClass.getAcademicYearId()))
+                .map(schoolClass -> schoolClass.getId())
+                .collect(Collectors.toSet());
+        Set<Long> currentSemesterIds = semesterRepository
+                .findAllByAcademicYearIdOrderByDisplayOrderAsc(currentAcademicYear.getId()).stream()
+                .map(semester -> semester.getId())
+                .collect(Collectors.toSet());
         Map<Long, String> classCodesById = schoolClassRepository.findAll().stream()
+                .filter(schoolClass -> currentClassIds.contains(schoolClass.getId()))
                 .collect(Collectors.toMap(
                         schoolClass -> schoolClass.getId(), schoolClass -> schoolClass.getClassCode()));
         Map<Long, String> teacherCodesById = teacherRepository.findAll().stream()
@@ -220,6 +330,7 @@ class DemoDataSeederIntegrationTest {
         Map<Long, String> semesterCodesById = semesterRepository.findAll().stream()
                 .collect(Collectors.toMap(semester -> semester.getId(), semester -> semester.getCode()));
         Map<Long, ClassSubject> classSubjectsById = classSubjectRepository.findAll().stream()
+                .filter(classSubject -> currentClassIds.contains(classSubject.getClassId()))
                 .collect(Collectors.toMap(classSubject -> classSubject.getId(), classSubject -> classSubject));
 
         Map<String, String> expectedHomerooms = canonicalHomerooms();
@@ -236,6 +347,7 @@ class DemoDataSeederIntegrationTest {
         Map<Long, Integer> gradeById = gradeLevelRepository.findAll().stream()
                 .collect(Collectors.toMap(grade -> grade.getId(), grade -> grade.getLevel()));
         Set<String> applicabilityKeys = applicabilityRepository.findAll().stream()
+                .filter(applicability -> currentSemesterIds.contains(applicability.getSemesterId()))
                 .filter(applicability -> "ACTIVE".equals(applicability.getStatus().name()))
                 .map(applicability -> applicabilityKey(
                         applicability,
@@ -261,17 +373,19 @@ class DemoDataSeederIntegrationTest {
                 "CONG_NGHE HK2 scope must be grades 6-8 only");
 
         Map<String, Long> classSubjectCountsBySemester = classSubjectRepository.findAll().stream()
+                .filter(classSubject -> currentClassIds.contains(classSubject.getClassId()))
                 .collect(Collectors.groupingBy(
                         classSubject -> semesterCodesById.get(classSubject.getSemesterId()),
                         Collectors.counting()));
         assertEquals(Map.of("HK1", 168L, "HK2", 172L), classSubjectCountsBySemester,
                 "class_subject counts must follow the corrected subject scope");
-        assertEquals(340L, classSubjectRepository.count(),
+        assertEquals(340L, classSubjectsById.size(),
                 "full academic year must contain 340 class_subject rows");
 
         Set<String> expectedSkillClasses = Set.of("8A1", "8A2", "8A3", "8A4",
                 "9A1", "9A2", "9A3", "9A4");
         Map<String, Set<String>> skillsByClass = classSubjectRepository.findAll().stream()
+                .filter(classSubject -> currentClassIds.contains(classSubject.getClassId()))
                 .filter(classSubject -> "HK2".equals(semesterCodesById.get(classSubject.getSemesterId())))
                 .filter(classSubject -> expectedSkillClasses.contains(classCodesById.get(classSubject.getClassId())))
                 .filter(classSubject -> Set.of("NGHE_DIEN", "NGHE_NONG_NGHIEP")
@@ -350,18 +464,351 @@ class DemoDataSeederIntegrationTest {
     }
 
     @Test
-    void seedsFourFunctionalRooms() {
+    void seedsUnassignedGradeSevenAndFullSixteenClassTimetableWithIdempotency() {
         runAllDemoSeeders();
 
-        assertEquals(Set.of("LAB-PHY-01", "LAB-CHEM-01", "LAB-IT-01", "LAB-BIO-01"),
+        AcademicYear currentAcademicYear = academicYearRepository.findAll().stream()
+                .filter(year -> "2026-2027".equals(year.getCode()))
+                .findFirst()
+                .orElseThrow();
+        Map<String, Long> classIdsByCode = schoolClassRepository.findAll().stream()
+                .filter(schoolClass -> currentAcademicYear.getId().equals(schoolClass.getAcademicYearId()))
+                .collect(Collectors.toMap(
+                        schoolClass -> schoolClass.getClassCode(),
+                        schoolClass -> schoolClass.getId()));
+        Map<Long, ClassSubject> classSubjectsById = classSubjectRepository.findAll().stream()
+                .filter(classSubject -> classIdsByCode.containsValue(classSubject.getClassId()))
+                .collect(Collectors.toMap(ClassSubject::getId, classSubject -> classSubject));
+        Map<Long, SubjectTeachingAssignment> assignmentsById = teachingAssignmentRepository.findAll().stream()
+                .collect(Collectors.toMap(SubjectTeachingAssignment::getId, assignment -> assignment));
+        Map<Long, String> subjectCodesById = subjectRepository.findAll().stream()
+                .collect(Collectors.toMap(subject -> subject.getId(), subject -> subject.getCode()));
+        Map<Long, String> semesterCodesById = semesterRepository.findAll().stream()
+                .collect(Collectors.toMap(semester -> semester.getId(), semester -> semester.getCode()));
+
+        assertEquals(expectedFixtureClassCodes(), classIdsByCode.keySet(),
+                "the timetable fixture must contain exactly the 16 Plan 081 classes");
+        assertUnassignedGradeSeven();
+
+        TimetableSnapshot hk1BeforeRerun = assertFullTimetable(
+                classIdsByCode, classSubjectsById, assignmentsById, subjectCodesById, semesterCodesById,
+                "HK1", 376, LocalDate.of(2026, 9, 1), LocalDate.of(2026, 12, 31));
+        TimetableSnapshot hk2BeforeRerun = assertFullTimetable(
+                classIdsByCode, classSubjectsById, assignmentsById, subjectCodesById, semesterCodesById,
+                "HK2", 388, LocalDate.of(2027, 1, 1), LocalDate.of(2027, 5, 31));
+
+        runAllDemoSeeders();
+        assertTimetableUnchanged(hk1BeforeRerun, "HK1 rerun");
+        assertTimetableUnchanged(hk2BeforeRerun, "HK2 rerun");
+    }
+
+    private void assertUnassignedGradeSeven() {
+        AcademicYear academicYear = academicYearRepository.findAll().stream()
+                .filter(year -> "2026-2027".equals(year.getCode()))
+                .findFirst()
+                .orElseThrow();
+        Set<String> expectedCodes = new HashSet<>();
+        for (int sequence = 41; sequence <= 80; sequence++) {
+            expectedCodes.add(String.format("STU260%04d", sequence));
+        }
+        Set<String> actualG7Codes = studentRepository.findAllByStudentCodeIn(expectedCodes).stream()
+                .filter(student -> "ACTIVE".equals(student.getStatus().name()))
+                .map(student -> student.getStudentCode())
+                .collect(Collectors.toSet());
+        assertEquals(expectedCodes, actualG7Codes, "G7 demo students must be exactly 40 ACTIVE students");
+        assertEquals(120, enrollmentRepository.findByAcademicYearIdAndStatusOrderByStudentIdAsc(
+                academicYear.getId(), EnrollmentStatus.ACTIVE).size(),
+                "only the 120 non-G7 students may have active enrollment");
+        assertTrue(studentRepository.findAllByStudentCodeIn(expectedCodes).stream()
+                .allMatch(student -> enrollmentRepository.findByStudentIdAndAcademicYearId(
+                        student.getId(), academicYear.getId()).isEmpty()),
+                "G7 demo students must have no enrollment in the target academic year");
+        assertEquals(expectedCodes,
+                enrollmentRepository.findUnassignedStudents(academicYear.getId()).stream()
+                        .map(student -> student.getStudentCode()).collect(Collectors.toSet()),
+                "the unassigned-student query must return exactly the 40 G7 demo students");
+    }
+
+    private TimetableSnapshot assertFullTimetable(
+            Map<String, Long> classIdsByCode,
+            Map<Long, ClassSubject> classSubjectsById,
+            Map<Long, SubjectTeachingAssignment> assignmentsById,
+            Map<Long, String> subjectCodesById,
+            Map<Long, String> semesterCodesById,
+            String semesterCode,
+            int expectedEntryCount,
+            LocalDate expectedStart,
+            LocalDate expectedEnd) {
+        var semester = semesterRepository.findAll().stream()
+                .filter(candidate -> semesterCode.equals(candidate.getCode()))
+                .findFirst()
+                .orElseThrow();
+        var head = timetableHeadRepository.findBySemesterId(semester.getId()).orElseThrow();
+        List<TimetableRevision> revisions = timetableRevisionRepository
+                .findByTimetableIdOrderByRevisionNumberDesc(head.getId());
+        List<TimetableRevision> seededRevisions = revisions.stream()
+                .filter(revision -> timetableAuditRepository.existsByRevisionIdAndAction(
+                        revision.getId(), "SEED_PLAN_081_FULL_V2"))
+                .toList();
+        assertEquals(1, seededRevisions.size(), semesterCode + " must have one full seeded revision");
+
+        TimetableRevision revision = seededRevisions.get(0);
+        assertEquals(TimetableRevisionStatus.DRAFT, revision.getStatus(), semesterCode + " must remain DRAFT");
+        assertEquals(semester.getId(), revision.getSemesterId());
+        assertEquals(expectedStart, revision.getEffectiveFrom());
+        assertEquals(expectedEnd, revision.getEffectiveTo());
+        assertEquals(0, revision.getBlockingCount());
+        assertEquals(revision.getId(), head.getCurrentRevisionId());
+
+        List<TimetableEntry> entries = timetableEntryRepository.findByRevisionId(revision.getId());
+        assertEquals(expectedEntryCount, entries.size(), semesterCode + " subject entry count");
+        Map<Long, TimetablePeriod> periodsById = timetablePeriodRepository
+                .findByCalendarIdOrderByDayOfWeekAscSessionAscPeriodIndexAsc(
+                        timetableCalendarRepository.findBySemesterId(semester.getId()).orElseThrow().getId())
+                .stream()
+                .collect(Collectors.toMap(TimetablePeriod::getId, period -> period));
+        Set<String> classSlots = new HashSet<>();
+        Set<String> teacherSlots = new HashSet<>();
+        Set<String> roomSlots = new HashSet<>();
+        Map<Long, String> classCodesById = classIdsByCode.entrySet().stream()
+                .collect(Collectors.toMap(entry -> entry.getValue(), entry -> entry.getKey()));
+        for (TimetableEntry entry : entries) {
+            assertEquals(expectedStart, entry.getValidFrom());
+            assertEquals(expectedEnd, entry.getValidTo());
+            TimetablePeriod period = periodsById.get(entry.getPeriodId());
+            assertTrue(period != null && period.getDayOfWeek() >= 1 && period.getDayOfWeek() <= 5,
+                    semesterCode + " entries must use Monday-Friday periods");
+            SubjectTeachingAssignment assignment = assignmentsById.get(entry.getAssignmentId());
+            assertTrue(assignment != null && assignment.getStatus() == AssignmentStatus.ACTIVE,
+                    semesterCode + " entries must use active assignments");
+            ClassSubject classSubject = classSubjectsById.get(assignment.getClassSubjectId());
+            Long classId = classSubject.getClassId();
+            assertEquals(semester.getId(), classSubject.getSemesterId());
+            assertTrue(classIdsByCode.containsValue(classId), "entry must target a fixture class");
+            assertTrue(classSlots.add(classId + "|" + entry.getPeriodId()),
+                    semesterCode + " has a class conflict");
+            assertTrue(teacherSlots.add(assignment.getTeacherId() + "|" + entry.getPeriodId()),
+                    semesterCode + " has a teacher conflict");
+            String subjectCode = subjectCodesById.get(classSubject.getSubjectId());
+            if (Set.of("TIN_HOC", "NGHE_DIEN", "NGHE_NONG_NGHIEP").contains(subjectCode)) {
+                assertTrue(entry.getFunctionalRoomId() != null,
+                        subjectCode + " entries must have a functional room");
+            }
+            if (entry.getFunctionalRoomId() != null) {
+                assertTrue(roomSlots.add(entry.getFunctionalRoomId() + "|" + entry.getPeriodId()),
+                        semesterCode + " has a functional-room conflict");
+            }
+        }
+        Map<String, Long> entriesByClass = entries.stream()
+                .collect(Collectors.groupingBy(entry -> classCodesById.get(
+                        classSubjectsById.get(assignmentsById.get(entry.getAssignmentId()).getClassSubjectId())
+                                .getClassId()),
+                        Collectors.counting()));
+        assertEquals(expectedFixtureClassCodes(), entriesByClass.keySet(),
+                semesterCode + " entries must cover all 16 classes");
+        assertTrue(entriesByClass.values().stream().allMatch(count -> count > 0),
+                semesterCode + " every fixture class must have subject entries");
+        Map<Long, Long> actualEntriesByAssignment = entries.stream()
+                .collect(Collectors.groupingBy(TimetableEntry::getAssignmentId, Collectors.counting()));
+        Map<Long, Long> expectedEntriesByAssignment = assignmentsById.values().stream()
+                .filter(assignment -> semester.getId().equals(
+                        classSubjectsById.get(assignment.getClassSubjectId()).getSemesterId()))
+                .map(assignment -> Map.entry(assignment.getId(), weeklyPeriods(
+                        assignment, classSubjectsById,
+                        classIdsByCode.entrySet().stream().collect(Collectors.toMap(
+                                entry -> entry.getValue(), entry -> entry.getKey())),
+                        subjectCodesById, semesterCodesById)))
+                .filter(entry -> entry.getValue() > 0)
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> (long) entry.getValue()));
+        assertEquals(expectedEntriesByAssignment, actualEntriesByAssignment,
+                semesterCode + " subject entries must match the design period counts");
+        assertEquals(expectedEntryCount, actualEntriesByAssignment.values().stream()
+                .mapToLong(Long::longValue).sum());
+
+        Map<Long, String> roomCodesById = functionalRoomRepository.findAll().stream()
+                .collect(Collectors.toMap(FunctionalRoom::getId, FunctionalRoom::getCode));
+        Map<Long, Long> tinPeakByPeriod = entries.stream()
+                .filter(entry -> "TIN-1".equals(roomCodesById.get(entry.getFunctionalRoomId()))
+                        || "TIN-2".equals(roomCodesById.get(entry.getFunctionalRoomId())))
+                .collect(Collectors.groupingBy(TimetableEntry::getPeriodId, Collectors.counting()));
+        assertEquals(2L, tinPeakByPeriod.values().stream().mapToLong(Long::longValue).max().orElse(0L),
+                semesterCode + " Tin room peak must be exactly 2");
+        Map<Long, Long> nghềPeakByPeriod = entries.stream()
+                .filter(entry -> "NGHE-1".equals(roomCodesById.get(entry.getFunctionalRoomId())))
+                .collect(Collectors.groupingBy(TimetableEntry::getPeriodId, Collectors.counting()));
+        if ("HK1".equals(semesterCode)) {
+            assertTrue(nghềPeakByPeriod.isEmpty(), "HK1 must not contain vocational subjects");
+        } else {
+            assertEquals(1L, nghềPeakByPeriod.values().stream()
+                    .mapToLong(Long::longValue).max().orElse(0L),
+                    "HK2 vocational room peak must be exactly 1");
+        }
+        List<TimetableAudit> audits = timetableAuditRepository.findByRevisionIdOrderByCreatedAtDesc(revision.getId());
+        assertTrue(audits.stream().anyMatch(audit -> "SEED_PLAN_081_FULL_V2".equals(audit.getAction())
+                && audit.getDetails().contains("semester=" + semesterCode)),
+                semesterCode + " must include the full timetable audit marker");
+        return new TimetableSnapshot(
+                head.getId(),
+                head.getCurrentRevisionId(),
+                revision.getId(),
+                revision.getRevisionNumber(),
+                entries.stream().map(TimetableEntry::getId).collect(Collectors.toSet()),
+                entries.stream().collect(Collectors.toMap(
+                        TimetableEntry::getId,
+                        entry -> entry.getFunctionalRoomId() == null ? 0L : entry.getFunctionalRoomId())),
+                audits.size());
+    }
+
+    private void assertTimetableUnchanged(TimetableSnapshot before, String semesterCode) {
+        var head = timetableHeadRepository.findById(before.headId()).orElseThrow();
+        List<TimetableRevision> revisions = timetableRevisionRepository
+                .findByTimetableIdOrderByRevisionNumberDesc(head.getId());
+        assertEquals(1, revisions.size(), semesterCode + " rerun must not create a revision");
+        assertEquals(before.currentRevisionId(), head.getCurrentRevisionId());
+        assertEquals(before.revisionId(), revisions.get(0).getId());
+        assertEquals(before.revisionNumber(), revisions.get(0).getRevisionNumber());
+        assertEquals(before.entryIds(), timetableEntryRepository.findByRevisionId(before.revisionId()).stream()
+                .map(TimetableEntry::getId).collect(Collectors.toSet()),
+                semesterCode + " rerun must not duplicate entries");
+        assertEquals(before.roomIdsByEntry(), timetableEntryRepository.findByRevisionId(before.revisionId()).stream()
+                .collect(Collectors.toMap(
+                        TimetableEntry::getId,
+                        entry -> entry.getFunctionalRoomId() == null ? 0L : entry.getFunctionalRoomId())),
+                semesterCode + " rerun must preserve room bindings");
+        assertEquals(before.auditCount(), timetableAuditRepository.findByRevisionIdOrderByCreatedAtDesc(
+                before.revisionId()).size(), semesterCode + " rerun must not duplicate audit rows");
+    }
+
+    @Test
+    void seedsFunctionalRoomsAndSubjectMappings() {
+        runAllDemoSeeders();
+
+        Set<String> expectedRooms = Set.of(
+                "LAB-PHY-01", "LAB-CHEM-01", "LAB-BIO-01",
+                "TIN-1", "TIN-2", "NGHE-1");
+        assertEquals(expectedRooms,
                 functionalRoomRepository.findAll().stream()
                         .map(room -> room.getCode()).collect(Collectors.toSet()));
-        assertTrue(functionalRoomRepository.findAll().stream()
-                .allMatch(room -> "ACTIVE".equals(room.getStatus().name())));
+        Map<String, FunctionalRoom> roomsByCode = functionalRoomRepository.findAll().stream()
+                .collect(Collectors.toMap(FunctionalRoom::getCode, room -> room));
+        assertTrue(expectedRooms.stream().allMatch(code -> roomsByCode.get(code).getStatus() == RoomStatus.ACTIVE));
+
+        Map<String, Long> subjectsByCode = subjectRepository.findAll().stream()
+                .collect(Collectors.toMap(subject -> subject.getCode(), subject -> subject.getId()));
+        Map<Long, String> roomsById = roomsByCode.values().stream()
+                .collect(Collectors.toMap(FunctionalRoom::getId, FunctionalRoom::getCode));
+        assertEquals(Set.of("TIN-1", "TIN-2"), subjectFunctionalRoomRepository
+                .findBySubjectId(subjectsByCode.get("TIN_HOC")).stream()
+                .map(mapping -> roomsById.get(mapping.getFunctionalRoomId())).collect(Collectors.toSet()));
+        for (String subjectCode : List.of("NGHE_DIEN", "NGHE_NONG_NGHIEP")) {
+            assertEquals(Set.of("NGHE-1"), subjectFunctionalRoomRepository
+                    .findBySubjectId(subjectsByCode.get(subjectCode)).stream()
+                    .map(mapping -> roomsById.get(mapping.getFunctionalRoomId())).collect(Collectors.toSet()));
+        }
 
         long roomCount = functionalRoomRepository.count();
         functionalRoomSeeder.run(new DefaultApplicationArguments());
         assertEquals(roomCount, functionalRoomRepository.count(), "functional room seed must be idempotent");
+    }
+
+    @Test
+    void seedsHistoricalGradeSixAcademicRecordForUnassignedGradeSevenStudents() {
+        runAllDemoSeeders();
+
+        AcademicYear historicalYear = academicYearRepository.findAll().stream()
+                .filter(year -> "2025-2026".equals(year.getCode()))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(AcademicYearStatus.CLOSED, historicalYear.getStatus());
+        Set<String> targetCodes = new HashSet<>();
+        for (int sequence = 41; sequence <= 80; sequence++) {
+            targetCodes.add(String.format("STU260%04d", sequence));
+        }
+        List<Student> targetStudents = studentRepository.findAllByStudentCodeIn(targetCodes);
+        Set<Long> targetStudentIds = targetStudents.stream().map(Student::getId).collect(Collectors.toSet());
+
+        Set<Long> historicalClassIds = schoolClassRepository.findAll().stream()
+                .filter(schoolClass -> historicalYear.getId().equals(schoolClass.getAcademicYearId()))
+                .filter(schoolClass -> Set.of("6A1", "6A2", "6A3", "6A4").contains(schoolClass.getClassCode()))
+                .map(schoolClass -> schoolClass.getId()).collect(Collectors.toSet());
+        assertEquals(4, historicalClassIds.size());
+        List<StudentYearEnrollment> historicalEnrollments = enrollmentRepository.findAll().stream()
+                .filter(enrollment -> historicalYear.getId().equals(enrollment.getAcademicYearId()))
+                .filter(enrollment -> targetStudentIds.contains(enrollment.getStudentId()))
+                .toList();
+        assertEquals(40, historicalEnrollments.size());
+        assertTrue(historicalEnrollments.stream().allMatch(e -> e.getStatus() == EnrollmentStatus.COMPLETED));
+
+        Set<Long> historicalClassSubjectIds = classSubjectRepository.findAll().stream()
+                .filter(classSubject -> historicalClassIds.contains(classSubject.getClassId()))
+                .map(ClassSubject::getId).collect(Collectors.toSet());
+        assertEquals(80, historicalClassSubjectIds.size());
+        Set<Long> historicalScorebookIds = scorebookRepository.findAll().stream()
+                .filter(scorebook -> historicalClassSubjectIds.contains(scorebook.getClassSubjectId()))
+                .map(scorebook -> scorebook.getId()).collect(Collectors.toSet());
+        assertEquals(80, historicalScorebookIds.size());
+        Set<Long> historicalColumnIds = assessmentColumnRepository.findAll().stream()
+                .filter(column -> historicalScorebookIds.contains(column.getScorebookId()))
+                .map(column -> column.getId()).collect(Collectors.toSet());
+        assertEquals(320, historicalColumnIds.size());
+        List<StudentScore> historicalScores = studentScoreRepository.findAll().stream()
+                .filter(score -> targetStudentIds.contains(score.getStudentId()))
+                .filter(score -> historicalColumnIds.contains(score.getAssessmentColumnId()))
+                .toList();
+        assertEquals(3200, historicalScores.size());
+        assertTrue(historicalScores.stream().allMatch(score -> score.getScoreStatus() == ScoreStatus.SCORED
+                && score.getScoreValue().compareTo(BigDecimal.valueOf(6.5)) >= 0
+                && score.getScoreValue().compareTo(BigDecimal.valueOf(9.5)) <= 0));
+
+        List<StudentAnnualTranscript> annualTranscripts = annualTranscriptRepository
+                .findAllByAcademicYearIdAndStudentIdIn(historicalYear.getId(), targetStudentIds);
+        assertEquals(40, annualTranscripts.size());
+        assertTrue(annualTranscripts.stream().allMatch(transcript ->
+                transcript.getCalculationStatus() == CalculationStatus.FINISH
+                        && transcript.getSourceVersion().equals(transcript.getCalculatedVersion())
+                        && transcript.getFinalDtbcn().compareTo(BigDecimal.valueOf(6.5)) >= 0));
+        Set<Long> annualTranscriptIds = annualTranscripts.stream()
+                .map(StudentAnnualTranscript::getId).collect(Collectors.toSet());
+        List<StudentTermTranscript> termTranscripts = termTranscriptRepository.findAll().stream()
+                .filter(term -> annualTranscriptIds.contains(term.getAnnualTranscriptId()))
+                .toList();
+        assertEquals(80, termTranscripts.size());
+        assertTrue(termTranscripts.stream().allMatch(term -> term.getCalculationStatus() == CalculationStatus.FINISH));
+        Set<Long> termTranscriptIds = termTranscripts.stream().map(StudentTermTranscript::getId)
+                .collect(Collectors.toSet());
+        assertEquals(800, termResultRepository.findAll().stream()
+                .filter(result -> termTranscriptIds.contains(result.getTermTranscriptId())).count());
+        assertEquals(400, annualResultRepository.findAll().stream()
+                .filter(result -> annualTranscriptIds.contains(result.getAnnualTranscriptId())).count());
+
+        AcademicYear currentYear = academicYearRepository.findAll().stream()
+                .filter(year -> "2026-2027".equals(year.getCode()))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(0, enrollmentRepository.findAll().stream()
+                .filter(enrollment -> currentYear.getId().equals(enrollment.getAcademicYearId()))
+                .filter(enrollment -> targetStudentIds.contains(enrollment.getStudentId()))
+                .count());
+
+        long enrollmentCount = historicalEnrollments.size();
+        long scoreCount = historicalScores.size();
+        long annualCount = annualTranscripts.size();
+        long termCount = termTranscripts.size();
+        long termResultCount = termResultRepository.count();
+        long annualResultCount = annualResultRepository.count();
+        runAllDemoSeeders();
+        assertEquals(enrollmentCount, enrollmentRepository.findAll().stream()
+                .filter(enrollment -> historicalYear.getId().equals(enrollment.getAcademicYearId()))
+                .filter(enrollment -> targetStudentIds.contains(enrollment.getStudentId())).count());
+        assertEquals(scoreCount, studentScoreRepository.findAll().stream()
+                .filter(score -> targetStudentIds.contains(score.getStudentId()))
+                .filter(score -> historicalColumnIds.contains(score.getAssessmentColumnId())).count());
+        assertEquals(annualCount, annualTranscriptRepository
+                .findAllByAcademicYearIdAndStudentIdIn(historicalYear.getId(), targetStudentIds).size());
+        assertEquals(termCount, termTranscriptRepository.findAll().stream()
+                .filter(term -> annualTranscriptIds.contains(term.getAnnualTranscriptId())).count());
+        assertEquals(termResultCount, termResultRepository.count());
+        assertEquals(annualResultCount, annualResultRepository.count());
     }
 
     @Test
@@ -571,6 +1018,24 @@ class DemoDataSeederIntegrationTest {
                 fixtureName + " mismatch; missing=" + missing + ", unexpected=" + unexpected);
     }
 
+    private Set<String> expectedFixtureClassCodes() {
+        return Set.of(
+                "6A1", "6A2", "6A3", "6A4",
+                "7A1", "7A2", "7A3", "7A4",
+                "8A1", "8A2", "8A3", "8A4",
+                "9A1", "9A2", "9A3", "9A4");
+    }
+
     private record TeacherFixture(String username, String name) {
+    }
+
+    private record TimetableSnapshot(
+            Long headId,
+            Long currentRevisionId,
+            Long revisionId,
+            Integer revisionNumber,
+            Set<Long> entryIds,
+            Map<Long, Long> roomIdsByEntry,
+            int auditCount) {
     }
 }

@@ -154,16 +154,16 @@ public class DemoNotificationSeeder implements ApplicationRunner {
                         "NOTI-081-IND-02", "Kết quả học tập", "Kết quả học tập đã được cập nhật.",
                         AUDIENCE_INDIVIDUAL, STATUS_PUBLISHED, CHANNEL_IN_APP, "student.6a1.01", publishedAt, null,
                         List.of(new ReceiptSpec(
-                                List.of("nguyen.minh.khang61", "student.6a1.01"), AUDIENCE_INDIVIDUAL,
+                                List.of("nguyen.minh.anh61", "student.6a1.01"), AUDIENCE_INDIVIDUAL,
                                 null, null, null, null))),
                 new NotificationSpec(
                         "NOTI-081-CLASS-01", "Lịch học tuần này", "Lịch học lớp 6A1 tuần này.",
                         AUDIENCE_CLASS, STATUS_PUBLISHED, CHANNEL_IN_APP, "6A1", publishedAt,
                         LocalDateTime.of(2026, 9, 25, 23, 59),
                         List.of(
-                                new ReceiptSpec(List.of("nguyen.minh.khang61", "student.6a1.01"),
+                                new ReceiptSpec(List.of("nguyen.minh.anh61", "student.6a1.01"),
                                         AUDIENCE_CLASS, null, null, null, null),
-                                new ReceiptSpec(List.of("nguyen.ngoc.anh61", "student.6a1.02"),
+                                new ReceiptSpec(List.of("nguyen.gia.bao61", "student.6a1.02"),
                                         AUDIENCE_CLASS, LocalDateTime.of(2026, 9, 18, 9, 0), null, null, null))),
                 new NotificationSpec(
                         "NOTI-081-SCHOOL-01", "Thông báo toàn trường", "Thông báo dành cho toàn trường.",

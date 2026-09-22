@@ -20,8 +20,10 @@ public class DemoFunctionalRoomSeeder implements ApplicationRunner {
     private static final List<RoomSeed> ROOMS = List.of(
             new RoomSeed("LAB-PHY-01", "Phòng thí nghiệm Vật lý"),
             new RoomSeed("LAB-CHEM-01", "Phòng thí nghiệm Hóa học"),
-            new RoomSeed("LAB-IT-01", "Phòng thực hành Tin học"),
-            new RoomSeed("LAB-BIO-01", "Phòng thí nghiệm Sinh học"));
+            new RoomSeed("LAB-BIO-01", "Phòng thí nghiệm Sinh học"),
+            new RoomSeed("TIN-1", "Phòng Tin học 1"),
+            new RoomSeed("TIN-2", "Phòng Tin học 2"),
+            new RoomSeed("NGHE-1", "Phòng Nghề"));
 
     private final FunctionalRoomRepository functionalRoomRepository;
 
@@ -32,6 +34,11 @@ public class DemoFunctionalRoomSeeder implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+        seedRooms();
+    }
+
+    @Transactional
+    public void seedRooms() {
         for (RoomSeed room : ROOMS) {
             if (!functionalRoomRepository.existsByCode(room.code())) {
                 functionalRoomRepository.save(createRoom(room));

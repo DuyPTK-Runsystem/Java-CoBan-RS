@@ -30,16 +30,28 @@ public class DemoDataSeeder implements ApplicationRunner {
     private final DemoAcademicCatalogSeeder catalogSeeder;
     private final DemoAcademicApplicabilitySeeder applicabilitySeeder;
     private final DemoAssignmentSeeder assignmentSeeder;
+    private final DemoFunctionalRoomSeeder functionalRoomSeeder;
+    private final DemoSubjectFunctionalRoomSeeder subjectFunctionalRoomSeeder;
+    private final DemoTimetableSeeder timetableSeeder;
+    private final DemoHistoricalAcademicSeeder historicalAcademicSeeder;
 
     public DemoDataSeeder(
             DemoIdentitySeeder identitySeeder,
             DemoAcademicCatalogSeeder catalogSeeder,
             DemoAcademicApplicabilitySeeder applicabilitySeeder,
-            DemoAssignmentSeeder assignmentSeeder) {
+            DemoAssignmentSeeder assignmentSeeder,
+            DemoFunctionalRoomSeeder functionalRoomSeeder,
+            DemoSubjectFunctionalRoomSeeder subjectFunctionalRoomSeeder,
+            DemoTimetableSeeder timetableSeeder,
+            DemoHistoricalAcademicSeeder historicalAcademicSeeder) {
         this.identitySeeder = identitySeeder;
         this.catalogSeeder = catalogSeeder;
         this.applicabilitySeeder = applicabilitySeeder;
         this.assignmentSeeder = assignmentSeeder;
+        this.functionalRoomSeeder = functionalRoomSeeder;
+        this.subjectFunctionalRoomSeeder = subjectFunctionalRoomSeeder;
+        this.timetableSeeder = timetableSeeder;
+        this.historicalAcademicSeeder = historicalAcademicSeeder;
     }
 
     @Override
@@ -52,10 +64,14 @@ public class DemoDataSeeder implements ApplicationRunner {
         Map<Integer, GradeLevel> grades = catalogSeeder.seedGrades();
         List<SchoolClass> classes = catalogSeeder.seedClasses(academicYear, grades);
         Map<String, Subject> subjects = catalogSeeder.seedSubjects();
+        functionalRoomSeeder.seedRooms();
+        subjectFunctionalRoomSeeder.seed(subjects.values().stream().toList());
         applicabilitySeeder.seedApplicability(subjects, semesters, grades);
         List<Student> students = identitySeeder.seedStudents(classes);
         identitySeeder.seedEnrollments(students, classes, academicYear);
         List<ClassSubject> classSubjects = applicabilitySeeder.seedClassSubjects(classes, semesters, subjects);
         assignmentSeeder.seed(classes, semesters, classSubjects, teachers, academicOffice.getId());
+        historicalAcademicSeeder.seed(students, grades.get(6), subjects, academicOffice.getId());
+        timetableSeeder.seed(classes, semesters);
     }
 }

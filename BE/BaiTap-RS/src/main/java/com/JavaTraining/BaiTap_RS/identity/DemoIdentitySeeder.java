@@ -1,5 +1,6 @@
 package com.JavaTraining.BaiTap_RS.identity;
 
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,18 +39,120 @@ public class DemoIdentitySeeder {
 
     private static final String ACADEMIC_OFFICE_USERNAME = "academic.office";
     private static final String DEMO_PASSWORD = "12345678";
-    private static final String[][] CANONICAL_STUDENTS = {
-            {"nguyen.minh.khang", "Nguyễn Minh Khang", "MALE"},
-            {"nguyen.ngoc.anh", "Nguyễn Ngọc Anh", "FEMALE"},
-            {"nguyen.hoang.long", "Nguyễn Hoàng Long", "MALE"},
-            {"nguyen.ha.my", "Nguyễn Hà My", "FEMALE"},
-            {"nguyen.duc.huy", "Nguyễn Đức Huy", "MALE"},
-            {"nguyen.thuy.linh", "Nguyễn Thùy Linh", "FEMALE"},
-            {"nguyen.quang.minh", "Nguyễn Quang Minh", "MALE"},
-            {"nguyen.phuong.thao", "Nguyễn Phương Thảo", "FEMALE"},
-            {"nguyen.thanh.dat", "Nguyễn Thành Đạt", "MALE"},
-            {"nguyen.mai.chi", "Nguyễn Mai Chi", "FEMALE"}
-    };
+    private static final String[][] CANONICAL_STUDENTS = buildCanonicalStudents();
+
+    private static String[][] buildCanonicalStudents() {
+        List<String[]> students = new ArrayList<>();
+        addStudents(students, new String[][]{
+                {"Nguyễn Minh Anh", "FEMALE"}, {"Nguyễn Gia Bảo", "MALE"},
+                {"Nguyễn Đức Anh", "MALE"}, {"Nguyễn Hải Anh", "MALE"},
+                {"Nguyễn Tuấn Anh", "MALE"}, {"Nguyễn Nhật Anh", "MALE"},
+                {"Nguyễn Hoài An", "FEMALE"}, {"Nguyễn Bình An", "MALE"},
+                {"Nguyễn Khánh An", "FEMALE"}, {"Nguyễn Gia An", "FEMALE"},
+                {"Nguyễn Minh An", "FEMALE"}, {"Nguyễn Đức An", "MALE"},
+                {"Nguyễn Hải An", "MALE"}, {"Nguyễn Phúc An", "MALE"},
+                {"Nguyễn Quốc An", "MALE"}, {"Nguyễn Gia Huy", "MALE"},
+                {"Nguyễn Minh Huy", "MALE"}, {"Nguyễn Đức Huy", "MALE"},
+                {"Nguyễn Hải Huy", "MALE"},
+                {"Nguyễn Quốc Huy", "MALE"}, {"Nguyễn Tuấn Huy", "MALE"},
+                {"Nguyễn Nhật Huy", "MALE"}, {"Nguyễn Khánh Huy", "MALE"},
+                {"Nguyễn Phúc Huy", "MALE"}, {"Nguyễn Anh Huy", "MALE"},
+                {"Nguyễn Gia Khang", "MALE"}, {"Nguyễn Minh Khang", "MALE"},
+                {"Nguyễn Đức Khang", "MALE"}, {"Nguyễn Hải Khang", "MALE"},
+                {"Nguyễn Hữu Khang", "MALE"}, {"Nguyễn Gia Khôi", "MALE"},
+                {"Nguyễn Minh Khôi", "MALE"}, {"Nguyễn Đức Khôi", "MALE"},
+                {"Nguyễn Hải Khôi", "MALE"}, {"Nguyễn Anh Khôi", "MALE"},
+                {"Nguyễn Gia Long", "MALE"}, {"Nguyễn Minh Long", "MALE"},
+                {"Nguyễn Đức Long", "MALE"}, {"Nguyễn Hải Long", "MALE"},
+                {"Nguyễn Thành Long", "MALE"}, {"Nguyễn Gia Nam", "MALE"},
+                {"Nguyễn Minh Nam", "MALE"}, {"Nguyễn Đức Nam", "MALE"},
+                {"Nguyễn Hải Nam", "MALE"}, {"Nguyễn Hoài Nam", "MALE"},
+                {"Nguyễn Quốc Nam", "MALE"}, {"Nguyễn Tuấn Nam", "MALE"},
+                {"Nguyễn Nhật Nam", "MALE"}, {"Nguyễn Khánh Nam", "MALE"},
+                {"Nguyễn Phúc Nam", "MALE"}, {"Nguyễn Gia Phúc", "MALE"},
+                {"Nguyễn Minh Phúc", "MALE"}, {"Nguyễn Đức Phúc", "MALE"},
+                {"Nguyễn Hải Phúc", "MALE"}, {"Nguyễn Anh Phúc", "MALE"},
+                {"Nguyễn Gia Sơn", "MALE"}, {"Nguyễn Minh Sơn", "MALE"},
+                {"Nguyễn Đức Sơn", "MALE"}, {"Nguyễn Hải Sơn", "MALE"},
+                {"Nguyễn Hoàng Sơn", "MALE"}, {"Nguyễn Gia Tâm", "MALE"},
+                {"Nguyễn Minh Tâm", "MALE"}, {"Nguyễn Đức Tâm", "MALE"},
+                {"Nguyễn Hải Tâm", "MALE"}, {"Nguyễn Hoài Tâm", "MALE"},
+                {"Nguyễn Gia Tú", "MALE"}, {"Nguyễn Minh Tú", "MALE"},
+                {"Nguyễn Đức Tú", "MALE"}, {"Nguyễn Hải Tú", "MALE"},
+                {"Nguyễn Anh Tú", "MALE"}, {"Nguyễn Gia Vy", "FEMALE"},
+                {"Nguyễn Minh Vy", "FEMALE"}, {"Nguyễn Thảo Vy", "FEMALE"},
+                {"Nguyễn Khánh Vy", "FEMALE"}, {"Nguyễn Bảo Vy", "FEMALE"},
+                {"Nguyễn Gia Linh", "FEMALE"}, {"Nguyễn Minh Linh", "FEMALE"},
+                {"Nguyễn Thảo Linh", "FEMALE"}, {"Nguyễn Khánh Linh", "FEMALE"},
+                {"Nguyễn Bảo Linh", "FEMALE"}, {"Nguyễn Gia Mai", "FEMALE"},
+                {"Nguyễn Minh Mai", "FEMALE"}, {"Nguyễn Thảo Mai", "FEMALE"},
+                {"Nguyễn Khánh Mai", "FEMALE"}, {"Nguyễn Bảo Mai", "FEMALE"},
+                {"Nguyễn Gia My", "FEMALE"}, {"Nguyễn Minh My", "FEMALE"},
+                {"Nguyễn Thảo My", "FEMALE"}, {"Nguyễn Khánh My", "FEMALE"},
+                {"Nguyễn Bảo My", "FEMALE"}, {"Nguyễn Gia Nhi", "FEMALE"},
+                {"Nguyễn Minh Nhi", "FEMALE"}, {"Nguyễn Thảo Nhi", "FEMALE"},
+                {"Nguyễn Khánh Nhi", "FEMALE"}, {"Nguyễn Bảo Nhi", "FEMALE"},
+                {"Nguyễn Gia Yến", "FEMALE"}, {"Nguyễn Minh Yến", "FEMALE"},
+                {"Nguyễn Thảo Yến", "FEMALE"}, {"Nguyễn Khánh Yến", "FEMALE"},
+                {"Nguyễn Bảo Yến", "FEMALE"}
+        });
+        addStudents(students, new String[][]{
+                {"Lý Minh Anh", "FEMALE"}, {"Lý Gia Bảo", "MALE"},
+                {"Lý Đức Anh", "MALE"}, {"Lý Hải Anh", "MALE"},
+                {"Lý Tuấn Anh", "MALE"}, {"Lý Nhật Anh", "MALE"},
+                {"Lý Hoài An", "FEMALE"}, {"Lý Bình An", "MALE"},
+                {"Lý Khánh An", "FEMALE"}, {"Lý Gia An", "FEMALE"},
+                {"Lý Minh An", "FEMALE"}, {"Lý Đức An", "MALE"},
+                {"Lý Hải An", "MALE"}, {"Lý Phúc An", "MALE"},
+                {"Lý Quốc An", "MALE"}, {"Lý Gia Huy", "MALE"},
+                {"Lý Minh Huy", "MALE"}, {"Lý Đức Huy", "MALE"},
+                {"Lý Hải Huy", "MALE"}, {"Lý Quốc Huy", "MALE"},
+                {"Lý Tuấn Huy", "MALE"}, {"Lý Nhật Huy", "MALE"},
+                {"Lý Khánh Huy", "MALE"}, {"Lý Phúc Huy", "MALE"},
+                {"Lý Anh Huy", "MALE"}, {"Lý Gia Khang", "MALE"},
+                {"Lý Minh Khang", "MALE"}, {"Lý Đức Khang", "MALE"},
+                {"Lý Hải Khang", "MALE"}, {"Lý Hữu Khang", "MALE"},
+                {"Lý Gia Khôi", "MALE"}, {"Lý Minh Khôi", "MALE"},
+                {"Lý Đức Khôi", "MALE"}, {"Lý Hải Khôi", "MALE"},
+                {"Lý Anh Khôi", "MALE"}, {"Lý Gia Long", "MALE"},
+                {"Lý Minh Long", "MALE"}, {"Lý Đức Long", "MALE"},
+                {"Lý Hải Long", "MALE"}, {"Lý Thành Long", "MALE"},
+                {"Lý Gia Nam", "MALE"}, {"Lý Minh Nam", "MALE"},
+                {"Lý Đức Nam", "MALE"}, {"Lý Hải Nam", "MALE"},
+                {"Lý Hoài Nam", "MALE"}, {"Lý Quốc Nam", "MALE"},
+                {"Lý Tuấn Nam", "MALE"}, {"Lý Nhật Nam", "MALE"},
+                {"Lý Khánh Nam", "MALE"}, {"Lý Phúc Nam", "MALE"},
+                {"Lý Gia Linh", "FEMALE"}, {"Lý Minh Linh", "FEMALE"},
+                {"Lý Thảo Linh", "FEMALE"}, {"Lý Khánh Linh", "FEMALE"},
+                {"Lý Bảo Linh", "FEMALE"}, {"Lý Gia Nhi", "FEMALE"},
+                {"Lý Minh Nhi", "FEMALE"}, {"Lý Thảo Nhi", "FEMALE"},
+                {"Lý Khánh Nhi", "FEMALE"}, {"Lý Bảo Nhi", "FEMALE"}
+        });
+        if (students.size() != 160) {
+            throw new IllegalStateException("Demo student catalog must contain 160 students");
+        }
+        return students.toArray(new String[0][]);
+    }
+
+    private static void addStudents(List<String[]> target, String[][] names) {
+        for (String[] name : names) {
+            target.add(new String[]{studentUsername(name[0]), name[0], name[1]});
+        }
+    }
+
+    private static String studentUsername(String fullName) {
+        String normalized = Normalizer.normalize(fullName, Normalizer.Form.NFD)
+                .replace("đ", "d").replace("Đ", "D")
+                .replaceAll("\\p{M}", "").toLowerCase(Locale.ROOT).replace(' ', '.');
+        String[] words = normalized.split("\\.");
+        String username = normalized;
+        if (username.length() > 17) {
+            int middleLength = 17 - words[0].length() - words[words.length - 1].length() - 2;
+            username = words[0] + "." + words[1].substring(0, middleLength)
+                    + "." + words[words.length - 1];
+        }
+        return username;
+    }
     private static final String[][] CANONICAL_TEACHERS = {
             {"GV001", "pham.minh.quan", "Phạm Minh Quân", "MALE", "0900000001"},
             {"GV002", "tran.thu.ha", "Trần Thu Hà", "FEMALE", "0900000002"},
@@ -163,12 +266,21 @@ public class DemoIdentitySeeder {
         orderedClasses.sort(Comparator.comparing(SchoolClass::getClassCode));
         for (int index = 0; index < students.size(); index++) {
             Student student = students.get(index);
+            if (isTargetedGradeSevenStudent(student)) {
+                continue;
+            }
             SchoolClass schoolClass = orderedClasses.get(index / 10);
             if (enrollmentRepository.findByStudentIdAndAcademicYearId(
                     student.getId(), academicYear.getId()).isEmpty()) {
-                enrollmentRepository.save(createEnrollment(student, schoolClass, academicYear, enrolledAt));
+                enrollmentRepository.save(createEnrollment(
+                        student, schoolClass, academicYear, enrolledAt));
             }
         }
+    }
+
+    private boolean isTargetedGradeSevenStudent(Student student) {
+        return "STU2600041".compareTo(student.getStudentCode()) <= 0
+                && "STU2600080".compareTo(student.getStudentCode()) >= 0;
     }
 
     private User ensureUser(String username, String rawPassword, String roleCode) {
