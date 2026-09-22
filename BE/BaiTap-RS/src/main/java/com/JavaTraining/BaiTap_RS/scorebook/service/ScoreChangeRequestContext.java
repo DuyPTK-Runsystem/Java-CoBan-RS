@@ -73,7 +73,7 @@ public class ScoreChangeRequestContext {
     public void validateRequestableScorebook(Scorebook scorebook) {
         if (scorebook.getStatus() != ScorebookStatus.OPEN
                 && scorebook.getStatus() != ScorebookStatus.PUBLISHED) {
-            throw conflict("Sổ điểm phải ở trạng thái OPEN hoặc PUBLISHED để tạo yêu cầu sửa điểm");
+            throw conflict("Sổ điểm phải ở trạng thái đang mở hoặc đã công bố để tạo yêu cầu sửa điểm");
         }
     }
 
