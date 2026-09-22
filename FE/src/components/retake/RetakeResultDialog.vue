@@ -300,7 +300,7 @@ function handleSave(): void {
 
       <div class="form-grid">
         <div class="field">
-          <label for="score-input">Điểm thi lại <span class="required-mark" aria-hidden="true">*</span></label>
+          <label for="score-input">Điểm thi lại *</label>
           <InputNumber
             id="score-input"
             v-model="retakeScore"
@@ -312,7 +312,6 @@ function handleSave(): void {
             :disabled="isCancelled"
             fluid
             data-testid="input-retake-score"
-            aria-required="true"
           />
         </div>
         <div class="field">
@@ -370,7 +369,7 @@ function handleSave(): void {
     <template v-else>
       <div class="form-grid">
         <div class="field">
-          <label for="create-student">Học sinh <span class="required-mark" aria-hidden="true">*</span></label>
+          <label for="create-student">Học sinh *</label>
           <Select
             id="create-student"
             v-model="studentId"
@@ -380,11 +379,10 @@ function handleSave(): void {
             placeholder="Chọn học sinh"
             fluid
             data-testid="select-student"
-            aria-required="true"
           />
         </div>
         <div class="field">
-          <label for="create-year">Năm học <span class="required-mark" aria-hidden="true">*</span></label>
+          <label for="create-year">Năm học *</label>
           <Select
             id="create-year"
             v-model="academicYearId"
@@ -394,11 +392,10 @@ function handleSave(): void {
             placeholder="Chọn năm học"
             fluid
             data-testid="select-year"
-            aria-required="true"
           />
         </div>
         <div class="field">
-          <label for="create-subject">Môn học <span class="required-mark" aria-hidden="true">*</span></label>
+          <label for="create-subject">Môn học *</label>
           <Select
             id="create-subject"
             v-model="subjectId"
@@ -408,7 +405,6 @@ function handleSave(): void {
             placeholder="Chọn môn học"
             fluid
             data-testid="select-subject"
-            aria-required="true"
           />
         </div>
         <div class="field">
@@ -491,10 +487,6 @@ function handleSave(): void {
 </template>
 
 <style scoped>
-.required-mark {
-  color: var(--error, #ba1a1a);
-}
-
 .dialog-caption {
   margin: 0 0 16px;
   color: #64748b;

@@ -19,7 +19,7 @@ describe('RegisterForm', () => {
     await wrapper.get('#register-confirm-password').setValue('secret2')
     await wrapper.get('form').trigger('submit')
 
-    expect(wrapper.text()).toContain('Mật khẩu xác nhận không khớp.')
+    expect(wrapper.text()).toContain('Passwords do not match.')
     expect(wrapper.emitted('submit')).toBeUndefined()
   })
 

@@ -141,7 +141,7 @@ describe('CalculationOperationsView.vue', () => {
     })
     await flushPromises()
 
-    expect(wrapper.text()).toContain('Tác vụ tính điểm và nhật ký kiểm toán')
+    expect(wrapper.text()).toContain('Calculation Task & Audit')
     expect(calculationTaskApi.fetchFailedCalculationTasks).toHaveBeenCalled()
     expect(wrapper.text()).toContain('#CT-1048')
   })
@@ -274,6 +274,6 @@ describe('CalculationOperationsView.vue', () => {
     await flushPromises()
 
     expect(wrapper.find('[data-testid="tasks-forbidden"]').exists()).toBe(true)
-    expect(wrapper.text()).toContain('403 — Bạn không có quyền vận hành tác vụ tính điểm')
+    expect(wrapper.text()).toContain('403 — Bạn không có quyền vận hành calculation task')
   })
 })

@@ -91,9 +91,9 @@ function getSupplementalRules(policy: TeacherLoadPolicy): TeacherLoadRule[] {
   return policy.rules.filter((rule) => !['HOMEROOM', 'NURSING_CHILD_UNDER_12M'].includes(rule.ruleCode))
 }
 
-async function loadData(): Promise<boolean> {
+async function loadData() {
   const token = requireAccessToken()
-  if (!token) return false
+  if (!token) return
   loadingState.value = 'loading'
   generalError.value = ''
   try {
@@ -108,31 +108,21 @@ async function loadData(): Promise<boolean> {
     eligibilities.value = eligList
     teachers.value = teacherList
     loadingState.value = 'idle'
-    return true
   } catch (err) {
     loadingState.value = 'error'
     generalError.value = extractApiErrorMessage(err, 'Không thể tải cấu hình thời khóa biểu')
-    return false
-  }
-}
-
-async function reloadAfterMutation(successText: string): Promise<void> {
-  successMessage.value = successText
-  const reloaded = await loadData()
-  if (!reloaded) {
-    generalError.value = 'Thao tác đã thành công nhưng không thể tải lại dữ liệu. Vui lòng thử tải lại.'
   }
 }
 
 async function handleActivatePolicy(policyId: number) {
-  resetMessages()
   const token = requireAccessToken()
   if (!token) return
   try {
     const policy = policies.value.find((item) => item.id === policyId)
     if (!policy) return
     await activateTeacherLoadPolicy(policyId, policy.version, token)
-    await reloadAfterMutation('Đã kích hoạt chính sách định mức thành công')
+    successMessage.value = 'Đã kích hoạt chính sách định mức thành công'
+    await loadData()
   } catch (err) {
     generalError.value = extractApiErrorMessage(err, 'Không thể kích hoạt chính sách')
   }
@@ -187,7 +177,6 @@ function formatDateStr(d: Date): string {
 }
 
 async function handleSavePolicy() {
-  resetMessages()
   const token = requireAccessToken()
   if (!token) return
   policySaving.value = true
@@ -223,7 +212,8 @@ async function handleSavePolicy() {
       token,
     )
     isPolicyDialogVisible.value = false
-    await reloadAfterMutation('Đã tạo chính sách mới')
+    successMessage.value = 'Đã tạo chính sách mới'
+    await loadData()
   } catch (err) {
     generalError.value = extractApiErrorMessage(err, 'Không thể tạo chính sách')
   } finally {
@@ -232,7 +222,6 @@ async function handleSavePolicy() {
 }
 
 async function handleSaveEligibility() {
-  resetMessages()
   if (!eligibilityForm.value.teacherId) {
     generalError.value = 'Vui lòng chọn giáo viên.'
     return
@@ -264,7 +253,8 @@ async function handleSaveEligibility() {
       }, token)
     }
     isEligibilityDialogVisible.value = false
-    await reloadAfterMutation(editingEligibility ? 'Đã cập nhật điều kiện miễn giảm' : 'Đã thêm điều kiện miễn giảm cho giáo viên')
+    successMessage.value = editingEligibility ? 'Đã cập nhật điều kiện miễn giảm' : 'Đã thêm điều kiện miễn giảm cho giáo viên'
+    await loadData()
   } catch (err) {
     generalError.value = extractApiErrorMessage(err, 'Không thể thêm điều kiện miễn giảm')
   } finally {
@@ -273,14 +263,14 @@ async function handleSaveEligibility() {
 }
 
 async function handleDeleteEligibility(id: number) {
-  resetMessages()
   const token = requireAccessToken()
   if (!token) return
   try {
     const eligibility = eligibilities.value.find((item) => item.id === id)
     if (!eligibility) return
     await revokeTeacherLoadEligibility(id, eligibility.version, token)
-    await reloadAfterMutation('Đã thu hồi điều kiện miễn giảm')
+    successMessage.value = 'Đã thu hồi điều kiện miễn giảm'
+    await loadData()
   } catch (err) {
     generalError.value = extractApiErrorMessage(err, 'Không thể xóa điều kiện')
   }
@@ -305,8 +295,8 @@ onMounted(() => {
       </div>
     </div>
 
-    <FormAlert v-if="generalError" :message="generalError" tone="error" />
-    <FormAlert v-if="successMessage" :message="successMessage" tone="success" />
+    <FormAlert v-if="generalError" :message="generalError" type="error" />
+    <FormAlert v-if="successMessage" :message="successMessage" type="success" />
 
     <!-- Tabs -->
     <div class="timetable-subtab-strip">
@@ -378,7 +368,7 @@ onMounted(() => {
                 size="small"
                 severity="primary"
                 text
-                @click="handleActivatePolicy(data.id)"
+                @click="handleActivatePolicy(data.id); resetMessages()"
               />
               <Button v-if="data.active" icon="pi pi-copy" label="Nhân bản" size="small" text @click="openPolicyDialog(data); resetMessages()" />
             </template>
@@ -420,7 +410,7 @@ onMounted(() => {
                 severity="danger"
                 text
                 rounded
-                @click="handleDeleteEligibility(data.id)"
+                @click="handleDeleteEligibility(data.id); resetMessages()"
               />
             </template>
           </Column>

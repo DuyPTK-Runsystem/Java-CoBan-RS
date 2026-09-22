@@ -34,8 +34,8 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         RestResponse<Void> body = RestResponse.failure(
                 HttpServletResponse.SC_UNAUTHORIZED,
-                "Chưa xác thực",
-                "Yêu cầu xác thực để tiếp tục");
+                "Unauthorized",
+                "Authentication is required");
         objectMapper.writeValue(response.getOutputStream(), body);
     }
 }

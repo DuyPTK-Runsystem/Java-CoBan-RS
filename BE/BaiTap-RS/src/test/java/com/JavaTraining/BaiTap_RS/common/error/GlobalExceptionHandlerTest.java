@@ -27,14 +27,4 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         assertEquals(HttpStatus.CONFLICT.value(), response.getBody().getStatusCode());
     }
-
-    @Test
-    void localizesApplicationStatusTitleWithoutChangingHttpStatus() {
-        var response = handler.handleAppException(
-                new AppException(HttpStatus.FORBIDDEN, "Bạn không có quyền xem dữ liệu này"));
-
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        assertEquals("Không có quyền", response.getBody().getError());
-        assertEquals("Bạn không có quyền xem dữ liệu này", response.getBody().getMessage());
-    }
 }

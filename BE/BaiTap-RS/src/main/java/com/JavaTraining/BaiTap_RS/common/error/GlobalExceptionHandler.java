@@ -17,7 +17,7 @@ public class GlobalExceptionHandler {
         HttpStatus status = exception.getStatus();
         RestResponse<Void> response = RestResponse.failure(
                 status.value(),
-                localizedStatusTitle(status),
+                status.getReasonPhrase(),
                 exception.getMessage());
         return ResponseEntity.status(status).body(response);
     }
@@ -51,19 +51,6 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT.getReasonPhrase(),
                 "Dữ liệu đã được cập nhật bởi người khác. Vui lòng tải lại.");
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-    }
-
-    private String localizedStatusTitle(HttpStatus status) {
-        return switch (status) {
-            case BAD_REQUEST -> "Yêu cầu không hợp lệ";
-            case UNAUTHORIZED -> "Chưa xác thực";
-            case FORBIDDEN -> "Không có quyền";
-            case NOT_FOUND -> "Không tìm thấy";
-            case CONFLICT -> "Xung đột";
-            case UNPROCESSABLE_ENTITY -> "Dữ liệu không hợp lệ";
-            case INTERNAL_SERVER_ERROR -> "Lỗi máy chủ";
-            default -> "Yêu cầu thất bại";
-        };
     }
 
 }

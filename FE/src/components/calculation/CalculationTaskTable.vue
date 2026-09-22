@@ -47,28 +47,12 @@ const emit = defineEmits<{
 }>()
 
 const statusOptions: Array<{ label: string; value: CalculationTaskStatus | '' }> = [
-  { label: 'Thất bại', value: 'FAILED' },
+  { label: 'FAILED', value: 'FAILED' },
   { label: 'Tất cả trạng thái', value: '' },
-  { label: 'Đang chờ', value: 'PENDING' },
-  { label: 'Đang xử lý', value: 'RUNNING' },
-  { label: 'Thành công', value: 'SUCCEEDED' },
+  { label: 'PENDING', value: 'PENDING' },
+  { label: 'RUNNING', value: 'RUNNING' },
+  { label: 'SUCCEEDED', value: 'SUCCEEDED' },
 ]
-
-const statusLabels: Record<CalculationTaskStatus, string> = {
-  PENDING: 'Đang chờ',
-  RUNNING: 'Đang xử lý',
-  SUCCEEDED: 'Thành công',
-  FAILED: 'Thất bại',
-}
-
-function statusLabel(status: CalculationTaskStatus): string {
-  return statusLabels[status] ?? status
-}
-
-function taskTypeLabel(taskType: ResCalculationTaskDTO['taskType']): string {
-  if (taskType === 'STUDENT_YEAR_RECALC') return 'Tính lại bảng điểm năm học'
-  return taskType
-}
 
 const hasFailedTasks = computed(() =>
   props.tasks.some((t) => t.status === 'FAILED'),
@@ -128,7 +112,7 @@ function statusSeverity(status: CalculationTaskStatus): 'danger' | 'warn' | 'inf
           @click="emit('refresh')"
         />
         <Button
-          label="Thử lại tất cả tác vụ thất bại"
+          label="Retry tất cả failed"
           icon="pi pi-replay"
           severity="danger"
           :disabled="!props.canRetry || !hasFailedTasks || props.loading"
@@ -140,18 +124,18 @@ function statusSeverity(status: CalculationTaskStatus): 'danger' | 'warn' | 'inf
 
     <div v-if="props.tasks.length === 0 && !props.loading" class="empty-container">
       <EmptyState
-        heading="Không có tác vụ tính điểm phù hợp"
+        heading="Không có calculation task phù hợp"
         message="Thử thay đổi bộ lọc trạng thái hoặc tải lại dữ liệu."
       />
     </div>
 
     <div v-else class="table-responsive">
-      <table class="data-table" role="table" aria-label="Bảng danh sách tác vụ tính điểm">
+      <table class="data-table" role="table" aria-label="Bảng danh sách calculation task">
         <thead>
           <tr>
-            <th scope="col">Mã tác vụ</th>
+            <th scope="col">Task ID</th>
             <th scope="col">Học sinh</th>
-            <th scope="col">Loại tác vụ</th>
+            <th scope="col">Loại task</th>
             <th scope="col">Trạng thái</th>
             <th scope="col">Số lần thử</th>
             <th scope="col">Lỗi gần nhất</th>
@@ -168,10 +152,10 @@ function statusSeverity(status: CalculationTaskStatus): 'danger' | 'warn' | 'inf
               <span class="student-code">{{ task.studentCode }}</span>
             </td>
             <td>
-              <span class="task-type">{{ taskTypeLabel(task.taskType) }}</span>
+              <span class="task-type">{{ task.taskType }}</span>
             </td>
             <td>
-              <Tag :value="statusLabel(task.status)" :severity="statusSeverity(task.status)" />
+              <Tag :value="task.status" :severity="statusSeverity(task.status)" />
             </td>
             <td>{{ task.attemptCount }} / {{ task.maxAttempts }}</td>
             <td class="cell-error">
@@ -198,7 +182,7 @@ function statusSeverity(status: CalculationTaskStatus): 'danger' | 'warn' | 'inf
                 />
                 <Button
                   v-if="task.status === 'FAILED' && props.canRetry"
-                  label="Thử lại"
+                  label="Retry"
                   size="small"
                   severity="danger"
                   text
@@ -216,7 +200,7 @@ function statusSeverity(status: CalculationTaskStatus): 'danger' | 'warn' | 'inf
 
     <div v-if="props.totalElements > 0" class="pagination-footer">
       <div class="pagination-info">
-        Hiển thị {{ props.tasks.length }} trong tổng số {{ props.totalElements }} tác vụ
+        Hiển thị {{ props.tasks.length }} trong tổng số {{ props.totalElements }} tasks
       </div>
       <ServerPagination
         :page="props.page"

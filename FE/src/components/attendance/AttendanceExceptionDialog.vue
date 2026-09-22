@@ -65,8 +65,8 @@ function close(): void {
     <form class="form-stack attendance-exception-form" novalidate @submit.prevent="save">
       <div class="context-strip"><strong>{{ props.student?.studentCode }} · {{ props.student?.studentName }}</strong><span v-if="props.session">{{ props.session.attendanceDate }} · {{ props.session.sessionPeriod === 'MORNING' ? 'Sáng' : 'Chiều' }}</span></div>
       <div class="field-group">
-        <label for="attendance-exception-status">Trạng thái điểm danh <span class="required-mark" aria-hidden="true">*</span></label>
-        <Select id="attendance-exception-status" v-model="values.status" :options="statusOptions" option-label="label" option-value="value" fluid :invalid="Boolean(errors.status)" aria-required="true" :disabled="props.saving" />
+        <label for="attendance-exception-status">Trạng thái điểm danh *</label>
+        <Select id="attendance-exception-status" v-model="values.status" :options="statusOptions" option-label="label" option-value="value" fluid :invalid="Boolean(errors.status)" :disabled="props.saving" />
         <small v-if="errors.status" class="field-error">{{ errors.status }}</small>
       </div>
       <div class="field-group">
@@ -78,4 +78,3 @@ function close(): void {
     </form>
   </Dialog>
 </template>
-<style scoped>.required-mark { color: var(--error, #ba1a1a); }</style>

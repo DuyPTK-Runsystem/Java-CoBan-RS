@@ -39,7 +39,7 @@ function issueContext(issue: TimetableIssue): string | null {
 </script>
 
 <template>
-  <div class="timetable-conflict-panel bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col gap-4 w-full min-w-0 max-w-full">
+  <div class="timetable-conflict-panel bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col gap-4 min-w-0 max-w-full">
     <div class="timetable-conflict-header flex justify-between items-center gap-2 flex-wrap pb-3 border-b border-gray-100">
       <div class="flex items-center gap-2 flex-wrap min-w-0">
         <h3 class="font-bold text-gray-900 text-base">Cần xử lý</h3>
@@ -65,7 +65,7 @@ function issueContext(issue: TimetableIssue): string | null {
       🎉 Không phát hiện xung đột lịch, trùng giáo viên, trùng lớp hay trùng phòng chức năng nào.
     </div>
 
-    <div v-else class="timetable-conflict-issues flex flex-col gap-2 pr-1 pb-1">
+    <div v-else class="timetable-conflict-issues flex flex-col gap-2 max-h-[480px] overflow-y-auto pr-1 pb-1">
       <div
         v-for="(issue, index) in issues"
         :key="index"
@@ -79,6 +79,7 @@ function issueContext(issue: TimetableIssue): string | null {
         <div class="flex items-start justify-between gap-2 min-w-0">
           <span class="font-semibold flex items-start gap-1.5 min-w-0 break-words">
             <span>{{ issue.severity === 'BLOCKING' ? '⛔ Lỗi chặn' : '⚠️ Cảnh báo' }}</span>
+            <span class="text-gray-500 text-[11px]">({{ issue.code }})</span>
           </span>
           <Button
             v-if="(issue.entryIds?.length ?? 0) > 0 || issue.entryId"

@@ -41,10 +41,10 @@ describe('RetryConfirmationModal.vue', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('Xác nhận thử lại tác vụ?')
+    expect(wrapper.text()).toContain('Xác nhận retry task?')
     expect(wrapper.text()).toContain('#CT-1048')
     expect(wrapper.text()).toContain('HS0001')
-    expect(wrapper.text()).toContain('Đang chờ')
+    expect(wrapper.text()).toContain('PENDING')
   })
 
   it('renders bulk retry confirmation with failed task count', () => {
@@ -64,9 +64,9 @@ describe('RetryConfirmationModal.vue', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('Thử lại tất cả tác vụ thất bại?')
+    expect(wrapper.text()).toContain('Retry tất cả failed?')
     expect(wrapper.text()).toContain('4')
-    expect(wrapper.find('[data-testid="confirm-retry-btn"]').text()).toContain('Thử lại 4 tác vụ')
+    expect(wrapper.find('[data-testid="confirm-retry-btn"]').text()).toContain('Retry 4 tasks')
   })
 
   it('emits confirm when confirm button is clicked', async () => {

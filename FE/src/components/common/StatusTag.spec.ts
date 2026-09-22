@@ -5,8 +5,8 @@ import StatusTag from './StatusTag.vue'
 
 describe('StatusTag', () => {
   it.each([
-    ['IN_PROGRESS', 'Đang xử lý', 'warn'],
-    ['FINISH', 'Đã hoàn tất', 'success'],
+    ['IN_PROGRESS', 'In progress', 'warn'],
+    ['FINISH', 'Finished', 'success'],
   ] as const)('maps %s to a readable label and severity', (status, label, severity) => {
     const wrapper = mount(StatusTag, {
       props: { status },

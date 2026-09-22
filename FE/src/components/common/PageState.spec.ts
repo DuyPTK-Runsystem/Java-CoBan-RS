@@ -7,7 +7,7 @@ import { primeVueStubs } from '@/test/stubs'
 describe('PageState', () => {
   it('renders loading, empty, error with retry, forbidden and success states', async () => {
     const loading = mount(PageState, { props: { state: 'loading' } })
-    expect(loading.text()).toContain('Đang tải...')
+    expect(loading.text()).toContain('Loading...')
 
     const empty = mount(PageState, { props: { state: 'empty', emptyHeading: 'No results' } })
     expect(empty.text()).toContain('No results')

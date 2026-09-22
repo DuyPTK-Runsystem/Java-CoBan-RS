@@ -17,19 +17,6 @@ const popupStatus = ref<'success' | 'failure'>('success')
 const popupMessage = ref('')
 const successRedirect = ref('/v2/attendance')
 
-function localizedAuthError(error: unknown, fallback: string): string {
-  const message = error instanceof Error ? error.message.trim() : ''
-  const knownTranslations: Record<string, string> = {
-    'Invalid credentials.': 'Tên đăng nhập hoặc mật khẩu không đúng.',
-    'Unable to log in. Please try again.': fallback,
-    'Unauthorized': 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn.',
-  }
-
-  if (knownTranslations[message]) return knownTranslations[message]
-  if (message && /[À-ỹ]/u.test(message)) return message
-  return fallback
-}
-
 async function handleSubmit(values: LoginValues): Promise<void> {
   submitting.value = true
   try {
@@ -39,14 +26,14 @@ async function handleSubmit(values: LoginValues): Promise<void> {
     // remains the authority for guarding direct URL navigation afterwards.
     successRedirect.value = firstPermittedWorkspacePath(session.user.roles ?? [])
     popupStatus.value = 'success'
-    popupMessage.value = 'Đăng nhập thành công.'
+    popupMessage.value = 'Login completed successfully.'
     popupVisible.value = true
   } catch (error) {
     if (isApiError(error, 401)) {
       clearAuthSession()
     }
     popupStatus.value = 'failure'
-    popupMessage.value = localizedAuthError(error, 'Đăng nhập không thành công. Vui lòng thử lại.')
+    popupMessage.value = error instanceof Error ? error.message : 'Unable to log in. Please try again.'
     popupVisible.value = true
   } finally {
     submitting.value = false
@@ -68,8 +55,8 @@ async function closePopup(): Promise<void> {
       <div class="auth-heading">
         <span class="brand-mark" aria-hidden="true">AC</span>
         <p class="eyebrow">Academic Core</p>
-        <h1 id="login-title">Chào mừng bạn trở lại</h1>
-        <p>Đăng nhập để quản lý hồ sơ học sinh.</p>
+        <h1 id="login-title">Welcome back</h1>
+        <p>Sign in to manage your student records.</p>
       </div>
       <LoginForm :submitting="submitting" @submit="handleSubmit" @register="router.push('/register')" />
     </section>
@@ -78,11 +65,11 @@ async function closePopup(): Promise<void> {
       modal
       :closable="false"
       :close-on-escape="false"
-      :header="popupStatus === 'success' ? 'Đăng nhập thành công' : 'Đăng nhập thất bại'"
+      :header="popupStatus === 'success' ? 'Login successful' : 'Login failed'"
     >
       <p class="dialog-message" role="status">{{ popupMessage }}</p>
       <template #footer>
-        <Button label="Đóng" @click="closePopup" />
+        <Button label="Close" @click="closePopup" />
       </template>
     </Dialog>
   </main>

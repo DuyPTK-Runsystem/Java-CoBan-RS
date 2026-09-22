@@ -16,8 +16,8 @@ const props = withDefaults(defineProps<{
 })
 
 const statusLabels: Record<CalculationStatus, string> = {
-  IN_PROGRESS: 'Đang xử lý',
-  FINISH: 'Đã hoàn tất',
+  IN_PROGRESS: 'In progress',
+  FINISH: 'Finished',
 }
 
 const statusSeverities: Record<CalculationStatus, TagSeverity> = {

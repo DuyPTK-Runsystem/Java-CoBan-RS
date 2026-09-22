@@ -28,11 +28,11 @@ const values = reactive<LoginValues>({
 const errors = reactive<FieldErrors<keyof LoginValues>>({})
 
 function validate(): boolean {
-  errors.userName = values.userName.trim() ? undefined : 'Tên đăng nhập là bắt buộc.'
+  errors.userName = values.userName.trim() ? undefined : 'User name is required.'
   if (!errors.userName && values.userName.length > 20) {
-    errors.userName = 'Tên đăng nhập tối đa 20 ký tự.'
+    errors.userName = 'User name must be 20 characters or fewer.'
   }
-  errors.password = values.password ? undefined : 'Mật khẩu là bắt buộc.'
+  errors.password = values.password ? undefined : 'Password is required.'
   return !errors.userName && !errors.password
 }
 
@@ -49,16 +49,16 @@ function submit(): void {
       {{ props.errorMessage }}
     </div>
     <div class="field-group">
-      <label for="login-user-name">Tên đăng nhập <span class="required-mark" aria-hidden="true">*</span></label>
-      <InputText id="login-user-name" v-model="values.userName" autocomplete="username" :invalid="Boolean(errors.userName)" aria-required="true" />
+      <label for="login-user-name">User name</label>
+      <InputText id="login-user-name" v-model="values.userName" autocomplete="username" :invalid="Boolean(errors.userName)" />
       <small v-if="errors.userName" class="field-error">{{ errors.userName }}</small>
     </div>
     <div class="field-group">
-      <label for="login-password">Mật khẩu <span class="required-mark" aria-hidden="true">*</span></label>
-      <Password id="login-password" v-model="values.password" autocomplete="current-password" :feedback="false" toggle-mask :invalid="Boolean(errors.password)" aria-required="true" />
+      <label for="login-password">Password</label>
+      <Password id="login-password" v-model="values.password" autocomplete="current-password" :feedback="false" toggle-mask :invalid="Boolean(errors.password)" />
       <small v-if="errors.password" class="field-error">{{ errors.password }}</small>
     </div>
-    <Button type="submit" label="Đăng nhập" icon="pi pi-sign-in" :loading="props.submitting" />
-    <Button type="button" label="Tạo tài khoản" icon="pi pi-user-plus" severity="secondary" text @click="emit('register')" />
+    <Button type="submit" label="Log in" icon="pi pi-sign-in" :loading="props.submitting" />
+    <Button type="button" label="Create an account" icon="pi pi-user-plus" severity="secondary" text @click="emit('register')" />
   </form>
 </template>

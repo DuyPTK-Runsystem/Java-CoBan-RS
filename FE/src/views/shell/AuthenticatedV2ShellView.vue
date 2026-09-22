@@ -1,50 +1,15 @@
 <script setup lang="ts">
-import { computed, onActivated, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import AuthenticatedLayout, { type NavigationItem } from '@/components/common/AuthenticatedLayout.vue'
 import { clearAuthSession, getAuthSession } from '@/services/authSession'
-import { fetchUnreadNotificationCount, NOTIFICATION_READ_EVENT } from '@/services/notificationApi'
 import { isStudentWorkspace, isStudentWorkspacePath, isTeacherWorkspace } from '@/services/studentNavigation'
 import { logout as logoutApi } from '@/services/userApi'
 
 const router = useRouter()
 const route = useRoute()
 const session = computed(() => getAuthSession())
-const unreadNotificationCount = ref<number | null>(null)
-
-async function refreshUnreadNotificationCount(): Promise<void> {
-  const accessToken = session.value?.accessToken
-  if (!accessToken) {
-    unreadNotificationCount.value = null
-    return
-  }
-
-  try {
-    unreadNotificationCount.value = await fetchUnreadNotificationCount(accessToken)
-  } catch {
-    // The badge is supplemental; keep the authenticated workspace usable when counting fails.
-    unreadNotificationCount.value = null
-  }
-}
-
-function handleNotificationRead(): void {
-  void refreshUnreadNotificationCount()
-}
-
-onMounted(() => {
-  window.addEventListener(NOTIFICATION_READ_EVENT, handleNotificationRead)
-  void refreshUnreadNotificationCount()
-})
-
-onActivated(() => {
-  void refreshUnreadNotificationCount()
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener(NOTIFICATION_READ_EVENT, handleNotificationRead)
-})
-
 const navigation = computed<NavigationItem[]>(() => {
   const items: NavigationItem[] = [
     { label: 'Năm học & học kỳ', to: '/v2/academic-years', icon: 'pi pi-calendar' },
@@ -64,13 +29,7 @@ const navigation = computed<NavigationItem[]>(() => {
   if (!isNonStudent) {
     items.push({ label: 'Bảng điểm', to: '/v2/transcripts', icon: 'pi pi-table' })
   }
-  items.push({
-    label: 'Thông báo',
-    to: '/v2/notifications',
-    icon: 'pi pi-bell',
-    active: Boolean(route?.path?.startsWith('/v2/notifications')),
-    badge: unreadNotificationCount.value ?? undefined,
-  })
+  items.push({ label: 'Thông báo', to: '/v2/notifications', icon: 'pi pi-bell', active: Boolean(route?.path?.startsWith('/v2/notifications')) })
 
   if (isNonStudent) {
     const isStudentActive = Boolean(route?.path?.startsWith('/v2/students'))

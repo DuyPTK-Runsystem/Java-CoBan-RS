@@ -6,7 +6,6 @@ export interface NavigationItem {
   to: string
   icon: string
   active?: boolean
-  badge?: number
 }
 
 const props = withDefaults(defineProps<{
@@ -44,15 +43,7 @@ const defaultNavigation: NavigationItem[] = [
               :to="item.to"
               :class="{ 'router-link-active': item.active }"
             >
-              <i :class="item.icon" aria-hidden="true" />
-              <span class="navigation-item-label">{{ item.label }}</span>
-              <span
-                v-if="item.badge !== undefined && item.badge > 0"
-                class="navigation-item-badge"
-                :aria-label="`${item.badge} thông báo chưa đọc`"
-              >
-                {{ item.badge > 99 ? '99+' : item.badge }}
-              </span>
+              <i :class="item.icon" aria-hidden="true" />{{ item.label }}
             </RouterLink>
           </slot>
         </nav>
@@ -63,24 +54,3 @@ const defaultNavigation: NavigationItem[] = [
     </div>
   </div>
 </template>
-
-<style scoped>
-.navigation-item-label {
-  flex: 1;
-}
-
-.navigation-item-badge {
-  display: inline-flex;
-  min-width: 22px;
-  height: 22px;
-  align-items: center;
-  justify-content: center;
-  padding: 0 6px;
-  border-radius: 999px;
-  color: white;
-  background: #dc2626;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1;
-}
-</style>

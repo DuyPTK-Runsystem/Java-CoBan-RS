@@ -399,7 +399,7 @@ onMounted(async () => {
     </div>
 
     <!-- ERROR & FORBIDDEN STATES -->
-    <FormAlert v-if="errorMessage" :message="errorMessage" tone="error" />
+    <FormAlert v-if="errorMessage" :message="errorMessage" type="error" />
 
     <div v-if="isForbidden" class="error-box">
       <div class="error-icon">⛔</div>

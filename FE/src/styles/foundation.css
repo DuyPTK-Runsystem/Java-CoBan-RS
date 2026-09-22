@@ -110,12 +110,6 @@ a {
   font-weight: 600;
 }
 
-.required-mark {
-  color: var(--error);
-  margin-left: 0.2rem;
-  font-weight: 700;
-}
-
 .field-group>.p-inputtext,
 .field-group>.p-password,
 .field-group>.p-inputnumber {

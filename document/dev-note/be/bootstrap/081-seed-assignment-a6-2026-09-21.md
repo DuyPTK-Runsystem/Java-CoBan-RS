@@ -16,7 +16,7 @@
 
 ## Thay đổi tài liệu
 
-- `document/dev-impl-plan/summary/081-seed-data-v2-v3-2026-09-18.md`: đồng bộ A.3.1, A.4, A.5, A.6, bảng tiết theo khối, số rows/tải mỗi học kỳ và ngoại lệ Công nghệ khối 9 HK2; A.3.1 dùng username hậu tố compact đúng với DB.
+- `document/dev-impl-plan/summary/081-seed-data-v2-v3-2026-09-18.md`: đồng bộ A.4, A.5, A.6, bảng tiết theo khối, số rows/tải mỗi học kỳ và ngoại lệ Công nghệ khối 9 HK2.
 - `document/dev-note/be/BE_DEV_NOTE_SUMMARY.md`: thay mô tả Plan 081 bằng phạm vi full assignment và trạng thái review.
 - `document/dev-note/summary/DEV_NOTE_SUMMARY.md`: thay mô tả Plan 081 bằng amendment đã chốt và trạng thái review.
 
@@ -24,7 +24,7 @@
 
 | Gate | Status | Evidence |
 |---|---|---|
-| Documentation consistency | PASS | Plan 081 và hai summary dùng cùng số `168/172/340`, `376/388`, ngưỡng `[15,24]` / `[19,24]`, loại `CONG_NGHE` khối 9 HK2; bảng A.3.1 khớp username compact thực tế trong DB. |
+| Documentation consistency | PASS | Plan 081 và hai summary dùng cùng số `168/172/340`, `376/388`, ngưỡng `[15,24]` / `[19,24]`, và loại `CONG_NGHE` khối 9 HK2. |
 | Focused test sau amendment | PASS | `cleanTest test --tests DemoDataSeederIntegrationTest -x jacocoTestReport --no-daemon --max-workers=1`; XML ghi nhận `6 tests, 0 failures, 0 errors`. |
 | JaCoCo sau amendment | PASS | `jacocoTestReport -x test --no-daemon --max-workers=1` hoàn tất thành công từ execution data của focused test. |
 | Checkstyle | PASS | `checkstyleMain` PASS; `build` cũng chạy `checkstyleTest` với warning có sẵn, không có error. |

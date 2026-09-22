@@ -72,7 +72,7 @@ describe('LoginView status popup', () => {
     await wrapper.get('[data-testid="login-submit"]').trigger('click')
     await flushPromises()
 
-    expect(wrapper.get('[data-testid="status-popup"]').text()).toContain('Đăng nhập thành công')
+    expect(wrapper.get('[data-testid="status-popup"]').text()).toContain('Login successful')
     expect(getAuthSession()?.accessToken).toBe('jwt-token')
     expect(router.currentRoute.value.name).toBe('login')
 
@@ -92,7 +92,7 @@ describe('LoginView status popup', () => {
     await wrapper.get('[data-testid="login-submit"]').trigger('click')
     await flushPromises()
 
-    expect(wrapper.get('[data-testid="status-popup"]').text()).toContain('Đăng nhập thành công')
+    expect(wrapper.get('[data-testid="status-popup"]').text()).toContain('Login successful')
 
     await (wrapper.vm as unknown as { closePopup: () => Promise<void> }).closePopup()
 
@@ -110,7 +110,7 @@ describe('LoginView status popup', () => {
     await wrapper.get('[data-testid="login-submit"]').trigger('click')
     await flushPromises()
 
-    expect(wrapper.get('[data-testid="status-popup"]').text()).toContain('Đăng nhập thành công')
+    expect(wrapper.get('[data-testid="status-popup"]').text()).toContain('Login successful')
 
     await (wrapper.vm as unknown as { closePopup: () => Promise<void> }).closePopup()
 
@@ -124,10 +124,8 @@ describe('LoginView status popup', () => {
     await wrapper.get('[data-testid="login-submit"]').trigger('click')
     await flushPromises()
 
-    expect(wrapper.get('[data-testid="status-popup"]').text()).toContain('Đăng nhập thất bại')
+    expect(wrapper.get('[data-testid="status-popup"]').text()).toContain('Login failed')
     expect(getAuthSession()).toBeNull()
-
-    expect(wrapper.get('[data-testid="status-popup"]').text()).toContain('Tên đăng nhập hoặc mật khẩu không đúng.')
 
     await (wrapper.vm as unknown as { closePopup: () => Promise<void> }).closePopup()
 

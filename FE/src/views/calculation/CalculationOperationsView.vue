@@ -144,7 +144,7 @@ async function loadTasks(): Promise<void> {
       tasksForbidden.value = true
       tasks.value = []
     } else if (!isApiError(error, 401)) {
-      errorMessage.value = extractApiErrorMessage(error, 'Không thể tải danh sách tác vụ tính điểm.')
+      errorMessage.value = extractApiErrorMessage(error, 'Không thể tải danh sách calculation task.')
     }
   } finally {
     tasksLoading.value = false
@@ -319,7 +319,7 @@ onMounted(async () => {
   <div class="calculation-operations-view">
     <header class="operations-heading">
       <div>
-        <h1 class="page-title">Tác vụ tính điểm và nhật ký kiểm toán</h1>
+        <h1 class="page-title">Calculation Task & Audit</h1>
       </div>
     </header>
 
@@ -358,12 +358,12 @@ onMounted(async () => {
     <div class="notice-box notice-info">
       <i class="pi pi-info-circle" />
       <div>
-        <strong>Trạng thái HTTP:</strong>
+        <strong>HTTP states:</strong>
         <span>
-          <strong>401</strong> yêu cầu xử lý phiên theo chính sách hiện có ·
-          <strong>403</strong> giữ phiên nhưng thiếu quyền/phạm vi ·
-          <strong>404</strong> tác vụ hoặc bảng điểm không tồn tại ·
-          <strong>409</strong> trạng thái đã đổi, hãy tải lại trước khi thử lại.
+          <strong>401</strong> yêu cầu xử lý session theo policy hiện có ·
+          <strong>403</strong> giữ session nhưng thiếu quyền/scope ·
+          <strong>404</strong> task hoặc transcript không tồn tại ·
+          <strong>409</strong> state đã đổi, refresh trước khi retry.
         </span>
       </div>
     </div>
@@ -395,22 +395,22 @@ onMounted(async () => {
     <!-- Quick Stats Cards -->
     <div class="stats-grid">
       <div class="stat-card">
-        <span class="stat-title">Thất bại</span>
+        <span class="stat-title">FAILED</span>
         <strong class="stat-count count-failed">{{ failedCount }}</strong>
         <span class="stat-subtitle">cần kiểm tra</span>
       </div>
       <div class="stat-card">
-        <span class="stat-title">Đang xử lý</span>
+        <span class="stat-title">RUNNING</span>
         <strong class="stat-count count-running">{{ runningCount }}</strong>
         <span class="stat-subtitle">đang xử lý</span>
       </div>
       <div class="stat-card">
-        <span class="stat-title">Đang tính</span>
+        <span class="stat-title">IN_PROGRESS</span>
         <strong class="stat-count count-progress">{{ isInProgressCount }}</strong>
-        <span class="stat-subtitle">bảng điểm</span>
+        <span class="stat-subtitle">transcript</span>
       </div>
       <div class="stat-card">
-        <span class="stat-title">Sự kiện kiểm toán</span>
+        <span class="stat-title">Audit events</span>
         <strong class="stat-count">{{ auditTotalElements }}</strong>
         <span class="stat-subtitle">ghi nhận</span>
       </div>
@@ -426,7 +426,7 @@ onMounted(async () => {
         data-testid="tab-tasks"
         @click="activeTab = 'tasks'"
       >
-        Tác vụ tính điểm
+        Calculation tasks
       </button>
       <button
         class="tab-button"
@@ -436,7 +436,7 @@ onMounted(async () => {
         data-testid="tab-status"
         @click="activeTab = 'status'"
       >
-        Trạng thái bảng điểm
+        Transcript status
       </button>
       <button
         class="tab-button"
@@ -446,7 +446,7 @@ onMounted(async () => {
         data-testid="tab-audit"
         @click="activeTab = 'audit'"
       >
-        Nhật ký kiểm toán điểm
+        Score audit log
       </button>
     </div>
 
@@ -454,9 +454,9 @@ onMounted(async () => {
     <section v-if="activeTab === 'tasks'" class="panel" role="tabpanel">
       <div v-if="tasksForbidden" class="forbidden-card" data-testid="tasks-forbidden">
         <div class="forbidden-icon">!</div>
-        <h2>403 — Bạn không có quyền vận hành tác vụ tính điểm</h2>
+        <h2>403 — Bạn không có quyền vận hành calculation task</h2>
         <p class="text-muted">
-          Chỉ có Quản trị viên (ADMIN) và Phòng Giáo vụ (ACADEMIC_OFFICE) mới có quyền quản lý và thử lại tác vụ tính điểm.
+          Chỉ có Quản trị viên (ADMIN) và Phòng Giáo vụ (ACADEMIC_OFFICE) mới có quyền quản lý và retry task tính điểm.
         </p>
       </div>
       <CalculationTaskTable
@@ -494,7 +494,7 @@ onMounted(async () => {
       <div v-if="auditForbidden" class="forbidden-card">
         <div class="forbidden-icon">!</div>
         <h2>403 — Bạn không có quyền xem nhật ký kiểm toán</h2>
-        <p class="text-muted">Phạm vi quyền hoặc vai trò hiện tại không cho phép xem lịch sử thay đổi.</p>
+        <p class="text-muted">Backend scope hoặc vai trò hiện tại không cho phép xem lịch sử thay đổi.</p>
       </div>
       <ScoreAuditLogTable
         v-else

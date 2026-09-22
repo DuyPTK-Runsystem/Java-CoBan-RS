@@ -64,7 +64,7 @@ describe('RegisterView status popup', () => {
     await wrapper.get('[data-testid="register-submit"]').trigger('click')
     await flushPromises()
 
-    expect(wrapper.get('[data-testid="status-popup"]').text()).toContain('Đăng ký thành công')
+    expect(wrapper.get('[data-testid="status-popup"]').text()).toContain('Registration successful')
     expect(router.currentRoute.value.name).toBe('register')
 
     await (wrapper.vm as unknown as { closePopup: () => Promise<void> }).closePopup()
@@ -79,8 +79,8 @@ describe('RegisterView status popup', () => {
     await wrapper.get('[data-testid="register-submit"]').trigger('click')
     await flushPromises()
 
-    expect(wrapper.get('[data-testid="status-popup"]').text()).toContain('Đăng ký thất bại')
-    expect(wrapper.text()).toContain('Tên đăng nhập đã tồn tại.')
+    expect(wrapper.get('[data-testid="status-popup"]').text()).toContain('Registration failed')
+    expect(wrapper.text()).toContain('Username already exists.')
 
     await (wrapper.vm as unknown as { closePopup: () => Promise<void> }).closePopup()
 

@@ -86,7 +86,7 @@ function handleConfirm() {
     @update:visible="emit('update:visible', $event)"
   >
     <div class="flex flex-col gap-4">
-      <FormAlert v-if="errorMessage" :message="errorMessage" tone="error" />
+      <FormAlert v-if="errorMessage" :message="errorMessage" type="error" />
 
       <div v-if="!canPublish" class="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-800" aria-live="polite">
         <p class="font-semibold mb-1">⛔ Chưa thể công bố</p>

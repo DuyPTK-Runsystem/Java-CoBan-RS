@@ -135,15 +135,9 @@ public class SemesterNotificationDispatchService {
 
     private void deliverNotification(SemesterCompletenessNotification notification) {
         notification.setAttemptCount(notification.getAttemptCount() + 1);
-        if (notification.getRecipientEmail() == null
-                || notification.getRecipientEmail().isBlank()) {
-            notification.setStatus(NotificationStatus.FAILED);
-            notification.setErrorMessage("Không có địa chỉ email người nhận hợp lệ");
-            return;
-        }
         if (mailSender == null) {
             notification.setStatus(NotificationStatus.FAILED);
-            notification.setErrorMessage("Hệ thống gửi email chưa được cấu hình");
+            notification.setErrorMessage("Email sender is not configured");
             return;
         }
         try {

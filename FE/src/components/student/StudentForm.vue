@@ -142,7 +142,7 @@ function save(): void {
     </div>
 
     <div class="field-group">
-      <label for="student-code">Mã học sinh <span class="required-mark" aria-hidden="true">*</span></label>
+      <label for="student-code">Mã học sinh</label>
       <div class="inline-field">
         <InputText
           id="student-code"
@@ -150,7 +150,6 @@ function save(): void {
           placeholder="Ví dụ: STU1234567"
           :disabled="isEdit"
           :invalid="Boolean(errors.studentCode)"
-          aria-required="true"
           @update:model-value="updateStudentCode"
           @blur="normalizeStudentCode"
         />
@@ -168,14 +167,13 @@ function save(): void {
     </div>
 
     <div class="field-group">
-      <label for="student-name">Họ và tên <span class="required-mark" aria-hidden="true">*</span></label>
+      <label for="student-name">Họ và tên</label>
       <InputText
         id="student-name"
         v-model="values.studentName"
         maxlength="35"
         placeholder="Ví dụ: Nguyễn Văn An"
         :invalid="Boolean(errors.studentName)"
-        aria-required="true"
       />
       <small v-if="errors.studentName" class="field-error">{{ errors.studentName }}</small>
     </div>
