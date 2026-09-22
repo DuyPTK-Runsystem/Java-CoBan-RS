@@ -1,5 +1,15 @@
 # FE Dev Note Summary
 
+| 075.18 | Timetable | [Việt hóa trạng thái đủ định mức](timetable/075.18-normal-status-copy-2026-09-21.md) | `NORMAL` hiển thị thành `ĐỦ ĐỊNH MỨC` với màu xanh dương; focused test/build/diff check PASS; lint FAIL do 2 warning baseline ngoài phạm vi; full FE/browser NOT RUN | 2026-09-21 |
+
+| 075.17 | Timetable | [Mở rộng panel cảnh báo và ẩn mã nội bộ](timetable/075.17-conflict-panel-responsive-copy-2026-09-21.md) | Panel tự mở rộng theo chiều dọc, không còn scroll nội bộ và không hiển thị mã như `LOAD_BELOW_TARGET`; 112 FE files/603 tests và build PASS; lint FAIL do 2 warning baseline ngoài phạm vi; browser/live NOT RUN | 2026-09-21 |
+
+| 076.14 | notification | [Notification unread awareness after login](notification/076.14-unread-login-awareness-2026-09-21.md) | Authenticated shell unread badge, non-blocking count failure, mark-read refresh; focused 33/33 tests and build PASS; lint FAIL from 2 pre-existing NotificationComposer warnings; full FE/Storybook/browser NOT RUN | 2026-09-21 |
+
+| 082 | notification/forms | [Feedback notification, language and required markers](notification/082-feedback-notification-language-required-markers-2026-09-21.md) | 111 FE test files/597 tests and build PASS; lint remains blocked by 2 pre-existing NotificationComposer warnings; browser/live SMTP NOT RUN | 2026-09-21 |
+
+| 075.16 | Timetable | [Việt hóa copy hiển thị định mức giáo viên](timetable/075.16-teacher-load-user-facing-copy-2026-09-21.md) | Xóa thuật ngữ triển khai khỏi panel định mức; test 111 files/602 tests và build PASS; lint FAIL do 2 warning baseline ngoài phạm vi; browser/live NOT RUN | 2026-09-21 |
+
 |   No. | Module | Note | Status | Updated |
 | --- | --- | --- | --- | --- |
 | 076.11 | notification | [Teacher notification sender scope](../be/notification/076.11-teacher-notification-sender-scope-2026-09-17.md) | Teacher manage/compose routes and sender-aware detail actions enabled; focused FE tests 91/91, lint/build PASS; browser NOT RUN | 2026-09-17 |
