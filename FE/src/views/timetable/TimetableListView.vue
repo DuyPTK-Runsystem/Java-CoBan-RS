@@ -118,7 +118,14 @@ function formatDateStr(d: Date): string {
 }
 
 async function handleCreateTimetable() {
-  if (!selectedSemesterId.value || !newEffectiveFrom.value) return
+  if (!selectedSemesterId.value) {
+    createError.value = 'Vui lòng chọn học kỳ áp dụng'
+    return
+  }
+  if (!newEffectiveFrom.value) {
+    createError.value = 'Vui lòng chọn ngày bắt đầu áp dụng'
+    return
+  }
   const token = requireAccessToken()
   if (!token) return
   createLoading.value = true
@@ -180,7 +187,7 @@ onMounted(() => {
       </RouterLink>
     </nav>
 
-    <FormAlert v-if="generalError" :message="generalError" type="error" />
+    <FormAlert v-if="generalError" :message="generalError" tone="error" />
 
     <div class="timetable-list-filter bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-4 items-center justify-between">
       <div class="w-72">
@@ -198,7 +205,7 @@ onMounted(() => {
     <PageState
       v-if="loadingState === 'loading' || loadingState === 'error'"
       :state="loadingState"
-      :message="generalError"
+      :error-message="generalError"
       @retry="loadTimetables"
     />
 
@@ -254,22 +261,24 @@ onMounted(() => {
       :style="{ width: '480px' }"
     >
       <div class="flex flex-col gap-4">
-        <FormAlert v-if="createError" :message="createError" type="error" />
+        <FormAlert v-if="createError" :message="createError" tone="error" />
 
         <div class="flex flex-col gap-1">
-          <label class="font-medium text-sm">Học kỳ áp dụng</label>
+          <label class="font-medium text-sm">Học kỳ áp dụng <span class="text-red-500" aria-hidden="true">*</span></label>
           <Select
             v-model="selectedSemesterId"
             :options="semesters"
             option-label="name"
             option-value="id"
             class="w-full"
+            :invalid="!selectedSemesterId"
+            aria-required="true"
           />
         </div>
 
         <div class="flex flex-col gap-1">
-          <label class="font-medium text-sm">Ngày bắt đầu áp dụng <span class="text-red-500">*</span></label>
-          <DatePicker v-model="newEffectiveFrom" date-format="yy-mm-dd" show-icon />
+          <label class="font-medium text-sm">Ngày bắt đầu áp dụng <span class="text-red-500" aria-hidden="true">*</span></label>
+          <DatePicker v-model="newEffectiveFrom" date-format="yy-mm-dd" show-icon :invalid="!newEffectiveFrom" aria-required="true" />
         </div>
       </div>
 

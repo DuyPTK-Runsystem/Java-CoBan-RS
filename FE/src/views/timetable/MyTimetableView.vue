@@ -56,12 +56,12 @@ onMounted(() => {
       />
     </div>
 
-    <FormAlert v-if="generalError" :message="generalError" type="error" />
+    <FormAlert v-if="generalError" :message="generalError" tone="error" />
 
     <PageState
       v-if="loadingState === 'loading' || loadingState === 'error'"
       :state="loadingState"
-      :message="generalError"
+      :error-message="generalError"
       @retry="loadData"
     />
 

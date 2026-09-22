@@ -303,7 +303,7 @@ onMounted(() => {
       </RouterLink>
     </nav>
 
-    <FormAlert v-if="generalError" :message="generalError" type="error" />
+    <FormAlert v-if="generalError" :message="generalError" tone="error" />
 
     <div class="teacher-unavailability-filter bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-4 items-center mt-2">
       <div class="w-64">
@@ -341,7 +341,7 @@ onMounted(() => {
     <PageState
       v-if="loadingState === 'loading' || loadingState === 'error'"
       :state="loadingState"
-      :message="generalError"
+      :error-message="generalError"
       @retry="loadList"
     />
 

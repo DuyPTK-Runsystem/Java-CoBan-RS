@@ -119,6 +119,15 @@ function validate(): boolean {
   if (!selectedSemesterId.value) {
     errors.value.semester = 'Vui lòng chọn học kỳ'
   }
+  if (!props.isTeacherRole && !selectedTeacherId.value) {
+    errors.value.teacher = 'Vui lòng chọn giáo viên'
+  }
+  if (repeatType.value === 'WEEKLY' && !dayOfWeek.value) {
+    errors.value.dayOfWeek = 'Vui lòng chọn thứ trong tuần'
+  }
+  if (repeatType.value === 'SPECIFIC_DATE' && !specificDate.value) {
+    errors.value.specificDate = 'Vui lòng chọn ngày cụ thể'
+  }
   if (!validFrom.value) {
     errors.value.validFrom = 'Vui lòng chọn ngày bắt đầu'
   }
@@ -189,11 +198,11 @@ function handleSave() {
     @update:visible="emit('update:visible', $event)"
   >
     <div class="flex flex-col gap-4">
-      <FormAlert v-if="errorMessage" :message="errorMessage" type="error" />
+      <FormAlert v-if="errorMessage" :message="errorMessage" tone="error" />
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="flex flex-col gap-1">
-          <label class="font-medium text-sm">Học kỳ <span class="text-red-500">*</span></label>
+          <label class="font-medium text-sm">Học kỳ <span class="text-red-500" aria-hidden="true">*</span></label>
           <Select
             v-model="selectedSemesterId"
             :options="semesters"
@@ -202,12 +211,13 @@ function handleSave() {
             placeholder="Chọn học kỳ"
             :disabled="isEdit"
             :invalid="Boolean(errors.semester)"
+            aria-required="true"
           />
           <small v-if="errors.semester" class="text-red-500 text-xs">{{ errors.semester }}</small>
         </div>
 
         <div v-if="!isTeacherRole" class="flex flex-col gap-1">
-          <label class="font-medium text-sm">Giáo viên <span class="text-red-500">*</span></label>
+          <label class="font-medium text-sm">Giáo viên <span class="text-red-500" aria-hidden="true">*</span></label>
           <Select
             v-model="selectedTeacherId"
             :options="teachers"
@@ -215,7 +225,10 @@ function handleSave() {
             option-value="id"
             placeholder="Chọn giáo viên"
             :disabled="isEdit"
+            :invalid="Boolean(errors.teacher)"
+            aria-required="true"
           />
+          <small v-if="errors.teacher" class="text-red-500 text-xs">{{ errors.teacher }}</small>
         </div>
       </div>
 
@@ -232,44 +245,50 @@ function handleSave() {
       </div>
 
       <div v-if="repeatType === 'WEEKLY'" class="flex flex-col gap-1">
-        <label class="font-medium text-sm">Thứ trong tuần <span class="text-red-500">*</span></label>
+        <label class="font-medium text-sm">Thứ trong tuần <span class="text-red-500" aria-hidden="true">*</span></label>
         <Select
           v-model="dayOfWeek"
           :options="dayOfWeekOptions"
           option-label="label"
           option-value="value"
+          :invalid="Boolean(errors.dayOfWeek)"
+          aria-required="true"
         />
+        <small v-if="errors.dayOfWeek" class="text-red-500 text-xs">{{ errors.dayOfWeek }}</small>
       </div>
 
       <div v-else class="flex flex-col gap-1">
-        <label class="font-medium text-sm">Ngày cụ thể <span class="text-red-500">*</span></label>
-        <DatePicker v-model="specificDate" date-format="yy-mm-dd" show-icon />
+        <label class="font-medium text-sm">Ngày cụ thể <span class="text-red-500" aria-hidden="true">*</span></label>
+        <DatePicker v-model="specificDate" date-format="yy-mm-dd" show-icon :invalid="Boolean(errors.specificDate)" aria-required="true" />
+        <small v-if="errors.specificDate" class="text-red-500 text-xs">{{ errors.specificDate }}</small>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="flex flex-col gap-1">
-          <label class="font-medium text-sm">Áp dụng từ ngày <span class="text-red-500">*</span></label>
-          <DatePicker v-model="validFrom" date-format="yy-mm-dd" show-icon />
+          <label class="font-medium text-sm">Áp dụng từ ngày <span class="text-red-500" aria-hidden="true">*</span></label>
+          <DatePicker v-model="validFrom" date-format="yy-mm-dd" show-icon :invalid="Boolean(errors.validFrom)" aria-required="true" />
+          <small v-if="errors.validFrom" class="text-red-500 text-xs">{{ errors.validFrom }}</small>
         </div>
         <div class="flex flex-col gap-1">
-          <label class="font-medium text-sm">Áp dụng đến ngày <span class="text-red-500">*</span></label>
-          <DatePicker v-model="validTo" date-format="yy-mm-dd" show-icon :invalid="Boolean(errors.validTo)" />
+          <label class="font-medium text-sm">Áp dụng đến ngày <span class="text-red-500" aria-hidden="true">*</span></label>
+          <DatePicker v-model="validTo" date-format="yy-mm-dd" show-icon :invalid="Boolean(errors.validTo)" aria-required="true" />
           <small v-if="errors.validTo" class="text-red-500 text-xs">{{ errors.validTo }}</small>
         </div>
       </div>
 
       <div class="flex flex-col gap-1">
-        <label class="font-medium text-sm">Buổi trong ngày <span class="text-red-500">*</span></label>
+        <label class="font-medium text-sm">Buổi trong ngày <span class="text-red-500" aria-hidden="true">*</span></label>
         <Select
           v-model="session"
           :options="sessionOptions"
           option-label="label"
           option-value="value"
+          aria-required="true"
         />
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="font-medium text-sm">Các tiết bận <span class="text-red-500">*</span></label>
+        <label class="font-medium text-sm">Các tiết bận <span class="text-red-500" aria-hidden="true">*</span></label>
         <div class="flex gap-4">
           <div v-for="idx in [1, 2, 3, 4]" :key="idx" class="flex items-center gap-2">
             <Checkbox v-model="selectedPeriods" :input-id="`period-${idx}`" :value="idx" />

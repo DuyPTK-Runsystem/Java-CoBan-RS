@@ -593,7 +593,7 @@ onMounted(() => {
       </div>
     </div>
 
-    <FormAlert v-if="generalError" :message="generalError" type="error" />
+    <FormAlert v-if="generalError" :message="generalError" tone="error" />
 
     <!-- Calendar init warning if zero periods exist -->
     <div
@@ -636,7 +636,7 @@ onMounted(() => {
     <PageState
       v-if="loadingState === 'loading' || loadingState === 'error'"
       :state="loadingState"
-      :message="generalError"
+      :error-message="generalError"
       @retry="loadInitial"
     />
 

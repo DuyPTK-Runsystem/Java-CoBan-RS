@@ -224,7 +224,7 @@ function handleDelete() {
     @update:visible="emit('update:visible', $event)"
   >
     <div class="flex flex-col gap-4">
-      <FormAlert v-if="errorMessage" :message="errorMessage" type="error" />
+      <FormAlert v-if="errorMessage" :message="errorMessage" tone="error" />
 
       <div class="flex flex-col gap-1">
         <label class="font-medium text-sm">Phân công môn học <span class="text-red-500">*</span></label>
@@ -288,11 +288,12 @@ function handleDelete() {
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="flex flex-col gap-1">
           <label class="font-medium text-sm">Áp dụng từ ngày <span class="text-red-500">*</span></label>
-          <DatePicker v-model="validFrom" date-format="yy-mm-dd" show-icon />
+          <DatePicker v-model="validFrom" date-format="yy-mm-dd" show-icon :invalid="Boolean(errors.validFrom)" aria-required="true" />
+          <small v-if="errors.validFrom" class="text-red-500 text-xs">{{ errors.validFrom }}</small>
         </div>
         <div class="flex flex-col gap-1">
           <label class="font-medium text-sm">Áp dụng đến ngày <span class="text-red-500">*</span></label>
-          <DatePicker v-model="validTo" date-format="yy-mm-dd" show-icon :invalid="Boolean(errors.validTo)" />
+          <DatePicker v-model="validTo" date-format="yy-mm-dd" show-icon :invalid="Boolean(errors.validTo)" aria-required="true" />
           <small v-if="errors.validTo" class="text-red-500 text-xs">{{ errors.validTo }}</small>
         </div>
       </div>

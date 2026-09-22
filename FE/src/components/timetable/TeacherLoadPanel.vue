@@ -12,6 +12,8 @@ defineProps<{
 
 function getStatusSeverity(status: string): 'success' | 'warn' | 'info' {
   switch (status) {
+    case 'NORMAL':
+      return 'info'
     case 'TARGET_MET':
       return 'success'
     case 'LOAD_ABOVE_TARGET':
@@ -24,6 +26,8 @@ function getStatusSeverity(status: string): 'success' | 'warn' | 'info' {
 
 function getStatusLabel(status: string): string {
   switch (status) {
+    case 'NORMAL':
+      return 'ĐỦ ĐỊNH MỨC'
     case 'TARGET_MET':
       return 'Đạt chuẩn'
     case 'LOAD_ABOVE_TARGET':
@@ -42,13 +46,13 @@ function getStatusLabel(status: string): string {
       <div>
         <h3 class="font-bold text-gray-900 text-base">Định mức tiết dạy giáo viên</h3>
         <p class="text-xs text-gray-500">
-          Số liệu và đánh giá được cung cấp bởi hệ thống theo policy đang áp dụng.
+          Số liệu được tính theo quy định định mức đang áp dụng.
         </p>
       </div>
     </div>
 
     <p v-if="teacherLoads.length === 0" class="text-xs text-gray-500">
-      Chưa có dữ liệu định mức từ backend để đối chiếu. Không suy diễn định mức khi thiếu policy.
+      Hiện chưa có dữ liệu định mức để hiển thị.
     </p>
 
     <DataTable :value="teacherLoads" :loading="loading" responsive-layout="scroll" striped-rows>

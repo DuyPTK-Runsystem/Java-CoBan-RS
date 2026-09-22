@@ -16,7 +16,7 @@
 @media (min-width:640px){.sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .settings-section{min-width:0}.settings-section .p-datatable-wrapper{overflow-x:auto}.settings-section .p-datatable-table{min-width:850px}
 .teacher-unavailability-filter{margin-bottom:1.5rem}
-.timetable-conflict-panel{overflow:hidden}.timetable-conflict-header .p-button{flex:0 0 auto}.timetable-conflict-issue{overflow-wrap:anywhere;word-break:break-word}.timetable-conflict-issue .p-button{max-width:100%;white-space:normal;text-align:right}
+.timetable-conflict-panel{width:100%;min-width:0;box-sizing:border-box;overflow:hidden}.timetable-conflict-issues{width:100%;min-width:0}.timetable-conflict-header .p-button{flex:0 0 auto}.timetable-conflict-issue{width:100%;min-width:0;box-sizing:border-box;overflow-wrap:anywhere;word-break:break-word}.timetable-conflict-issue .p-button{max-width:100%;white-space:normal;text-align:right}
 .timetable-busy-slot{background:#e5e7eb!important;color:#1f2937!important}
 .timetable-subtab-strip{display:flex;flex-wrap:wrap;gap:8px;width:100%;padding:4px 10px;background:#f1f2f4}
 .timetable-subtab{padding:8px 16px;border:0;border-radius:8px;background:transparent;color:#475569;font-size:.875rem;font-weight:600;line-height:1.2;cursor:pointer;transition:background-color .15s ease,color .15s ease,box-shadow .15s ease}
@@ -24,7 +24,7 @@
 .timetable-subtab.is-active{background:#fff;color:#111827;box-shadow:0 1px 2px #00000014}
 .timetable-list-filter{margin-top:24px}
 .timetable-list-results{margin-top:24px}
-@media (max-width:640px){.timetable-conflict-panel{padding:.75rem}.timetable-conflict-header{align-items:flex-start}.timetable-conflict-header h3{max-width:5rem;line-height:1.1}.timetable-conflict-header>.p-button{margin-left:auto}.timetable-conflict-issues{max-height:none;overflow:visible;padding-right:0}.timetable-conflict-issue{padding:.7rem}.timetable-conflict-issue .font-semibold{font-size:.72rem}}
+@media (max-width:640px){.timetable-conflict-panel{padding:.75rem}.timetable-conflict-header{align-items:flex-start}.timetable-conflict-header h3{max-width:5rem;line-height:1.1}.timetable-conflict-header>.p-button{margin-left:auto}.timetable-conflict-issues{padding-right:0}.timetable-conflict-issue{padding:.7rem}.timetable-conflict-issue .font-semibold{font-size:.72rem}}
 .timetable-settings-dialog .p-dialog-content{padding:1.25rem}.timetable-settings-dialog .p-inputtext,.timetable-settings-dialog .p-select,.timetable-settings-dialog .p-datepicker,.timetable-settings-dialog .p-inputnumber{width:100%}
 .timetable-settings-dialog .p-dialog-footer{padding-top:0}.settings-form-grid{align-items:start}
 @media (max-width:639px){.timetable-settings-dialog .p-dialog-content{padding:.9rem}.timetable-settings-dialog .p-dialog-footer{padding:.75rem}.timetable-settings-dialog .p-dialog-footer>div{flex-wrap:wrap}.timetable-settings-dialog .p-dialog-footer .p-button{flex:1 1 100%}}
