@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import ButtonStub from '@/test/stubs/ButtonStub.vue'
 import NotificationInboxView from '@/views/notification/NotificationInboxView.vue'
 import type { NotificationPage } from '@/types/notification'
-import { cancelNotification, createNotificationDraft, fetchManagedNotifications, fetchNotification, fetchNotificationInbox, fetchNotificationIndividualAudiences, markNotificationRead, publishNotification } from './notificationApi'
+import { cancelNotification, createNotificationDraft, fetchManagedNotifications, fetchNotification, fetchNotificationInbox, fetchNotificationIndividualAudiences, fetchUnreadNotificationCount, markNotificationRead, publishNotification } from './notificationApi'
 
 const fetchMock = vi.fn()
 const routerPush = vi.fn()
@@ -19,6 +19,15 @@ describe('notificationApi', () => {
     fetchMock.mockImplementation(() => Promise.resolve(new Response(JSON.stringify({ data: { meta: {}, result: [] } }), { status: 200 }))); vi.stubGlobal('fetch', fetchMock)
     await fetchNotificationInbox('test-token', { page: 0, pageSize: 10, unreadOnly: true })
     const [url, options] = fetchMock.mock.calls[0]; expect(url).toContain('/api/v3/notifications/inbox?page=0&size=10&unreadOnly=true'); expect(options.headers.Authorization).toBe('Bearer test-token')
+  })
+
+  it('serializes the login unread-count query as page 0, size 1, and unreadOnly true', async () => {
+    fetchMock.mockImplementation(() => Promise.resolve(new Response(JSON.stringify({ data: { meta: { page: 0, pageSize: 1, totalPages: 0, totalItems: 0 }, result: [] } }), { status: 200 }))); vi.stubGlobal('fetch', fetchMock)
+    await fetchUnreadNotificationCount('test-token')
+
+    const requestUrl = new URL(fetchMock.mock.calls[0]?.[0] as string, 'http://localhost')
+    expect(requestUrl.pathname).toBe('/api/v3/notifications/inbox')
+    expect(Object.fromEntries(requestUrl.searchParams.entries())).toEqual({ page: '0', size: '1', unreadOnly: 'true' })
   })
 
   it('preserves canonical ResultPaginationDTO metadata from the v3 response', async () => {

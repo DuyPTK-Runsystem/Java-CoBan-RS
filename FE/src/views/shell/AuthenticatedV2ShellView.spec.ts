@@ -1,11 +1,14 @@
-import { mount } from '@vue/test-utils'
+import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { clearAuthSession, saveAuthSession } from '@/services/authSession'
+import ButtonStub from '@/test/stubs/ButtonStub.vue'
+import { NOTIFICATION_READ_EVENT } from '@/services/notificationApi'
 import AuthenticatedV2ShellView from './AuthenticatedV2ShellView.vue'
 
 const mocks = vi.hoisted(() => ({
   currentPath: '/v2/academic-years',
+  fetchUnreadNotificationCount: vi.fn(),
   push: vi.fn(),
   replace: vi.fn(),
 }))
@@ -27,10 +30,33 @@ vi.mock('vue-router', () => ({
   },
 }))
 
+vi.mock('@/services/notificationApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/services/notificationApi')>()
+  return {
+    ...actual,
+    fetchUnreadNotificationCount: mocks.fetchUnreadNotificationCount,
+  }
+})
+
+enableAutoUnmount(afterEach)
+
+function mountShellWithRealLayout() {
+  return mount(AuthenticatedV2ShellView, {
+    global: {
+      stubs: {
+        Button: ButtonStub,
+        RouterLink: { props: ['to'], template: '<a :href="to"><slot /></a>' },
+        RouterView: true,
+      },
+    },
+  })
+}
+
 describe('AuthenticatedV2ShellView.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.currentPath = '/v2/academic-years'
+    mocks.fetchUnreadNotificationCount.mockResolvedValue(0)
   })
 
   afterEach(() => {
@@ -93,6 +119,73 @@ describe('AuthenticatedV2ShellView.vue', () => {
     })
 
     expect(wrapper.find('[data-to="/v2/notifications"]').attributes('data-active')).toBe('true')
+  })
+
+  it('loads unread metadata on mount and renders the unread count on the Notification tab', async () => {
+    mocks.fetchUnreadNotificationCount.mockResolvedValueOnce(3)
+    saveAuthSession({
+      accessToken: 'token-stu-unread',
+      user: { id: 7, username: 'student_unread', roles: ['STUDENT'] },
+    })
+
+    const wrapper = mountShellWithRealLayout()
+    await flushPromises()
+
+    expect(mocks.fetchUnreadNotificationCount).toHaveBeenCalledWith('token-stu-unread')
+    const notificationLink = wrapper.get('a[href="/v2/notifications"]')
+    expect(notificationLink.text()).toContain('Thông báo')
+    expect(notificationLink.text()).toContain('3')
+  })
+
+  it('does not render a Notification count when unread metadata is zero', async () => {
+    saveAuthSession({
+      accessToken: 'token-stu-read',
+      user: { id: 8, username: 'student_read', roles: ['STUDENT'] },
+    })
+
+    const wrapper = mountShellWithRealLayout()
+    await flushPromises()
+
+    expect(mocks.fetchUnreadNotificationCount).toHaveBeenCalledWith('token-stu-read')
+    expect(wrapper.get('a[href="/v2/notifications"]').text()).toBe('Thông báo')
+  })
+
+  it('keeps the authenticated shell usable when the unread count request fails', async () => {
+    mocks.fetchUnreadNotificationCount.mockRejectedValueOnce(new Error('notification service unavailable'))
+    saveAuthSession({
+      accessToken: 'token-stu-error',
+      user: { id: 9, username: 'student_error', roles: ['STUDENT'] },
+    })
+
+    const wrapper = mountShellWithRealLayout()
+    await flushPromises()
+
+    expect(mocks.fetchUnreadNotificationCount).toHaveBeenCalledWith('token-stu-error')
+    expect(wrapper.find('main.page-content').exists()).toBe(true)
+    expect(wrapper.get('a[href="/v2/notifications"]').text()).toContain('Thông báo')
+  })
+
+  it('refreshes the unread count after the notification-read event', async () => {
+    let unreadCount = 2
+    mocks.fetchUnreadNotificationCount.mockImplementation(() => Promise.resolve(unreadCount))
+    saveAuthSession({
+      accessToken: 'token-stu-refresh',
+      user: { id: 14, username: 'student_refresh', roles: ['STUDENT'] },
+    })
+
+    const wrapper = mountShellWithRealLayout()
+    await flushPromises()
+    const notificationLink = wrapper.get('a[href="/v2/notifications"]')
+    expect(notificationLink.text()).toContain('2')
+
+    unreadCount = 1
+    window.dispatchEvent(new Event(NOTIFICATION_READ_EVENT))
+    await flushPromises()
+
+    expect(mocks.fetchUnreadNotificationCount).toHaveBeenCalledTimes(2)
+    expect(mocks.fetchUnreadNotificationCount).toHaveBeenNthCalledWith(1, 'token-stu-refresh')
+    expect(mocks.fetchUnreadNotificationCount).toHaveBeenNthCalledWith(2, 'token-stu-refresh')
+    expect(notificationLink.text()).toContain('1')
   })
 
   it('hides Transcript tab and shows Class Transcript tab for TEACHER role', () => {
