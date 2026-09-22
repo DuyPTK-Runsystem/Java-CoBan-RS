@@ -1,18 +1,22 @@
 package com.JavaTraining.BaiTap_RS.placement.service;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.never;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.AcademicYear;
@@ -23,10 +27,12 @@ import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClassStatus;
 import com.JavaTraining.BaiTap_RS.academic.repository.AcademicYearRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.GradeLevelRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
+import com.JavaTraining.BaiTap_RS.common.audit.domain.entity.AuditLog;
 import com.JavaTraining.BaiTap_RS.common.audit.repository.AuditLogRepository;
 import com.JavaTraining.BaiTap_RS.common.contract.ResultPaginationDTO;
 import com.JavaTraining.BaiTap_RS.common.error.AppException;
 import com.JavaTraining.BaiTap_RS.enrollment.domain.entity.EnrollmentStatus;
+import com.JavaTraining.BaiTap_RS.enrollment.domain.DTOs.requests.ReqCreateEnrollmentDTO;
 import com.JavaTraining.BaiTap_RS.enrollment.repository.StudentYearEnrollmentRepository;
 import com.JavaTraining.BaiTap_RS.enrollment.service.EnrollmentService;
 import com.JavaTraining.BaiTap_RS.placement.domain.DTOs.requests.ReqConfirmPlacementDTO;
@@ -62,6 +68,8 @@ import com.JavaTraining.BaiTap_RS.scorebook.repository.StudentAnnualTranscriptRe
 import com.JavaTraining.BaiTap_RS.student.domain.entity.StudentGender;
 import com.JavaTraining.BaiTap_RS.student.domain.entity.StudentInfo;
 import com.JavaTraining.BaiTap_RS.student.repository.StudentInfoRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -76,6 +84,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class PlacementServiceTest {
+    private static final String GENDER_MALE = "MALE";
+    private static final BigDecimal SCORE_EIGHT = new BigDecimal("8.0");
+    private static final String PLACEMENT_ENTITY = "placement_session";
+
     @Mock private PlacementSessionRepository sessions;
     @Mock private AcademicYearRepository academicYears;
     @Mock private GradeLevelRepository gradeLevels;
@@ -89,6 +101,7 @@ class PlacementServiceTest {
     @Mock private AuditLogRepository audits;
 
     private PlacementService service;
+    private PlacementSessionAccess access;
     private final List<PlacementResult> storedResults = new ArrayList<>();
 
     @BeforeEach
@@ -101,11 +114,11 @@ class PlacementServiceTest {
         PlacementCandidateSnapshotService snapshots = new PlacementCandidateSnapshotService(academicYears,
                 annualTranscripts, studentInfos, candidates, eligibilityValidator);
         PlacementResponseMapper responseMapper = new PlacementResponseMapper(scopeService);
-        PlacementSessionAccess access = new PlacementSessionAccess(sessions, candidates, results, responseMapper);
+        access = new PlacementSessionAccess(sessions, candidates, results, responseMapper);
         PlacementSessionRules rules = new PlacementSessionRules();
         service = new PlacementService(sessions, scopeService, snapshots,
                 new PlacementConfirmationValidator(scopeService, candidates, enrollments), access, rules,
-                new PlacementConfirmationSupport(sessions, enrollmentService, audits, access),
+                new PlacementConfirmationSupport(sessions, enrollmentService, audits, access, mapper),
                 new PlacementSimulationSupport(sessions, candidates, results, scopeService,
                         new PlacementAllocationEngine(), access, rules));
         org.mockito.Mockito.lenient().when(results.findAllBySessionIdOrderByStudentIdAsc(1L))
@@ -134,7 +147,7 @@ class PlacementServiceTest {
     }
 
     @Test
-    void createUsesOfficialPreviousYearTranscriptAndSnapshotsGender() {
+    void createUsesOfficialPreviousYearTranscriptAndSnapshotsGender() throws JsonProcessingException {
         AcademicYear target = year(2L, LocalDate.of(2027, 8, 1), LocalDate.of(2028, 5, 31));
         AcademicYear previous = year(1L, LocalDate.of(2026, 8, 1), LocalDate.of(2027, 5, 31));
         SchoolClass targetClass = schoolClass(10L, 2L, 8L, 30);
@@ -161,19 +174,23 @@ class PlacementServiceTest {
         service.create(new ReqCreatePlacementSessionDTO(2L, 8L,
                 List.of(new ReqCreatePlacementSessionDTO.TargetClass(10L, PlacementClassProfile.REGULAR, 30)),
                 List.of(new ReqCreatePlacementSessionDTO.Candidate(20L, 8L, PlacementSourceType.CONTINUING,
-                        new BigDecimal("1.0"), "caller-value", "MALE", null, null)), "P1-P6-v1"));
+                        new BigDecimal("1.0"), "caller-value", GENDER_MALE, null, null)), "P1-P6-v1"));
 
         ArgumentCaptor<PlacementCandidate> captor = ArgumentCaptor.forClass(PlacementCandidate.class);
         verify(candidates).save(captor.capture());
         assertEquals(new BigDecimal("8.5"), captor.getValue().getScore());
         assertEquals("student_annual_transcript:99:finalDtbcn:v4", captor.getValue().getScoreSourceReference());
         assertEquals("FEMALE", captor.getValue().getGenderSnapshot());
+
+        ArgumentCaptor<AuditLog> auditCaptor = ArgumentCaptor.forClass(AuditLog.class);
+        verify(audits).save(auditCaptor.capture());
+        checkPlacementAudit(auditCaptor.getValue(), "PLACEMENT_SESSION_CREATED", "classes", 1);
     }
 
     @Test
     void simulateAssignsTopScoreToAdvancedAndLeavesMissingGenderForManualPlacement() {
         PlacementSession session = sessionWithScope(1L, advancedAndRegularScope());
-        PlacementCandidate top = candidate(1L, new BigDecimal("9.5"), "MALE");
+        PlacementCandidate top = candidate(1L, new BigDecimal("9.5"), GENDER_MALE);
         PlacementCandidate missingGender = candidate(2L, new BigDecimal("8.5"), null);
         when(sessions.findByIdForUpdate(1L)).thenReturn(Optional.of(session));
         when(classes.findAllByIdInAndAcademicYearIdOrderByClassCodeAsc(List.of(10L, 11L), 2L))
@@ -195,7 +212,7 @@ class PlacementServiceTest {
     @Test
     void simulateMarksEqualScoreAtAdvancedBoundaryForManualPlacement() {
         PlacementSession session = sessionWithScope(1L, advancedAndRegularScope());
-        PlacementCandidate first = candidate(1L, new BigDecimal("9.0"), "MALE");
+        PlacementCandidate first = candidate(1L, new BigDecimal("9.0"), GENDER_MALE);
         PlacementCandidate tied = candidate(2L, new BigDecimal("9.0"), "FEMALE");
         when(sessions.findByIdForUpdate(1L)).thenReturn(Optional.of(session));
         when(classes.findAllByIdInAndAcademicYearIdOrderByClassCodeAsc(List.of(10L, 11L), 2L))
@@ -213,9 +230,9 @@ class PlacementServiceTest {
     }
 
     @Test
-    void simulateUsesHardCapacityForAutomaticResults() {
+    void simulateLeavesCapacityOverflowAsManualWarningWithoutBlockingAutomaticResults() {
         PlacementSession session = sessionWithScope(1L, regularScope());
-        PlacementCandidate first = candidate(1L, new BigDecimal("8.0"), "MALE");
+        PlacementCandidate first = candidate(1L, SCORE_EIGHT, GENDER_MALE);
         PlacementCandidate second = candidate(2L, new BigDecimal("7.0"), "FEMALE");
         when(sessions.findByIdForUpdate(1L)).thenReturn(Optional.of(session));
         when(classes.findAllByIdInAndAcademicYearIdOrderByClassCodeAsc(List.of(10L), 2L))
@@ -224,10 +241,52 @@ class PlacementServiceTest {
 
         ResPlacementSessionDTO response = service.simulate(1L, new ReqPlacementActionDTO(0L, null));
 
-        assertEquals(PlacementSessionStatus.SIMULATED, response.status());
-        assertTrue(storedResults.stream().anyMatch(r -> r.getIssueSeverity() == PlacementIssueSeverity.BLOCKING
-                && "CAPACITY_EXCEEDED".equals(r.getIssueCode())));
+        assertEquals(PlacementSessionStatus.READY_FOR_CONFIRM, response.status());
+        PlacementResult overflow = storedResults.stream()
+                .filter(r -> "CAPACITY_EXCEEDED".equals(r.getIssueCode())).findFirst().orElseThrow();
+        assertEquals(PlacementResultStatus.MANUAL_REQUIRED, overflow.getResultStatus());
+        assertEquals(PlacementIssueSeverity.WARNING, overflow.getIssueSeverity());
+        assertNull(overflow.getTargetClassId());
         assertEquals(1, storedResults.stream().filter(r -> r.getResultStatus() == PlacementResultStatus.AUTO_ASSIGNED).count());
+    }
+
+    @Test
+    void confirmCreatesOnlyAutomaticEnrollmentWhenOverflowAndTieRemainManual() {
+        PlacementSession session = sessionWithScope(1L, fourRegularClassesScope());
+        ReflectionTestUtils.setField(session, "status", PlacementSessionStatus.READY_FOR_CONFIRM);
+        PlacementCandidate automatic = candidate(1L, new BigDecimal("9.5"), GENDER_MALE);
+        PlacementCandidate overflow = candidate(2L, new BigDecimal("8.5"), "FEMALE");
+        PlacementCandidate tie = candidate(3L, new BigDecimal("8.5"), GENDER_MALE);
+        PlacementResult automaticResult = new PlacementResult(1L, 1L, 10L,
+                PlacementResultStatus.AUTO_ASSIGNED, automatic.getScore(), null, null, "assigned");
+        PlacementResult overflowResult = new PlacementResult(1L, 2L, null,
+                PlacementResultStatus.MANUAL_REQUIRED, overflow.getScore(), "CAPACITY_EXCEEDED",
+                PlacementIssueSeverity.WARNING, "overflow");
+        PlacementResult tieResult = new PlacementResult(1L, 3L, null,
+                PlacementResultStatus.MANUAL_REQUIRED, tie.getScore(), "SCORE_TIE",
+                PlacementIssueSeverity.WARNING, "tie");
+        storedResults.addAll(List.of(automaticResult, overflowResult, tieResult));
+        when(sessions.findByIdForUpdate(1L)).thenReturn(Optional.of(session));
+        when(sessions.findByConfirmIdempotencyKey("confirm-overflow")).thenReturn(Optional.empty());
+        when(candidates.findAllBySessionIdOrderByStudentIdAsc(1L))
+                .thenReturn(List.of(automatic, overflow, tie));
+        when(classes.findAllByIdInAndAcademicYearIdOrderByClassCodeAsc(
+                List.of(10L, 11L, 12L, 13L), 2L)).thenReturn(List.of(
+                        schoolClass(10L, 2L, 8L, 7), schoolClass(11L, 2L, 8L, 10),
+                        schoolClass(12L, 2L, 8L, 10), schoolClass(13L, 2L, 8L, 10)));
+
+        ResPlacementSessionDTO response = service.confirm(1L,
+                new ReqConfirmPlacementDTO(0L, "confirm-overflow"));
+
+        assertEquals(PlacementSessionStatus.CONFIRMED, response.status());
+        ArgumentCaptor<ReqCreateEnrollmentDTO> enrollmentCaptor =
+                ArgumentCaptor.forClass(ReqCreateEnrollmentDTO.class);
+        verify(enrollmentService).createEnrollment(enrollmentCaptor.capture());
+        assertEquals(1L, enrollmentCaptor.getValue().studentId());
+        assertEquals(10L, enrollmentCaptor.getValue().classId());
+        verify(enrollmentService, org.mockito.Mockito.times(1)).createEnrollment(any());
+        assertTrue(storedResults.stream().filter(r -> r.getResultStatus() == PlacementResultStatus.MANUAL_REQUIRED)
+                .allMatch(r -> r.getTargetClassId() == null));
     }
 
     @Test
@@ -241,6 +300,25 @@ class PlacementServiceTest {
 
         assertEquals(PlacementSessionStatus.CONFIRMED, response.status());
         verifyNoInteractions(enrollmentService);
+    }
+
+    @Test
+    void confirmAuditsResultCountAsJson() throws JsonProcessingException {
+        PlacementSession session = sessionWithScope(1L, regularScope());
+        ReflectionTestUtils.setField(session, "status", PlacementSessionStatus.READY_FOR_CONFIRM);
+        PlacementCandidate placementCandidate = candidate(1L, SCORE_EIGHT, GENDER_MALE);
+        PlacementResult result = new PlacementResult(1L, 1L, 10L, PlacementResultStatus.AUTO_ASSIGNED,
+                SCORE_EIGHT, null, null, "assigned");
+        when(sessions.findByIdForUpdate(1L)).thenReturn(Optional.of(session));
+        when(sessions.findByConfirmIdempotencyKey("confirm-json")).thenReturn(Optional.empty());
+        when(candidates.findAllBySessionIdOrderByStudentIdAsc(1L)).thenReturn(List.of(placementCandidate));
+        when(classes.findAllByIdInAndAcademicYearIdOrderByClassCodeAsc(List.of(10L), 2L))
+                .thenReturn(List.of(schoolClass(10L, 2L, 8L, 1)));
+        storedResults.add(result);
+
+        service.confirm(1L, new ReqConfirmPlacementDTO(0L, "confirm-json"));
+
+        checkConfirmedAudit();
     }
 
     @Test
@@ -306,8 +384,20 @@ class PlacementServiceTest {
 
         assertEquals(PlacementSessionStatus.CANCELLED, response.status());
         verify(sessions).save(session);
-        verify(audits).save(any());
+        ArgumentCaptor<AuditLog> auditCaptor = ArgumentCaptor.forClass(AuditLog.class);
+        verify(audits).save(auditCaptor.capture());
+        checkCancelledPlacementAudit(auditCaptor.getValue());
         verify(results).findAllBySessionIdOrderByStudentIdAsc(1L);
+    }
+
+    @Test
+    void auditSerializationFailurePropagatesWithoutSavingAudit() throws JsonProcessingException {
+        ObjectMapper failingMapper = mock(ObjectMapper.class);
+        when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("forced failure") { });
+        PlacementConfirmationSupport support = new PlacementConfirmationSupport(sessions, enrollmentService, audits,
+                access, failingMapper);
+
+        checkSerializationFailure(support);
     }
 
     @Test
@@ -327,7 +417,7 @@ class PlacementServiceTest {
     void resultsRouteUsesPagedRepositoryQuery() {
         PlacementSession session = sessionWithScope(1L, regularScope());
         PlacementResult result = new PlacementResult(1L, 20L, 10L, PlacementResultStatus.AUTO_ASSIGNED,
-                new BigDecimal("8.0"), null, null, "assigned");
+                SCORE_EIGHT, null, null, "assigned");
         when(sessions.findById(1L)).thenReturn(Optional.of(session));
         when(results.findBySessionIdOrderByStudentIdAsc(1L, PageRequest.of(0, 2)))
                 .thenReturn(new PageImpl<>(List.of(result), PageRequest.of(0, 2), 1));
@@ -339,6 +429,45 @@ class PlacementServiceTest {
         verify(results).findBySessionIdOrderByStudentIdAsc(1L, PageRequest.of(0, 2));
         verify(results, never())
                 .findAllBySessionIdOrderByStudentIdAsc(1L);
+    }
+
+    private void checkConfirmedAudit() throws JsonProcessingException {
+        ArgumentCaptor<AuditLog> auditCaptor = ArgumentCaptor.forClass(AuditLog.class);
+        verify(audits).save(auditCaptor.capture());
+        checkPlacementAudit(auditCaptor.getValue(), "PLACEMENT_SESSION_CONFIRMED", "results", 1);
+    }
+
+    private void checkPlacementAudit(AuditLog audit, String expectedAction, String expectedCountField,
+            int expectedCount) throws JsonProcessingException {
+        JsonNode afterData = new ObjectMapper().readTree(audit.getAfterData());
+        assertAll("placement audit fields",
+                () -> assertEquals(expectedAction, audit.getAction(), "audit action should be preserved"),
+                () -> assertEquals(PLACEMENT_ENTITY, audit.getEntityType(), "audit entity type should be preserved"),
+                () -> assertEquals("1", audit.getEntityId(), "audit entity id should be preserved"),
+                () -> assertEquals(expectedCount, afterData.get(expectedCountField).asInt(),
+                        "audit count should be serialized as JSON"));
+    }
+
+    private void checkCancelledPlacementAudit(AuditLog audit) {
+        assertAll("cancelled placement audit fields",
+                () -> assertEquals("PLACEMENT_SESSION_CANCELLED", audit.getAction(),
+                        "cancel audit action should be preserved"),
+                () -> assertEquals(PLACEMENT_ENTITY, audit.getEntityType(),
+                        "cancel audit entity type should be preserved"),
+                () -> assertEquals("1", audit.getEntityId(), "cancel audit entity id should be preserved"),
+                () -> assertNull(audit.getAfterData(), "cancel audit after_data should remain null"));
+    }
+
+    private void checkSerializationFailure(PlacementConfirmationSupport support) {
+        assertAll("audit serialization failure",
+                () -> {
+                    AppException exception = assertThrows(AppException.class,
+                            () -> support.audit("PLACEMENT_SESSION_CREATED", 1L, Map.of("classes", 1)),
+                            "audit serialization failure should propagate as an application error");
+                    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatus(),
+                            "audit serialization failure should use server error status");
+                });
+        verify(audits, never()).save(any());
     }
 
     private PlacementCandidate candidate(Long studentId, BigDecimal score, String gender) {
@@ -363,6 +492,16 @@ class PlacementServiceTest {
     private String regularScope() {
         return "[{\"classId\":10,\"classCode\":\"8A\",\"className\":\"8A\","
                 + "\"profile\":\"REGULAR\",\"capacity\":1}]";
+    }
+
+    private String fourRegularClassesScope() {
+        return "[{\"classId\":10,\"classCode\":\"7A1\",\"className\":\"7A1\","
+                + "\"profile\":\"REGULAR\",\"capacity\":7},{\"classId\":11,"
+                + "\"classCode\":\"7A2\",\"className\":\"7A2\",\"profile\":\"REGULAR\","
+                + "\"capacity\":10},{\"classId\":12,\"classCode\":\"7A3\","
+                + "\"className\":\"7A3\",\"profile\":\"REGULAR\",\"capacity\":10},"
+                + "{\"classId\":13,\"classCode\":\"7A4\",\"className\":\"7A4\","
+                + "\"profile\":\"REGULAR\",\"capacity\":10}]";
     }
 
     private AcademicYear year(Long id, LocalDate start, LocalDate end) {

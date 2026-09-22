@@ -1,6 +1,7 @@
 package com.JavaTraining.BaiTap_RS.placement.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
@@ -48,7 +49,8 @@ public class PlacementService {
         PlacementSession session = sessions.save(new PlacementSession(request.academicYearId(), request.targetGradeId(),
                 request.ruleVersion(), scopeService.snapshot(targets), AuditContext.currentUserId()));
         candidateSnapshots.snapshot(session, request.candidates());
-        confirmation.audit("PLACEMENT_SESSION_CREATED", session.getId(), "classes=" + targets.size());
+        confirmation.audit("PLACEMENT_SESSION_CREATED", session.getId(),
+                Map.<String, Object>of("classes", targets.size()));
         return access.response(session, List.of());
     }
 
@@ -100,7 +102,8 @@ public class PlacementService {
         session.setStatus(PlacementSessionStatus.CONFIRMED);
         session.setConfirmIdempotencyKey(request.idempotencyKey());
         sessions.save(session);
-        confirmation.audit("PLACEMENT_SESSION_CONFIRMED", id, "results=" + resultValues.size());
+        confirmation.audit("PLACEMENT_SESSION_CONFIRMED", id,
+                Map.<String, Object>of("results", resultValues.size()));
         return access.response(session, resultValues);
     }
 
