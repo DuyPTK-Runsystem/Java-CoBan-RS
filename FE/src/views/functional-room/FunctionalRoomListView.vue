@@ -168,7 +168,7 @@ onMounted(() => {
       <Button label="Thêm phòng chức năng" icon="pi pi-plus" @click="openCreateDialog" />
     </div>
 
-    <FormAlert v-if="generalError" :message="generalError" type="error" />
+    <FormAlert v-if="generalError" :message="generalError" tone="error" />
 
     <div class="functional-room-toolbar bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row gap-4 justify-between">
       <div class="functional-room-search flex flex-1 gap-2 max-w-md">
@@ -194,7 +194,7 @@ onMounted(() => {
     <PageState
       v-if="loadingState === 'loading' || loadingState === 'error'"
       :state="loadingState"
-      :message="generalError"
+      :error-message="generalError"
       @retry="loadRooms"
     />
 

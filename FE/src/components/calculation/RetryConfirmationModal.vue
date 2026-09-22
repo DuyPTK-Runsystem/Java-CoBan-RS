@@ -40,37 +40,37 @@ function handleConfirm(): void {
   <Dialog
     :visible="props.visible"
     modal
-    :header="props.mode === 'bulk' ? 'Retry tất cả failed?' : 'Xác nhận retry task?'"
+    :header="props.mode === 'bulk' ? 'Thử lại tất cả tác vụ thất bại?' : 'Xác nhận thử lại tác vụ?'"
     :style="{ width: '480px', maxWidth: '95vw' }"
     @update:visible="emit('update:visible', $event)"
   >
     <div class="confirmation-body">
       <div v-if="props.mode === 'single' && props.task" class="target-summary">
-        <strong>Task #CT-{{ props.task.taskId }}</strong> ·
+        <strong>Tác vụ #CT-{{ props.task.taskId }}</strong> ·
         <span>{{ props.task.studentCode }}</span> ·
-        <span class="status-failed">FAILED</span>
+        <span class="status-failed">Thất bại</span>
       </div>
       <div v-else-if="props.mode === 'bulk'" class="target-summary">
-        Phạm vi hiện tại: <strong>{{ props.failedCount }}</strong> task FAILED
+        Phạm vi hiện tại: <strong>{{ props.failedCount }}</strong> tác vụ thất bại
       </div>
 
       <div class="notice-box notice-warning">
         <div class="notice-title">
           <i class="pi pi-exclamation-triangle" />
-          <span>{{ props.mode === 'bulk' ? 'Mutation hàng loạt' : 'Mutation bất đồng bộ' }}</span>
+          <span>{{ props.mode === 'bulk' ? 'Thao tác hàng loạt' : 'Thao tác bất đồng bộ' }}</span>
         </div>
         <p class="notice-text">
           <template v-if="props.mode === 'bulk'">
-            Backend sẽ đưa toàn bộ các task FAILED trong phạm vi command về <strong>PENDING</strong> và ghi audit event theo contract.
+            Hệ thống sẽ đưa toàn bộ tác vụ thất bại trong phạm vi yêu cầu về trạng thái <strong>Đang chờ</strong> và ghi sự kiện kiểm toán.
           </template>
           <template v-else>
-            Task sẽ được đưa về trạng thái <strong>PENDING</strong>; worker nền sẽ xử lý bất đồng bộ. UI sẽ tự động làm mới trạng thái sau khi gửi yêu cầu.
+            Tác vụ sẽ được đưa về trạng thái <strong>Đang chờ</strong>; tiến trình nền sẽ xử lý bất đồng bộ. Giao diện sẽ tự động làm mới trạng thái sau khi gửi yêu cầu.
           </template>
         </p>
       </div>
 
       <p class="idempotency-note">
-        Thao tác retry có tính chất idempotent theo backend contract. Nếu hệ thống phản hồi lỗi <strong>409 (Conflict)</strong>, task đã được đổi trạng thái; UI sẽ tải lại dữ liệu mới nhất.
+        Thao tác thử lại có thể lặp lại an toàn theo hợp đồng API. Nếu hệ thống phản hồi lỗi <strong>409 (Xung đột)</strong>, tác vụ đã được đổi trạng thái; giao diện sẽ tải lại dữ liệu mới nhất.
       </p>
     </div>
 
@@ -83,7 +83,7 @@ function handleConfirm(): void {
           @click="handleCancel"
         />
         <Button
-          :label="props.mode === 'bulk' ? `Retry ${props.failedCount} tasks` : 'Retry task'"
+          :label="props.mode === 'bulk' ? `Thử lại ${props.failedCount} tác vụ` : 'Thử lại tác vụ'"
           severity="danger"
           icon="pi pi-replay"
           :loading="props.loading"

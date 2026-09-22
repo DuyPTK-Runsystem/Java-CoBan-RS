@@ -14,14 +14,14 @@ const props = withDefaults(defineProps<{
   acceptLabel?: string
   rejectLabel?: string
 }>(), {
-  label: 'Confirm',
+  label: 'Xác nhận',
   icon: 'pi pi-check',
-  header: 'Confirm action',
+  header: 'Xác nhận thao tác',
   severity: 'primary',
   disabled: false,
   loading: false,
-  acceptLabel: 'Confirm',
-  rejectLabel: 'Cancel',
+  acceptLabel: 'Xác nhận',
+  rejectLabel: 'Hủy',
 })
 
 const emit = defineEmits<{ confirm: []; cancel: [] }>()

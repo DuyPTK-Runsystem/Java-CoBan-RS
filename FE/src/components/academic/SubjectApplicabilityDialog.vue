@@ -118,10 +118,10 @@ function save(): void {
         <h2>{{ formHeading }}</h2>
         <span v-if="props.mode === 'edit'" class="section-caption">ID #{{ props.initialValue?.id }}</span>
       </div>
-      <div class="field-group"><label for="applicability-semester">Học kỳ</label><Select id="applicability-semester" v-model="values.semesterId" :options="props.semesters" option-label="name" option-value="id" placeholder="Chọn học kỳ" :invalid="Boolean(errors.semesterId)" fluid /><small v-if="errors.semesterId" class="field-error">{{ errors.semesterId }}</small></div>
+      <div class="field-group"><label for="applicability-semester">Học kỳ <span class="required-mark" aria-hidden="true">*</span></label><Select id="applicability-semester" v-model="values.semesterId" :options="props.semesters" option-label="name" option-value="id" placeholder="Chọn học kỳ" :invalid="Boolean(errors.semesterId)" fluid aria-required="true" /><small v-if="errors.semesterId" class="field-error">{{ errors.semesterId }}</small></div>
       <div class="catalog-form-grid">
         <div class="field-group"><label for="applicability-scope">Phạm vi</label><Select id="applicability-scope" v-model="values.scopeType" :options="scopeOptions" option-label="label" option-value="value" :invalid="Boolean(errors.scopeType)" fluid /><small v-if="errors.scopeType" class="field-error">{{ errors.scopeType }}</small></div>
-        <div class="field-group"><label for="applicability-target">{{ targetLabel }}</label><Select id="applicability-target" v-model="targetValue" :options="targetOptions" option-label="label" option-value="id" placeholder="Chọn phạm vi" :invalid="Boolean(errors.target)" fluid /><small v-if="errors.target" class="field-error">{{ errors.target }}</small></div>
+        <div class="field-group"><label for="applicability-target">{{ targetLabel }} <span class="required-mark" aria-hidden="true">*</span></label><Select id="applicability-target" v-model="targetValue" :options="targetOptions" option-label="label" option-value="id" placeholder="Chọn phạm vi" :invalid="Boolean(errors.target)" fluid aria-required="true" /><small v-if="errors.target" class="field-error">{{ errors.target }}</small></div>
       </div>
       <div class="form-actions"><Button type="button" label="Hủy" icon="pi pi-times" severity="secondary" outlined :disabled="props.saving" @click="close" /><Button type="submit" :label="props.mode === 'edit' ? 'Lưu thay đổi' : 'Lưu cấu hình'" icon="pi pi-check" :loading="props.saving" /></div>
     </form>

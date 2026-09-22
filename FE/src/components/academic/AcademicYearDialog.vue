@@ -100,19 +100,19 @@ function save(): void {
     <div v-if="isReadOnly" class="form-alert form-alert-info">Dữ liệu lịch sử được giữ nguyên và không thể chỉnh sửa.</div>
     <form class="form-stack" novalidate @submit.prevent="save">
       <div class="field-group">
-        <label for="academic-year-code">Năm học</label>
-        <InputText id="academic-year-code" v-model="values.code" maxlength="20" pattern="[0-9 -]+" placeholder="Ví dụ: 2026-2027" :invalid="Boolean(errors.code)" :disabled="isReadOnly" />
+        <label for="academic-year-code">Năm học <span class="required-mark" aria-hidden="true">*</span></label>
+        <InputText id="academic-year-code" v-model="values.code" maxlength="20" pattern="[0-9 -]+" placeholder="Ví dụ: 2026-2027" :invalid="Boolean(errors.code)" :disabled="isReadOnly" aria-required="true" />
         <small v-if="errors.code" class="field-error">{{ errors.code }}</small>
       </div>
       <div class="form-grid-two">
         <div class="field-group">
-          <label for="academic-year-start">Ngày bắt đầu</label>
-          <DatePicker id="academic-year-start" v-model="startDateModel" date-format="dd/mm/yy" placeholder="dd/mm/yyyy" show-icon fluid :invalid="Boolean(errors.startDate)" :disabled="isReadOnly" />
+          <label for="academic-year-start">Ngày bắt đầu <span class="required-mark" aria-hidden="true">*</span></label>
+          <DatePicker id="academic-year-start" v-model="startDateModel" date-format="dd/mm/yy" placeholder="dd/mm/yyyy" show-icon fluid :invalid="Boolean(errors.startDate)" :disabled="isReadOnly" aria-required="true" />
           <small v-if="errors.startDate" class="field-error">{{ errors.startDate }}</small>
         </div>
         <div class="field-group">
-          <label for="academic-year-end">Ngày kết thúc</label>
-          <DatePicker id="academic-year-end" v-model="endDateModel" date-format="dd/mm/yy" placeholder="dd/mm/yyyy" show-icon fluid :invalid="Boolean(errors.endDate)" :disabled="isReadOnly" />
+          <label for="academic-year-end">Ngày kết thúc <span class="required-mark" aria-hidden="true">*</span></label>
+          <DatePicker id="academic-year-end" v-model="endDateModel" date-format="dd/mm/yy" placeholder="dd/mm/yyyy" show-icon fluid :invalid="Boolean(errors.endDate)" :disabled="isReadOnly" aria-required="true" />
           <small v-if="errors.endDate" class="field-error">{{ errors.endDate }}</small>
         </div>
       </div>

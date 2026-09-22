@@ -87,9 +87,10 @@ describe('CalculationTaskTable.vue', () => {
 
     expect(wrapper.text()).toContain('#CT-1048')
     expect(wrapper.text()).toContain('HS0001')
-    expect(wrapper.text()).toContain('FAILED')
+    expect(wrapper.text()).toContain('Thất bại')
+    expect(wrapper.text()).toContain('Tính lại bảng điểm năm học')
     expect(wrapper.text()).toContain('#CT-1046')
-    expect(wrapper.text()).toContain('PENDING')
+    expect(wrapper.text()).toContain('Đang chờ')
   })
 
   it('emits view-detail when Chi tiết button is clicked', async () => {
@@ -225,6 +226,6 @@ describe('CalculationTaskTable.vue', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('Không có calculation task phù hợp')
+    expect(wrapper.text()).toContain('Không có tác vụ tính điểm phù hợp')
   })
 })

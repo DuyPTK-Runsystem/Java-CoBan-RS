@@ -18,4 +18,14 @@ describe('FormAlert', () => {
     expect(wrapper.text()).toContain('name: Name is required.')
     expect(wrapper.text()).toContain('name: Name is too short.')
   })
+
+  it('renders success messages with the success tone and status role', () => {
+    const wrapper = mount(FormAlert, {
+      props: { tone: 'success', message: 'Saved successfully.' },
+    })
+
+    expect(wrapper.attributes('role')).toBe('status')
+    expect(wrapper.classes()).toContain('form-alert-success')
+    expect(wrapper.text()).toContain('Saved successfully.')
+  })
 })
