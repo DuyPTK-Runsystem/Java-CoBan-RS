@@ -195,3 +195,5 @@ Plan/Audit 067 (2026-09-04): Actual Permission Matrix và FE Remaining Plans đ�
 Plan 072 (2026-09-08): FE Source Refactor — Completed; foundation auth/session boundary, date format boundary, Student Detail 4-panel split, workspace composables extraction, stylesheet responsibility split và tái cấu trúc hoàn toàn các thư mục phẳng gom quá nhiều files trong `FE/src` (`components/` 180 files và `views/` 40 files) thành 12 domain subfolders cho components và 11 domain subfolders cho views; toàn bộ 87 test files (469 tests), lint, coverage, production build, Storybook build và diff check PASS 100%.
 
 Plan 078 (2026-09-10): Đồng bộ trạng thái Master Plan và Developer Plan Summary thành `Implemented`; validation PASS, PMD/build baseline `BLOCKED`, live API/browser `NOT RUN`.
+
+Plan 074.3 (2026-09-23): Removed placement review copy/eyebrows, fixed `studentName`, and changed capacity overflow to `MANUAL_REQUIRED + WARNING` while preserving hard capacity for automatic enrollment; focused BE placement tests, 21 FE tests and FE build PASS; PMD/Checkstyle skipped by user; browser confirm persistence remains unverified.
