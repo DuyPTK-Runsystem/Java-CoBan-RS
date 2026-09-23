@@ -1,5 +1,9 @@
 # Dev Note Summary
 
+- 074.6 FE placement: [implementation note](../fe/enrollment/074.6-placement-confirm-return-to-workspace-2026-09-23.md) — after confirmation, return to the existing Xếp lớp screen with a one-time success alert; tests, lint, build, browser and diff check NOT RUN.
+
+- 074.5 FE/BE placement: [FE note](../fe/enrollment/074.5-placement-copy-manual-cta-2026-09-23.md) and [BE/seed note](../be/enrollment/074.5-placement-copy-and-score-seed-2026-09-23.md) — exact REGULAR and boundary-tie explanations, manual CTA removed, STU2600048 seeded to annual transcript 8.2; focused tests and FE full tests/coverage/build PASS; FE lint baseline warnings; backend full test 560/101 failures, Checkstyle PASS with 978 warnings, PMD/build fail on 7 existing identity-seeder violations (2026-09-23).
+
 - 075.18 FE Timetable: [implementation note](../fe/timetable/075.18-normal-status-copy-2026-09-21.md) — map `NORMAL` thành `ĐỦ ĐỊNH MỨC` với màu xanh dương; focused test/build/diff check PASS; lint FAIL do 2 warning baseline ngoài phạm vi; full FE/browser NOT RUN (2026-09-21).
 
 - 075.17 FE Timetable: [implementation note](../fe/timetable/075.17-conflict-panel-responsive-copy-2026-09-21.md) — panel cảnh báo tự mở rộng theo chiều dọc, bỏ scroll nội bộ và ẩn mã kiểm tra nội bộ khỏi UI; 112 FE files/603 tests, build và diff check PASS; lint FAIL do 2 warning baseline ngoài phạm vi; browser/live NOT RUN (2026-09-21).
@@ -196,4 +200,5 @@ Plan 072 (2026-09-08): FE Source Refactor — Completed; foundation auth/session
 
 Plan 078 (2026-09-10): Đồng bộ trạng thái Master Plan và Developer Plan Summary thành `Implemented`; validation PASS, PMD/build baseline `BLOCKED`, live API/browser `NOT RUN`.
 
-Plan 074.3 (2026-09-23): Removed placement review copy/eyebrows, fixed `studentName`, and changed capacity overflow to `MANUAL_REQUIRED + WARNING` while preserving hard capacity for automatic enrollment; focused BE placement tests, 21 FE tests and FE build PASS; PMD/Checkstyle skipped by user; browser confirm persistence remains unverified.
+Plan 074.4 (2026-09-23): [Placement draft empty-state clarification](../fe/enrollment/074.4-placement-draft-empty-state-2026-09-23.md) — clear no-results message and first-run `Mô phỏng` with `pi-play`, rerun with `pi-refresh`; focused spec 9/9 and build/diff check PASS; lint FAIL due two existing NotificationComposer warnings; browser/full FE suite NOT RUN.
+Plan 074.3 (2026-09-23): Placement review copy/name and capacity behavior documented above; latest FE layout places the continuing eligibility line after the source column and stacks candidate rows as responsive cards on mobile; Chrome verified at 390 × 844. Focused ESLint/build PASS; full lint reports two existing NotificationComposer warnings; tests NOT RUN.
