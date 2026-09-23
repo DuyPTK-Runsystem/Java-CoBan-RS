@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import Button from 'primevue/button'
 
 import CapacityWarningBanner from '@/components/enrollment/CapacityWarningBanner.vue'
@@ -21,6 +21,7 @@ import type { AcademicYear, GradeLevel, SchoolClass, Semester } from '@/types/ac
 import type { BulkEnrollmentFormValues, CapacityWarning, ClassStudent, CreateEnrollmentFormValues, EnrollmentMutation, StudentEnrollmentHistory, TransferEnrollmentFormValues, TransferScoreAssistSnapshot, TransferWithScoresRequest, UnassignedStudent } from '@/types/enrollment'
 import type { LoadingState } from '@/types/ui'
 const router = useRouter()
+const route = useRoute()
 const { requireAccessToken: token } = useAuthSession()
 const academicYears = ref<AcademicYear[]>([])
 const grades = ref<GradeLevel[]>([])
@@ -379,7 +380,15 @@ watch(selectedClassId, (value, oldValue) => {
     void loadRoster(value)
   }
 })
-onMounted(() => { void loadContext() })
+onMounted(() => {
+  if (route.query.placementConfirmed === 'true') {
+    statusMessage.value = 'Đã xác nhận xếp lớp tự động. Học sinh được phân bổ tự động đã dược ghi danh'
+    const query = { ...route.query }
+    delete query.placementConfirmed
+    void router.replace({ name: 'v2-enrollments', query })
+  }
+  void loadContext()
+})
 </script>
 
 <template>

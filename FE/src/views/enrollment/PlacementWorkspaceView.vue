@@ -336,7 +336,10 @@ async function executeConfirm(): Promise<void> {
       expectedVersion: session.value.version,
       idempotencyKey: confirmIntentKey.value,
     })
-    await loadResults(session.value.id, 0, resultsMeta.value?.pageSize ?? 20)
+    await router.replace({
+      name: 'v2-enrollments',
+      query: { placementConfirmed: 'true' },
+    })
   } catch (error) {
     if (isApiError(error, 401)) return
     if (isApiError(error, 403)) {
@@ -383,11 +386,6 @@ async function executeCancel(): Promise<void> {
 function handleViewReason(result: PlacementResult): void {
   detailResult.value = result
   detailDialogVisible.value = true
-}
-
-function handleContinueManualFromDetail(): void {
-  detailDialogVisible.value = false
-  void router.push({ name: 'v2-enrollments' })
 }
 
 function handleRetryReview(): void {
@@ -457,7 +455,6 @@ onMounted(() => {
       :result="detailResult"
       :student-label="detailStudentLabel"
       :target-class-label="detailTargetClassLabel"
-      @continue-manual="handleContinueManualFromDetail"
     />
 
     <!-- Dialog xác nhận Confirm -->
