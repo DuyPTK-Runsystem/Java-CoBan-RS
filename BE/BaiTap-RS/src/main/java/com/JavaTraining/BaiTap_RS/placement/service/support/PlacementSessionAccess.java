@@ -13,7 +13,9 @@ import com.JavaTraining.BaiTap_RS.placement.repository.PlacementCandidateReposit
 import com.JavaTraining.BaiTap_RS.placement.repository.PlacementResultRepository;
 import com.JavaTraining.BaiTap_RS.placement.repository.PlacementSessionRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -54,7 +56,9 @@ public final class PlacementSessionAccess {
     }
 
     public ResultPaginationDTO<ResPlacementResultDTO> pageResults(Long id, Pageable pageable) {
-        Page<PlacementResult> page = results.findBySessionIdOrderByStudentIdAsc(id, pageable);
+        Pageable stablePage = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                Sort.by(Sort.Order.asc("studentId"), Sort.Order.asc("id")));
+        Page<PlacementResult> page = results.findBySessionId(id, stablePage);
         return new ResultPaginationDTO<>(new ResultPaginationDTO.Meta(page.getNumber(), page.getSize(),
                 page.getTotalPages(), page.getTotalElements()),
                 page.getContent().stream().map(responseMapper::result).toList());

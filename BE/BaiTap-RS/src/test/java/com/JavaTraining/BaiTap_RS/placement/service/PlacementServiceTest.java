@@ -79,6 +79,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -430,16 +431,19 @@ class PlacementServiceTest {
         PlacementResult result = new PlacementResult(1L, 20L, 10L, PlacementResultStatus.AUTO_ASSIGNED,
                 SCORE_EIGHT, null, null, "Phân bổ cân bằng theo điểm học tập và tỷ lệ nam, nữ.");
         when(sessions.findById(1L)).thenReturn(Optional.of(session));
-        when(results.findBySessionIdOrderByStudentIdAsc(1L, PageRequest.of(0, 2)))
-                .thenReturn(new PageImpl<>(List.of(result), PageRequest.of(0, 2), 1));
+        PageRequest stablePage = PageRequest.of(0, 2,
+                Sort.by(Sort.Order.asc("studentId"), Sort.Order.asc("id")));
+        when(results.findBySessionId(1L, stablePage))
+                .thenReturn(new PageImpl<>(List.of(result), stablePage, 1));
 
-        ResultPaginationDTO<ResPlacementResultDTO> response = service.getResults(1L, PageRequest.of(0, 2));
+        ResultPaginationDTO<ResPlacementResultDTO> response = service.getResults(1L,
+                PageRequest.of(0, 2, Sort.by(Sort.Order.desc("score"))));
 
         assertEquals(1, response.result().size(), "paged route should map returned result content");
         assertEquals(1, response.meta().totalItems(), "paged route should preserve total item count");
         assertEquals("Phân bổ cân bằng theo điểm học tập và tỷ lệ nam, nữ.",
                 response.result().get(0).explanation(), "results response must preserve the REGULAR explanation");
-        verify(results).findBySessionIdOrderByStudentIdAsc(1L, PageRequest.of(0, 2));
+        verify(results).findBySessionId(1L, stablePage);
         verify(results, never())
                 .findAllBySessionIdOrderByStudentIdAsc(1L);
     }

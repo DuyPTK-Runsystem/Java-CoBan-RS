@@ -1,5 +1,7 @@
 # BE Dev Note Summary
 
+| 083 | placement | [Stable results pagination](enrollment/083-placement-stable-pagination-2026-09-23.md) | API results ép sort `studentId ASC, id ASC`, bỏ sort request; regression test updated; diff check PASS; tests/Checkstyle/PMD/build NOT RUN; runtime endpoint 401 without auth | 2026-09-23 |
+
 | 074.5 | placement/seed | [Placement explanations and STU2600048 annual score seed](enrollment/074.5-placement-copy-and-score-seed-2026-09-23.md) | REGULAR/SCORE_TIE copy updated; historical seed recalculates STU2600048 to annual 8.2; focused placement and seeder tests PASS; full test FAIL 560/101 baseline fixture/context issues; Checkstyle PASS with 978 warnings; PMD/build FAIL on 7 existing DemoIdentitySeeder violations | 2026-09-23 |
 
 | 082 | notification/security/scorebook | [Delivery outcome and Vietnamese error copy](notification/082-delivery-outcome-and-security-copy-2026-09-21.md) | Delivery/security/scorebook status copy localized; focused tests/checkstyleMain/pmdMain and diff check PASS; full build FAIL at baseline pmdTest 276 violations and 99/553 Spring-context test failures in DemoIdentitySeeder | 2026-09-21 |

@@ -9,6 +9,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface PlacementResultRepository extends JpaRepository<PlacementResult, Long> {
     List<PlacementResult> findAllBySessionIdOrderByStudentIdAsc(Long sessionId);
-    Page<PlacementResult> findBySessionIdOrderByStudentIdAsc(Long sessionId, Pageable pageable);
+    Page<PlacementResult> findBySessionId(Long sessionId, Pageable pageable);
     void deleteAllBySessionId(Long sessionId);
 }

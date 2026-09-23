@@ -1,5 +1,7 @@
 # Dev Note Summary
 
+- 083 BE placement: [stable results pagination](../be/enrollment/083-placement-stable-pagination-2026-09-23.md) — ép API results sort `studentId ASC, id ASC` và bỏ ảnh hưởng của sort tùy chọn; regression test cập nhật; diff check PASS, tests/Checkstyle/PMD/build và xác thực runtime NOT RUN (2026-09-23).
+
 - 074.6 FE placement: [implementation note](../fe/enrollment/074.6-placement-confirm-return-to-workspace-2026-09-23.md) — after confirmation, return to the existing Xếp lớp screen with a one-time success alert; tests, lint, build, browser and diff check NOT RUN.
 
 - 074.5 FE/BE placement: [FE note](../fe/enrollment/074.5-placement-copy-manual-cta-2026-09-23.md) and [BE/seed note](../be/enrollment/074.5-placement-copy-and-score-seed-2026-09-23.md) — exact REGULAR and boundary-tie explanations, manual CTA removed, STU2600048 seeded to annual transcript 8.2; focused tests and FE full tests/coverage/build PASS; FE lint baseline warnings; backend full test 560/101 failures, Checkstyle PASS with 978 warnings, PMD/build fail on 7 existing identity-seeder violations (2026-09-23).
