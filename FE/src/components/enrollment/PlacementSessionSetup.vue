@@ -110,7 +110,6 @@ const expandedCandidateRows = ref<Record<string | number, boolean>>({})
 watch(() => props.unassignedStudents, (students) => {
   const map: Record<string | number, boolean> = {}
   for (const s of students) {
-    map[s.studentId] = true
     if (!candidateConfigs[s.studentId]) {
       candidateConfigs[s.studentId] = {
         selected: true,
@@ -119,9 +118,21 @@ watch(() => props.unassignedStudents, (students) => {
         approvalReference: '',
       }
     }
+    map[s.studentId] = candidateConfigs[s.studentId].sourceType !== 'CONTINUING'
   }
   expandedCandidateRows.value = map
 }, { immediate: true })
+
+function onCandidateSourceChange(studentId: number, sourceType: PlacementCandidateSource): void {
+  const candidate = candidateConfigs[studentId]
+  if (!candidate) return
+
+  candidate.sourceType = sourceType
+  expandedCandidateRows.value = {
+    ...expandedCandidateRows.value,
+    [studentId]: sourceType !== 'CONTINUING',
+  }
+}
 
 const selectedClassesCount = computed(() => {
   return availableClasses.value.filter((c) => classProfiles[c.id]?.selected).length
@@ -210,7 +221,6 @@ function validateAndSubmit(): void {
     <header class="page-heading">
       <div>
         <h1>Tạo phiên xếp lớp tự động</h1>
-        <p class="section-caption">Cấu hình năm học, khối, lớp đích theo cách phân lớp và danh sách học sinh cần xếp lớp.</p>
       </div>
       <div class="page-heading-actions">
         <Button label="Hủy" severity="secondary" outlined :disabled="props.saving" @click="emit('cancel')" />
@@ -233,7 +243,6 @@ function validateAndSubmit(): void {
       <div class="section-heading">
         <div>
           <h2>1. Chọn phạm vi xếp lớp</h2>
-          <p class="section-caption">Chọn năm học và khối học sinh sẽ được phân bổ vào.</p>
         </div>
       </div>
       <div class="scope-selectors">
@@ -273,9 +282,6 @@ function validateAndSubmit(): void {
       <div class="section-heading">
         <div>
           <h2>2. Chọn lớp đích và cách phân lớp (Đã chọn: {{ selectedClassesCount }})</h2>
-          <p class="section-caption">
-            Quy tắc: Nâng cao ưu tiên điểm cao; Hỗ trợ học tập ưu tiên nhóm điểm thấp; Thường cân bằng học lực và nam nữ.
-          </p>
         </div>
       </div>
 
@@ -327,9 +333,6 @@ function validateAndSubmit(): void {
       <div class="section-heading">
         <div>
           <h2>3. Danh sách học sinh chưa xếp lớp (Đã chọn: {{ selectedCandidatesCount }}/{{ props.unassignedStudents.length }})</h2>
-          <p class="section-caption">
-            Học sinh nhập học mới hoặc học lại cần có căn cứ và thông tin phê duyệt trước khi xếp lớp.
-          </p>
         </div>
       </div>
 
@@ -343,7 +346,6 @@ function validateAndSubmit(): void {
           :value="props.unassignedStudents"
           data-key="studentId"
           striped-rows
-          responsive-layout="scroll"
           class="candidates-placement-table"
         >
           <Column header-style="width: 3rem">
@@ -360,46 +362,60 @@ function validateAndSubmit(): void {
             </template>
           </Column>
 
-          <Column field="studentCode" header="Mã HS" style="width: 140px">
+          <Column field="studentCode" header="Mã HS" style="width: 14%">
             <template #body="{ data }">
               <strong>{{ data.studentCode }}</strong>
             </template>
           </Column>
-          <Column field="studentName" header="Họ và tên" style="min-width: 180px" />
-
-          <Column header="Nguồn học sinh" style="min-width: 240px">
+          <Column field="studentName" header="Họ và tên" style="width: 22%">
             <template #body="{ data }">
-              <Select
-                v-if="candidateConfigs[data.studentId]"
-                v-model="candidateConfigs[data.studentId].sourceType"
-                :options="candidateSourceOptions"
-                option-label="label"
-                option-value="value"
-                size="small"
-                class="w-full"
-                :disabled="!candidateConfigs[data.studentId].selected || props.saving"
-              />
+              <div class="candidate-responsive-cell">
+                <span class="candidate-mobile-label">Họ và tên</span>
+                <span>{{ data.studentName }}</span>
+              </div>
             </template>
           </Column>
 
-          <template #expansion="{ data }">
-            <div
-              v-if="candidateConfigs[data.studentId]"
-              class="candidate-disclosure-panel"
-              :class="{ 'candidate-disclosure-panel--inactive': !candidateConfigs[data.studentId].selected }"
-            >
-              <!-- CONTINUING: Trạng thái tinh gọn, không input -->
+          <Column header="Nguồn học sinh" style="width: 24%">
+            <template #body="{ data }">
+              <div class="candidate-responsive-cell">
+                <span class="candidate-mobile-label">Nguồn học sinh</span>
+                <Select
+                  v-if="candidateConfigs[data.studentId]"
+                  :model-value="candidateConfigs[data.studentId].sourceType"
+                  :options="candidateSourceOptions"
+                  option-label="label"
+                  option-value="value"
+                  size="small"
+                  class="w-full"
+                  :disabled="!candidateConfigs[data.studentId].selected || props.saving"
+                  @update:model-value="onCandidateSourceChange(data.studentId, $event)"
+                />
+              </div>
+            </template>
+          </Column>
+
+          <Column header="" style="width: 32%">
+            <template #body="{ data }">
               <div
-                v-if="candidateConfigs[data.studentId].sourceType === 'CONTINUING'"
+                v-if="candidateConfigs[data.studentId]?.sourceType === 'CONTINUING'"
                 class="candidate-continuing-badge"
               >
                 <i class="pi pi-check-circle continuing-icon" aria-hidden="true" />
                 <span class="continuing-text">✓ Đủ điều kiện lên lớp theo kết quả năm học trước. Không cần bổ sung hồ sơ.</span>
               </div>
+            </template>
+          </Column>
 
+          <template #expansion="{ data }">
+            <div
+              v-if="candidateConfigs[data.studentId] && candidateConfigs[data.studentId].sourceType !== 'CONTINUING'"
+              class="candidate-disclosure-panel"
+              :class="{ 'candidate-disclosure-panel--inactive': !candidateConfigs[data.studentId].selected }"
+            >
               <!-- NEW_ADMISSION: Section nhập bổ sung với label & placeholder thực tế -->
               <div
-                v-else-if="candidateConfigs[data.studentId].sourceType === 'NEW_ADMISSION'"
+                v-if="candidateConfigs[data.studentId].sourceType === 'NEW_ADMISSION'"
                 class="candidate-supplementary-form"
               >
                 <div class="supplementary-field">
@@ -555,7 +571,17 @@ function validateAndSubmit(): void {
   color: var(--p-text-muted-color, #6b7280);
 }
 .table-container {
-  overflow-x: auto;
+  overflow-x: hidden;
+}
+:deep(.candidates-placement-table .p-datatable-table) {
+  width: 100%;
+  table-layout: fixed;
+}
+:deep(.candidates-placement-table .p-datatable-table-container) {
+  overflow-x: hidden;
+}
+.candidate-mobile-label {
+  display: none;
 }
 .loading-hint, .empty-hint {
   padding: 20px;
@@ -597,6 +623,9 @@ function validateAndSubmit(): void {
   font-size: 0.875rem;
   font-weight: 500;
   padding: 4px 0;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .continuing-icon {
   font-size: 0.95rem;
@@ -612,6 +641,88 @@ function validateAndSubmit(): void {
   .candidate-supplementary-form {
     grid-template-columns: 1fr;
     gap: 10px;
+  }
+}
+@media (max-width: 640px) {
+  .table-container {
+    overflow-x: visible;
+  }
+  :deep(.candidates-placement-table .p-datatable-table-container) {
+    overflow: visible;
+  }
+  :deep(.candidates-placement-table .p-datatable-table) {
+    width: 100%;
+    table-layout: fixed;
+  }
+  :deep(.candidates-placement-table .p-datatable-thead) {
+    display: none;
+  }
+  :deep(.candidates-placement-table .p-datatable-tbody) {
+    display: grid;
+    gap: 10px;
+  }
+  :deep(.candidates-placement-table .p-datatable-tbody > tr:not(.p-datatable-row-expansion)) {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    grid-template-areas:
+      "select code"
+      "name name"
+      "source source"
+      "status status";
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid var(--p-content-border-color, #e5e7eb);
+    border-radius: 8px;
+    background: var(--p-content-background, #fff);
+  }
+  :deep(.candidates-placement-table .p-datatable-tbody > tr:not(.p-datatable-row-expansion) > td) {
+    display: block;
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 4px !important;
+    border: 0 !important;
+    text-align: left;
+  }
+  :deep(.candidates-placement-table .p-datatable-tbody > tr:not(.p-datatable-row-expansion) > td:nth-child(1)) {
+    grid-area: select;
+  }
+  :deep(.candidates-placement-table .p-datatable-tbody > tr:not(.p-datatable-row-expansion) > td:nth-child(2)) {
+    grid-area: code;
+  }
+  :deep(.candidates-placement-table .p-datatable-tbody > tr:not(.p-datatable-row-expansion) > td:nth-child(3)) {
+    grid-area: name;
+  }
+  :deep(.candidates-placement-table .p-datatable-tbody > tr:not(.p-datatable-row-expansion) > td:nth-child(4)) {
+    grid-area: source;
+  }
+  :deep(.candidates-placement-table .p-datatable-tbody > tr:not(.p-datatable-row-expansion) > td:nth-child(5)) {
+    grid-area: status;
+  }
+  .candidate-responsive-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+  }
+  .candidate-mobile-label {
+    display: block;
+    color: var(--p-text-muted-color, #6b7280);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .candidate-continuing-badge {
+    white-space: normal;
+    align-items: flex-start;
+    font-size: 0.8rem;
+  }
+  :deep(.candidates-placement-table .p-datatable-row-expansion) {
+    display: grid;
+    grid-column: 1 / -1;
+  }
+  :deep(.candidates-placement-table .p-datatable-row-expansion > td) {
+    display: block;
+    width: 100%;
+    padding: 8px 4px;
   }
 }
 .supplementary-field {
