@@ -5,6 +5,33 @@ import { placementReviewFixture } from '@/fixtures/placementFixture'
 import PlacementWorkspaceReview from './PlacementWorkspaceReview.vue'
 
 describe('PlacementWorkspaceReview', () => {
+  it('explains an empty draft and emits simulate from the first-run action', async () => {
+    const session = { ...placementReviewFixture, status: 'DRAFT' as const, results: [] }
+    const wrapper = mount(PlacementWorkspaceReview, { props: { session } })
+    const simulateButton = wrapper.findAll('button').find((button) => button.text() === 'Mô phỏng')
+
+    expect(wrapper.text()).toContain('Phiên nháp chưa có kết quả mô phỏng. Chọn “Mô phỏng” để xem lớp đề xuất.')
+    expect(simulateButton).toBeDefined()
+    expect(simulateButton?.find('.pi-play').exists()).toBe(true)
+    await simulateButton?.trigger('click')
+    expect(wrapper.emitted('simulate')).toEqual([[]])
+  })
+
+  it('does not show the empty-draft message while results are loading', () => {
+    const session = { ...placementReviewFixture, status: 'DRAFT' as const, results: [] }
+    const wrapper = mount(PlacementWorkspaceReview, { props: { session, loadingResults: true } })
+
+    expect(wrapper.text()).not.toContain('Phiên nháp chưa có kết quả mô phỏng.')
+  })
+
+  it('keeps the rerun action and hides the draft-empty message when results already exist', () => {
+    const wrapper = mount(PlacementWorkspaceReview, { props: { session: placementReviewFixture } })
+
+    const rerunButton = wrapper.findAll('button').find((button) => button.text() === 'Mô phỏng lại')
+    expect(rerunButton).toBeDefined()
+    expect(rerunButton?.find('.pi-refresh').exists()).toBe(true)
+    expect(wrapper.text()).not.toContain('Phiên nháp chưa có kết quả mô phỏng.')
+  })
   it('renders class metadata and a result needing manual handling without blocking confirm', () => {
     const wrapper = mount(PlacementWorkspaceReview, {
       props: {

@@ -112,8 +112,8 @@ function getTargetClassName(targetClassId: number | null): string {
       </div>
       <div class="page-heading-actions">
         <Button
-          label="Mô phỏng lại"
-          icon="pi pi-refresh"
+          :label="props.session?.status === 'DRAFT' ? 'Mô phỏng' : 'Mô phỏng lại'"
+          :icon="props.session?.status === 'DRAFT' ? 'pi pi-play' : 'pi pi-refresh'"
           severity="secondary"
           :disabled="!props.session || props.reviewState !== 'ready' || props.session.status === 'CONFIRMED' || props.session.status === 'CANCELLED' || props.saving"
           :loading="props.saving"
@@ -201,6 +201,13 @@ function getTargetClassName(targetClassId: number | null): string {
         </div>
 
         <div class="placement-table-scroll">
+          <div
+            v-if="props.session.status === 'DRAFT' && !props.loadingResults && displayResults.length === 0"
+            class="form-alert form-alert-neutral"
+            role="status"
+          >
+            Phiên nháp chưa có kết quả mô phỏng. Chọn “Mô phỏng” để xem lớp đề xuất.
+          </div>
           <DataTable :value="displayResults" :loading="props.loadingResults" striped-rows responsive-layout="scroll">
             <Column header="Mã HS" style="width: 120px">
               <template #body="{ data }">
