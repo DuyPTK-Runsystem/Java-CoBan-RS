@@ -120,7 +120,7 @@ public class PlacementAllocationEngine {
                     .filter(candidate -> candidate.getScore().compareTo(boundary) == 0).toList();
             selected.removeIf(candidate -> candidate.getScore().compareTo(boundary) == 0);
             tied.forEach(candidate -> manual(candidate, "SCORE_TIE", PlacementIssueSeverity.WARNING,
-                    "Bằng điểm tại ngưỡng; giáo vụ xếp thủ công"));
+                    "Có nhiều học sinh bằng điểm tại ranh giới chỉ tiêu; giáo vụ cần xếp lớp thủ công."));
             ranked.removeAll(tied);
             return selected;
         }
@@ -177,9 +177,13 @@ public class PlacementAllocationEngine {
                 maleAssigned.computeIfPresent(target.classId(), (key, value) -> value + 1);
             }
             scoreTotals.computeIfPresent(target.classId(), (key, value) -> value.add(candidate.getScore()));
+            String explanation = switch (targetsById.get(target.classId()).profile()) {
+                case REGULAR -> "Phân bổ cân bằng theo điểm học tập và tỷ lệ nam, nữ.";
+                case ADVANCED -> "Lớp chọn";
+                case SUPPORT -> "Lớp bổ trợ";
+            };
             allocatedResults.add(new PlacementResult(sessionId, candidate.getStudentId(), target.classId(),
-                    PlacementResultStatus.AUTO_ASSIGNED, candidate.getScore(), null, null,
-                    "Phân bổ theo profile " + targetsById.get(target.classId()).profile().name()));
+                    PlacementResultStatus.AUTO_ASSIGNED, candidate.getScore(), null, null, explanation));
             handledStudentIds.add(candidate.getStudentId());
         }
 

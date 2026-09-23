@@ -204,6 +204,9 @@ class PlacementServiceTest {
         PlacementResult manual = storedResults.stream().filter(r -> r.getStudentId().equals(2L)).findFirst().orElseThrow();
         assertEquals(PlacementResultStatus.AUTO_ASSIGNED, auto.getResultStatus());
         assertEquals(10L, auto.getTargetClassId());
+        assertNull(auto.getIssueCode());
+        assertNull(auto.getIssueSeverity());
+        assertEquals("Lớp chọn", auto.getExplanation());
         assertEquals(PlacementResultStatus.MANUAL_REQUIRED, manual.getResultStatus());
         assertEquals("MISSING_DATA", manual.getIssueCode());
         assertEquals(PlacementIssueSeverity.WARNING, manual.getIssueSeverity());
@@ -221,12 +224,14 @@ class PlacementServiceTest {
 
         service.simulate(1L, new ReqPlacementActionDTO(0L, null));
 
-        assertTrue(storedResults.stream().anyMatch(r -> r.getStudentId().equals(1L)
-                && r.getResultStatus() == PlacementResultStatus.MANUAL_REQUIRED
-                && "SCORE_TIE".equals(r.getIssueCode())));
-        assertTrue(storedResults.stream().anyMatch(r -> r.getStudentId().equals(2L)
-                && r.getResultStatus() == PlacementResultStatus.MANUAL_REQUIRED
-                && "SCORE_TIE".equals(r.getIssueCode())));
+        List<PlacementResult> tiedResults = storedResults.stream()
+                .filter(r -> "SCORE_TIE".equals(r.getIssueCode())).toList();
+        assertEquals(2, tiedResults.size());
+        assertTrue(tiedResults.stream().allMatch(r -> r.getResultStatus() == PlacementResultStatus.MANUAL_REQUIRED
+                && r.getIssueSeverity() == PlacementIssueSeverity.WARNING
+                && r.getTargetClassId() == null
+                && "Có nhiều học sinh bằng điểm tại ranh giới chỉ tiêu; giáo vụ cần xếp lớp thủ công."
+                        .equals(r.getExplanation())));
     }
 
     @Test
@@ -247,7 +252,13 @@ class PlacementServiceTest {
         assertEquals(PlacementResultStatus.MANUAL_REQUIRED, overflow.getResultStatus());
         assertEquals(PlacementIssueSeverity.WARNING, overflow.getIssueSeverity());
         assertNull(overflow.getTargetClassId());
+        PlacementResult automatic = storedResults.stream()
+                .filter(r -> r.getResultStatus() == PlacementResultStatus.AUTO_ASSIGNED).findFirst().orElseThrow();
         assertEquals(1, storedResults.stream().filter(r -> r.getResultStatus() == PlacementResultStatus.AUTO_ASSIGNED).count());
+        assertEquals(10L, automatic.getTargetClassId());
+        assertNull(automatic.getIssueCode());
+        assertNull(automatic.getIssueSeverity());
+        assertEquals("Phân bổ cân bằng theo điểm học tập và tỷ lệ nam, nữ.", automatic.getExplanation());
     }
 
     @Test
@@ -417,7 +428,7 @@ class PlacementServiceTest {
     void resultsRouteUsesPagedRepositoryQuery() {
         PlacementSession session = sessionWithScope(1L, regularScope());
         PlacementResult result = new PlacementResult(1L, 20L, 10L, PlacementResultStatus.AUTO_ASSIGNED,
-                SCORE_EIGHT, null, null, "assigned");
+                SCORE_EIGHT, null, null, "Phân bổ cân bằng theo điểm học tập và tỷ lệ nam, nữ.");
         when(sessions.findById(1L)).thenReturn(Optional.of(session));
         when(results.findBySessionIdOrderByStudentIdAsc(1L, PageRequest.of(0, 2)))
                 .thenReturn(new PageImpl<>(List.of(result), PageRequest.of(0, 2), 1));
@@ -426,6 +437,8 @@ class PlacementServiceTest {
 
         assertEquals(1, response.result().size(), "paged route should map returned result content");
         assertEquals(1, response.meta().totalItems(), "paged route should preserve total item count");
+        assertEquals("Phân bổ cân bằng theo điểm học tập và tỷ lệ nam, nữ.",
+                response.result().get(0).explanation(), "results response must preserve the REGULAR explanation");
         verify(results).findBySessionIdOrderByStudentIdAsc(1L, PageRequest.of(0, 2));
         verify(results, never())
                 .findAllBySessionIdOrderByStudentIdAsc(1L);

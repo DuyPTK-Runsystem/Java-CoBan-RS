@@ -86,6 +86,19 @@ public class DemoHistoricalAcademicSeeder {
     private static final List<String> SUBJECT_CODES = List.of(
             "TOAN", "VAT_LY", "SINH_HOC", "NGU_VAN", "NGOAI_NGU",
             "LICH_SU", "DIA_LY", "GDCD", "TIN_HOC", "CONG_NGHE");
+    private static final String TARGET_SCORE_STUDENT_CODE = "STU2600048";
+    private static final BigDecimal TARGET_SUBJECT_SCORE_8_3 = new BigDecimal("8.3");
+    private static final Map<String, BigDecimal> TARGET_ANNUAL_SUBJECT_SCORES = Map.of(
+            "TOAN", new BigDecimal("8.0"),
+            "VAT_LY", new BigDecimal("8.1"),
+            "SINH_HOC", new BigDecimal("8.1"),
+            "NGU_VAN", new BigDecimal("8.2"),
+            "NGOAI_NGU", new BigDecimal("8.2"),
+            "LICH_SU", new BigDecimal("8.2"),
+            "DIA_LY", TARGET_SUBJECT_SCORE_8_3,
+            "GDCD", TARGET_SUBJECT_SCORE_8_3,
+            "TIN_HOC", TARGET_SUBJECT_SCORE_8_3,
+            "CONG_NGHE", TARGET_SUBJECT_SCORE_8_3);
     private static final List<ColumnSeed> COLUMN_SEEDS = List.of(
             new ColumnSeed(AssessmentType.KTTT, 1, "Miệng 1", "1.00"),
             new ColumnSeed(AssessmentType.KTTT, 2, "15 phút 1", "1.00"),
@@ -147,6 +160,8 @@ public class DemoHistoricalAcademicSeeder {
         List<Semester> semesters = ensureSemesters(academicYear);
         List<SchoolClass> classes = ensureClasses(academicYear, gradeSix);
         Map<String, Subject> academicSubjects = selectSubjects(subjects);
+        Map<Long, String> subjectCodesById = new HashMap<>();
+        academicSubjects.forEach((code, subject) -> subjectCodesById.put(subject.getId(), code));
         List<ClassSubject> classSubjects = ensureClassSubjects(classes, semesters, gradeSix, academicSubjects);
         Map<String, List<ClassSubject>> classSubjectsByStudentClass = indexClassSubjects(classes, semesters, classSubjects);
         List<Student> targetStudents = targetStudents(currentStudents);
@@ -155,7 +170,7 @@ public class DemoHistoricalAcademicSeeder {
         for (Student student : targetStudents) {
             StudentYearEnrollment enrollment = enrollments.get(student.getStudentCode());
             boolean scoreDataChanged = seedScorebooksAndScores(
-                    student, enrollment, classes, semesters, classSubjectsByStudentClass, actorId);
+                    student, enrollment, classes, semesters, classSubjectsByStudentClass, subjectCodesById, actorId);
             ensureTranscript(student, enrollment, academicYear, semesters, scoreDataChanged);
             completeEnrollment(enrollment);
         }
@@ -328,6 +343,7 @@ public class DemoHistoricalAcademicSeeder {
             List<SchoolClass> classes,
             List<Semester> semesters,
             Map<String, List<ClassSubject>> classSubjectsByKey,
+            Map<Long, String> subjectCodesById,
             Long actorId) {
         String classCode = classes.stream()
                 .filter(item -> Objects.equals(item.getId(), enrollment.getCurrentClassId()))
@@ -346,7 +362,9 @@ public class DemoHistoricalAcademicSeeder {
                 List<AssessmentColumn> columns = ensureColumns(scorebook);
                 for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
                     AssessmentColumn column = columns.get(columnIndex);
-                    BigDecimal value = scoreFor(studentIndex, semesterIndex, classSubject.getSubjectId(), columnIndex);
+                    String subjectCode = subjectCodesById.get(classSubject.getSubjectId());
+                    BigDecimal value = scoreFor(student.getStudentCode(), studentIndex, semesterIndex,
+                            subjectCode, classSubject.getSubjectId(), columnIndex);
                     StudentScore score = scoreRepository
                             .findByAssessmentColumnIdAndStudentId(column.getId(), student.getId())
                             .orElse(null);
@@ -448,7 +466,25 @@ public class DemoHistoricalAcademicSeeder {
         enrollmentRepository.save(enrollment);
     }
 
-    private BigDecimal scoreFor(int studentIndex, int semesterIndex, Long subjectId, int columnIndex) {
+    private BigDecimal scoreFor(
+            String studentCode,
+            int studentIndex,
+            int semesterIndex,
+            String subjectCode,
+            Long subjectId,
+            int columnIndex) {
+        if (TARGET_SCORE_STUDENT_CODE.equals(studentCode)) {
+            BigDecimal subjectScore = TARGET_ANNUAL_SUBJECT_SCORES.get(subjectCode);
+            if (subjectScore != null) {
+                if (columnIndex == 0) {
+                    return subjectScore.add(new BigDecimal("0.1"));
+                }
+                if (columnIndex == 1) {
+                    return subjectScore.subtract(new BigDecimal("0.1"));
+                }
+                return subjectScore;
+            }
+        }
         int offset = Math.floorMod(studentIndex * 11 + semesterIndex * 7
                 + subjectId.intValue() * 3 + columnIndex * 5, 31);
         return BigDecimal.valueOf(65L + offset, 1);

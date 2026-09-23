@@ -29,7 +29,7 @@ describe('placementApi', () => {
         score: 8.5,
         issueCode: null,
         issueSeverity: null,
-        explanation: 'Phân bổ theo profile REGULAR.',
+        explanation: 'Phân bổ cân bằng theo điểm học tập và tỷ lệ nam, nữ.',
       }],
     }
     fetchMock.mockResolvedValue(new Response(JSON.stringify({ data: page }), { status: 200 }))

@@ -14,7 +14,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:visible': [value: boolean]
-  'continue-manual': []
 }>()
 
 const resultLabels: Record<PlacementResultStatus, string> = {
@@ -34,11 +33,6 @@ const issueLabels: Record<string, string> = {
 
 function closeDialog(): void {
   emit('update:visible', false)
-}
-
-function handleContinueManual(): void {
-  closeDialog()
-  emit('continue-manual')
 }
 </script>
 
@@ -98,13 +92,6 @@ function handleContinueManual(): void {
 
       <div v-if="props.result.resultStatus === 'MANUAL_REQUIRED'" class="manual-assist-banner">
         <p>Học sinh này chưa được xếp lớp tự động. Giáo vụ có thể xếp lớp trực tiếp qua danh sách học sinh chưa xếp lớp.</p>
-        <Button
-          label="Tiếp tục xếp thủ công"
-          icon="pi pi-external-link"
-          severity="secondary"
-          size="small"
-          @click="handleContinueManual"
-        />
       </div>
     </div>
 

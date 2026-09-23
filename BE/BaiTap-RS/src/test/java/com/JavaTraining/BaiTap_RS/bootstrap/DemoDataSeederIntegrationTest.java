@@ -790,6 +790,26 @@ class DemoDataSeederIntegrationTest {
                 .filter(enrollment -> targetStudentIds.contains(enrollment.getStudentId()))
                 .count());
 
+        Student targetStudent = targetStudents.stream()
+                .filter(student -> "STU2600048".equals(student.getStudentCode()))
+                .findFirst().orElseThrow();
+        StudentAnnualTranscript targetAnnual = annualTranscriptRepository
+                .findByStudentIdAndAcademicYearId(targetStudent.getId(), historicalYear.getId()).orElseThrow();
+        assertEquals(CalculationStatus.FINISH, targetAnnual.getCalculationStatus());
+        assertEquals(targetAnnual.getSourceVersion(), targetAnnual.getCalculatedVersion());
+        assertEquals(0, new BigDecimal("8.2").compareTo(targetAnnual.getFinalDtbcn()));
+        List<StudentScore> targetScores = historicalScores.stream()
+                .filter(score -> targetStudent.getId().equals(score.getStudentId())).toList();
+        List<String> targetScoreSnapshot = targetScores.stream()
+                .map(score -> score.getAssessmentColumnId() + "|" + score.getScoreStatus() + "|"
+                        + score.getScoreValue().toPlainString())
+                .sorted().toList();
+        List<String> targetAnnualResults = annualResultRepository
+                .findAllByAnnualTranscriptIdOrderBySubjectIdAsc(targetAnnual.getId()).stream()
+                .map(result -> result.getSubjectId() + "|" + result.getOfficialDtbmhCn().toPlainString())
+                .toList();
+        assertEquals(10, targetAnnualResults.size());
+
         long enrollmentCount = historicalEnrollments.size();
         long scoreCount = historicalScores.size();
         long annualCount = annualTranscripts.size();
@@ -809,6 +829,23 @@ class DemoDataSeederIntegrationTest {
                 .filter(term -> annualTranscriptIds.contains(term.getAnnualTranscriptId())).count());
         assertEquals(termResultCount, termResultRepository.count());
         assertEquals(annualResultCount, annualResultRepository.count());
+        StudentAnnualTranscript targetAnnualAfterReseed = annualTranscriptRepository
+                .findByStudentIdAndAcademicYearId(targetStudent.getId(), historicalYear.getId()).orElseThrow();
+        assertEquals(0, new BigDecimal("8.2").compareTo(targetAnnualAfterReseed.getFinalDtbcn()));
+        List<String> targetScoreSnapshotAfterReseed = studentScoreRepository.findAll().stream()
+                .filter(score -> targetStudent.getId().equals(score.getStudentId()))
+                .filter(score -> historicalColumnIds.contains(score.getAssessmentColumnId()))
+                .map(score -> score.getAssessmentColumnId() + "|" + score.getScoreStatus() + "|"
+                        + score.getScoreValue().toPlainString())
+                .sorted().toList();
+        assertEquals(targetScoreSnapshot, targetScoreSnapshotAfterReseed,
+                "re-running demo seeders must preserve STU2600048 subject assessment scores");
+        List<String> targetAnnualResultsAfterReseed = annualResultRepository
+                .findAllByAnnualTranscriptIdOrderBySubjectIdAsc(targetAnnualAfterReseed.getId()).stream()
+                .map(result -> result.getSubjectId() + "|" + result.getOfficialDtbmhCn().toPlainString())
+                .toList();
+        assertEquals(targetAnnualResults, targetAnnualResultsAfterReseed,
+                "re-running demo seeders must preserve STU2600048 annual subject averages");
     }
 
     @Test
