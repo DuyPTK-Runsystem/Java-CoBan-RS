@@ -222,3 +222,7 @@ Plan 074.4 (2026-09-23): [Placement draft empty-state clarification](../fe/enrol
 Plan 074.3 (2026-09-23): Placement review copy/name and capacity behavior documented above; latest FE layout places the continuing eligibility line after the source column and stacks candidate rows as responsive cards on mobile; Chrome verified at 390 × 844. Focused ESLint/build PASS; full lint reports two existing NotificationComposer warnings; tests NOT RUN.
 
 Plan 083 follow-up (2026-09-24): placement endpoint now binds zero-based paging directly; compileJava PASS and Chrome confirms Trang 1 STU2600041–0060 / Trang 2 STU2600061–0080; test suite, Checkstyle, PMD, full build and diff check NOT RUN.
+
+Vercel FE deployment (2026-09-24): [FE Vercel Dev Note](../fe/tooling/vercel-frontend-deployment-2026-09-24.md) — independent FE build/JSON/diff PASS; full lint FAIL at 2 existing warnings; remote deployment pending.
+
+Azure Container Apps BE deployment (2026-09-24): [BE Azure Dev Note](../be/config/085-azure-container-apps-backend-2026-09-24.md) — independent `bootJar`/diff PASS; Docker daemon unavailable, image/runtime and remote deployment pending.

@@ -105,6 +105,8 @@
 |   078 | scorebook          | [Score import v2 bulk extension](scorebook/078-score-import-v2-bulk-extension-2026-09-10.md) | Implemented; test/JaCoCo, Checkstyle and bootJar PASS; PMD/build blocked by repository baseline; live API NOT RUN | 2026-09-10 |
 |   081 | bootstrap          | [Seed assignment theo Phụ lục A.4/A.6](bootstrap/081-seed-assignment-a6-2026-09-21.md) | Historical `2025-2026` CLOSED: 4 lớp Khối 6, 40 enrollment COMPLETED, scorebook/columns/scores `80/320/3200`, transcript/subject results `40/80/400/800`; đồng thời TKB 16 lớp và G7 `40` unassigned. Focused historical test PASS `1m30s`, compile/checkstyle PASS với 978 warning baseline, pmdMain FAIL 7 baseline tại `DemoIdentitySeeder`; full test lượt cuối NOT RUN | 2026-09-22 |
 
+|   085 | config             | [Azure Container Apps backend Docker deployment](config/085-azure-container-apps-backend-2026-09-24.md) | Azure Container Apps Dockerfile, PORT and configurable FE CORS; independent bootJar/diff PASS; Docker runtime and remote deployment NOT RUN | 2026-09-24 |
+
 ## Module folders
 
 - `user-auth/`: User registration, login/logout, account, and authentication implementation notes.

@@ -1,5 +1,7 @@
 package com.JavaTraining.BaiTap_RS.config;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.JavaTraining.BaiTap_RS.common.filter.RequestIdFilter;
@@ -8,6 +10,7 @@ import com.JavaTraining.BaiTap_RS.security.RestAccessDeniedHandler;
 import com.JavaTraining.BaiTap_RS.security.RestAuthenticationEntryPoint;
 import com.JavaTraining.BaiTap_RS.security.UserPrincipal;
 import com.JavaTraining.BaiTap_RS.user.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -83,9 +86,16 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource(
+            @Value("${APP_CORS_ALLOWED_ORIGINS:}") String additionalOrigins) {
+        List<String> allowedOrigins = new ArrayList<>(List.of("http://localhost:5173", "http://localhost:5174"));
+        Arrays.stream(additionalOrigins.split(","))
+                .map(String::trim)
+                .filter(origin -> !origin.isEmpty())
+                .forEach(allowedOrigins::add);
+
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174"));
+        configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("*"));

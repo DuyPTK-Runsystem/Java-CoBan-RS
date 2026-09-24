@@ -1,6 +1,8 @@
+.env
+.env.*
 .gradle/
 build/
-.env
+out/
 .git/
 .idea/
 .project
@@ -10,3 +12,5 @@ build/
 *.iml
 *.log
 boilerplate/
+docker/
+docker-entrypoint.sh
