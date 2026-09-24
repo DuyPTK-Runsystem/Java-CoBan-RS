@@ -16,16 +16,21 @@ public class LessonLogPolicyValidator {
     private static final ZoneId ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
     private static final Set<String> DEADLINE_MODES = Set.of("FIXED_HOURS", "END_OF_WEEK");
 
-    public void validate(ReqPolicyDTO request) {
-        validateEffectiveDate(request.effectiveFrom());
+    public void validate(ReqPolicyDTO request, LocalDate latestEffectiveFrom) {
+        validateEffectiveDate(request.effectiveFrom(), latestEffectiveFrom);
         validateDeadlineMode(request.deadlineMode());
         validateEditWindow(request.deadlineMode(), request.editWindowHours());
         validateTimezone(request.timezone());
     }
 
-    private void validateEffectiveDate(LocalDate effectiveFrom) {
-        if (effectiveFrom.isBefore(LocalDate.now(ZONE))) {
-            throw error(HttpStatus.UNPROCESSABLE_ENTITY, "Policy chỉ có hiệu lực từ ngày tương lai");
+    private void validateEffectiveDate(LocalDate effectiveFrom, LocalDate latestEffectiveFrom) {
+        if (!effectiveFrom.isAfter(LocalDate.now(ZONE))) {
+            throw error(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Ngày hiệu lực của policy phải sau ngày hiện tại theo múi giờ Asia/Ho_Chi_Minh");
+        }
+        if (latestEffectiveFrom != null && !effectiveFrom.isAfter(latestEffectiveFrom)) {
+            throw error(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Ngày hiệu lực của policy phải sau ngày hiệu lực mới nhất (" + latestEffectiveFrom + ")");
         }
     }
 

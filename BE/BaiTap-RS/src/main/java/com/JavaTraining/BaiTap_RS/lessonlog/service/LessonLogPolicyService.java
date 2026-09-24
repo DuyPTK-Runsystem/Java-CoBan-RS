@@ -56,8 +56,11 @@ public class LessonLogPolicyService {
 
     @Transactional(readOnly = true)
     public LessonLogPolicyResponse getPolicy(LocalDate lessonDate) {
-        LocalDate selectedDate = lessonDate == null ? LocalDate.now(ZONE) : lessonDate;
-        return toResponse(getEffectivePolicy(selectedDate));
+        LessonLogPolicy selectedPolicy = lessonDate == null
+                ? policies.findTopByOrderByPolicyVersionDesc()
+                        .orElseThrow(() -> error(HttpStatus.UNPROCESSABLE_ENTITY, "Chưa cấu hình policy sổ đầu bài"))
+                : getEffectivePolicy(lessonDate);
+        return toResponse(selectedPolicy);
     }
 
     @Transactional
@@ -66,7 +69,7 @@ public class LessonLogPolicyService {
         if (previousPolicy != null && !java.util.Objects.equals(previousPolicy.getVersion(), request.expectedVersion())) {
             throw error(HttpStatus.CONFLICT, "Policy đã thay đổi");
         }
-        validator.validate(request);
+        validator.validate(request, previousPolicy == null ? null : previousPolicy.getEffectiveFrom());
 
         LessonLogPolicy policy = new LessonLogPolicy();
         policy.setPolicyVersion(previousPolicy == null ? 1 : previousPolicy.getPolicyVersion() + 1);
