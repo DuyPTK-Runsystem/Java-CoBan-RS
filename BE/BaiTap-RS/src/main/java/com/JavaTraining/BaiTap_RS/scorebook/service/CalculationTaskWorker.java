@@ -26,7 +26,7 @@ public class CalculationTaskWorker {
         this.taskRepository = taskRepository;
     }
 
-    @Scheduled(fixedDelayString = "${app.calculation.worker-interval-ms:5000}")
+    @Scheduled(fixedDelayString = "${app.calculation.worker-interval-ms:30000}")
     public void processNextTask() {
         Long taskId = taskService.claimNextTask(workerId);
         if (taskId == null) {
