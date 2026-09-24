@@ -367,7 +367,7 @@ async function executeCancel(): Promise<void> {
   cancelDialogVisible.value = false
   try {
     session.value = await cancelPlacementSession(accessToken, session.value.id, session.value.version)
-    await loadResults(session.value.id, 0, resultsMeta.value?.pageSize ?? 20)
+    await router.replace({ name: 'v2-enrollments' })
   } catch (error) {
     if (isApiError(error, 401)) return
     if (isApiError(error, 403)) {
