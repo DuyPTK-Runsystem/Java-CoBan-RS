@@ -28,7 +28,7 @@ const audienceLabels: Record<NotificationAudienceType, string> = {
 }
 
 const channelLabels: Record<NotificationChannel, string> = {
-  IN_APP: 'Trong ứng dụng',
+  IN_APP: 'Trên website',
   EMAIL: 'Email',
 }
 

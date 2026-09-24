@@ -131,7 +131,7 @@ function handleSubmit(): void {
           id="notification-channel"
           v-model="channel"
           :options="[
-            { label: 'Trong ứng dụng', value: 'IN_APP' },
+            { label: 'Trên website', value: 'IN_APP' },
             { label: 'Email', value: 'EMAIL' },
           ]"
           option-label="label"

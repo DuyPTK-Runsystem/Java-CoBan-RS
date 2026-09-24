@@ -44,9 +44,7 @@ function handleCancel(): void {
   <div class="notification-view" data-testid="notification-composer-view">
     <header class="page-heading">
       <div>
-        <p class="eyebrow">THÔNG BÁO</p>
         <h1>Soạn thông báo</h1>
-        <p>Tạo bản nháp trong phạm vi được backend cho phép.</p>
       </div>
     </header>
 
