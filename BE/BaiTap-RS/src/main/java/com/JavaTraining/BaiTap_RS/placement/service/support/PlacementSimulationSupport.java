@@ -34,7 +34,7 @@ public final class PlacementSimulationSupport {
         results.saveAll(allocated);
         session.setStatus(rules.hasBlockingIssue(allocated) ? PlacementSessionStatus.SIMULATED
                 : PlacementSessionStatus.READY_FOR_CONFIRM);
-        sessions.save(session);
+        sessions.saveAndFlush(session);
         return access.response(session, allocated, candidateValues);
     }
 }

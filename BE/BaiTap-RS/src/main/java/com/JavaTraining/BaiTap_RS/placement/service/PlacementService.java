@@ -72,7 +72,7 @@ public class PlacementService {
         rules.require(session, PlacementSessionStatus.DRAFT);
         session.setScopeSnapshot(scopeService.snapshot(scopeService.updateScope(session,
                 rules.updateProfiles(request.targetClasses()))));
-        sessions.save(session);
+        sessions.saveAndFlush(session);
         return access.response(session, access.allResults(id));
     }
 
@@ -101,7 +101,7 @@ public class PlacementService {
         confirmation.createAutomaticEnrollments(session, resultValues);
         session.setStatus(PlacementSessionStatus.CONFIRMED);
         session.setConfirmIdempotencyKey(request.idempotencyKey());
-        sessions.save(session);
+        sessions.saveAndFlush(session);
         confirmation.audit("PLACEMENT_SESSION_CONFIRMED", id,
                 Map.<String, Object>of("results", resultValues.size()));
         return access.response(session, resultValues);
@@ -114,7 +114,7 @@ public class PlacementService {
         rules.require(session, PlacementSessionStatus.DRAFT, PlacementSessionStatus.SIMULATED,
                 PlacementSessionStatus.READY_FOR_CONFIRM);
         session.setStatus(PlacementSessionStatus.CANCELLED);
-        sessions.save(session);
+        sessions.saveAndFlush(session);
         confirmation.audit("PLACEMENT_SESSION_CANCELLED", id, null);
         return access.response(session, access.allResults(id));
     }
