@@ -1,4 +1,12 @@
 # FE Dev Note Summary
+| 055.2 | FE Teaching Assignment | [Việt hóa màn hình Phân công giảng dạy](teacher/055.2-localize-teaching-assignment-screen-2026-09-24.md) | Xóa caption môn học; tiêu đề đổi thành “Phạm vi phân công”, fallback tiếng Việt; build/focused lint PASS; full lint 2 warning baseline; tests NOT RUN | 2026-09-24 |
+
+| 074.10 | FE Enrollment | [Việt hóa popup lịch sử xếp lớp](enrollment/074.10-enrollment-history-vietnamese-copy-2026-09-24.md) | Việt hóa popup và fallback lỗi, bỏ hai dòng mô tả; nút “Tải lại”; source lint, build và browser review PASS; full lint 2 warning baseline; tests NOT RUN | 2026-09-24 |
+
+| 074.9 | FE Enrollment | [Về Xếp lớp sau khi hủy phiên](enrollment/074.9-placement-cancel-return-to-enrollments-2026-09-24.md) | Cancel thành công dùng router.replace về v2-enrollments; FE build PASS; tests/browser flow NOT RUN | 2026-09-24 |
+
+| 074.7 | FE Enrollment | [Sĩ số hiện tại trong phiên xếp lớp](../be/enrollment/074.7-placement-current-roster-count-2026-09-24.md) | Focused test 9/9 PASS; full tests 607/608 (1 unrelated failure); lint FAIL on 2 existing warnings; build PASS; browser NOT RUN | 2026-09-24 |
+
 
 | 074.6 | FE Enrollment | [Quay về màn hình Xếp lớp sau xác nhận](enrollment/074.6-placement-confirm-return-to-workspace-2026-09-23.md) | Xác nhận thành công quay về Xếp lớp, hiện FormAlert một lần và xóa query; test/lint/build/browser NOT RUN | 2026-09-23 |
 

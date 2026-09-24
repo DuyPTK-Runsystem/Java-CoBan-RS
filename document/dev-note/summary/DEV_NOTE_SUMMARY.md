@@ -1,4 +1,12 @@
 # Dev Note Summary
+| 055.2 | FE | [Việt hóa màn hình Phân công giảng dạy](../fe/teacher/055.2-localize-teaching-assignment-screen-2026-09-24.md) | Xóa caption; Việt hóa tiêu đề phạm vi; build/focused lint PASS; full lint 2 warning baseline; tests NOT RUN | 2026-09-24 |
+
+- 074.9 placement FE: [về Xếp lớp sau khi hủy phiên](../fe/enrollment/074.9-placement-cancel-return-to-enrollments-2026-09-24.md) — cancel thành công quay về route `v2-enrollments`; FE build PASS; tests và browser cancel flow NOT RUN (2026-09-24).
+
+- 074.8 placement BE: [flush version trước response](../be/enrollment/074.8-placement-version-flush-2026-09-24.md) — simulate/update/confirm/cancel flush `@Version` trước DTO; compileJava PASS; tests, Checkstyle, PMD, full build, Chrome post-fix và diff check NOT RUN (2026-09-24).
+
+- 074.7 placement BE/FE: [implementation note](../be/enrollment/074.7-placement-current-roster-count-2026-09-24.md) — focused BE/FE PASS, FE build PASS; BE full tests FAIL baseline contexts, PMD/build FAIL on 7 DemoIdentitySeeder baseline violations, FE full suite 607/608, lint FAIL on 2 baseline warnings; runtime GET 401 without auth (2026-09-24).
+
 
 - 083 BE placement: [stable results pagination](../be/enrollment/083-placement-stable-pagination-2026-09-23.md) — ép API results sort `studentId ASC, id ASC` và bỏ ảnh hưởng của sort tùy chọn; regression test cập nhật; diff check PASS, tests/Checkstyle/PMD/build và xác thực runtime NOT RUN (2026-09-23).
 
@@ -204,3 +212,5 @@ Plan 078 (2026-09-10): Đồng bộ trạng thái Master Plan và Developer Plan
 
 Plan 074.4 (2026-09-23): [Placement draft empty-state clarification](../fe/enrollment/074.4-placement-draft-empty-state-2026-09-23.md) — clear no-results message and first-run `Mô phỏng` with `pi-play`, rerun with `pi-refresh`; focused spec 9/9 and build/diff check PASS; lint FAIL due two existing NotificationComposer warnings; browser/full FE suite NOT RUN.
 Plan 074.3 (2026-09-23): Placement review copy/name and capacity behavior documented above; latest FE layout places the continuing eligibility line after the source column and stacks candidate rows as responsive cards on mobile; Chrome verified at 390 × 844. Focused ESLint/build PASS; full lint reports two existing NotificationComposer warnings; tests NOT RUN.
+
+Plan 083 follow-up (2026-09-24): placement endpoint now binds zero-based paging directly; compileJava PASS and Chrome confirms Trang 1 STU2600041–0060 / Trang 2 STU2600061–0080; test suite, Checkstyle, PMD, full build and diff check NOT RUN.

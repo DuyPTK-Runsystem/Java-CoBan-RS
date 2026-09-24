@@ -1,5 +1,10 @@
 # BE Dev Note Summary
 
+| 074.8 | placement | [Flush version trước response](enrollment/074.8-placement-version-flush-2026-09-24.md) | saveAndFlush trước DTO sau simulate/update/confirm/cancel; compileJava PASS; tests/Checkstyle/PMD/full build/Chrome post-fix/diff check NOT RUN | 2026-09-24 |
+
+| 074.7 | placement | [Current class roster count](enrollment/074.7-placement-current-roster-count-2026-09-24.md) | Focused PlacementServiceTest PASS + JaCoCo; full tests FAIL 560/101; Checkstyle PASS (978 warnings); PMD/build FAIL on 7 existing DemoIdentitySeeder violations; GET 401 without auth | 2026-09-24 |
+
+
 | 083 | placement | [Stable results pagination](enrollment/083-placement-stable-pagination-2026-09-23.md) | API results ép sort `studentId ASC, id ASC`, bỏ sort request; regression test updated; diff check PASS; tests/Checkstyle/PMD/build NOT RUN; runtime endpoint 401 without auth | 2026-09-23 |
 
 | 074.5 | placement/seed | [Placement explanations and STU2600048 annual score seed](enrollment/074.5-placement-copy-and-score-seed-2026-09-23.md) | REGULAR/SCORE_TIE copy updated; historical seed recalculates STU2600048 to annual 8.2; focused placement and seeder tests PASS; full test FAIL 560/101 baseline fixture/context issues; Checkstyle PASS with 978 warnings; PMD/build FAIL on 7 existing DemoIdentitySeeder violations | 2026-09-23 |
@@ -111,3 +116,5 @@
 Plan 040.1: Email-only notification contract — Completed; full test, Checkstyle, PMD and build PASS. Existing IN_APP data must be preflighted before production migration.
 
 Plan 078 documentation sync (2026-09-10): cập nhật trạng thái Plan 078 trong các summary thành `Implemented`; giữ PMD/build baseline `BLOCKED` và live API `NOT RUN`.
+
+|   083 | enrollment | [Placement stable pagination](enrollment/083-placement-stable-pagination-2026-09-23.md) | Follow-up fixes zero-based request binding; compileJava and Chrome page 1/2 PASS; tests/Checkstyle/PMD/full build/diff check NOT RUN | 2026-09-24 |
