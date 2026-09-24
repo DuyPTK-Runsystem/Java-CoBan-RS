@@ -1,5 +1,6 @@
 package com.JavaTraining.BaiTap_RS.placement.service.support;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -59,6 +60,10 @@ public class PlacementScopeService {
                 targets.stream().map(PlacementTarget::classId).toList());
         validator.validateCapacitySnapshot(targets, currentClasses);
         return currentClasses.stream().collect(Collectors.toMap(SchoolClass::getId, validator::availableCapacity));
+    }
+
+    public long currentRosterCount(Long classId, LocalDateTime at) {
+        return validator.currentRosterCount(classId, at);
     }
 
     public void validateConfirmScope(PlacementSession session, Map<Long, Long> assignedCounts) {

@@ -20,6 +20,7 @@ export interface PlacementClassTarget {
   capacity: number | null
   genderTargetMale: number | null
   genderTargetFemale: number | null
+  currentStudentCount: number
 }
 
 export interface PlacementCandidateRequest {

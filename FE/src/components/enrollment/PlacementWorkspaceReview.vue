@@ -167,7 +167,6 @@ function getTargetClassName(targetClassId: number | null): string {
         <div class="section-heading">
           <div>
             <h2>Cách phân lớp</h2>
-            <p class="section-caption">Cách phân lớp, sĩ số và mục tiêu nam nữ do hệ thống cung cấp.</p>
           </div>
           <Tag :value="sessionStatusLabels[props.session.status]" severity="info" />
         </div>
@@ -188,6 +187,7 @@ function getTargetClassName(targetClassId: number | null): string {
             </div>
             <p>{{ profileDescriptions[target.profile] }}</p>
             <small>{{ target.capacity ?? '—' }} chỗ</small>
+            <small>Sĩ số hiện tại: {{ target.currentStudentCount }}</small>
             <small>Mục tiêu: {{ target.genderTargetMale ?? '—' }} nam · {{ target.genderTargetFemale ?? '—' }} nữ</small>
           </article>
         </div>

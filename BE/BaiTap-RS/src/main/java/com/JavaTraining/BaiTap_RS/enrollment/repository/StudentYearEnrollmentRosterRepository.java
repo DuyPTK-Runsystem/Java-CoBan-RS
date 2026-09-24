@@ -24,8 +24,8 @@ public interface StudentYearEnrollmentRosterRepository {
             select count(e.id) from StudentYearEnrollment e, SchoolClass c
             where c.id = :classId and e.academicYearId = c.academicYearId
               and e.enrolledAt <= :at and (e.completedAt is null or e.completedAt > :at)
-              and (not exists (select h.id from ClassTransferHistory h
-                    where h.enrollmentId = e.id)
+              and ((e.currentClassId = :classId and not exists (select h.id from ClassTransferHistory h
+                    where h.enrollmentId = e.id))
                 or exists (select h.id from ClassTransferHistory h
                     where h.enrollmentId = e.id and h.effectiveAt <= :at and h.toClassId = :classId
                       and not exists (select newer.id from ClassTransferHistory newer

@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -414,12 +415,22 @@ class PlacementServiceTest {
 
     @Test
     void getSessionDoesNotLoadResultsThatHaveTheirOwnPaginationRoute() {
-        PlacementSession session = sessionWithScope(1L, regularScope());
+        PlacementSession session = sessionWithScope(1L, advancedAndRegularScope());
         when(sessions.findById(1L)).thenReturn(Optional.of(session));
+        when(enrollments.countRosterAt(org.mockito.ArgumentMatchers.eq(10L), any(LocalDateTime.class)))
+                .thenReturn(28L);
+        when(enrollments.countRosterAt(org.mockito.ArgumentMatchers.eq(11L), any(LocalDateTime.class)))
+                .thenReturn(17L);
 
         ResPlacementSessionDTO response = service.get(1L);
 
         assertTrue(response.results().isEmpty());
+        assertEquals(List.of(10L, 11L), response.targetClasses().stream()
+                .map(target -> target.classId()).toList());
+        assertEquals(List.of(28L, 17L), response.targetClasses().stream()
+                .map(target -> target.currentStudentCount()).toList());
+        verify(enrollments).countRosterAt(org.mockito.ArgumentMatchers.eq(10L), any(LocalDateTime.class));
+        verify(enrollments).countRosterAt(org.mockito.ArgumentMatchers.eq(11L), any(LocalDateTime.class));
         verify(candidates).findAllBySessionIdOrderByStudentIdAsc(1L);
         verify(results, never())
                 .findAllBySessionIdOrderByStudentIdAsc(1L);

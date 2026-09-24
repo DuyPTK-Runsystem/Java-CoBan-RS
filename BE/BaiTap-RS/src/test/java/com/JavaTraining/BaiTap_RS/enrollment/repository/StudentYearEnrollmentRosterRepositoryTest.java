@@ -2,7 +2,6 @@ package com.JavaTraining.BaiTap_RS.enrollment.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClass;
@@ -24,7 +23,8 @@ import org.springframework.test.util.ReflectionTestUtils;
         "spring.datasource.username=sa",
         "spring.datasource.password=",
         "spring.flyway.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=create-drop"
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "app.seed.demo.enabled=false"
 })
 class StudentYearEnrollmentRosterRepositoryTest {
 
@@ -67,6 +67,18 @@ class StudentYearEnrollmentRosterRepositoryTest {
         assertEquals(1, enrollmentRepository.countRosterAt(sourceClassId, TRANSFERRED_AT.minusMinutes(1)));
         assertEquals(0, enrollmentRepository.countRosterAt(sourceClassId, TRANSFERRED_AT.plusMinutes(1)));
         assertEquals(1, enrollmentRepository.countRosterAt(targetClassId, TRANSFERRED_AT.plusMinutes(1)));
+    }
+
+    @Test
+    void countsEnrollmentsWithoutTransferHistoryOnlyForTheirCurrentClass() {
+        enrollment(201L, sourceClassId);
+        enrollment(202L, sourceClassId);
+        enrollment(203L, targetClassId);
+
+        LocalDateTime queriedAt = ENROLLED_AT.plusHours(1);
+
+        assertEquals(2, enrollmentRepository.countRosterAt(sourceClassId, queriedAt));
+        assertEquals(1, enrollmentRepository.countRosterAt(targetClassId, queriedAt));
     }
 
     @Test

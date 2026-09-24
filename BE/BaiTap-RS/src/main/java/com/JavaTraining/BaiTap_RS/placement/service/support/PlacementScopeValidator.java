@@ -1,5 +1,6 @@
 package com.JavaTraining.BaiTap_RS.placement.service.support;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -56,5 +57,9 @@ public final class PlacementScopeValidator {
         int capacity = schoolClass.getCapacity() == null ? Integer.MAX_VALUE : schoolClass.getCapacity();
         long occupied = enrollments.countByCurrentClassIdAndStatus(schoolClass.getId(), EnrollmentStatus.ACTIVE);
         return capacity == Integer.MAX_VALUE ? capacity : Math.max(0, capacity - Math.toIntExact(occupied));
+    }
+
+    public long currentRosterCount(Long classId, LocalDateTime at) {
+        return enrollments.countRosterAt(classId, at);
     }
 }
