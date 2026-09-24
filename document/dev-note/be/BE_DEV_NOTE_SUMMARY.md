@@ -1,4 +1,9 @@
 # BE Dev Note Summary
+| 084 | config | [Nạp `.env` khi chạy backend trực tiếp](config/084-local-env-import-2026-09-24.md) | Runtime smoke PASS; focused H2 PASS; Checkstyle PASS (977 warning); full test dừng theo yêu cầu, PMD/build NOT RUN | 2026-09-24 |
+| 079.4 | lesson-log | [Policy GET và ngày hiệu lực phiên bản](lesson-log/079.4-policy-effective-date-2026-09-24.md) | GET không ngày trả latest policy, Chrome settings load không lỗi; validator chỉ nhận ngày tương lai sau version mới nhất; compileJava PASS; Checkstyle FAIL do 977 warning baseline, PMD FAIL do 7 DemoIdentitySeeder violations; tests/full build NOT RUN | 2026-09-24 |
+
+
+| 078.1 | scorebook | [Bỏ qua phần hướng dẫn cuối file khi preview](scorebook/078.1-ignore-template-note-footer-2026-09-24.md) | Preview dừng tại nhãn `Ghi chú:`; compileJava/diff-check PASS; Checkstyle PASS với 977 warning baseline; PMD FAIL trên 7 DemoIdentitySeeder violations; tests/full build NOT RUN | 2026-09-24 |
 
 | 074.8 | placement | [Flush version trước response](enrollment/074.8-placement-version-flush-2026-09-24.md) | saveAndFlush trước DTO sau simulate/update/confirm/cancel; compileJava PASS; tests/Checkstyle/PMD/full build/Chrome post-fix/diff check NOT RUN | 2026-09-24 |
 
