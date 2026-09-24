@@ -82,7 +82,6 @@ const previewHasErrors = computed(() => (preview.value?.summary.errorRows ?? 0) 
 const normalizedPreviewItems = computed(() => preview.value?.normalizedItems ?? preview.value?.items ?? [])
 const fileSaveDisabled = computed(() => !preview.value
   || previewLoading.value
-  || previewHasErrors.value
   || normalizedPreviewItems.value.length === 0
   || Boolean(props.saving))
 
@@ -289,12 +288,8 @@ function saveFilePreview(): void {
     validationMessage.value = 'Hãy xem trước file trước khi lưu.'
     return
   }
-  if (previewHasErrors.value) {
-    validationMessage.value = 'File còn dòng lỗi, chưa thể lưu điểm.'
-    return
-  }
   if (normalizedPreviewItems.value.length === 0) {
-    validationMessage.value = 'Backend chưa trả về dòng điểm hợp lệ để lưu.'
+    validationMessage.value = 'Không có dòng điểm hợp lệ để lưu.'
     return
   }
   emit('save', { items: normalizedPreviewItems.value })
@@ -372,6 +367,7 @@ function save(): void {
             <div>
               <strong>Xem trước dữ liệu</strong>
               <span>{{ preview.summary.validRows }} dòng hợp lệ · {{ preview.summary.errorRows }} dòng lỗi · {{ preview.summary.newScores }} điểm mới · {{ preview.summary.updatedScores }} điểm cập nhật</span>
+              <span v-if="previewHasErrors">Khi lưu, chỉ các dòng hợp lệ sẽ được lưu; dòng lỗi sẽ được bỏ qua.</span>
             </div>
             <label class="error-filter"><input v-model="showOnlyErrors" type="checkbox"> Chỉ xem dòng lỗi</label>
           </div>
