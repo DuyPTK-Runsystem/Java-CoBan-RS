@@ -56,6 +56,7 @@ const policyForm = ref({
 })
 const ruleDrafts = ref<TeacherLoadRule[]>([])
 const policySaving = ref(false)
+const policyDialogError = ref('')
 
 // Create eligibility dialog
 const isEligibilityDialogVisible = ref(false)
@@ -68,6 +69,7 @@ const eligibilityForm = ref({
   evidenceInfo: '',
 })
 const eligibilitySaving = ref(false)
+const eligibilityDialogError = ref('')
 const eligibilityRuleOptions = computed(() => {
   const rules = activePolicy.value?.rules.filter((rule) => rule.triggerType === 'ELIGIBILITY') ?? []
   return rules.length > 0
@@ -139,6 +141,7 @@ async function handleActivatePolicy(policyId: number) {
 }
 
 function openPolicyDialog(policy?: TeacherLoadPolicy) {
+  policyDialogError.value = ''
   policyDialogMode.value = policy ? 'clone' : 'create'
   policyForm.value = {
     policyName: policy ? `${policy.policyName} - bản mới` : '',
@@ -168,6 +171,7 @@ function removeRuleDraft(index: number) {
 }
 
 function openEligibilityDialog(eligibility?: TeacherLoadEligibility) {
+  eligibilityDialogError.value = ''
   editingEligibilityId.value = eligibility?.id ?? null
   eligibilityForm.value = {
     teacherId: eligibility?.teacherId ?? null,
@@ -186,12 +190,40 @@ function formatDateStr(d: Date): string {
   return `${y}-${m}-${day}`
 }
 
+function createRuleCode(ruleName: string, usedCodes: Set<string>): string {
+  const base = ruleName
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/gi, 'd')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 80)
+    .replace(/_+$/g, '') || 'RULE'
+
+  let code = base
+  let suffix = 2
+  while (usedCodes.has(code)) {
+    const suffixText = `_${suffix}`
+    code = `${base.slice(0, 80 - suffixText.length).replace(/_+$/g, '')}${suffixText}`
+    suffix += 1
+  }
+  usedCodes.add(code)
+  return code
+}
+
 async function handleSavePolicy() {
-  resetMessages()
+  policyDialogError.value = ''
   const token = requireAccessToken()
   if (!token) return
   policySaving.value = true
   try {
+    const usedRuleCodes = new Set(['HOMEROOM', 'NURSING_CHILD_UNDER_12M'])
+    const supplementalRules = ruleDrafts.value.map((rule) => {
+      const ruleCode = rule.ruleCode.trim() || createRuleCode(rule.ruleName, usedRuleCodes)
+      usedRuleCodes.add(ruleCode.toUpperCase())
+      return { ...rule, ruleCode }
+    })
     await createTeacherLoadPolicy(
       {
         policyName: policyForm.value.policyName,
@@ -217,28 +249,29 @@ async function handleSavePolicy() {
             source: policyForm.value.sourceDocument,
             active: true,
           },
-          ...ruleDrafts.value,
+          ...supplementalRules,
         ],
       },
       token,
     )
+    policyDialogError.value = ''
     isPolicyDialogVisible.value = false
     await reloadAfterMutation('Đã tạo chính sách mới')
   } catch (err) {
-    generalError.value = extractApiErrorMessage(err, 'Không thể tạo chính sách')
+    policyDialogError.value = extractApiErrorMessage(err, 'Không thể tạo chính sách')
   } finally {
     policySaving.value = false
   }
 }
 
 async function handleSaveEligibility() {
-  resetMessages()
+  eligibilityDialogError.value = ''
   if (!eligibilityForm.value.teacherId) {
-    generalError.value = 'Vui lòng chọn giáo viên.'
+    eligibilityDialogError.value = 'Vui lòng chọn giáo viên.'
     return
   }
   if (eligibilityForm.value.validTo < eligibilityForm.value.validFrom) {
-    generalError.value = 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.'
+    eligibilityDialogError.value = 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.'
     return
   }
   const token = requireAccessToken()
@@ -263,10 +296,11 @@ async function handleSaveEligibility() {
         evidenceReference: eligibilityForm.value.evidenceInfo,
       }, token)
     }
+    eligibilityDialogError.value = ''
     isEligibilityDialogVisible.value = false
     await reloadAfterMutation(editingEligibility ? 'Đã cập nhật điều kiện miễn giảm' : 'Đã thêm điều kiện miễn giảm cho giáo viên')
   } catch (err) {
-    generalError.value = extractApiErrorMessage(err, 'Không thể thêm điều kiện miễn giảm')
+    eligibilityDialogError.value = extractApiErrorMessage(err, 'Không thể thêm điều kiện miễn giảm')
   } finally {
     eligibilitySaving.value = false
   }
@@ -431,6 +465,7 @@ onMounted(() => {
     <!-- Create Policy Dialog -->
     <Dialog v-model:visible="isPolicyDialogVisible" :header="policyDialogMode === 'clone' ? 'Tạo phiên bản chính sách mới' : 'Thêm chính sách định mức mới'" modal class="timetable-dialog timetable-settings-dialog" :style="{ width: 'min(94vw, 680px)' }" :dismissable-mask="false">
       <div class="flex flex-col gap-4">
+        <FormAlert v-if="policyDialogError" :message="policyDialogError" tone="error" />
         <div class="flex flex-col gap-1">
           <label class="font-medium text-sm">Tên chính sách</label>
           <InputText v-model="policyForm.policyName" placeholder="Ví dụ: Quy định định mức tiết dạy 2026" />
@@ -445,7 +480,7 @@ onMounted(() => {
         </div>
         <div class="settings-form-grid grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div class="flex flex-col gap-1">
-            <label class="font-medium text-xs">Tiết chuẩn THPT</label>
+            <label class="font-medium text-xs">Tiết chuẩn THCS</label>
             <InputNumber v-model="policyForm.standardPeriodsHighSchool" :min="1" />
           </div>
           <div class="flex flex-col gap-1">
@@ -461,17 +496,28 @@ onMounted(() => {
           <div class="flex items-center justify-between gap-2">
             <div>
               <h4 class="font-semibold text-sm">Quy tắc miễn giảm bổ sung</h4>
-              <p class="text-xs text-gray-500">Các mức giảm được cộng dồn và áp dụng theo điều kiện miễn giảm.</p>
+              <p class="text-xs text-gray-500">Mức giảm được cộng dồn và áp dụng theo hồ sơ miễn giảm phù hợp.</p>
             </div>
             <Button label="Thêm quy tắc" icon="pi pi-plus" size="small" severity="secondary" outlined @click="addRuleDraft" />
           </div>
-          <div v-for="(rule, index) in ruleDrafts" :key="index" class="settings-rule-row grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <InputText v-model="rule.ruleCode" placeholder="Mã quy tắc, ví dụ SENIORITY" />
-            <InputText v-model="rule.ruleName" placeholder="Tên diện miễn giảm" />
-            <Select v-model="rule.triggerType" :options="[{ label: 'Theo điều kiện miễn giảm', value: 'ELIGIBILITY' }, { label: 'Theo giáo viên chủ nhiệm', value: 'HOMEROOM' }]" option-label="label" option-value="value" />
-            <InputNumber v-model="rule.reductionPeriods" :min="0" placeholder="Số tiết giảm" />
-            <InputText v-model="rule.source" class="sm:col-span-2" placeholder="Văn bản/căn cứ của quy tắc" />
-            <Button label="Bỏ quy tắc" icon="pi pi-trash" severity="danger" text class="sm:col-span-2 justify-self-start" @click="removeRuleDraft(index)" />
+          <div v-for="(rule, index) in ruleDrafts" :key="index" class="settings-rule-row grid grid-cols-1 gap-2">
+            <div class="flex flex-col gap-1">
+              <label class="font-medium text-xs">Tên diện miễn giảm</label>
+              <InputText v-model="rule.ruleName" placeholder="Ví dụ: Thâm niên công tác" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="font-medium text-xs">Điều kiện áp dụng</label>
+              <Select v-model="rule.triggerType" :options="[{ label: 'Theo điều kiện miễn giảm', value: 'ELIGIBILITY' }, { label: 'Theo giáo viên chủ nhiệm', value: 'HOMEROOM' }]" option-label="label" option-value="value" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="font-medium text-xs">Số tiết giảm</label>
+              <InputNumber v-model="rule.reductionPeriods" :min="0" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="font-medium text-xs">Văn bản/căn cứ của quy tắc</label>
+              <InputText v-model="rule.source" placeholder="Ví dụ: Quyết định số 123/QĐ-..." />
+            </div>
+            <Button label="Bỏ quy tắc" icon="pi pi-trash" severity="danger" text class="justify-self-start" @click="removeRuleDraft(index)" />
           </div>
         </div>
       </div>
@@ -486,6 +532,7 @@ onMounted(() => {
     <!-- Create Eligibility Dialog -->
     <Dialog v-model:visible="isEligibilityDialogVisible" :header="editingEligibilityId ? 'Sửa diện miễn giảm giáo viên' : 'Thêm diện miễn giảm giáo viên'" modal class="timetable-dialog timetable-settings-dialog" :style="{ width: 'min(94vw, 620px)' }" :dismissable-mask="false">
       <div class="flex flex-col gap-4">
+        <FormAlert v-if="eligibilityDialogError" :message="eligibilityDialogError" tone="error" />
         <div class="flex flex-col gap-1">
           <label class="font-medium text-sm">Giáo viên</label>
           <Select
