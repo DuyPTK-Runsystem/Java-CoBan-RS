@@ -10,8 +10,11 @@ import com.JavaTraining.BaiTap_RS.placement.domain.DTOs.response.ResPlacementRes
 import com.JavaTraining.BaiTap_RS.placement.domain.DTOs.response.ResPlacementSessionDTO;
 import com.JavaTraining.BaiTap_RS.placement.service.PlacementService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
-import org.springframework.data.domain.Pageable;
+import jakarta.validation.constraints.PositiveOrZero;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -58,7 +62,10 @@ public class PlacementController {
     @GetMapping("/{id}/results")
     @ApiMessage("Xem kết quả xếp lớp")
     public ResultPaginationDTO<ResPlacementResultDTO> results(@PathVariable("id") @Positive Long id,
-            Pageable pageable) { return placementService.getResults(id, pageable); }
+            @RequestParam(defaultValue = "0") @PositiveOrZero int page,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(2000) int size) {
+        return placementService.getResults(id, PageRequest.of(page, size));
+    }
 
     @PostMapping("/{id}/confirm")
     @ApiMessage("Xác nhận xếp lớp")
