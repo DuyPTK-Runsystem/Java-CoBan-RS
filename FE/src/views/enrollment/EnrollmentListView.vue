@@ -360,7 +360,7 @@ async function loadHistory(studentId: number): Promise<void> {
     history.value = await fetchStudentEnrollmentHistory(accessToken, studentId)
   } catch (error) {
     if (isApiError(error, 401)) return
-    historyError.value = messageFor(error, 'Không thể tải lịch sử enrollment của học sinh.')
+    historyError.value = messageFor(error, 'Không thể tải lịch sử xếp lớp của học sinh.')
   } finally {
     historyLoading.value = false
   }
@@ -397,7 +397,7 @@ onMounted(() => {
       <h1>Xếp lớp</h1>
     </div>
     <div class="page-heading-actions">
-      <Button label="Làm mới context" icon="pi pi-refresh" severity="secondary" outlined :loading="academicYearLoading || classLoading" @click="loadContext" />
+      <Button label="Tải lại" icon="pi pi-refresh" severity="secondary" outlined :loading="academicYearLoading || classLoading" @click="loadContext" />
       <Button label="Xếp lớp tự động" icon="pi pi-bolt" @click="router.push({ name: 'v2-placement-new' })" />
     </div>
   </div>
