@@ -46,6 +46,17 @@ Các container kết nối nội bộ qua `db:3306`; không dùng `localhost:330
 
 Mỗi lần `api` khởi động, entrypoint script kiểm tra kết nối MySQL và chạy `CREATE DATABASE IF NOT EXISTS java_coban` trước khi chạy Spring Boot. Vì vậy Docker volume cũ chưa có database này vẫn có thể khởi động, miễn credential trong `docker/.env` hợp lệ.
 
+## Chạy backend trực tiếp
+
+Đặt cấu hình local trong `BE/BaiTap-RS/.env`, rồi chạy từ chính thư mục backend:
+
+```bash
+cd BE/BaiTap-RS
+./gradlew bootRun
+```
+
+Spring Boot tự nạp `.env` từ thư mục làm việc hiện tại. File này được Git bỏ qua; không đưa mật khẩu vào `application.properties`. Nếu chạy từ thư mục khác, hãy đặt `.env` trong thư mục làm việc đó hoặc cấp các biến qua môi trường tiến trình. Docker vẫn dùng `docker/.env` theo lệnh Compose ở trên.
+
 ## Nạp dữ liệu test batch
 
 Script dưới đây chờ API healthy rồi chạy `document/postman/Java-CoBan-Batch-Test-Data.postman_collection.json` bằng Newman. Collection tạo một test user và 500 Student qua REST API, không insert SQL trực tiếp.
