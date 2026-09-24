@@ -27,12 +27,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 /**
  * NFR-CALC-005: Tạo hoặc gộp calculation task theo idempotency key.
  */
 @Service
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.GuardLogStatement"})
+@SuppressWarnings({ "PMD.TooManyMethods", "PMD.GuardLogStatement" })
 public class CalculationTaskService {
 
     private final CalculationTaskRepository taskRepository;
@@ -77,7 +76,7 @@ public class CalculationTaskService {
         List<CalculationTask> tasks = taskRepository.findAvailableForUpdate(
                 CalculationTaskStatus.PENDING,
                 LocalDateTime.now(),
-                PageRequest.of(0, 1));
+                PageRequest.of(0, 10));
         if (tasks.isEmpty()) {
             return null;
         }
