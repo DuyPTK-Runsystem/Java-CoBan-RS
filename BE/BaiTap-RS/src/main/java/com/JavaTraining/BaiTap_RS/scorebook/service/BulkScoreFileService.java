@@ -71,8 +71,10 @@ public class BulkScoreFileService {
     private static final String XLSX_EXTENSION = ".xlsx";
     private static final int HEADER_ROW_INDEX = 5;
     private static final int FIRST_DATA_ROW_INDEX = HEADER_ROW_INDEX + 1;
+    private static final int FIRST_NOTE_COLUMN_INDEX = 1;
+    private static final String IMPORT_NOTES_LABEL = "Ghi chú:";
     private static final String FORM_FONT = "Times New Roman";
-    private static final String[] HEADERS = {"STT", "Mã học sinh", "Họ tên học sinh", "Điểm số", "Ghi chú"};
+    private static final String[] HEADERS = { "STT", "Mã học sinh", "Họ tên học sinh", "Điểm số", "Ghi chú" };
 
     private final ScoreEntryContext entryContext;
     private final ScorebookGuard scorebookGuard;
@@ -176,10 +178,13 @@ public class BulkScoreFileService {
     private void createImportNotes(Sheet sheet, int firstNoteRow, CellStyle labelStyle, CellStyle noteStyle) {
         Row noteLabel = sheet.createRow(firstNoteRow);
         setText(noteLabel, 0, "Ghi chú:", labelStyle);
-        setText(noteLabel, 1, "- Điểm số trong khoảng từ 0-10, làm tròn một (01) chữ số thập phân", noteStyle);
-        setText(sheet.createRow(firstNoteRow + 1), 1, "- Giá trị 11 đại diện cho Vắng", noteStyle);
-        setText(sheet.createRow(firstNoteRow + 2), 1, "- Giá trị 12 đại diện cho Miễn", noteStyle);
-        setText(sheet.createRow(firstNoteRow + 3), 1, "- Giá trị 13 đại diện cho Hủy", noteStyle);
+        setText(noteLabel, FIRST_NOTE_COLUMN_INDEX,
+                "- Điểm số trong khoảng từ 0-10, làm tròn một (01) chữ số thập phân", noteStyle);
+        setText(sheet.createRow(firstNoteRow + 1), FIRST_NOTE_COLUMN_INDEX, "- Giá trị 11 đại diện cho Vắng",
+                noteStyle);
+        setText(sheet.createRow(firstNoteRow + 2), FIRST_NOTE_COLUMN_INDEX, "- Giá trị 12 đại diện cho Miễn",
+                noteStyle);
+        setText(sheet.createRow(firstNoteRow + 3), FIRST_NOTE_COLUMN_INDEX, "- Giá trị 13 đại diện cho Hủy", noteStyle);
     }
 
     public ResBulkScoreFilePreviewDTO preview(Long columnId, MultipartFile file) {
@@ -212,6 +217,9 @@ public class BulkScoreFileService {
             DataFormatter formatter = new DataFormatter();
             for (int index = FIRST_DATA_ROW_INDEX; index <= sheet.getLastRowNum(); index++) {
                 Row row = sheet.getRow(index);
+                if (isImportNotesStart(row, formatter)) {
+                    break;
+                }
                 if (isBlankRow(row, formatter)) {
                     continue;
                 }
@@ -410,6 +418,10 @@ public class BulkScoreFileService {
                 decision.errorMessage() == null ? (decision.skipped() ? "SKIPPED" : "VALID") : "ERROR",
                 decision.errorMessage() == null ? null : "INVALID_ROW",
                 decision.errorMessage());
+    }
+
+    private boolean isImportNotesStart(Row row, DataFormatter formatter) {
+        return row != null && IMPORT_NOTES_LABEL.equalsIgnoreCase(text(row.getCell(0), formatter));
     }
 
     private boolean isBlankRow(Row row, DataFormatter formatter) {
