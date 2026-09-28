@@ -385,9 +385,10 @@ class LessonLogServiceTest {
     }
 
     private LessonLogEntry entry() {
+        ZoneId businessZone = ZoneId.of("Asia/Ho_Chi_Minh");
         LessonLogEntry e = LessonLogEntry.create(new LessonLogEntrySourceData(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L,
-                LocalDate.now().minusDays(1), "MORNING", 1, "{}", LocalDateTime.now().minusHours(2),
-                LocalDateTime.now().plusHours(2), null));
+                LocalDate.now(businessZone).minusDays(1), "MORNING", 1, "{}",
+                LocalDateTime.now(businessZone).minusHours(2), LocalDateTime.now(businessZone).plusHours(2), null));
         org.springframework.test.util.ReflectionTestUtils.setField(e, "id", 7L);
         return e;
     }

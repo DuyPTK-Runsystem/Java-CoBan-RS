@@ -396,7 +396,7 @@ class PlacementServiceTest {
         ResPlacementSessionDTO response = service.cancel(1L, new ReqPlacementActionDTO(0L, null));
 
         assertEquals(PlacementSessionStatus.CANCELLED, response.status());
-        verify(sessions).save(session);
+        verify(sessions).saveAndFlush(session);
         ArgumentCaptor<AuditLog> auditCaptor = ArgumentCaptor.forClass(AuditLog.class);
         verify(audits).save(auditCaptor.capture());
         checkCancelledPlacementAudit(auditCaptor.getValue());
