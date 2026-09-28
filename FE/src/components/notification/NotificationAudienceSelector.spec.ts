@@ -105,15 +105,20 @@ describe('NotificationAudienceSelector', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('Người nhận')
-    expect(wrapper.text()).toContain('Chọn một hoặc nhiều người nhận')
+    expect(wrapper.text()).toContain('Chọn tất cả')
     const results = wrapper.findAll('button.audience-result')
     await results[0]!.trigger('click')
     expect(wrapper.emitted('update:recipientUserIds')?.[0]).toEqual([[2]])
     expect(wrapper.text()).toContain('Nguyễn Văn A')
 
-    const removeButton = wrapper.find('button[aria-label="Bỏ chọn Nguyễn Văn A"]')
-    await removeButton.trigger('click')
+    await wrapper.setProps({ recipientUserIds: [2] })
+    await wrapper.vm.$nextTick()
+    expect(results[0]!.attributes('aria-selected')).toBe('true')
+    await results[0]!.trigger('click')
     expect(wrapper.emitted('update:recipientUserIds')?.[1]).toEqual([[]])
+    await wrapper.setProps({ recipientUserIds: [] })
+    await wrapper.vm.$nextTick()
+    expect(results[0]!.attributes('aria-selected')).toBe('false')
   })
 
   it('renders one checkbox per result without an extra checkmark and emits toggled recipient IDs', async () => {

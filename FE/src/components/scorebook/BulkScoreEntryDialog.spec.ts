@@ -304,6 +304,6 @@ describe('BulkScoreEntryDialog', () => {
     view.save()
 
     expect(wrapper.emitted('save')).toBeUndefined()
-    expect(view.validationMessage).toContain('dòng lỗi')
+    expect(view.validationMessage).toBe('Không có dòng điểm hợp lệ để lưu.')
   })
 })

@@ -59,7 +59,7 @@ describe('PlacementSessionSetup', () => {
     expect(wrapper.text()).toContain('8A1')
     expect(wrapper.text()).toContain('8A2')
     expect(wrapper.text()).toContain('HS101')
-    expect(wrapper.text()).toContain('Học sinh nhập học mới hoặc học lại cần có căn cứ và thông tin phê duyệt trước khi xếp lớp.')
+    expect(wrapper.text()).toContain('Nguồn học sinh')
     expect(wrapper.text()).toContain('✓ Đủ điều kiện lên lớp theo kết quả năm học trước. Không cần bổ sung hồ sơ.')
     expect(wrapper.text()).not.toContain('V3 · PLACEMENT')
     expect(wrapper.text()).not.toContain('CONTINUING')
