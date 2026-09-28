@@ -630,7 +630,6 @@ jobs:
           ACA_INFRA_SUBNET_CIDR: ${{ vars.ACA_INFRA_SUBNET_CIDR }}
           SEED_TARGET_ID: ${{ vars.DEMO_SEED_TARGET_ID }}
           ACA_NAME: ${{ vars.ACA_NAME }}
-          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
         run: |
           set -euo pipefail
           scripts/ci/run-demo-network-job.sh
