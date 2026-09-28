@@ -7,15 +7,16 @@ import com.JavaTraining.BaiTap_RS.functionalroom.repository.FunctionalRoomReposi
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Order(Ordered.LOWEST_PRECEDENCE)
+@Order(200)
 @ConditionalOnProperty(name = "app.seed.demo.enabled", havingValue = "true")
 public class DemoFunctionalRoomSeeder implements ApplicationRunner {
+
+    private final DemoSeedCompletion completion;
 
     private static final List<RoomSeed> ROOMS = List.of(
             new RoomSeed("LAB-PHY-01", "Phòng thí nghiệm Vật lý"),
@@ -27,13 +28,19 @@ public class DemoFunctionalRoomSeeder implements ApplicationRunner {
 
     private final FunctionalRoomRepository functionalRoomRepository;
 
-    public DemoFunctionalRoomSeeder(FunctionalRoomRepository functionalRoomRepository) {
+    public DemoFunctionalRoomSeeder(
+            FunctionalRoomRepository functionalRoomRepository,
+            DemoSeedCompletion completion) {
         this.functionalRoomRepository = functionalRoomRepository;
+        this.completion = completion;
     }
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+        if (completion.isComplete()) {
+            return;
+        }
         seedRooms();
     }
 

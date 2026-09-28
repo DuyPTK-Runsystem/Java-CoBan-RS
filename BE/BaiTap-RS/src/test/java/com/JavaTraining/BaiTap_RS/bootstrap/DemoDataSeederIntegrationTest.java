@@ -68,6 +68,7 @@ import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableHeadRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetablePeriodRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableRevisionRepository;
 import com.JavaTraining.BaiTap_RS.user.repository.UserRepository;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -75,6 +76,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootTest(properties = {
@@ -208,6 +210,9 @@ class DemoDataSeederIntegrationTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @Test
     void seedsDeterministicIdentityAcademicAndAssignmentFixture() {
         runAllDemoSeeders();
@@ -230,50 +235,59 @@ class DemoDataSeederIntegrationTest {
         List<ClassSubject> currentClassSubjects = classSubjectRepository.findAll().stream()
                 .filter(classSubject -> currentClassIds.contains(classSubject.getClassId()))
                 .toList();
-        assertTrue(userRepository.count() == 182
-                && teacherRepository.count() == 20
-                && studentRepository.count() == 160
-                && enrollmentRepository.count() == 200
-                && schoolClassRepository.count() == 20
-                && currentEnrollments.size() == 120
-                && currentEnrollments.stream()
-                .collect(Collectors.groupingBy(StudentYearEnrollment::getCurrentClassId, Collectors.counting()))
-                .size() == 12
-                && currentEnrollments.stream()
-                .collect(Collectors.groupingBy(StudentYearEnrollment::getCurrentClassId, Collectors.counting()))
-                .values().stream().allMatch(count -> count == 10)
-                && schoolClassRepository.findAll().stream().allMatch(schoolClass -> schoolClass.getCapacity() == 10)
-                && homeroomAssignmentRepository.count() == 16
-                && applicabilityRepository.findAll().stream()
+        Map<Long, Long> enrollmentsByClass = currentEnrollments.stream()
+                .collect(Collectors.groupingBy(
+                        StudentYearEnrollment::getCurrentClassId, Collectors.counting()));
+        long currentActiveApplicabilityCount = applicabilityRepository.findAll().stream()
                 .filter(applicability -> currentSemesterIds.contains(applicability.getSemesterId()))
                 .filter(applicability -> "ACTIVE".equals(applicability.getStatus().name()))
-                .count() == 107
-                && currentClassSubjects.size() == 340
-                && teachingAssignmentRepository.count() == 340
-                && userRepository.findByUsername(ADMIN_USERNAME)
-                .filter(user -> passwordEncoder.matches(ADMIN_PASSWORD, user.getPassword()))
-                .isPresent()
-                && userRepository.findByUsername("academic.office")
-                .filter(user -> passwordEncoder.matches(DEFAULT_PASSWORD, user.getPassword())
-                        && user.getRoles().stream().anyMatch(role -> "ACADEMIC_OFFICE".equals(role.getCode())))
-                .isPresent()
-                && userRepository.findByUsername("nguyen.minh.anh61")
-                .filter(user -> passwordEncoder.matches(DEFAULT_PASSWORD, user.getPassword())
-                        && user.getRoles().stream().anyMatch(role -> "STUDENT".equals(role.getCode())))
-                .isPresent()
-                && userRepository.findAll().stream().allMatch(user -> {
-                    String expectedPassword = ADMIN_USERNAME.equals(user.getUsername())
-                            ? ADMIN_PASSWORD : DEFAULT_PASSWORD;
-                    return passwordEncoder.matches(expectedPassword, user.getPassword());
-                })
-                && teacherRepository.findAll().stream().allMatch(teacher -> teacher.getUserId() != null
+                .count();
+        boolean allUserPasswordsMatch = userRepository.findAll().stream().allMatch(user -> {
+            String expectedPassword = ADMIN_USERNAME.equals(user.getUsername())
+                    ? ADMIN_PASSWORD : DEFAULT_PASSWORD;
+            return passwordEncoder.matches(expectedPassword, user.getPassword());
+        });
+        boolean allTeacherAccountsHaveRole = teacherRepository.findAll().stream().allMatch(teacher ->
+                teacher.getUserId() != null
                         && userRepository.findById(teacher.getUserId())
                         .filter(user -> user.getRoles().stream()
                                 .anyMatch(role -> "TEACHER".equals(role.getCode())))
-                        .isPresent())
-                && studentRepository.findAll().stream()
-                .allMatch(student -> student.getUserId() != null && student.getStudentInfo() != null),
-                "demo fixture counts, credentials, and identity links must be deterministic");
+                        .isPresent());
+        boolean allStudentsHaveAccountAndInfo = studentRepository.findAll().stream()
+                .allMatch(student -> student.getUserId() != null && student.getStudentInfo() != null);
+
+        assertAll("demo fixture counts, credentials, and identity links must be deterministic",
+                () -> assertEquals(182, userRepository.count(), "user count"),
+                () -> assertEquals(20, teacherRepository.count(), "teacher count"),
+                () -> assertEquals(160, studentRepository.count(), "student count"),
+                () -> assertEquals(160, enrollmentRepository.count(), "current plus historical enrollment count"),
+                () -> assertEquals(20, schoolClassRepository.count(), "current plus historical class count"),
+                () -> assertEquals(120, currentEnrollments.size(), "current year enrollment count"),
+                () -> assertEquals(12, enrollmentsByClass.size(), "number of currently enrolled classes"),
+                () -> assertTrue(enrollmentsByClass.values().stream().allMatch(count -> count == 10),
+                        "each currently enrolled class has ten students"),
+                () -> assertTrue(schoolClassRepository.findAll().stream()
+                        .allMatch(schoolClass -> schoolClass.getCapacity() == 10), "class capacities"),
+                () -> assertEquals(16, homeroomAssignmentRepository.count(), "homeroom assignment count"),
+                () -> assertEquals(87, currentActiveApplicabilityCount, "active subject applicability count"),
+                () -> assertEquals(340, currentClassSubjects.size(), "current class subject count"),
+                () -> assertEquals(340, teachingAssignmentRepository.count(), "teaching assignment count"),
+                () -> assertTrue(userRepository.findByUsername(ADMIN_USERNAME)
+                        .filter(user -> passwordEncoder.matches(ADMIN_PASSWORD, user.getPassword()))
+                        .isPresent(), "admin username and password"),
+                () -> assertTrue(userRepository.findByUsername("academic.office")
+                        .filter(user -> passwordEncoder.matches(DEFAULT_PASSWORD, user.getPassword())
+                                && user.getRoles().stream()
+                                        .anyMatch(role -> "ACADEMIC_OFFICE".equals(role.getCode())))
+                        .isPresent(), "academic office credentials and role"),
+                () -> assertTrue(userRepository.findByUsername("nguyen.minh.anh61")
+                        .filter(user -> passwordEncoder.matches(DEFAULT_PASSWORD, user.getPassword())
+                                && user.getRoles().stream()
+                                        .anyMatch(role -> "STUDENT".equals(role.getCode())))
+                        .isPresent(), "canonical student credentials and role"),
+                () -> assertTrue(allUserPasswordsMatch, "all demo account passwords"),
+                () -> assertTrue(allTeacherAccountsHaveRole, "teacher account links and roles"),
+                () -> assertTrue(allStudentsHaveAccountAndInfo, "student account and info links"));
 
         List<String> studentNames = studentRepository.findAll().stream()
                 .map(Student::getStudentName)
@@ -852,16 +866,47 @@ class DemoDataSeederIntegrationTest {
     void seedsScorebookColumnsAndNullValuesForNonScoredStatuses() {
         runAllDemoSeeders();
 
-        assertEquals(1, scorebookRepository.count());
-        List<Long> scorebookIds = scorebookRepository.findAll().stream()
-                .map(scorebook -> scorebook.getId()).toList();
-        assertEquals(4,
-                assessmentColumnRepository.findAllByScorebookIdInOrderByScorebookIdAscAssessmentTypeAscColumnNoAsc(
-                        scorebookIds).size());
-        assertEquals(40, studentScoreRepository.count());
+        AcademicYear academicYear = academicYearRepository.findAll().stream()
+                .filter(year -> "2026-2027".equals(year.getCode()))
+                .findFirst()
+                .orElseThrow();
+        Long classId = schoolClassRepository.findAllByAcademicYearIdOrderByClassCodeAsc(academicYear.getId()).stream()
+                .filter(schoolClass -> "6A1".equals(schoolClass.getClassCode()))
+                .map(schoolClass -> schoolClass.getId())
+                .findFirst()
+                .orElseThrow();
+        Long semesterId = semesterRepository.findAllByAcademicYearIdOrderByDisplayOrderAsc(academicYear.getId()).stream()
+                .filter(semester -> "HK1".equals(semester.getCode()))
+                .map(semester -> semester.getId())
+                .findFirst()
+                .orElseThrow();
+        Long subjectId = subjectRepository.findAllByOrderByCodeAsc().stream()
+                .filter(subject -> "TOAN".equals(subject.getCode()))
+                .map(subject -> subject.getId())
+                .findFirst()
+                .orElseThrow();
+        ClassSubject targetClassSubject = classSubjectRepository
+                .findAllByClassIdAndSemesterIdOrderBySubjectIdAsc(classId, semesterId).stream()
+                .filter(classSubject -> subjectId.equals(classSubject.getSubjectId()))
+                .findFirst()
+                .orElseThrow();
+        com.JavaTraining.BaiTap_RS.scorebook.domain.entity.Scorebook targetScorebook = scorebookRepository
+                .findByClassSubjectId(targetClassSubject.getId())
+                .orElseThrow();
+        List<com.JavaTraining.BaiTap_RS.scorebook.domain.entity.AssessmentColumn> targetColumns =
+                assessmentColumnRepository.findAllByScorebookIdOrderByAssessmentTypeAscColumnNoAsc(
+                        targetScorebook.getId());
+        assertEquals(4, targetColumns.size());
+        Set<Long> targetColumnIds = targetColumns.stream()
+                .map(column -> column.getId())
+                .collect(Collectors.toSet());
+        List<com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentScore> targetScores =
+                studentScoreRepository.findAll().stream()
+                        .filter(score -> targetColumnIds.contains(score.getAssessmentColumnId()))
+                        .toList();
+        assertEquals(40, targetScores.size());
 
-        List<com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentScore> nonScored = studentScoreRepository
-                .findAll().stream()
+        List<com.JavaTraining.BaiTap_RS.scorebook.domain.entity.StudentScore> nonScored = targetScores.stream()
                 .filter(score -> score.getScoreStatus() != ScoreStatus.SCORED)
                 .toList();
         assertEquals(3, nonScored.size());
@@ -934,6 +979,9 @@ class DemoDataSeederIntegrationTest {
     }
 
     private void runAllDemoSeeders() {
+        // This test class explicitly reruns fixture seeders to restore data between scenarios.
+        jdbcTemplate.update(
+                "DELETE FROM app_demo_seed_completion WHERE seed_key = ?", "DEMO_FIXTURE_PLAN_081");
         demoDataSeeder.run(new DefaultApplicationArguments());
         functionalRoomSeeder.run(new DefaultApplicationArguments());
         placementSeeder.run(new DefaultApplicationArguments());

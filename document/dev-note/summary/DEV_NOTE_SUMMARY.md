@@ -1,4 +1,5 @@
 # Dev Note Summary
+| 086 | BE/FE/Ops | [GitHub Actions demo CI/CD](../be/workflow-skill/086-github-actions-demo-ci-cd-2026-09-28.md) | Local workflow/IaC and operator runbook implemented; independent workflow/shell/SQL static QA PASS; Bicep compile exit 0 with no Bicep diagnostics; Azure quota/SKU and external CIDR/IPAM unverified; DBA verifier identity/secret setup pending; cloud NOT RUN. | 2026-09-28 |
 | 084 | BE | [Nạp `.env` khi chạy backend trực tiếp](../be/config/084-local-env-import-2026-09-24.md) | Runtime smoke PASS; focused H2 PASS; Checkstyle PASS; full test dừng theo yêu cầu, PMD/build NOT RUN | 2026-09-24 |
 | 079.6 | FE | [Việt hóa chi tiết sổ đầu bài](../fe/lesson-log/079.6-localize-entry-detail-2026-09-24.md) | Tiến độ và xếp loại dùng nhãn tiếng Việt; ngày/hạn sửa định dạng dd/mm/yyyy; lint/build NOT RUN do lỗi sandbox; tests/browser NOT RUN | 2026-09-24 |
 | 079.5 | FE | [Ẩn rubric khỏi cài đặt sổ đầu bài](../fe/lesson-log/079.5-hide-rubric-settings-2026-09-24.md) | Gỡ phần hiển thị rubric/CSS; giữ nguyên policy payload; lint/build NOT RUN do command runner lỗi sandbox; tests/browser NOT RUN | 2026-09-24 |

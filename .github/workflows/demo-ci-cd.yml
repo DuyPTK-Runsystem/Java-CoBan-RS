@@ -1,0 +1,640 @@
+name: Demo CI and deployment
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Demo operation
+        required: true
+        type: choice
+        options:
+          - deploy
+          - bootstrap
+          - rollback
+          - private-cutover
+      rollback_image:
+        description: Existing immutable ACR image, required only for rollback
+        required: false
+        type: string
+      cutover_image:
+        description: Currently deployed immutable ACR image, required only for private-cutover
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+# One environment lock shared by bootstrap, deployment, and rollback.
+concurrency:
+  group: demo-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  quality:
+    name: Frontend release gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: FE/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: FE
+        run: npm ci
+
+      - name: Frontend lint
+        working-directory: FE
+        run: npm run lint
+
+      - name: Frontend tests
+        working-directory: FE
+        run: npm test
+
+      - name: Frontend build
+        working-directory: FE
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+        run: |
+          test -n "$VITE_API_BASE_URL"
+          npm run build
+
+  backend-release-gates:
+    name: Backend focused release gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Focused seed tests
+        working-directory: BE/BaiTap-RS
+        run: >-
+          ./gradlew --no-daemon test
+          --tests 'com.JavaTraining.BaiTap_RS.bootstrap.DemoSeedCompletionTest'
+          --tests 'com.JavaTraining.BaiTap_RS.bootstrap.DemoDataSeederIntegrationTest'
+          --tests 'com.JavaTraining.BaiTap_RS.bootstrap.DemoNotificationSeedRunnerTest'
+          --tests 'com.JavaTraining.BaiTap_RS.bootstrap.DemoSeedActivationTest'
+
+      - name: Backend bootJar
+        working-directory: BE/BaiTap-RS
+        run: ./gradlew --no-daemon bootJar
+
+      - name: Backend Checkstyle main sources
+        working-directory: BE/BaiTap-RS
+        run: ./gradlew --no-daemon checkstyleMain
+
+      - name: Backend PMD main sources
+        working-directory: BE/BaiTap-RS
+        run: ./gradlew --no-daemon pmdMain
+
+  backend-baseline-observation:
+    name: Backend full-suite baseline observation (non-release-gating)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Full backend test suite baseline
+        id: full-tests
+        working-directory: BE/BaiTap-RS
+        run: ./gradlew --no-daemon test
+
+      - name: PMD test-source baseline
+        if: always()
+        working-directory: BE/BaiTap-RS
+        run: ./gradlew --no-daemon pmdTest
+
+  release-quality:
+    name: Required release quality gates
+    needs: [quality, backend-release-gates]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm frontend and focused backend gates passed
+        run: echo 'Frontend gates and focused backend seed/build/main-source gates passed.'
+
+  deployment-approval:
+    name: Protected demo deployment approval
+    needs: release-quality
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref_name == vars.DEPLOY_BRANCH) ||
+      (github.event_name == 'push' && github.ref_name == vars.DEPLOY_BRANCH)
+    runs-on: ubuntu-latest
+    environment: demo
+    steps:
+      - name: Approval gate
+        run: echo 'Protected demo deployment approved.'
+
+  release-image:
+    name: Build and publish immutable backend image
+    needs: [release-quality, deployment-approval]
+    if: >-
+      ((github.event_name == 'workflow_dispatch' || github.event_name == 'push') &&
+      github.ref_name == vars.DEPLOY_BRANCH)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+      verifier_image: ${{ steps.image.outputs.verifier_image }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check release branch and rollback image
+        env:
+          DEPLOY_BRANCH: ${{ vars.DEPLOY_BRANCH }}
+          OPERATION: ${{ github.event.inputs.operation || 'deploy' }}
+          ROLLBACK_IMAGE: ${{ github.event.inputs.rollback_image }}
+          CUTOVER_IMAGE: ${{ github.event.inputs.cutover_image }}
+          ACR_NAME: ${{ vars.ACR_NAME }}
+          ACR_REPOSITORY: ${{ vars.ACR_REPOSITORY }}
+        run: |
+          set -euo pipefail
+          test -n "$DEPLOY_BRANCH" && test "$GITHUB_REF_NAME" = "$DEPLOY_BRANCH"
+          expected_prefix="$ACR_NAME.azurecr.io/$ACR_REPOSITORY:"
+          if [ "$OPERATION" = 'rollback' ]; then
+            candidate="$ROLLBACK_IMAGE"
+            label='Rollback'
+          elif [ "$OPERATION" = 'private-cutover' ]; then
+            candidate="$CUTOVER_IMAGE"
+            label='Cutover'
+          else
+            candidate=''
+            label=''
+          fi
+          if [ -n "$label" ]; then
+            case "$candidate" in
+              "$expected_prefix"*) ;;
+              *) echo "$label image must belong to the configured ACR repository." >&2; exit 1 ;;
+            esac
+            tag="${candidate#"$expected_prefix"}"
+            [[ "$tag" =~ ^[0-9a-f]{40}$ ]]
+          fi
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push commit image to ACR
+        id: image
+        env:
+          ACR_NAME: ${{ vars.ACR_NAME }}
+          ACR_REPOSITORY: ${{ vars.ACR_REPOSITORY }}
+          DB_VERIFY_REPOSITORY: ${{ vars.DEMO_DB_VERIFY_REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+          OPERATION: ${{ github.event.inputs.operation || 'deploy' }}
+          ROLLBACK_IMAGE: ${{ github.event.inputs.rollback_image }}
+          CUTOVER_IMAGE: ${{ github.event.inputs.cutover_image }}
+        run: |
+          set -euo pipefail
+          test -n "$ACR_NAME"
+          test -n "$ACR_REPOSITORY"
+          test -n "$DB_VERIFY_REPOSITORY"
+          if [ "$OPERATION" = 'private-cutover' ]; then
+            expected_prefix="$ACR_NAME.azurecr.io/$ACR_REPOSITORY:"
+            tag="${CUTOVER_IMAGE#"$expected_prefix"}"
+            az acr repository show-tags --name "$ACR_NAME" --repository "$ACR_REPOSITORY" --output tsv | grep -Fx "$tag" >/dev/null
+            echo "image=$CUTOVER_IMAGE" >> "$GITHUB_OUTPUT"
+          elif [ "$OPERATION" = 'rollback' ]; then
+            expected_prefix="$ACR_NAME.azurecr.io/$ACR_REPOSITORY:"
+            tag="${ROLLBACK_IMAGE#"$expected_prefix"}"
+            az acr repository show-tags --name "$ACR_NAME" --repository "$ACR_REPOSITORY" --output tsv | grep -Fx "$tag" >/dev/null
+            echo "image=$ROLLBACK_IMAGE" >> "$GITHUB_OUTPUT"
+          else
+            az acr build \
+              --registry "$ACR_NAME" \
+              --image "$ACR_REPOSITORY:$IMAGE_TAG" \
+              BE/BaiTap-RS
+            echo "image=$ACR_NAME.azurecr.io/$ACR_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          fi
+          az acr build \
+            --registry "$ACR_NAME" \
+            --image "$DB_VERIFY_REPOSITORY:$IMAGE_TAG" \
+            --file infra/plan086-db-verify/Dockerfile \
+            .
+          echo "verifier_image=$ACR_NAME.azurecr.io/$DB_VERIFY_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+
+  database-preflight:
+    name: Verify VNet topology and classify MySQL seed state
+    needs: release-image
+    if: needs.release-image.result == 'success' && (github.event_name != 'workflow_dispatch' || github.event.inputs.operation != 'private-cutover')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify app, Job, PE and DNS resource wiring
+        id: network
+        env:
+          ACA_NAME: ${{ vars.ACA_NAME }}
+          ACA_JOB_NAME: ${{ vars.ACA_JOB_NAME }}
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          ACA_INFRA_SUBNET_ID: ${{ vars.ACA_INFRA_SUBNET_ID }}
+          MYSQL_SERVER_RESOURCE_ID: ${{ vars.MYSQL_SERVER_RESOURCE_ID }}
+          MYSQL_PRIVATE_ENDPOINT_NAME: ${{ vars.MYSQL_PRIVATE_ENDPOINT_NAME }}
+          MYSQL_PRIVATE_ENDPOINT_SUBNET_ID: ${{ vars.MYSQL_PRIVATE_ENDPOINT_SUBNET_ID }}
+          DEMO_NETWORK_RESOURCE_GROUP: ${{ vars.DEMO_NETWORK_RESOURCE_GROUP }}
+          NETWORK_STAGE: preflight
+        run: scripts/ci/verify-demo-azure-network.sh
+
+      - name: Classify seed state from a VNet-attached ACA Job
+        env:
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          ACA_JOB_NAME: ${{ vars.ACA_JOB_NAME }}
+          DB_VERIFY_IMAGE: ${{ needs.release-image.outputs.verifier_image }}
+          DB_JOB_TASK: preflight
+          MYSQL_HOST: ${{ vars.DEMO_MYSQL_HOST }}
+          MYSQL_DATABASE: ${{ vars.DEMO_MYSQL_DATABASE }}
+          MYSQL_USER: ${{ vars.DEMO_MYSQL_USER }}
+          MYSQL_PRIVATE_ENDPOINT_IP: ${{ steps.network.outputs.mysql_private_endpoint_ip }}
+          ACA_INFRA_SUBNET_CIDR: ${{ vars.ACA_INFRA_SUBNET_CIDR }}
+          SEED_TARGET_ID: ${{ vars.DEMO_SEED_TARGET_ID }}
+          EXPECTED_IMAGE: ${{ needs.release-image.outputs.image }}
+          OPERATION: ${{ github.event.inputs.operation == 'private-cutover' && 'deploy' || github.event.inputs.operation || 'deploy' }}
+        run: scripts/ci/run-demo-network-job.sh
+
+  deploy-backend:
+    name: Deploy backend with seeding disabled
+    needs: [release-image, database-preflight]
+    if: >-
+      needs.database-preflight.result == 'success' &&
+      (github.event_name == 'workflow_dispatch' || github.ref_name == vars.DEPLOY_BRANCH) &&
+      (github.event_name != 'workflow_dispatch' || github.event.inputs.operation != 'private-cutover')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      api_url: ${{ steps.deploy.outputs.api_url }}
+    steps:
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy revision and wait for readiness
+        id: deploy
+        env:
+          ACA_NAME: ${{ vars.ACA_NAME }}
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          IMAGE: ${{ needs.release-image.outputs.image }}
+          OPERATION: ${{ github.event.inputs.operation || 'deploy' }}
+          SEED_TARGET_ID: ${{ vars.DEMO_SEED_TARGET_ID }}
+          ACA_MIN_REPLICAS: ${{ vars.ACA_MIN_REPLICAS }}
+          ACA_MAX_REPLICAS: ${{ vars.ACA_MAX_REPLICAS }}
+        run: |
+            set -euo pipefail
+            app="$ACA_NAME"
+            group="$AZURE_RESOURCE_GROUP"
+            image="$IMAGE"
+            operation="$OPERATION"
+            target="$SEED_TARGET_ID"
+            test -n "$app" && test -n "$group" && test -n "$target"
+
+            mode="$(az containerapp show --name "$app" --resource-group "$group" --query properties.configuration.activeRevisionsMode --output tsv)"
+            if [ "$mode" != 'Single' ]; then
+              echo 'Refusing deployment: Container App must use Single revision mode.' >&2
+              exit 1
+            fi
+
+            api_url="https://$(az containerapp show --name "$app" --resource-group "$group" --query properties.configuration.ingress.fqdn --output tsv)"
+            test -n "$api_url"
+
+            if [ "$operation" = 'bootstrap' ]; then
+              seed_flag='true'
+            else
+              seed_flag='false'
+            fi
+
+            # The explicit false is also used by the EXIT cleanup after failed bootstrap.
+            cleanup() {
+              status=$?
+              if [ "$status" -ne 0 ] && [ "$operation" = 'bootstrap' ]; then
+                echo 'Bootstrap failed; forcing a new revision with demo seeding disabled.' >&2
+                az containerapp update \
+                  --name "$app" --resource-group "$group" \
+                  --image "$image" \
+                  --min-replicas 1 --max-replicas 1 \
+                  --set-env-vars APP_SEED_DEMO_ENABLED=false APP_SEED_DEMO_TARGET_ID="$target" APP_SEED_DEMO_DEPLOYMENT_REF="$image" || true
+              fi
+              exit "$status"
+            }
+            trap cleanup EXIT
+
+            if [ "$operation" = 'bootstrap' ]; then
+              min_replicas=1
+              max_replicas=1
+            else
+              min_replicas="$ACA_MIN_REPLICAS"
+              max_replicas="$ACA_MAX_REPLICAS"
+              test -n "$min_replicas" && test -n "$max_replicas"
+            fi
+
+            az containerapp update \
+              --name "$app" --resource-group "$group" \
+              --image "$image" \
+              --min-replicas "$min_replicas" --max-replicas "$max_replicas" \
+              --set-env-vars APP_SEED_DEMO_ENABLED="$seed_flag" APP_SEED_DEMO_TARGET_ID="$target" APP_SEED_DEMO_DEPLOYMENT_REF="$image"
+
+            deadline=$((SECONDS + 900))
+            until curl --fail --silent --show-error "$api_url/actuator/health/readiness" >/dev/null; do
+              if [ "$SECONDS" -ge "$deadline" ]; then
+                echo 'Readiness did not become healthy before timeout.' >&2
+                exit 1
+              fi
+              sleep 10
+            done
+
+            if [ "$operation" = 'bootstrap' ]; then
+              echo 'Bootstrap revision is ready; a separate private DB verifier must confirm the completion marker before disabling the seed flag.'
+            fi
+
+            echo "api_url=$api_url" >> "$GITHUB_OUTPUT"
+
+  database-postflight:
+    name: Verify completion marker and disable bootstrap seed flag
+    needs: [release-image, database-preflight, deploy-backend]
+    if: needs.deploy-backend.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify ACA network resources
+        id: network
+        env:
+          ACA_NAME: ${{ vars.ACA_NAME }}
+          ACA_JOB_NAME: ${{ vars.ACA_JOB_NAME }}
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          ACA_INFRA_SUBNET_ID: ${{ vars.ACA_INFRA_SUBNET_ID }}
+          MYSQL_SERVER_RESOURCE_ID: ${{ vars.MYSQL_SERVER_RESOURCE_ID }}
+          MYSQL_PRIVATE_ENDPOINT_NAME: ${{ vars.MYSQL_PRIVATE_ENDPOINT_NAME }}
+          MYSQL_PRIVATE_ENDPOINT_SUBNET_ID: ${{ vars.MYSQL_PRIVATE_ENDPOINT_SUBNET_ID }}
+          DEMO_NETWORK_RESOURCE_GROUP: ${{ vars.DEMO_NETWORK_RESOURCE_GROUP }}
+          NETWORK_STAGE: preflight
+        run: scripts/ci/verify-demo-azure-network.sh
+
+      - name: Verify completion marker through ACA Job
+        env:
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          ACA_JOB_NAME: ${{ vars.ACA_JOB_NAME }}
+          DB_VERIFY_IMAGE: ${{ needs.release-image.outputs.verifier_image }}
+          DB_JOB_TASK: postflight
+          MYSQL_HOST: ${{ vars.DEMO_MYSQL_HOST }}
+          MYSQL_DATABASE: ${{ vars.DEMO_MYSQL_DATABASE }}
+          MYSQL_USER: ${{ vars.DEMO_MYSQL_USER }}
+          MYSQL_PRIVATE_ENDPOINT_IP: ${{ steps.network.outputs.mysql_private_endpoint_ip }}
+          ACA_INFRA_SUBNET_CIDR: ${{ vars.ACA_INFRA_SUBNET_CIDR }}
+          SEED_TARGET_ID: ${{ vars.DEMO_SEED_TARGET_ID }}
+          EXPECTED_IMAGE: ${{ needs.release-image.outputs.image }}
+          OPERATION: ${{ github.event.inputs.operation || 'deploy' }}
+        run: scripts/ci/run-demo-network-job.sh
+
+      - name: Disable seed flag and verify application health
+        env:
+          ACA_NAME: ${{ vars.ACA_NAME }}
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          SEED_TARGET_ID: ${{ vars.DEMO_SEED_TARGET_ID }}
+          EXPECTED_IMAGE: ${{ needs.release-image.outputs.image }}
+          OPERATION: ${{ github.event.inputs.operation || 'deploy' }}
+          API_URL: ${{ needs.deploy-backend.outputs.api_url }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 12 --retry-delay 5 "$API_URL/actuator/health" | jq -e '.status == "UP"' >/dev/null
+          if [[ "$OPERATION" == 'bootstrap' ]]; then
+            az containerapp update \
+              --name "$ACA_NAME" --resource-group "$AZURE_RESOURCE_GROUP" \
+              --image "$EXPECTED_IMAGE" --min-replicas 1 --max-replicas 1 \
+              --set-env-vars APP_SEED_DEMO_ENABLED=false APP_SEED_DEMO_TARGET_ID="$SEED_TARGET_ID" APP_SEED_DEMO_DEPLOYMENT_REF="$EXPECTED_IMAGE" >/dev/null
+          fi
+          flag="$(az containerapp show --name "$ACA_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --query "properties.template.containers[0].env[?name=='APP_SEED_DEMO_ENABLED'].value | [0]" --output tsv)"
+          [[ "$flag" == 'false' ]] || { echo 'Active app template does not explicitly disable demo seeding.' >&2; exit 1; }
+          mode="$(az containerapp show --name "$ACA_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --query properties.configuration.activeRevisionsMode --output tsv)"
+          [[ "$mode" == 'Single' ]] || { echo 'Container App is not in Single revision mode.' >&2; exit 1; }
+          active_count="$(az containerapp revision list --name "$ACA_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --query '[?properties.active == `true`] | length(@)' --output tsv)"
+          [[ "$active_count" == '1' ]] || { echo "Expected one active revision, found $active_count." >&2; exit 1; }
+          curl --fail --silent --show-error --retry 30 --retry-delay 10 --retry-connrefused "$API_URL/actuator/health/readiness" >/dev/null
+
+  bootstrap-cleanup:
+    name: Force seed disabled after failed bootstrap verification
+    needs: [release-image, database-postflight, deploy-backend]
+    if: >-
+      always() &&
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.operation == 'bootstrap' &&
+      needs.deploy-backend.result == 'success' &&
+      needs.deploy-backend.result != 'skipped' &&
+      needs.database-postflight.result != 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Deploy same image with demo seeding disabled
+        env:
+          ACA_NAME: ${{ vars.ACA_NAME }}
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          IMAGE: ${{ needs.release-image.outputs.image }}
+          SEED_TARGET_ID: ${{ vars.DEMO_SEED_TARGET_ID }}
+        run: |
+          set -euo pipefail
+          az containerapp update \
+            --name "$ACA_NAME" --resource-group "$AZURE_RESOURCE_GROUP" \
+            --image "$IMAGE" --min-replicas 1 --max-replicas 1 \
+            --set-env-vars APP_SEED_DEMO_ENABLED=false APP_SEED_DEMO_TARGET_ID="$SEED_TARGET_ID" APP_SEED_DEMO_DEPLOYMENT_REF="$IMAGE"
+
+  deploy-frontend:
+    name: Build and deploy frontend to Vercel
+    needs: [database-postflight, deploy-backend]
+    if: needs.database-postflight.result == 'success' && needs.deploy-backend.result == 'success' && github.event.inputs.operation != 'private-cutover'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: FE/package-lock.json
+
+      - name: Build production frontend
+        working-directory: FE
+        env:
+          VITE_API_BASE_URL: ${{ needs.deploy-backend.outputs.api_url }}
+        run: |
+          test -n "$VITE_API_BASE_URL"
+          npm ci
+          npm run build
+
+      - name: Deploy to Vercel
+        working-directory: FE
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+          VITE_API_BASE_URL: ${{ needs.deploy-backend.outputs.api_url }}
+        run: |
+          set -euo pipefail
+          test -n "$VERCEL_TOKEN" && test -n "$VERCEL_ORG_ID" && test -n "$VERCEL_PROJECT_ID"
+          npx --yes vercel pull --yes --environment=production --token "$VERCEL_TOKEN"
+          npx --yes vercel build --prod --token "$VERCEL_TOKEN"
+          npx --yes vercel deploy --prebuilt --prod --yes --token "$VERCEL_TOKEN"
+
+  database-private-cutover:
+    name: Explicitly cut over MySQL to private-only access
+    needs: [release-image, deployment-approval]
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.operation == 'private-cutover' && needs.deployment-approval.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify private connection before denying public MySQL access
+        id: private-route
+        env:
+          ACA_NAME: ${{ vars.ACA_NAME }}
+          ACA_JOB_NAME: ${{ vars.ACA_JOB_NAME }}
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          ACA_INFRA_SUBNET_ID: ${{ vars.ACA_INFRA_SUBNET_ID }}
+          MYSQL_SERVER_RESOURCE_ID: ${{ vars.MYSQL_SERVER_RESOURCE_ID }}
+          MYSQL_PRIVATE_ENDPOINT_NAME: ${{ vars.MYSQL_PRIVATE_ENDPOINT_NAME }}
+          MYSQL_PRIVATE_ENDPOINT_SUBNET_ID: ${{ vars.MYSQL_PRIVATE_ENDPOINT_SUBNET_ID }}
+          DEMO_NETWORK_RESOURCE_GROUP: ${{ vars.DEMO_NETWORK_RESOURCE_GROUP }}
+          NETWORK_STAGE: preflight
+        run: scripts/ci/verify-demo-azure-network.sh
+
+      - name: Verify active immutable image and Plan 081 marker before cutover
+        env:
+          ACA_NAME: ${{ vars.ACA_NAME }}
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          ACTIVE_IMAGE_EXPECTED: ${{ needs.release-image.outputs.image }}
+          ACA_JOB_NAME: ${{ vars.ACA_JOB_NAME }}
+          DB_VERIFY_IMAGE: ${{ needs.release-image.outputs.verifier_image }}
+          DB_JOB_TASK: postflight
+          MYSQL_HOST: ${{ vars.DEMO_MYSQL_HOST }}
+          MYSQL_DATABASE: ${{ vars.DEMO_MYSQL_DATABASE }}
+          MYSQL_USER: ${{ vars.DEMO_MYSQL_USER }}
+          MYSQL_PRIVATE_ENDPOINT_IP: ${{ steps.private-route.outputs.mysql_private_endpoint_ip }}
+          ACA_INFRA_SUBNET_CIDR: ${{ vars.ACA_INFRA_SUBNET_CIDR }}
+          SEED_TARGET_ID: ${{ vars.DEMO_SEED_TARGET_ID }}
+          EXPECTED_IMAGE: ${{ needs.release-image.outputs.image }}
+          OPERATION: private-cutover
+        run: |
+          set -euo pipefail
+          mode="$(az containerapp show --name "$ACA_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --query properties.configuration.activeRevisionsMode --output tsv)"
+          [[ "$mode" == 'Single' ]] || { echo 'Private cutover requires Single revision mode.' >&2; exit 1; }
+          active_count="$(az containerapp revision list --name "$ACA_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --query '[?properties.active == `true`] | length(@)' --output tsv)"
+          [[ "$active_count" == '1' ]] || { echo "Expected exactly one active ACA revision, found $active_count." >&2; exit 1; }
+          active_image="$(az containerapp show --name "$ACA_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --query properties.template.containers[0].image --output tsv)"
+          [[ "$active_image" == "$ACTIVE_IMAGE_EXPECTED" ]] || { echo "Active ACA image '$active_image' does not match approved immutable image '$ACTIVE_IMAGE_EXPECTED'." >&2; exit 1; }
+          scripts/ci/run-demo-network-job.sh
+
+      - name: Confirm current application readiness before database cutover
+        env:
+          ACA_NAME: ${{ vars.ACA_NAME }}
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+        run: |
+          set -euo pipefail
+          api_host="$(az containerapp show --name "$ACA_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --query properties.configuration.ingress.fqdn --output tsv)"
+          test -n "$api_host" && test "$api_host" != 'None'
+          curl --fail --silent --show-error "https://$api_host/actuator/health/readiness" | jq -e '.status == "UP"' >/dev/null
+
+      - name: Disable MySQL public networking and remove broad firewall rules
+        env:
+          MYSQL_SERVER_RESOURCE_ID: ${{ vars.MYSQL_SERVER_RESOURCE_ID }}
+        run: |
+          set -euo pipefail
+          mysql_server_name="${MYSQL_SERVER_RESOURCE_ID##*/}"
+          mysql_group="$(sed -n 's#^/subscriptions/[^/]*/resourceGroups/\([^/]*\)/.*#\1#p' <<< "$MYSQL_SERVER_RESOURCE_ID")"
+          test -n "$mysql_group"
+          az mysql flexible-server update --name "$mysql_server_name" --resource-group "$mysql_group" --public-access Disabled --output none
+          firewall_rules="$(az mysql flexible-server firewall-rule list --name "$mysql_server_name" --resource-group "$mysql_group" --output json)"
+          jq -r '.[] | select((.startIpAddress == "0.0.0.0" and .endIpAddress == "255.255.255.255") or (.startIpAddress == "0.0.0.0" and .endIpAddress == "0.0.0.0")) | .name' <<< "$firewall_rules" | while IFS= read -r rule_name; do
+            test -n "$rule_name"
+            az mysql flexible-server firewall-rule delete --name "$mysql_server_name" --resource-group "$mysql_group" --rule-name "$rule_name" --yes
+          done
+
+      - name: Verify private-only Azure network state after cutover
+        id: postcutover-network
+        env:
+          ACA_NAME: ${{ vars.ACA_NAME }}
+          ACA_JOB_NAME: ${{ vars.ACA_JOB_NAME }}
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          ACA_INFRA_SUBNET_ID: ${{ vars.ACA_INFRA_SUBNET_ID }}
+          MYSQL_SERVER_RESOURCE_ID: ${{ vars.MYSQL_SERVER_RESOURCE_ID }}
+          MYSQL_PRIVATE_ENDPOINT_NAME: ${{ vars.MYSQL_PRIVATE_ENDPOINT_NAME }}
+          MYSQL_PRIVATE_ENDPOINT_SUBNET_ID: ${{ vars.MYSQL_PRIVATE_ENDPOINT_SUBNET_ID }}
+          DEMO_NETWORK_RESOURCE_GROUP: ${{ vars.DEMO_NETWORK_RESOURCE_GROUP }}
+          NETWORK_STAGE: postcutover
+        run: scripts/ci/verify-demo-azure-network.sh
+
+      - name: Probe MySQL and application after public cutover
+        env:
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          ACA_JOB_NAME: ${{ vars.ACA_JOB_NAME }}
+          DB_VERIFY_IMAGE: ${{ needs.release-image.outputs.verifier_image }}
+          DB_JOB_TASK: probe
+          MYSQL_HOST: ${{ vars.DEMO_MYSQL_HOST }}
+          MYSQL_DATABASE: ${{ vars.DEMO_MYSQL_DATABASE }}
+          MYSQL_USER: ${{ vars.DEMO_MYSQL_USER }}
+          MYSQL_PRIVATE_ENDPOINT_IP: ${{ steps.postcutover-network.outputs.mysql_private_endpoint_ip }}
+          ACA_INFRA_SUBNET_CIDR: ${{ vars.ACA_INFRA_SUBNET_CIDR }}
+          SEED_TARGET_ID: ${{ vars.DEMO_SEED_TARGET_ID }}
+          ACA_NAME: ${{ vars.ACA_NAME }}
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+        run: |
+          set -euo pipefail
+          scripts/ci/run-demo-network-job.sh
+          api_host="$(az containerapp show --name "$ACA_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --query properties.configuration.ingress.fqdn --output tsv)"
+          test -n "$api_host" && test "$api_host" != 'None'
+          curl --fail --silent --show-error --retry 12 --retry-delay 5 "https://$api_host/actuator/health" | jq -e '.status == "UP"' >/dev/null
+          echo 'Private MySQL access and ACA database health are healthy after public networking was disabled.'

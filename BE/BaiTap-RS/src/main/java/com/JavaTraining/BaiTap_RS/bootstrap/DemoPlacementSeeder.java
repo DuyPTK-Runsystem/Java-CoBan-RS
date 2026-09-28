@@ -22,15 +22,16 @@ import com.JavaTraining.BaiTap_RS.student.repository.StudentRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Order(Ordered.LOWEST_PRECEDENCE)
+@Order(300)
 @ConditionalOnProperty(name = "app.seed.demo.enabled", havingValue = "true")
 public class DemoPlacementSeeder implements ApplicationRunner {
+
+    private final DemoSeedCompletion completion;
 
     private static final String ACADEMIC_YEAR_CODE = "2026-2027";
     private static final String RULE_VERSION = "placement-rule-v1";
@@ -53,18 +54,23 @@ public class DemoPlacementSeeder implements ApplicationRunner {
             StudentRepository studentRepository,
             PlacementSessionRepository sessionRepository,
             PlacementCandidateRepository candidateRepository,
-            PlacementResultRepository resultRepository) {
+            PlacementResultRepository resultRepository,
+            DemoSeedCompletion completion) {
         this.academicYearRepository = academicYearRepository;
         this.gradeLevelRepository = gradeLevelRepository;
         this.schoolClassRepository = schoolClassRepository;
         this.studentRepository = studentRepository;
         this.sessionRepository = sessionRepository;
         this.seedWriter = new DemoPlacementSeedWriter(candidateRepository, resultRepository);
+        this.completion = completion;
     }
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+        if (completion.isComplete()) {
+            return;
+        }
         AcademicYear academicYear = academicYearRepository.findAll().stream()
                 .filter(year -> ACADEMIC_YEAR_CODE.equals(year.getCode()))
                 .findFirst()

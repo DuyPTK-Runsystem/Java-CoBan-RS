@@ -15,17 +15,11 @@ import com.JavaTraining.BaiTap_RS.notification.repository.NotificationRepository
 import com.JavaTraining.BaiTap_RS.user.domain.entity.User;
 import com.JavaTraining.BaiTap_RS.user.repository.UserRepository;
 import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Order(Ordered.LOWEST_PRECEDENCE)
-@ConditionalOnProperty(name = "app.seed.demo.enabled", havingValue = "true")
-public class DemoNotificationSeeder implements ApplicationRunner {
+public class DemoNotificationSeeder {
 
     private static final String SCHOOL_SCOPE = "DEFAULT_SCHOOL";
     private static final String SENDER_USERNAME = "academic.office";
@@ -53,7 +47,6 @@ public class DemoNotificationSeeder implements ApplicationRunner {
         this.userRepository = userRepository;
     }
 
-    @Override
     @Transactional
     public void run(ApplicationArguments args) {
         Optional<User> sender = userRepository.findByUsername(SENDER_USERNAME);

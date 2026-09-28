@@ -19,10 +19,12 @@ import com.JavaTraining.BaiTap_RS.user.domain.entity.User;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@Order(100)
 @ConditionalOnProperty(name = "app.seed.demo.enabled", havingValue = "true")
 public class DemoDataSeeder implements ApplicationRunner {
 
@@ -34,6 +36,7 @@ public class DemoDataSeeder implements ApplicationRunner {
     private final DemoSubjectFunctionalRoomSeeder subjectFunctionalRoomSeeder;
     private final DemoTimetableSeeder timetableSeeder;
     private final DemoHistoricalAcademicSeeder historicalAcademicSeeder;
+    private final DemoSeedCompletion completion;
 
     public DemoDataSeeder(
             DemoIdentitySeeder identitySeeder,
@@ -43,7 +46,8 @@ public class DemoDataSeeder implements ApplicationRunner {
             DemoFunctionalRoomSeeder functionalRoomSeeder,
             DemoSubjectFunctionalRoomSeeder subjectFunctionalRoomSeeder,
             DemoTimetableSeeder timetableSeeder,
-            DemoHistoricalAcademicSeeder historicalAcademicSeeder) {
+            DemoHistoricalAcademicSeeder historicalAcademicSeeder,
+            DemoSeedCompletion completion) {
         this.identitySeeder = identitySeeder;
         this.catalogSeeder = catalogSeeder;
         this.applicabilitySeeder = applicabilitySeeder;
@@ -52,11 +56,15 @@ public class DemoDataSeeder implements ApplicationRunner {
         this.subjectFunctionalRoomSeeder = subjectFunctionalRoomSeeder;
         this.timetableSeeder = timetableSeeder;
         this.historicalAcademicSeeder = historicalAcademicSeeder;
+        this.completion = completion;
     }
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+        if (completion.isComplete()) {
+            return;
+        }
         User academicOffice = identitySeeder.seedAcademicOffice();
         List<Teacher> teachers = identitySeeder.seedTeachers();
         AcademicYear academicYear = catalogSeeder.seedAcademicYear();

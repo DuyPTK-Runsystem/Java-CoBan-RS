@@ -29,16 +29,16 @@ import com.JavaTraining.BaiTap_RS.scorebook.repository.ScorebookRepository;
 import com.JavaTraining.BaiTap_RS.scorebook.repository.StudentScoreRepository;
 import com.JavaTraining.BaiTap_RS.user.domain.entity.User;
 import com.JavaTraining.BaiTap_RS.user.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Order(Ordered.LOWEST_PRECEDENCE)
+@Order(400)
 @ConditionalOnProperty(name = "app.seed.demo.enabled", havingValue = "true")
 @SuppressWarnings({
         "PMD.ExcessiveImports",
@@ -46,6 +46,9 @@ import org.springframework.transaction.annotation.Transactional;
         "PMD.AvoidInstantiatingObjectsInLoops"
 })
 public class DemoScorebookSeeder implements ApplicationRunner {
+
+    @Autowired
+    private DemoSeedCompletion completion;
 
     private static final String ACADEMIC_YEAR_CODE = "2026-2027";
     private static final String SEMESTER_CODE = "HK1";
@@ -97,6 +100,9 @@ public class DemoScorebookSeeder implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+        if (completion.isComplete()) {
+            return;
+        }
         Optional<Long> actorId = findActorId();
         Optional<ClassSubject> target = findTargetClassSubject();
         if (actorId.isEmpty() || target.isEmpty()) {

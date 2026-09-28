@@ -1,4 +1,5 @@
 # BE Dev Note Summary
+| 086 | bootstrap | [Idempotent Plan 081 demo seed marker](bootstrap/086-demo-seed-completion-2026-09-28.md) | Focused tests 15/15 PASS; Checkstyle main/test and PMD main PASS; full test FAIL from baseline Placement mock mismatch/OOM; build -x test FAIL at pmdTest (400 test-source violations) | 2026-09-28 |
 | 084 | config | [Nạp `.env` khi chạy backend trực tiếp](config/084-local-env-import-2026-09-24.md) | Runtime smoke PASS; focused H2 PASS; Checkstyle PASS (977 warning); full test dừng theo yêu cầu, PMD/build NOT RUN | 2026-09-24 |
 | 079.4 | lesson-log | [Policy GET và ngày hiệu lực phiên bản](lesson-log/079.4-policy-effective-date-2026-09-24.md) | GET không ngày trả latest policy, Chrome settings load không lỗi; validator chỉ nhận ngày tương lai sau version mới nhất; compileJava PASS; Checkstyle FAIL do 977 warning baseline, PMD FAIL do 7 DemoIdentitySeeder violations; tests/full build NOT RUN | 2026-09-24 |
 
@@ -106,6 +107,8 @@
 |   081 | bootstrap          | [Seed assignment theo Phụ lục A.4/A.6](bootstrap/081-seed-assignment-a6-2026-09-21.md) | Historical `2025-2026` CLOSED: 4 lớp Khối 6, 40 enrollment COMPLETED, scorebook/columns/scores `80/320/3200`, transcript/subject results `40/80/400/800`; đồng thời TKB 16 lớp và G7 `40` unassigned. Focused historical test PASS `1m30s`, compile/checkstyle PASS với 978 warning baseline, pmdMain FAIL 7 baseline tại `DemoIdentitySeeder`; full test lượt cuối NOT RUN | 2026-09-22 |
 
 |   085 | config             | [Azure Container Apps backend Docker deployment](config/085-azure-container-apps-backend-2026-09-24.md) | Azure Container Apps Dockerfile, PORT and configurable FE CORS; independent bootJar/diff PASS; Docker runtime and remote deployment NOT RUN | 2026-09-24 |
+
+| 086 | workflow-skill | [GitHub Actions demo CI/CD](workflow-skill/086-github-actions-demo-ci-cd-2026-09-28.md) | Approved; CI/CD+seed implemented locally, static workflow QA PASS. VNet/ACA Job amendment documented; no current subscription VNet. Private-cutover is explicit and protected; no self-hosted runner/NAT. official Bicep compile PASS with Key Vault DNS suffix lint warning; quota/SKU and external IPAM unverified. ACA Express/no VNet, MySQL public+allow-all/no PE, Vercel branch mismatch; full tests/OOM and pmdTest ~400 baseline; cloud NOT RUN | 2026-09-28 |
 
 ## Module folders
 
