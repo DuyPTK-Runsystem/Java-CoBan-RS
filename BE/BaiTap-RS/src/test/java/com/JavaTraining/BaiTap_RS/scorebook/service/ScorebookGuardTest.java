@@ -48,6 +48,16 @@ class ScorebookGuardTest {
     }
 
     @Test
+    void academicOfficeCanCreateClassSubjectWithoutTeacherAssignment() {
+        authenticate(100L, "ACADEMIC_OFFICE");
+        ScorebookGuard guard = new ScorebookGuard(teacherRepository, assignmentAccessService);
+
+        guard.assertCanReadClassSubject(20L);
+
+        Mockito.verifyNoInteractions(teacherRepository, assignmentAccessService);
+    }
+
+    @Test
     void mappedTeacherUsesActiveSubjectAssignment() {
         authenticate(100L, "TEACHER");
         Teacher teacher = new Teacher(
@@ -87,6 +97,33 @@ class ScorebookGuardTest {
         ScorebookGuard guard = new ScorebookGuard(teacherRepository, assignmentAccessService);
 
         verifyClassSubjectAssignment(guard);
+    }
+
+    @Test
+    void teacherCannotReadClassSubjectWhenActiveAssignmentCheckRejectsIt() {
+        authenticate(100L, "TEACHER");
+        Teacher teacher = new Teacher(
+                100L,
+                "GV001",
+                "Nguyen Van A",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                TeacherStatus.ACTIVE);
+        ReflectionTestUtils.setField(teacher, "id", 200L);
+        Mockito.when(teacherRepository.findByUserId(100L)).thenReturn(Optional.of(teacher));
+        Mockito.doThrow(new AppException(HttpStatus.FORBIDDEN, "no active assignment"))
+                .when(assignmentAccessService).assertActiveAssignment(
+                        Mockito.eq(200L), Mockito.eq(20L), Mockito.any());
+        ScorebookGuard guard = new ScorebookGuard(teacherRepository, assignmentAccessService);
+
+        AppException exception = Assertions.assertThrows(
+                AppException.class, () -> guard.assertCanReadClassSubject(20L));
+
+        Assertions.assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
     }
 
     @Test

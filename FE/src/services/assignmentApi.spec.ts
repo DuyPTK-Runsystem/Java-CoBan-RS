@@ -4,6 +4,7 @@ import {
   createSubjectTeachingAssignment,
   endHomeroomAssignment,
   endSubjectTeachingAssignment,
+  fetchMyEffectiveScorebookAssignments,
   fetchHomeroomAssignmentsByClass,
   fetchSubjectAssignmentsByClass,
   fetchSubjectAssignmentsByTeacher,
@@ -27,6 +28,7 @@ describe('assignmentApi', () => {
     await fetchHomeroomAssignmentsByClass('t', 3)
     await fetchSubjectAssignmentsByClass('t', 3, 1)
     await fetchSubjectAssignmentsByTeacher('t', 2)
+    await fetchMyEffectiveScorebookAssignments('t')
     await createHomeroomAssignment('t', 3, request)
     await replaceHomeroomAssignment('t', 4, request)
     await endHomeroomAssignment('t', 4, { validTo: '2027-01-01' })
@@ -38,6 +40,7 @@ describe('assignmentApi', () => {
       'http://localhost:8081/api/v2/assignments/classes/3',
       'http://localhost:8081/api/v2/assignments/classes/3/subjects?semesterId=1',
       'http://localhost:8081/api/v2/assignments/teachers/2',
+      'http://localhost:8081/api/v2/assignments/me/scorebook-context',
       'http://localhost:8081/api/v2/classes/3/homeroom-assignments',
       'http://localhost:8081/api/v2/homeroom-assignments/4/replace',
       'http://localhost:8081/api/v2/homeroom-assignments/4/end',
@@ -45,6 +48,18 @@ describe('assignmentApi', () => {
       'http://localhost:8081/api/v2/subject-teaching-assignments/6/replace',
       'http://localhost:8081/api/v2/subject-teaching-assignments/6/end',
     ])
+  })
+
+  it('loads the authenticated teacher scorebook context without a teacher id', async () => {
+    fetchMock.mockImplementation(() => Promise.resolve(new Response(JSON.stringify({ data: [] }), { status: 200 })))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await fetchMyEffectiveScorebookAssignments('teacher-token')
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://localhost:8081/api/v2/assignments/me/scorebook-context',
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: 'Bearer teacher-token' }) }),
+    )
   })
 
   it('loads teaching assignments for a timetable class and semester', async () => {

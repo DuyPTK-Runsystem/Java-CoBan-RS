@@ -24,6 +24,7 @@ export interface SubjectTeachingAssignment {
   subjectId?: number | null
   subjectName?: string | null
   semesterId?: number | null
+  academicYearId: number | null
 }
 
 export interface AssignmentDateValues {

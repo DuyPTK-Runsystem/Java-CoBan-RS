@@ -22,6 +22,10 @@ export function fetchSubjectAssignmentsByTeacher(token: string, teacherId: numbe
   return apiClient.get<SubjectTeachingAssignment[]>(`/api/v2/assignments/teachers/${teacherId}`, { token })
 }
 
+export function fetchMyEffectiveScorebookAssignments(token: string): Promise<SubjectTeachingAssignment[]> {
+  return apiClient.get<SubjectTeachingAssignment[]>('/api/v2/assignments/me/scorebook-context', { token })
+}
+
 export function fetchSubjectAssignmentsByClass(token: string, classId: number, semesterId: number): Promise<SubjectTeachingAssignment[]> {
   return apiClient.get<SubjectTeachingAssignment[]>(`/api/v2/assignments/classes/${classId}/subjects?semesterId=${semesterId}`, { token })
 }

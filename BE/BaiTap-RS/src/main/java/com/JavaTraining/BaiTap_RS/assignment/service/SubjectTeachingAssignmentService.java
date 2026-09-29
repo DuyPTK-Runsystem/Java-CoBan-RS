@@ -5,9 +5,11 @@ import java.util.List;
 
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.ClassSubject;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.SchoolClass;
+import com.JavaTraining.BaiTap_RS.academic.domain.entity.Semester;
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.Subject;
 import com.JavaTraining.BaiTap_RS.academic.repository.ClassSubjectRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SchoolClassRepository;
+import com.JavaTraining.BaiTap_RS.academic.repository.SemesterRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectRepository;
 import com.JavaTraining.BaiTap_RS.assignment.domain.DTOs.requests.ReqCreateSubjectTeachingAssignmentDTO;
 import com.JavaTraining.BaiTap_RS.assignment.domain.DTOs.requests.ReqEndAssignmentDTO;
@@ -15,6 +17,7 @@ import com.JavaTraining.BaiTap_RS.assignment.domain.DTOs.requests.ReqReplaceAssi
 import com.JavaTraining.BaiTap_RS.assignment.domain.DTOs.response.ResSubjectTeachingAssignmentDTO;
 import com.JavaTraining.BaiTap_RS.assignment.domain.entity.AssignmentStatus;
 import com.JavaTraining.BaiTap_RS.assignment.domain.entity.SubjectTeachingAssignment;
+import com.JavaTraining.BaiTap_RS.assignment.repository.EffectiveSubjectTeachingAssignmentRepository;
 import com.JavaTraining.BaiTap_RS.assignment.repository.SubjectTeachingAssignmentRepository;
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
 import com.JavaTraining.BaiTap_RS.common.logging.DeveloperTrace;
@@ -29,25 +32,31 @@ public class SubjectTeachingAssignmentService {
     private static final LocalDate OPEN_ENDED = LocalDate.of(9999, 12, 31);
 
     private final SubjectTeachingAssignmentRepository subjectTeachingRepository;
+    private final EffectiveSubjectTeachingAssignmentRepository effectiveAssignmentRepository;
     private final SubjectTeachingAssignmentGuard guard;
     private final AssignmentAuditService auditService;
     private final ClassSubjectRepository classSubjectRepository;
     private final SchoolClassRepository schoolClassRepository;
     private final SubjectRepository subjectRepository;
+    private final SemesterRepository semesterRepository;
 
     public SubjectTeachingAssignmentService(
             SubjectTeachingAssignmentRepository subjectTeachingRepository,
+            EffectiveSubjectTeachingAssignmentRepository effectiveAssignmentRepository,
             SubjectTeachingAssignmentGuard guard,
             AssignmentAuditService auditService,
             ClassSubjectRepository classSubjectRepository,
             SchoolClassRepository schoolClassRepository,
-            SubjectRepository subjectRepository) {
+            SubjectRepository subjectRepository,
+            SemesterRepository semesterRepository) {
         this.subjectTeachingRepository = subjectTeachingRepository;
+        this.effectiveAssignmentRepository = effectiveAssignmentRepository;
         this.guard = guard;
         this.auditService = auditService;
         this.classSubjectRepository = classSubjectRepository;
         this.schoolClassRepository = schoolClassRepository;
         this.subjectRepository = subjectRepository;
+        this.semesterRepository = semesterRepository;
     }
 
     @Transactional(readOnly = true)
@@ -58,6 +67,16 @@ public class SubjectTeachingAssignmentService {
         List<SubjectTeachingAssignment> assignments = subjectTeachingRepository
                 .findAllByTeacherIdOrderByValidFromDesc(teacherId);
         return assignments.stream().map(this::toResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ResSubjectTeachingAssignmentDTO> listEffectiveScorebookAssignments(
+            Long teacherId, LocalDate effectiveDate) {
+        DeveloperTrace.trace(/* NOPMD GuardLogStatement */
+                SubjectTeachingAssignmentService.class,
+                "SubjectTeachingAssignmentService.listEffectiveScorebookAssignments");
+        return effectiveAssignmentRepository.findEffectiveByTeacherId(teacherId, effectiveDate)
+                .stream().map(this::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
@@ -177,7 +196,8 @@ public class SubjectTeachingAssignmentService {
                 classCode(schoolClass),
                 subjectId(classSubject),
                 subjectName(subject),
-                semesterId(classSubject));
+                semesterId(classSubject),
+                academicYearId(classSubject));
     }
 
     private Long classId(ClassSubject classSubject) {
@@ -202,6 +222,15 @@ public class SubjectTeachingAssignmentService {
 
     private Long semesterId(ClassSubject classSubject) {
         return classSubject == null ? null : classSubject.getSemesterId();
+    }
+
+    private Long academicYearId(ClassSubject classSubject) {
+        if (classSubject == null) {
+            return null;
+        }
+        return semesterRepository.findById(classSubject.getSemesterId())
+                .map(Semester::getAcademicYearId)
+                .orElse(null);
     }
 
 }

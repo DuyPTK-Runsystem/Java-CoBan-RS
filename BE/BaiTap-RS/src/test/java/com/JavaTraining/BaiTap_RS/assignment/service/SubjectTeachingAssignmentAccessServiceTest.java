@@ -82,6 +82,23 @@ class SubjectTeachingAssignmentAccessServiceTest {
     }
 
     @Test
+    void currentTeacherIdIsDerivedFromAuthenticatedPrincipal() {
+        authenticate(100L, TEACHER_ROLE);
+        Mockito.when(teacherRepository.findByUserId(100L)).thenReturn(Optional.of(teacher(200L, 100L)));
+
+        Assertions.assertEquals(200L, service.currentTeacherId());
+        Mockito.verify(teacherRepository).findByUserId(100L);
+    }
+
+    @Test
+    void currentTeacherIdRejectsAuthenticatedUserWithoutTeacherProfile() {
+        authenticate(100L, TEACHER_ROLE);
+        Mockito.when(teacherRepository.findByUserId(100L)).thenReturn(Optional.empty());
+
+        Assertions.assertThrows(AppException.class, service::currentTeacherId);
+    }
+
+    @Test
     void teacherCanViewAssignedClass() {
         authenticate(100L, TEACHER_ROLE);
         Mockito.when(teacherRepository.findByUserId(100L)).thenReturn(Optional.of(teacher(200L, 100L)));

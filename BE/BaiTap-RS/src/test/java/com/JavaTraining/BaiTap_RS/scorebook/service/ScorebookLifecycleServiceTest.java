@@ -9,6 +9,7 @@ import com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectType;
 import com.JavaTraining.BaiTap_RS.academic.repository.ClassSubjectRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SemesterRepository;
 import com.JavaTraining.BaiTap_RS.academic.repository.SubjectRepository;
+import com.JavaTraining.BaiTap_RS.common.error.AppException;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.DTOs.requests.ReqCreateScorebookDTO;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.AssessmentColumnStatus;
 import com.JavaTraining.BaiTap_RS.scorebook.domain.entity.AssessmentType;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -100,6 +102,20 @@ class ScorebookLifecycleServiceTest {
                 lifecycleService.createScorebook(new ReqCreateScorebookDTO(20L));
 
         Assertions.assertEquals(ScorebookStatus.DRAFT, response.status(), "new scorebook should start as draft");
+        Mockito.verify(scorebookGuard).assertCanReadClassSubject(20L);
+    }
+
+    @Test
+    void createScorebookStopsBeforeLoadingClassSubjectWhenAssignmentGuardRejectsTeacher() {
+        Mockito.doThrow(new AppException(HttpStatus.FORBIDDEN, "no active assignment"))
+                .when(scorebookGuard).assertCanReadClassSubject(20L);
+
+        AppException exception = Assertions.assertThrows(
+                AppException.class,
+                () -> lifecycleService.createScorebook(new ReqCreateScorebookDTO(20L)));
+
+        Assertions.assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
+        Mockito.verifyNoInteractions(classSubjectRepository, scorebookRepository);
     }
 
     @Test

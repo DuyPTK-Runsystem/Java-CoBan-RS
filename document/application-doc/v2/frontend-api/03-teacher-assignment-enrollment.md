@@ -73,6 +73,21 @@ Important:
 - current query endpoints in this controller are office-only even though Requirement v2 contains broader view use cases;
 - FE must follow the current endpoint authorization until a contract changes.
 
+### Scorebook context lookup for the authenticated teacher
+
+| Method | Path | Authorization | Request | Response |
+|---|---|---|---|---|
+| `GET` | `/api/v2/assignments/me/scorebook-context` | `TEACHER` | — | `ResSubjectTeachingAssignmentDTO[]` |
+
+This lookup derives the linked teacher from the authenticated principal. It returns
+only `ACTIVE` subject-teaching assignments whose `validFrom <= today` and whose
+`validTo` is null or `validTo >= today`, using `Asia/Ho_Chi_Minh`, matching the
+scorebook authorization guard. It does not accept a teacher ID from the client. Each
+response includes the existing assignment fields plus `academicYearId`, alongside
+`semesterId`, class, subject and class-subject identifiers. An empty list means the
+teacher has no currently effective subject assignment. Homeroom assignment does not
+grant scorebook context. Existing office lookups remain unchanged.
+
 ## Enrollment API
 
 Base controller:

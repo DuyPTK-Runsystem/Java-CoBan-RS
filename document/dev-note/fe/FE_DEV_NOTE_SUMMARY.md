@@ -1,4 +1,5 @@
 # FE Dev Note Summary
+| 087 | Scorebook | [Context theo phân công giáo viên](../be/scorebook/087-scorebook-teacher-assignment-dropdown-2026-09-29.md) | FE focused 19/19 across 2 files, lint/build/diff-check PASS after create-flow fix; browser/live NOT RUN | 2026-09-29 |
 | 079.6 | Lesson Log | [Việt hóa chi tiết sổ đầu bài](lesson-log/079.6-localize-entry-detail-2026-09-24.md) | Enum tiến độ dùng nhãn tiếng Việt; hạng lấy từ rubric; ngày/hạn sửa theo dd/mm/yyyy hh:mm; lint/build NOT RUN do lỗi sandbox; tests/browser NOT RUN | 2026-09-24 |
 | 079.5 | Lesson Log | [Ẩn rubric khỏi cài đặt](lesson-log/079.5-hide-rubric-settings-2026-09-24.md) | Gỡ phần hiển thị rubric và CSS riêng; policy payload giữ nguyên; lint/build NOT RUN do command runner lỗi sandbox; tests/browser NOT RUN | 2026-09-24 |
 | 079.4 | Lesson Log | [Ngày hiệu lực policy phiên bản mới](lesson-log/079.4-policy-effective-date-2026-09-24.md) | Mặc định ngày policy tiếp theo theo HCM, cập nhật sau lưu; Chrome settings load và ngày 2026-09-25 PASS; file lint/build PASS, full lint 2 warning baseline; tests NOT RUN | 2026-09-24 |

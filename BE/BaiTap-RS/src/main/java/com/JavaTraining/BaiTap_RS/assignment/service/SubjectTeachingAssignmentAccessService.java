@@ -80,6 +80,17 @@ public class SubjectTeachingAssignmentAccessService {
     }
 
     @Transactional(readOnly = true)
+    public Long currentTeacherId() {
+        Long currentUserId = AuditContext.currentUserId();
+        if (currentUserId == null) {
+            throw new AppException(HttpStatus.FORBIDDEN, "Tài khoản chưa có ngữ cảnh giáo viên hợp lệ");
+        }
+        return teacherRepository.findByUserId(currentUserId)
+                .map(Teacher::getId)
+                .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "Tài khoản chưa có hồ sơ giáo viên"));
+    }
+
+    @Transactional(readOnly = true)
     public boolean hasActiveAssignment(Long teacherId, Long classSubjectId, LocalDate effectiveDate) {
         DeveloperTrace.trace(/* NOPMD GuardLogStatement */
                 SubjectTeachingAssignmentAccessService.class,

@@ -25,6 +25,7 @@ import {
   fetchSubjects,
 } from '@/services/academicApi'
 import { createScoreChangeRequest } from '@/services/scoreChangeRequestApi'
+import { fetchMyEffectiveScorebookAssignments } from '@/services/assignmentApi'
 import {
   bulkUpsertStudentScores,
   createAssessmentColumn,
@@ -40,6 +41,7 @@ import {
   upsertStudentScore,
 } from '@/services/scorebookApi'
 import type { AcademicYear, ClassSubject, SchoolClass, Semester, Subject } from '@/types/academic'
+import type { SubjectTeachingAssignment } from '@/types/assignment'
 import { extractApiErrorMessage, isApiError } from '@/types/api'
 import type {
   AssessmentColumn,
@@ -60,8 +62,11 @@ const { roles, hasRoleContract, requireAccessToken: token } = useAuthSession()
 const academicYears = ref<AcademicYear[]>([])
 const semesters = ref<Semester[]>([])
 const classes = ref<SchoolClass[]>([])
+const classesForYear = ref<SchoolClass[]>([])
 const subjects = ref<Subject[]>([])
 const classSubjects = ref<ClassSubject[]>([])
+const teacherAssignments = ref<SubjectTeachingAssignment[]>([])
+const teacherSemesters = ref<Semester[]>([])
 const selectedAcademicYearId = ref<number | null>(null)
 const selectedSemesterId = ref<number | null>(null)
 const selectedClassId = ref<number | null>(null)
@@ -102,10 +107,12 @@ const selectedContextLabel = computed(() => {
   if (!selectedClass.value || !selectedSubject.value || !selectedSemester.value) return ''
   return `${selectedClass.value.classCode} · ${selectedSubject.value.name} · ${selectedSemester.value.name}`
 })
+const officeRole = computed(() => roles.value.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE'))
+const teacherScoped = computed(() => roles.value.includes('TEACHER') && !officeRole.value)
 const canUseWorkspace = computed(() =>
   roles.value.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE' || role === 'TEACHER'))
 const canCreate = computed(() =>
-  roles.value.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE'))
+  selectedClassSubjectId.value !== null && (officeRole.value || teacherScoped.value))
 const readOnlyColumns = computed(() =>
   scorebook.value?.status === 'PUBLISHED' || scorebook.value?.status === 'CLOSED')
 const assessmentTypeLabels: Record<string, string> = { KTTT: 'Thường xuyên', 'KTĐK': 'Giữa kỳ', KTCK: 'Cuối kỳ' }
@@ -182,14 +189,39 @@ async function loadContext(): Promise<void> {
   selectedClassSubjectId.value = null
   resetScorebook()
   if (!accessToken || yearId === null || semesterId === null || classId === null) return
+  if (teacherScoped.value) {
+    const semesterAssignments = teacherAssignments.value.filter((assignment) =>
+      assignment.academicYearId === yearId && assignment.semesterId === semesterId)
+    const eligibleClassIds = new Set(semesterAssignments
+      .map((assignment) => assignment.classId).filter((id): id is number => id !== null && id !== undefined))
+    classes.value = classesForYear.value.filter((schoolClass) => eligibleClassIds.has(schoolClass.id))
+    if (!eligibleClassIds.has(classId)) {
+      selectedClassId.value = classes.value[0]?.id ?? null
+      return
+    }
+  }
   const requestId = ++contextRequestId
   loading.value = true
   clearMessages()
   try {
-    const items = await fetchClassSubjects(accessToken, classId, semesterId)
+    if (teacherScoped.value) {
+      const matching = teacherAssignments.value.filter((assignment) =>
+        assignment.academicYearId === yearId
+        && assignment.semesterId === semesterId
+        && assignment.classId === classId
+        && assignment.classSubjectId !== null)
+      classSubjects.value = matching.map((assignment) => ({
+        id: assignment.classSubjectId,
+        classId: assignment.classId ?? classId,
+        subjectId: assignment.subjectId ?? 0,
+        semesterId: assignment.semesterId ?? semesterId,
+        status: 'ACTIVE',
+      }))
+    } else {
+      classSubjects.value = await fetchClassSubjects(accessToken, classId, semesterId)
+    }
     if (contextRequestId !== requestId) return
-    classSubjects.value = items
-    selectedClassSubjectId.value = items[0]?.id ?? null
+    selectedClassSubjectId.value = classSubjects.value[0]?.id ?? null
   } catch (error) {
     if (isApiError(error, 401)) return
     forbidden.value = isApiError(error, 403)
@@ -206,27 +238,41 @@ async function loadYearContext(yearId: number | null): Promise<void> {
   const accessToken = token()
   semesters.value = []
   classes.value = []
+  classesForYear.value = []
   classSubjects.value = []
   selectedSemesterId.value = null
   selectedClassId.value = null
   selectedClassSubjectId.value = null
   resetScorebook()
-  if (!accessToken || yearId === null) return
+  if (!accessToken || yearId === null) {
+    loading.value = false
+    return
+  }
   loading.value = true
   clearMessages()
   try {
-    const [semesterItems, classItems] = await Promise.all([
-      fetchSemesters(accessToken, yearId),
+    const [loadedSemesters, loadedClasses] = await Promise.all([
+      teacherScoped.value ? Promise.resolve(teacherSemesters.value.filter((item) => item.academicYearId === yearId))
+        : fetchSemesters(accessToken, yearId),
       fetchSchoolClasses(accessToken, yearId),
     ])
     if (selectedAcademicYearId.value !== yearId) return
-    semesters.value = semesterItems
-    classes.value = classItems
-    selectedSemesterId.value = semesterItems.find((item) => item.status === 'ACTIVE')?.id
-      ?? semesterItems[0]?.id
+    semesters.value = loadedSemesters
+    const availableSemesterIds = new Set(loadedSemesters.map((item) => item.id))
+    const eligibleClassIds = teacherScoped.value
+      ? new Set(teacherAssignments.value.filter((item) => availableSemesterIds.has(item.semesterId ?? -1)).map((item) => item.classId))
+      : null
+    classesForYear.value = loadedClasses
+    classes.value = eligibleClassIds === null ? loadedClasses
+      : loadedClasses.filter((item) => eligibleClassIds.has(item.id))
+    selectedSemesterId.value = loadedSemesters.find((item) => item.status === 'ACTIVE')?.id
+      ?? loadedSemesters[0]?.id
       ?? null
-    selectedClassId.value = classItems.find((item) => item.status !== 'CLOSED')?.id
-      ?? classItems[0]?.id
+    const semesterClassIds = new Set(teacherAssignments.value
+      .filter((item) => item.semesterId === selectedSemesterId.value).map((item) => item.classId))
+    const semesterClasses = teacherScoped.value ? classes.value.filter((item) => semesterClassIds.has(item.id)) : classes.value
+    selectedClassId.value = semesterClasses.find((item) => item.status !== 'CLOSED')?.id
+      ?? semesterClasses[0]?.id
       ?? null
   } catch (error) {
     if (isApiError(error, 401)) return
@@ -252,14 +298,24 @@ async function load(): Promise<void> {
   }
   loading.value = true
   try {
-    const [yearItems, subjectItems] = await Promise.all([
+    const [yearItems, subjectItems, assignmentItems] = await Promise.all([
       fetchAcademicYears(accessToken),
       fetchSubjects(accessToken, 'ACTIVE'),
+      teacherScoped.value ? fetchMyEffectiveScorebookAssignments(accessToken) : Promise.resolve([]),
     ])
-    academicYears.value = yearItems
     subjects.value = subjectItems
-    selectedAcademicYearId.value = yearItems.find((item) => item.status === 'ACTIVE')?.id
-      ?? yearItems[0]?.id
+    teacherAssignments.value = assignmentItems
+    if (teacherScoped.value) {
+      const semesterCatalogs = await Promise.all(yearItems.map((year) => fetchSemesters(accessToken, year.id)))
+      const assignmentSemesterIds = new Set(assignmentItems.map((item) => item.semesterId).filter((id): id is number => id !== null && id !== undefined))
+      teacherSemesters.value = semesterCatalogs.flat().filter((semester) => assignmentSemesterIds.has(semester.id))
+      const assignedYearIds = new Set(teacherSemesters.value.map((semester) => semester.academicYearId))
+      academicYears.value = yearItems.filter((year) => assignedYearIds.has(year.id))
+    } else {
+      academicYears.value = yearItems
+    }
+    selectedAcademicYearId.value = academicYears.value.find((item) => item.status === 'ACTIVE')?.id
+      ?? academicYears.value[0]?.id
       ?? null
   } catch (error) {
     if (isApiError(error, 401)) return
@@ -535,6 +591,10 @@ onMounted(() => { void load() })
   <FormAlert v-if="errorMessage && !forbidden" tone="error" :message="errorMessage" />
   <FormAlert v-if="forbidden" tone="warning" :message="errorMessage || 'Bạn không có quyền thao tác sổ điểm này. Phiên đăng nhập vẫn được giữ nguyên.'" />
 
+  <p v-if="teacherScoped && academicYears.length === 0" class="field-hint">
+    Bạn chưa có phân công giảng dạy đang hiệu lực để xem sổ điểm.
+  </p>
+
   <ScorebookContextPanel
     v-model:academic-year-id="selectedAcademicYearId"
     v-model:semester-id="selectedSemesterId"
@@ -566,7 +626,7 @@ onMounted(() => { void load() })
     <div v-if="lookupState === 'empty' && selectedClassSubject" class="content-surface page-state">
       <p>Chưa có sổ điểm cho môn học đã chọn.</p>
       <Button v-if="canCreate" label="Tạo sổ điểm" icon="pi pi-plus" :loading="saving" @click="create" />
-      <span v-else class="field-hint">Giáo viên không thể tạo sổ điểm; vui lòng liên hệ giáo vụ.</span>
+      <span v-else class="field-hint">Cần có phân công GVBM còn hiệu lực cho lớp-môn này để tạo sổ điểm.</span>
     </div>
 
     <template v-if="scorebook">

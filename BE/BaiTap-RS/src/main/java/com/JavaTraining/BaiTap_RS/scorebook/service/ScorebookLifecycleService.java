@@ -60,6 +60,7 @@ public class ScorebookLifecycleService {
         DeveloperTrace.trace(/* NOPMD GuardLogStatement */
                 ScorebookLifecycleService.class,
                 "ScorebookLifecycleService.createScorebook");
+        guard.assertCanReadClassSubject(request.classSubjectId());
         ClassSubject classSubject = context.findClassSubject(request.classSubjectId());
         context.validateClassSubject(classSubject);
         context.findActiveSubject(classSubject.getSubjectId());

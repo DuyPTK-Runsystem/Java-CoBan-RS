@@ -43,7 +43,7 @@ public class ScorebookController {
 
     @PostMapping("/scorebooks")
     @ApiMessage("Tạo sổ điểm")
-    @PreAuthorize(OFFICE_ROLES)
+    @PreAuthorize(SCOREBOOK_ROLES)
     public ResponseEntity<ResScorebookDTO> createScorebook(
             @Valid @RequestBody ReqCreateScorebookDTO request) {
                 DeveloperTrace.trace(/* NOPMD GuardLogStatement */

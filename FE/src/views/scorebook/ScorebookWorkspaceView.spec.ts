@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   fetchSchoolClasses: vi.fn(),
   fetchSubjects: vi.fn(),
   fetchClassSubjects: vi.fn(),
+  fetchMyEffectiveScorebookAssignments: vi.fn(),
   fetchScorebookByClassSubject: vi.fn(),
   fetchScorebook: vi.fn(),
   fetchScoreGrid: vi.fn(),
@@ -36,6 +37,9 @@ vi.mock('@/services/academicApi', () => ({
   fetchSubjects: mocks.fetchSubjects,
   fetchClassSubjects: mocks.fetchClassSubjects,
 }))
+vi.mock('@/services/assignmentApi', () => ({
+  fetchMyEffectiveScorebookAssignments: mocks.fetchMyEffectiveScorebookAssignments,
+}))
 vi.mock('@/services/scorebookApi', () => ({
   fetchScorebookByClassSubject: mocks.fetchScorebookByClassSubject,
   fetchScorebook: mocks.fetchScorebook,
@@ -54,11 +58,32 @@ vi.mock('@/services/scoreChangeRequestApi', () => ({
   createScoreChangeRequest: mocks.createScoreChangeRequest,
 }))
 
-const years = [{ id: 1, code: '2026-2027', startDate: '2026-09-01', endDate: '2027-05-31', status: 'ACTIVE' as const, notes: null }]
-const semesters = [{ id: 2, academicYearId: 1, code: 'HK1', name: 'Học kỳ 1', displayOrder: 1, startDate: '2026-09-01', endDate: '2026-12-31', automaticLockAt: null, status: 'ACTIVE' as const, lockedAt: null, lockedBy: null, lockReason: null, reopenUntil: null }]
-const classes = [{ id: 3, academicYearId: 1, gradeLevelId: 6, classCode: '6A1', className: 'Lớp 6A1', capacity: 35, status: 'ACTIVE' as const }]
-const subjects = [{ id: 9, code: 'TOAN', name: 'Toán', subjectType: 'ACADEMIC' as const, applicationScope: 'GRADE' as const, status: 'ACTIVE' as const }]
+const years = [
+  { id: 1, code: '2026-2027', startDate: '2026-09-01', endDate: '2027-05-31', status: 'ACTIVE' as const, notes: null },
+  { id: 5, code: '2027-2028', startDate: '2027-09-01', endDate: '2028-05-31', status: 'ACTIVE' as const, notes: null },
+]
+const semesters = [
+  { id: 2, academicYearId: 1, code: 'HK1', name: 'Học kỳ 1', displayOrder: 1, startDate: '2026-09-01', endDate: '2026-12-31', automaticLockAt: null, status: 'ACTIVE' as const, lockedAt: null, lockedBy: null, lockReason: null, reopenUntil: null },
+  { id: 4, academicYearId: 1, code: 'HK2', name: 'Học kỳ 2', displayOrder: 2, startDate: '2027-01-01', endDate: '2027-05-31', automaticLockAt: null, status: 'ACTIVE' as const, lockedAt: null, lockedBy: null, lockReason: null, reopenUntil: null },
+  { id: 6, academicYearId: 5, code: 'HK1', name: 'Học kỳ 1', displayOrder: 1, startDate: '2027-09-01', endDate: '2027-12-31', automaticLockAt: null, status: 'ACTIVE' as const, lockedAt: null, lockedBy: null, lockReason: null, reopenUntil: null },
+]
+const classes = [
+  { id: 3, academicYearId: 1, gradeLevelId: 6, classCode: '6A1', className: 'Lớp 6A1', capacity: 35, status: 'ACTIVE' as const },
+  { id: 4, academicYearId: 1, gradeLevelId: 6, classCode: '6A2', className: 'Lớp 6A2', capacity: 35, status: 'ACTIVE' as const },
+  { id: 5, academicYearId: 1, gradeLevelId: 6, classCode: '6A3', className: 'Lớp 6A3', capacity: 35, status: 'ACTIVE' as const },
+  { id: 8, academicYearId: 5, gradeLevelId: 7, classCode: '7A1', className: 'Lớp 7A1', capacity: 35, status: 'ACTIVE' as const },
+]
+const subjects = [
+  { id: 9, code: 'TOAN', name: 'Toán', subjectType: 'ACADEMIC' as const, applicationScope: 'GRADE' as const, status: 'ACTIVE' as const },
+  { id: 10, code: 'VAN', name: 'Văn', subjectType: 'ACADEMIC' as const, applicationScope: 'GRADE' as const, status: 'ACTIVE' as const },
+]
 const classSubjects = [{ id: 20, classId: 3, subjectId: 9, semesterId: 2, status: 'ACTIVE' as const }]
+const assignments = [
+  { id: 50, classSubjectId: 20, teacherId: 5, validFrom: '2026-09-01', validTo: null, status: 'ACTIVE' as const, assignedBy: null, classId: 3, className: 'Lớp 6A1', classCode: '6A1', subjectId: 9, subjectName: 'Toán', semesterId: 2, academicYearId: 1 },
+  { id: 51, classSubjectId: 21, teacherId: 5, validFrom: '2026-09-01', validTo: null, status: 'ACTIVE' as const, assignedBy: null, classId: 4, className: 'Lớp 6A2', classCode: '6A2', subjectId: 10, subjectName: 'Văn', semesterId: 2, academicYearId: 1 },
+  { id: 52, classSubjectId: 22, teacherId: 5, validFrom: '2027-01-01', validTo: null, status: 'ACTIVE' as const, assignedBy: null, classId: 3, className: 'Lớp 6A1', classCode: '6A1', subjectId: 10, subjectName: 'Văn', semesterId: 4, academicYearId: 1 },
+  { id: 53, classSubjectId: 23, teacherId: 5, validFrom: '2027-09-01', validTo: null, status: 'ACTIVE' as const, assignedBy: null, classId: 8, className: 'Lớp 7A1', classCode: '7A1', subjectId: 9, subjectName: 'Toán', semesterId: 6, academicYearId: 5 },
+]
 const scorebook = { id: 12, classSubjectId: 20, status: 'OPEN' as const, publishedAt: null, publishedBy: null, closedAt: null, columns: [], skillWeightConfig: null }
 const grid = { scorebookId: 12, classSubjectId: 20, scorebookStatus: 'OPEN' as const, columns: [], page: 0, size: 10, totalElements: 21, totalPages: 3, students: [] }
 
@@ -66,6 +91,10 @@ const simpleStub = { template: '<div><slot /></div>' }
 const scoreGridStub = { props: ['readOnly'], template: '<div data-test="score-grid" :data-read-only="String(readOnly)" />' }
 const scoreEntryDialogStub = { props: ['readOnly'], template: '<div data-test="score-entry-dialog" :data-read-only="String(readOnly)" />' }
 const buttonStub = { props: ['label'], template: '<button @click="$emit(\'click\')">{{ label }}</button>' }
+const contextPanelStub = {
+  props: ['academicYears', 'semesters', 'classes', 'classSubjects'],
+  template: '<div data-test="context-panel" :data-year-ids="academicYears.map(x => x.id).join(\',\')" :data-semester-ids="semesters.map(x => x.id).join(\',\')" :data-class-ids="classes.map(x => x.id).join(\',\')" :data-class-subject-ids="classSubjects.map(x => x.id).join(\',\')" />',
+}
 
 function mountView() {
   return mount(ScorebookWorkspaceView, {
@@ -79,7 +108,7 @@ function mountView() {
         Button: buttonStub,
         ConfirmDialog: simpleStub,
         FormAlert: { props: ['message'], template: '<div>{{ message }}</div>' },
-        ScorebookContextPanel: simpleStub,
+        ScorebookContextPanel: contextPanelStub,
         ScorebookStatusHeader: simpleStub,
         ScoreEntryDialog: scoreEntryDialogStub,
         ScoreChangeRequestForm: simpleStub,
@@ -99,10 +128,12 @@ describe('ScorebookWorkspaceView', () => {
     })
     Object.values(mocks).forEach((mock) => mock.mockReset())
     mocks.fetchAcademicYears.mockResolvedValue(years)
-    mocks.fetchSemesters.mockResolvedValue(semesters)
+    mocks.fetchSemesters.mockImplementation((_token, yearId) =>
+      Promise.resolve(semesters.filter((semester) => semester.academicYearId === yearId)))
     mocks.fetchSchoolClasses.mockResolvedValue(classes)
     mocks.fetchSubjects.mockResolvedValue(subjects)
     mocks.fetchClassSubjects.mockResolvedValue(classSubjects)
+    mocks.fetchMyEffectiveScorebookAssignments.mockResolvedValue(assignments)
     mocks.fetchScorebookByClassSubject.mockResolvedValue(scorebook)
     mocks.fetchScorebook.mockResolvedValue(scorebook)
     mocks.fetchScoreGrid.mockImplementation((_token, _id, page = 0, size = 10) =>
@@ -120,6 +151,83 @@ describe('ScorebookWorkspaceView', () => {
     expect(mocks.fetchScorebookByClassSubject).toHaveBeenCalledWith('teacher-token', 20)
     expect(mocks.fetchScoreGrid).toHaveBeenCalledWith('teacher-token', 12, 0, 10)
     expect(mocks.createScorebook).not.toHaveBeenCalled()
+  })
+
+  it('uses only the authenticated teacher assignment context to populate dropdown choices', async () => {
+    const wrapper = mountView()
+    await flushPromises()
+    const context = wrapper.get('[data-test="context-panel"]')
+
+    expect(mocks.fetchMyEffectiveScorebookAssignments).toHaveBeenCalledWith('teacher-token')
+    expect(mocks.fetchSchoolClasses).toHaveBeenCalledWith('teacher-token', 1)
+    expect(mocks.fetchClassSubjects).not.toHaveBeenCalled()
+    expect(context.attributes('data-year-ids')).toBe('1,5')
+    expect(context.attributes('data-semester-ids')).toBe('2,4')
+    expect(context.attributes('data-class-ids')).toBe('3,4')
+    expect(context.attributes('data-class-subject-ids')).toBe('20')
+  })
+
+  it('resets dependent options and scorebook when the teacher changes semester or class', async () => {
+    const wrapper = mountView()
+    await flushPromises()
+    const view = wrapper.vm as unknown as {
+      selectedAcademicYearId: number | null
+      selectedSemesterId: number | null
+      selectedClassId: number | null
+      classSubjects: Array<{ id: number }>
+      selectedClassSubjectId: number | null
+      scorebook: typeof scorebook | null
+    }
+
+    view.selectedSemesterId = 4
+    await flushPromises()
+    expect(view.classSubjects.map((item) => item.id)).toEqual([22])
+    expect(view.selectedClassSubjectId).toBe(22)
+    expect(mocks.fetchScorebookByClassSubject).toHaveBeenLastCalledWith('teacher-token', 22)
+
+    view.selectedSemesterId = 2
+    await flushPromises()
+    view.selectedClassId = 4
+    await flushPromises()
+    expect(view.classSubjects.map((item) => item.id)).toEqual([21])
+    expect(view.selectedClassSubjectId).toBe(21)
+    expect(mocks.fetchScorebookByClassSubject).toHaveBeenLastCalledWith('teacher-token', 21)
+
+    view.selectedAcademicYearId = 5
+    await flushPromises()
+    expect(view.classSubjects.map((item) => item.id)).toEqual([23])
+    expect(view.selectedClassSubjectId).toBe(23)
+    expect(mocks.fetchScorebookByClassSubject).toHaveBeenLastCalledWith('teacher-token', 23)
+  })
+
+  it('shows an empty assignment state and makes no scorebook lookup when teacher has no assignments', async () => {
+    mocks.fetchMyEffectiveScorebookAssignments.mockResolvedValue([])
+    const wrapper = mountView()
+    await flushPromises()
+    const view = wrapper.vm as unknown as { academicYears: unknown[]; classes: unknown[]; classSubjects: unknown[]; canCreate: boolean }
+
+    expect(view.academicYears).toEqual([])
+    expect(view.canCreate).toBe(false)
+    expect(wrapper.text()).not.toContain('Tạo sổ điểm')
+    expect(view.classes).toEqual([])
+    expect(view.classSubjects).toEqual([])
+    expect(wrapper.text()).toContain('Bạn chưa có phân công giảng dạy đang hiệu lực để xem sổ điểm.')
+    expect(mocks.fetchScorebookByClassSubject).not.toHaveBeenCalled()
+  })
+
+  it('keeps the catalog lookup path for ADMIN', async () => {
+    clearAuthSession()
+    saveAuthSession({
+      accessToken: 'admin-token',
+      user: { id: 1, username: 'admin.demo', roles: ['ADMIN'] },
+    })
+    const wrapper = mountView()
+    await flushPromises()
+
+    expect(mocks.fetchMyEffectiveScorebookAssignments).not.toHaveBeenCalled()
+    expect(mocks.fetchSemesters).toHaveBeenCalledWith('admin-token', 1)
+    expect(mocks.fetchClassSubjects).toHaveBeenCalledWith('admin-token', 3, 2)
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('loads requested server pages', async () => {
@@ -160,15 +268,32 @@ describe('ScorebookWorkspaceView', () => {
     expect(view.scorebook?.id).toBe(13)
   })
 
-  it('treats lookup 404 as an empty state without duplicate create', async () => {
+  it('allows creation for an assigned class-subject when scorebook lookup returns 404', async () => {
     mocks.fetchScorebookByClassSubject.mockRejectedValue(new ApiError(404, 'Chưa có sổ điểm'))
     const wrapper = mountView()
     await flushPromises()
     const view = wrapper.vm as unknown as { lookupState: string; canCreate: boolean }
 
     expect(view.lookupState).toBe('empty')
-    expect(view.canCreate).toBe(false)
+    expect(view.canCreate).toBe(true)
     expect(mocks.createScorebook).not.toHaveBeenCalled()
+  })
+
+  it('shows the teacher create target and creates then opens an assigned scorebook', async () => {
+    mocks.fetchScorebookByClassSubject.mockRejectedValue(new ApiError(404, 'Chưa có sổ điểm'))
+    mocks.createScorebook.mockResolvedValue(scorebook)
+    const wrapper = mountView()
+    await flushPromises()
+    const createButton = wrapper.findAll('button').find((button) => button.text() === 'Tạo sổ điểm')
+
+    expect(createButton).toBeDefined()
+    if (!createButton) throw new Error('Teacher create button should be visible for an assigned class-subject')
+    await createButton.trigger('click')
+    await flushPromises()
+
+    expect(mocks.createScorebook).toHaveBeenCalledWith('teacher-token', { classSubjectId: 20 })
+    expect(mocks.openScorebook).toHaveBeenCalledWith('teacher-token', 12)
+    expect(wrapper.text()).toContain('Đã tạo và mở sổ điểm.')
   })
 
   it('creates then opens an absent scorebook for an academic office session', async () => {
@@ -184,6 +309,9 @@ describe('ScorebookWorkspaceView', () => {
     const view = wrapper.vm as unknown as { canCreate: boolean; create: () => Promise<void> }
 
     expect(view.canCreate).toBe(true)
+    expect(mocks.fetchMyEffectiveScorebookAssignments).not.toHaveBeenCalled()
+    expect(mocks.fetchSemesters).toHaveBeenCalledWith('office-token', 1)
+    expect(mocks.fetchClassSubjects).toHaveBeenCalledWith('office-token', 3, 2)
     await view.create()
 
     expect(mocks.createScorebook).toHaveBeenCalledWith('office-token', { classSubjectId: 20 })

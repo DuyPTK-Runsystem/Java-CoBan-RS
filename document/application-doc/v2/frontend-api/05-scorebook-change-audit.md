@@ -4,11 +4,18 @@
 
 ## Scorebook API
 
+Teacher workspace choices are loaded from the authenticated-teacher lookup documented
+in [`03-teacher-assignment-enrollment.md`](03-teacher-assignment-enrollment.md). The
+workspace limits year, semester, class and class-subject choices to the returned
+effective `SUBJECT_TEACHING` assignments. Office users retain the existing academic
+catalog lookup path. This lookup is for choice presentation; scorebook and score APIs
+continue to enforce authorization independently.
+
 ### Scorebook lifecycle/config
 
 | Method | Path | Authorization | Request | Response |
 |---|---|---|---|---|
-| `POST` | `/api/v2/scorebooks` | Office | `{ classSubjectId }` | `201 ResScorebookDTO` |
+| `POST` | `/api/v2/scorebooks` | Office or assigned Teacher | `{ classSubjectId }` | `201 ResScorebookDTO` |
 | `GET` | `/api/v2/scorebooks/{scorebookId}` | Office/Teacher | — | `ResScorebookDTO` |
 | `GET` | `/api/v2/scorebooks/by-class-subject/{classSubjectId}` | Office/Teacher | — | `200 ResScorebookDTO`; `404` when no scorebook exists |
 | `POST` | `/api/v2/scorebooks/{scorebookId}/open` | Office/Teacher | — | `ResScorebookDTO` |
@@ -33,7 +40,7 @@ ACADEMIC_OFFICE
 TEACHER
 ```
 
-Backend service must still enforce actual assignment/scope. FE must not interpret the role list as permission to edit every scorebook.
+Backend service must still enforce actual assignment/scope. FE must not interpret the role list as permission to edit every scorebook. For `POST /api/v2/scorebooks`, an authenticated TEACHER may create only when the submitted `classSubjectId` has that teacher's currently effective `SUBJECT_TEACHING` assignment. The backend derives the teacher from the principal and returns `403` otherwise. `ADMIN` and `ACADEMIC_OFFICE` retain the existing create path. Homeroom assignment alone does not authorize scorebook creation. Other scorebook lifecycle operations remain subject to their existing guards.
 
 `POST /api/v2/scorebooks/{scorebookId}/open` accepts scorebooks in `DRAFT` or
 `PUBLISHED`; `CLOSED` remains unavailable. Score entry is available to the

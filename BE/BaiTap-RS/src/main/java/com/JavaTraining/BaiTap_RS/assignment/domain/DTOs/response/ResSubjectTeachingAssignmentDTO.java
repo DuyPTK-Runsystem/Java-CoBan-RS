@@ -17,5 +17,6 @@ public record ResSubjectTeachingAssignmentDTO(
         String classCode,
         Long subjectId,
         String subjectName,
-        Long semesterId) {
+        Long semesterId,
+        Long academicYearId) {
 }
