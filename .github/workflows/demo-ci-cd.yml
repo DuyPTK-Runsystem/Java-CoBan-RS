@@ -207,6 +207,7 @@ jobs:
           test -n "$ACR_NAME"
           test -n "$ACR_REPOSITORY"
           test -n "$DB_VERIFY_REPOSITORY"
+          az acr login --name "$ACR_NAME"
           if [ "$OPERATION" = 'private-cutover' ]; then
             expected_prefix="$ACR_NAME.azurecr.io/$ACR_REPOSITORY:"
             tag="${CUTOVER_IMAGE#"$expected_prefix"}"
@@ -218,18 +219,18 @@ jobs:
             az acr repository show-tags --name "$ACR_NAME" --repository "$ACR_REPOSITORY" --output tsv | grep -Fx "$tag" >/dev/null
             echo "image=$ROLLBACK_IMAGE" >> "$GITHUB_OUTPUT"
           else
-            az acr build \
-              --registry "$ACR_NAME" \
-              --image "$ACR_REPOSITORY:$IMAGE_TAG" \
-              BE/BaiTap-RS
-            echo "image=$ACR_NAME.azurecr.io/$ACR_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+            backend_image="$ACR_NAME.azurecr.io/$ACR_REPOSITORY:$IMAGE_TAG"
+            docker build --tag "$backend_image" BE/BaiTap-RS
+            docker push "$backend_image"
+            echo "image=$backend_image" >> "$GITHUB_OUTPUT"
           fi
-          az acr build \
-            --registry "$ACR_NAME" \
-            --image "$DB_VERIFY_REPOSITORY:$IMAGE_TAG" \
+          verifier_image="$ACR_NAME.azurecr.io/$DB_VERIFY_REPOSITORY:$IMAGE_TAG"
+          docker build \
+            --tag "$verifier_image" \
             --file infra/plan086-db-verify/Dockerfile \
             .
-          echo "verifier_image=$ACR_NAME.azurecr.io/$DB_VERIFY_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          docker push "$verifier_image"
+          echo "verifier_image=$verifier_image" >> "$GITHUB_OUTPUT"
 
   database-preflight:
     name: Verify VNet topology and classify MySQL seed state
