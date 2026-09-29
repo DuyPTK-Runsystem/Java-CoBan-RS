@@ -8,6 +8,25 @@ for name in DB_JOB_TASK MYSQL_HOST MYSQL_DATABASE MYSQL_USER MYSQL_PWD MYSQL_PRI
   fi
 done
 
+if [[ -z "${MYSQL_SSL_CA:-}" ]]; then
+  for candidate in \
+    /etc/pki/tls/certs/ca-bundle.crt \
+    /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem \
+    /etc/ssl/certs/ca-certificates.crt
+  do
+    if [[ -r "$candidate" ]]; then
+      MYSQL_SSL_CA="$candidate"
+      break
+    fi
+  done
+fi
+
+if [[ -z "${MYSQL_SSL_CA:-}" || ! -r "$MYSQL_SSL_CA" ]]; then
+  printf 'A readable MySQL CA bundle is required; set MYSQL_SSL_CA or install CA certificates.\n' >&2
+  exit 2
+fi
+export MYSQL_SSL_CA
+
 /opt/plan086/verify-demo-private-network.sh
 case "$DB_JOB_TASK" in
   preflight)
@@ -22,6 +41,7 @@ case "$DB_JOB_TASK" in
     ;;
   probe)
     mysql --connect-timeout=10 --ssl-mode=VERIFY_IDENTITY \
+      --ssl-ca="$MYSQL_SSL_CA" \
       --host="$MYSQL_HOST" --user="$MYSQL_USER" --database="$MYSQL_DATABASE" \
       --batch --raw --skip-column-names --execute='SELECT 1' | grep -Fx 1 >/dev/null
     echo 'private_mysql_probe=PASS'

@@ -1,7 +1,7 @@
 FROM mysql:8.4
 
 USER root
-RUN microdnf install -y iproute jq python3 && microdnf clean all
+RUN microdnf install -y iproute jq python3 ca-certificates && microdnf clean all
 
 WORKDIR /opt/plan086
 COPY scripts/ci/verify-demo-private-network.sh /opt/plan086/verify-demo-private-network.sh

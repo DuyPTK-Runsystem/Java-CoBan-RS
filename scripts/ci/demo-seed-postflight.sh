@@ -7,9 +7,13 @@ for name in MYSQL_HOST MYSQL_DATABASE MYSQL_USER MYSQL_PWD SEED_TARGET_ID EXPECT
     exit 2
   fi
 done
+if [[ -z "${MYSQL_SSL_CA:-}" || ! -r "$MYSQL_SSL_CA" ]]; then
+  echo 'MYSQL_SSL_CA must name a readable CA bundle.' >&2
+  exit 2
+fi
 
 mysql_query() {
-  mysql --connect-timeout=10 --ssl-mode=VERIFY_IDENTITY \
+  mysql --connect-timeout=10 --ssl-mode=VERIFY_IDENTITY --ssl-ca="$MYSQL_SSL_CA" \
     --host="$MYSQL_HOST" --user="$MYSQL_USER" --database="$MYSQL_DATABASE" \
     --batch --raw --skip-column-names --execute="$1"
 }

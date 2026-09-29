@@ -7,9 +7,14 @@ for name in MYSQL_HOST MYSQL_DATABASE MYSQL_USER MYSQL_PWD; do
     exit 2
   fi
 done
+if [[ -z "${MYSQL_SSL_CA:-}" || ! -r "$MYSQL_SSL_CA" ]]; then
+  echo 'MYSQL_SSL_CA must name a readable CA bundle.' >&2
+  exit 2
+fi
 [[ "$MYSQL_DATABASE" =~ ^[A-Za-z0-9_]+$ ]] || { echo 'MYSQL_DATABASE must use simple alphanumeric/underscore characters for the read-only grant check.' >&2; exit 2; }
 
 grants="$(mysql --connect-timeout=10 --ssl-mode=VERIFY_IDENTITY \
+  --ssl-ca="$MYSQL_SSL_CA" \
   --host="$MYSQL_HOST" --user="$MYSQL_USER" --database="$MYSQL_DATABASE" \
   --batch --raw --skip-column-names --execute='SHOW GRANTS FOR CURRENT_USER()')"
 [[ -n "$grants" ]] || { echo 'MySQL verifier account returned no grants.' >&2; exit 1; }
