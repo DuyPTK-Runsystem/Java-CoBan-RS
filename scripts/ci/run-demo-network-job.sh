@@ -33,6 +33,8 @@ env_json="$(jq -cn \
   --arg target "$SEED_TARGET_ID" \
   --arg operation "${OPERATION:-}" \
   --arg expectedImage "${EXPECTED_IMAGE:-}" \
+  --arg markerTimeout "${POSTFLIGHT_MARKER_TIMEOUT_SECONDS:-900}" \
+  --arg markerPollInterval "${POSTFLIGHT_MARKER_POLL_INTERVAL_SECONDS:-15}" \
   '[
     {name:"DB_JOB_TASK",value:$task},
     {name:"MYSQL_HOST",value:$host},
@@ -41,7 +43,9 @@ env_json="$(jq -cn \
     {name:"MYSQL_PWD",secretRef:"mysql-password"},
     {name:"MYSQL_PRIVATE_ENDPOINT_IP",value:$privateIp},
     {name:"ACA_INFRA_SUBNET_CIDR",value:$subnet},
-    {name:"SEED_TARGET_ID",value:$target}
+    {name:"SEED_TARGET_ID",value:$target},
+    {name:"POSTFLIGHT_MARKER_TIMEOUT_SECONDS",value:$markerTimeout},
+    {name:"POSTFLIGHT_MARKER_POLL_INTERVAL_SECONDS",value:$markerPollInterval}
   ] + (if $task == "probe" then [] else [{name:"OPERATION",value:$operation},{name:"EXPECTED_IMAGE",value:$expectedImage}] end)')"
 jq -n --arg image "$DB_VERIFY_IMAGE" --argjson env "$env_json" '{containers:[{name:"db-verify",image:$image,command:["/bin/bash","/opt/plan086/run-demo-db-job.sh"],resources:{cpu:0.25,memory:"0.5Gi"},env:$env}]}' > "$request_file"
 

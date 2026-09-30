@@ -423,6 +423,8 @@ jobs:
           SEED_TARGET_ID: ${{ vars.DEMO_SEED_TARGET_ID }}
           EXPECTED_IMAGE: ${{ needs.release-image.outputs.image }}
           OPERATION: ${{ github.event.inputs.operation || 'deploy' }}
+          POSTFLIGHT_MARKER_TIMEOUT_SECONDS: 900
+          POSTFLIGHT_MARKER_POLL_INTERVAL_SECONDS: 15
         run: scripts/ci/run-demo-network-job.sh
 
       - name: Disable seed flag and verify application health

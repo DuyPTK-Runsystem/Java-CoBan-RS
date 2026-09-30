@@ -100,3 +100,13 @@
 - Validation: `bash -n scripts/ci/demo-seed-preflight.sh` **PASS**; a local mocked MySQL run accepted the empty-schema path and rejected an existing schema with fixture keys **PASS**; `git diff --check` **PASS**. Live empty-schema ACA Job and full GitHub workflow **NOT RUN**. No Azure/MySQL mutation occurred for this code change.
 - Deviation: the original preflight assumed Flyway tables already existed. The new branch handles only a truly empty schema, preserving fail-closed behavior for partial schemas.
 - Remaining: publish the patch on the release branch; draft PR #7 proposes a dispatch-only default-branch entry and is not merged. After review, run the protected bootstrap and verify marker/seed flag. Live DB reset and bootstrap are separate operations.
+
+
+## Bootstrap completion-marker wait (2026-09-30)
+
+- Related Developer Plan: [Plan 086](../../../dev-impl-plan/summary/086-github-actions-first-demo-seed-2026-09-28.md), approved. This follow-up implements the approved requirement to wait for all seed `ApplicationRunner`s to finish and to preserve failure cleanup.
+- Changed `scripts/ci/demo-seed-postflight.sh`: bootstrap postflight polls for `DEMO_FIXTURE_PLAN_081` for up to 900 seconds at 15-second intervals. Normal deploy and private-cutover keep their existing immediate marker check. On timeout, the verifier logs elapsed time, the missing marker result, and aggregate `academic_year`/`student`/`teacher` counts; the existing network-job wrapper retrieves the failed ACA execution logs.
+- Changed `.github/workflows/demo-ci-cd.yml`: set the timeout and poll interval explicitly for the ACA postflight verifier step. Changed `scripts/ci/run-demo-network-job.sh` to forward both values into the ACA Job container. Existing failed-postflight cleanup still forces the seed flag off.
+- Validation: `bash -n` for both changed scripts **PASS**; workflow YAML parse with PyYAML **PASS**; mocked delayed-marker success, timeout with aggregate-count evidence, non-bootstrap fail-fast, and ACA Job environment forwarding **PASS**; `git diff --check` **PASS**. Live ACA/MySQL and GitHub Actions run **NOT RUN**.
+- Deviations: none.
+- Remaining risk: the 900-second allowance is not verified against a live full seed run; if runner completion consistently takes longer, the workflow will fail closed and retain timeout diagnostics.
