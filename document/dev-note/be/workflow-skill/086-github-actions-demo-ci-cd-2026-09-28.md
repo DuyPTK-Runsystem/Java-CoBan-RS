@@ -118,3 +118,12 @@
 - Changed `.github/workflows/demo-ci-cd.yml`: normal deploy defaults missing `ACA_MIN_REPLICAS` and `ACA_MAX_REPLICAS` repository variables to `1`, and validates nonnegative integer bounds before calling `az containerapp update`. Bootstrap continues to use explicit `1/1`. No DB or ACA resource was changed by this fix.
 - Validation: workflow YAML parse, extracted deploy shell syntax and replica-bound cases, and `git diff --check` **PASS**. Live GitHub workflow **NOT RUN** for this patch.
 - Deviation: none. After run #14 failed, a read-only MySQL query found the Plan 081 completion marker for image `51e75915` and 160 students. Run #14 DB preflight had succeeded. The earlier partial-seed observation is no longer current; a normal deploy can proceed if its preflight continues to pass. Live deploy after this patch remains unverified.
+
+
+## Wrapped Actuator health response in CI gates (2026-09-30)
+
+- Related Developer Plan: [Plan 086](../../../dev-impl-plan/summary/086-github-actions-first-demo-seed-2026-09-28.md), approved.
+- Run #15 showed `/actuator/health` returns the standard REST envelope with status under `data.status`; the workflow had asserted root `.status`, so a healthy response failed the jq gate. Updated all three jq health assertions in `.github/workflows/demo-ci-cd.yml` to require `.data.status == "UP"` and emit an explicit jq error otherwise. Kept readiness checks that only require a successful HTTP response unchanged.
+- Validation: workflow YAML parse and `bash -n` over all 29 inline run blocks **PASS**; jq mock for wrapped `UP` and clear failure on `DOWN` **PASS**; confirmed all three jq health assertions use the wrapped status **PASS**; `git diff --check` **PASS**. Live workflow/API rerun **NOT RUN**.
+- Deviations: none.
+- Remaining: run #15 was not rerun after this workflow edit, so remote confirmation is pending.
