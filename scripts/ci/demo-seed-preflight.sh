@@ -46,6 +46,15 @@ if [[ -n "$marker_rows" ]]; then
   exit 1
 fi
 
+# A first bootstrap may target a newly created, completely empty database.
+# Flyway creates the application tables only after this preflight succeeds.
+schema_table_count="$(mysql_query "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE()")"
+if [[ "$schema_table_count" == '0' ]]; then
+  if [[ -n "${GITHUB_OUTPUT:-}" ]]; then echo 'seed_state=empty-schema' >> "$GITHUB_OUTPUT"; else echo 'seed_state=empty-schema'; fi
+  echo 'Read-only preflight found an empty schema; Flyway will create the application tables during bootstrap.'
+  exit 0
+fi
+
 # A missing marker alone is inconclusive. Any Plan 081 fixture key means the target
 # needs manual inspection before bootstrap; partial data is never retried here.
 fixture_count="$(mysql_query "
