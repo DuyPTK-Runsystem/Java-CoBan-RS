@@ -110,3 +110,11 @@
 - Validation: `bash -n` for both changed scripts **PASS**; workflow YAML parse with PyYAML **PASS**; mocked delayed-marker success, timeout with aggregate-count evidence, non-bootstrap fail-fast, and ACA Job environment forwarding **PASS**; `git diff --check` **PASS**. Live ACA/MySQL and GitHub Actions run **NOT RUN**.
 - Deviations: none.
 - Remaining risk: the 900-second allowance is not verified against a live full seed run; if runner completion consistently takes longer, the workflow will fail closed and retain timeout diagnostics.
+
+
+## ACA replica defaults after run #14 (2026-09-30)
+
+- Related Developer Plan: [Plan 086](../../../dev-impl-plan/summary/086-github-actions-first-demo-seed-2026-09-28.md), approved. Run #14 push deploy reached backend update and failed with `--min-replicas: invalid int value: ''`; live ACA scale readback was min/max `1/1`.
+- Changed `.github/workflows/demo-ci-cd.yml`: normal deploy defaults missing `ACA_MIN_REPLICAS` and `ACA_MAX_REPLICAS` repository variables to `1`, and validates nonnegative integer bounds before calling `az containerapp update`. Bootstrap continues to use explicit `1/1`. No DB or ACA resource was changed by this fix.
+- Validation: workflow YAML parse, extracted deploy shell syntax and replica-bound cases, and `git diff --check` **PASS**. Live GitHub workflow **NOT RUN** for this patch.
+- Deviation: none. After run #14 failed, a read-only MySQL query found the Plan 081 completion marker for image `51e75915` and 160 students. Run #14 DB preflight had succeeded. The earlier partial-seed observation is no longer current; a normal deploy can proceed if its preflight continues to pass. Live deploy after this patch remains unverified.

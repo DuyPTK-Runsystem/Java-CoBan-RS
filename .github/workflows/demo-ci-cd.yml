@@ -307,8 +307,8 @@ jobs:
           IMAGE: ${{ needs.release-image.outputs.image }}
           OPERATION: ${{ github.event.inputs.operation || 'deploy' }}
           SEED_TARGET_ID: ${{ vars.DEMO_SEED_TARGET_ID }}
-          ACA_MIN_REPLICAS: ${{ vars.ACA_MIN_REPLICAS }}
-          ACA_MAX_REPLICAS: ${{ vars.ACA_MAX_REPLICAS }}
+          ACA_MIN_REPLICAS: ${{ vars.ACA_MIN_REPLICAS || '1' }}
+          ACA_MAX_REPLICAS: ${{ vars.ACA_MAX_REPLICAS || '1' }}
         run: |
             set -euo pipefail
             app="$ACA_NAME"
@@ -354,7 +354,11 @@ jobs:
             else
               min_replicas="$ACA_MIN_REPLICAS"
               max_replicas="$ACA_MAX_REPLICAS"
-              test -n "$min_replicas" && test -n "$max_replicas"
+              if [[ ! "$min_replicas" =~ ^[0-9]+$ || ! "$max_replicas" =~ ^[0-9]+$ ]] ||
+                 (( max_replicas < min_replicas )); then
+                echo 'ACA replica limits must be nonnegative integers with max >= min.' >&2
+                exit 2
+              fi
             fi
 
             az containerapp update \

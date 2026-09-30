@@ -132,3 +132,4 @@ Plan 040.1: Email-only notification contract — Completed; full test, Checkstyl
 Plan 078 documentation sync (2026-09-10): cập nhật trạng thái Plan 078 trong các summary thành `Implemented`; giữ PMD/build baseline `BLOCKED` và live API `NOT RUN`.
 
 |   083 | enrollment | [Placement stable pagination](enrollment/083-placement-stable-pagination-2026-09-23.md) | Follow-up fixes zero-based request binding; compileJava and Chrome page 1/2 PASS; tests/Checkstyle/PMD/full build/diff check NOT RUN | 2026-09-24 |
+- [086 — ACA replica defaults](workflow-skill/086-github-actions-demo-ci-cd-2026-09-28.md): run #14 empty min replica fix; YAML/shell validation PASS; live rerun NOT RUN.
