@@ -1,0 +1,32 @@
+name: Demo CI and deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Demo operation
+        required: true
+        type: choice
+        options:
+          - deploy
+          - bootstrap
+          - rollback
+          - private-cutover
+      rollback_image:
+        description: Existing immutable ACR image, required only for rollback
+        required: false
+        type: string
+      cutover_image:
+        description: Currently deployed immutable ACR image, required only for private-cutover
+        required: false
+        type: string
+
+# The release branch contains the full deployment workflow. This default-branch
+# entry makes GitHub's manual dispatch available; select DEPLOY_BRANCH to run it.
+jobs:
+  default-branch-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo 'Select the configured DEPLOY_BRANCH when starting this workflow.' >&2
+          exit 1
