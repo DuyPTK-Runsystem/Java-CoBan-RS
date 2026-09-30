@@ -515,7 +515,8 @@ jobs:
           npm run build
 
       - name: Deploy to Vercel
-        working-directory: FE
+        # The Vercel project already sets Root Directory to FE.
+        working-directory: .
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}

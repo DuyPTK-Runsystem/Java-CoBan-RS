@@ -234,3 +234,5 @@ Vercel FE deployment (2026-09-24): [FE Vercel Dev Note](../fe/tooling/vercel-fro
 Azure Container Apps BE deployment (2026-09-24): [BE Azure Dev Note](../be/config/085-azure-container-apps-backend-2026-09-24.md) — independent `bootJar`/diff PASS; Docker daemon unavailable, image/runtime and remote deployment pending.
 
 Plan 086 follow-up (2026-09-30): [ACA replica defaults](../be/workflow-skill/086-github-actions-demo-ci-cd-2026-09-28.md) — run #14 empty min replica fix; YAML/shell validation PASS; live rerun NOT RUN.
+
+Plan 086 follow-up (2026-09-30): [Vercel CLI root](../be/workflow-skill/086-github-actions-demo-ci-cd-2026-09-28.md) — run #16 frontend build path fix; static validation PASS, live deploy pending.

@@ -127,3 +127,11 @@
 - Validation: workflow YAML parse and `bash -n` over all 29 inline run blocks **PASS**; jq mock for wrapped `UP` and clear failure on `DOWN` **PASS**; confirmed all three jq health assertions use the wrapped status **PASS**; `git diff --check` **PASS**. Live workflow/API rerun **NOT RUN**.
 - Deviations: none.
 - Remaining: run #15 was not rerun after this workflow edit, so remote confirmation is pending.
+
+
+## Vercel CLI working directory after run #16 (2026-09-30)
+
+- Related Developer Plan: [Plan 086](../../../dev-impl-plan/summary/086-github-actions-first-demo-seed-2026-09-28.md), approved. Run #16 passed backend deployment and DB postflight, then Vercel CLI `vite build` failed with `Could not resolve entry module "index.html"`. The project Root Directory is `FE`, and the workflow ran the CLI from `FE`; Vercel documents that the Root Directory setting also applies to CLI commands.
+- Changed `.github/workflows/demo-ci-cd.yml`: run only the `vercel pull`, `vercel build`, and `vercel deploy --prebuilt` step from repository root. The separate FE production build remains in `FE`. This avoids applying `FE` twice while preserving the configured Vercel project root.
+- Validation: workflow YAML parse, run-block shell syntax, repo `FE/index.html` readback, and `git diff --check` **PASS**. Live Vercel CLI build/deploy **NOT RUN** for this patch; next workflow run will verify it.
+- Deviations: none. Remaining: approve the protected demo environment for the new run, confirm Vercel deployment, then run FE/API smoke.
