@@ -187,7 +187,7 @@ onMounted(() => void load())
 
       <div class="field-group">
         <label class="lesson-log-checkbox-label">
-          <input v-model="requireReview" type="checkbox" />
+          <input v-model="requireReview" type="checkbox">
           <span>Bắt buộc giáo viên chủ nhiệm ký tổng kết tuần</span>
         </label>
       </div>

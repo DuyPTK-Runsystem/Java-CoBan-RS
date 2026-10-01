@@ -272,9 +272,9 @@ function recordLate(): void {
       <p
         v-if="
           !props.readOnly &&
-          form.presentCount !== null &&
-          form.absentCount !== null &&
-          Number(form.presentCount) + Number(form.absentCount) !== props.entry.rosterCountSnapshot
+            form.presentCount !== null &&
+            form.absentCount !== null &&
+            Number(form.presentCount) + Number(form.absentCount) !== props.entry.rosterCountSnapshot
         "
         class="validation-warning"
       >
