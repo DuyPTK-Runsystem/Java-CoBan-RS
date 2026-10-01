@@ -1,8 +1,10 @@
 # BE Dev Note Summary
 
-## CR v4 — planning only
+- [Three workflow skills](workflow-skill/088-three-workflow-skills-2026-10-02.md) — Project-local Java rewrite safety, goal pause handoff, and subagent context budget; three skill validators PASS (2026-10-02).
 
-- [Dev Note 088: Spring AI timetable agent plan](../summary/088-spring-ai-timetable-agent-plan-2026-10-01.md) — Docs-only; chưa triển khai backend/provider/migration; approval PENDING (2026-10-01).
+## CR v4 — Plan 088 approved
+
+- [Dev Note 088: Spring AI timetable agent implementation](../summary/088-spring-ai-timetable-agent-implementation-2026-10-01.md) — Người dùng đã approve; backend đang tích hợp/validation; provider runtime và MySQL cô lập NOT RUN (2026-10-01).
 
 | 076.16 | notification | [Notification inbox SSE](notification/076.16-notification-inbox-sse-2026-10-01.md) | SSE endpoint, process-local recipient registry and post-commit dispatch; focused tests PASS; full tests FAIL 587/105; Checkstyle PASS with 976 warnings; PMD main PASS; build FAIL on baseline pmdTest and full tests | 2026-10-01 |
 | 086 | Ops | [Wrapped Actuator health response in CI gates](workflow-skill/086-github-actions-demo-ci-cd-2026-09-28.md#wrapped-actuator-health-response-in-ci-gates-2026-09-30) | All three jq health assertions read `.data.status` and report a clear failure otherwise; YAML/29 shell blocks and jq UP/DOWN mock PASS; live rerun NOT RUN. | 2026-09-30 |

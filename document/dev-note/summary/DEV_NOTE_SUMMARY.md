@@ -1,10 +1,12 @@
 # Dev Note Summary
 
+- [Three workflow skills](../be/workflow-skill/088-three-workflow-skills-2026-10-02.md) — User-approved project-local skills; validators PASS; Plan 088 stays paused (2026-10-02).
+
 ## Chronological Summary
 
 | No. | Area | Note | Status | Updated |
 | --- | --- | --- | --- | --- |
-| 088 | Docs BE/FE | [CR v4 và kế hoạch Spring AI timetable agent](088-spring-ai-timetable-agent-plan-2026-10-01.md) | Docs-only; amendment harness/tools/snapshot/cache D08–D10 đã ghi; design DRAFT, validation tại note | 2026-10-01 |
+| 088 | BE/FE | [Spring AI timetable agent implementation](088-spring-ai-timetable-agent-implementation-2026-10-01.md) | APPROVED; implementation/validation đang chạy; FE offline gates PASS tại note; provider/MySQL live NOT RUN | 2026-10-01 |
 | 076.17 | FE | [SSE badge connection synchronization](../fe/notification/076.17-sse-badge-connection-sync-2026-10-01.md) | Initial-connection gap fixed; regression red then green; lint, 636 tests, coverage, build and local Chrome badge 3 to 4 without refresh PASS | 2026-10-01 |
 | 076.16 | BE/FE | [Notification inbox SSE](../be/notification/076.16-notification-inbox-sse-2026-10-01.md) | SSE callback directly refreshes badge; no-store and latest-request guard; diff-check PASS, tests/live UI NOT RUN. Earlier FE lint/coverage/build PASS; backend baseline blockers documented in note | 2026-10-01 |
 |   001 | BE             | [Base Backend Theo Boilerplate, Rút Gọn User/Auth](../be/user-auth/001-base-boilerplate-user-auth-2026-08-17.md)                                                                                  | Completed                                                                                                                                                                                                                                                                                                                                                            | 2026-08-17 |

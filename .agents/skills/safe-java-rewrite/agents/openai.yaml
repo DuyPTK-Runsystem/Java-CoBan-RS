@@ -1,0 +1,5 @@
+interface:
+  display_name: "safe-java-rewrite"
+  short_description: "Safe bulk Java edits and encoding recovery"
+  default_prompt: "Use $safe-java-rewrite for the current authorized task."
+

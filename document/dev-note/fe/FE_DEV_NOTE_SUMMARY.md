@@ -4,7 +4,7 @@
 
 | No. | Module | Note | Status | Updated |
 | --- | --- | --- | --- | --- |
-| 088 | Docs timetable | [CR v4 và wireframe Spring AI agent](../summary/088-spring-ai-timetable-agent-plan-2026-10-01.md) | Docs-only; static wireframe DRAFT; production FE/Storybook và native browser NOT RUN | 2026-10-01 |
+| 088 | Timetable agent | [Spring AI timetable agent](088-spring-ai-timetable-agent-2026-10-01.md) | Typed API/panel/review/recovery + 20 stories; lint/build/Storybook/fixture Chrome PASS; independent tests/coverage tại note; live provider/API NOT RUN | 2026-10-01 |
 | 076.17 | Notification | [SSE badge connection synchronization](notification/076.17-sse-badge-connection-sync-2026-10-01.md) | Initial-connection gap fixed; regression red then green; lint, 636 tests, coverage, build and local Chrome badge 3 to 4 without refresh PASS | 2026-10-01 |
 | 076.16 | Notification | [Notification inbox SSE](../be/notification/076.16-notification-inbox-sse-2026-10-01.md) | SSE callback directly refreshes badge; no-store and latest-request guard; diff-check PASS, tests/live UI NOT RUN. Earlier lint, coverage (116 files / 630 tests) and build PASS | 2026-10-01 |
 |   009 | FE Project Skeleton                                 | [FE Project Skeleton](foundation/009-fe-project-skeleton-2026-08-18.md)                                                             | Completed; validation blocker resolved by 010/011                                                                                                                                                                                                                                                                                                                          | 2026-08-18 |

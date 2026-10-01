@@ -27,6 +27,7 @@ import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableEntryRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableHeadRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetablePeriodRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableRevisionRepository;
+import com.JavaTraining.BaiTap_RS.timetableagent.service.TimetableAgentWorkspaceCapabilityService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -86,6 +87,9 @@ class TimetableServiceTest {
         @Mock
         private TimetableCalendarService calendarService;
 
+        @Mock
+        private TimetableAgentWorkspaceCapabilityService timetableAgentCapabilityService;
+
         private TimetableService timetableService;
 
         @BeforeEach
@@ -94,7 +98,8 @@ class TimetableServiceTest {
                                 headRepository, revisionRepository, entryRepository, periodRepository,
                                 auditRepository, semesterRepository, policyRepository, assignmentRepository,
                                 classSubjectRepository, schoolClassRepository, subjectRepository,
-                                teacherRepository, roomRepository, validationService, calendarService);
+                                teacherRepository, roomRepository, validationService, calendarService,
+                                timetableAgentCapabilityService);
         }
 
         @Test

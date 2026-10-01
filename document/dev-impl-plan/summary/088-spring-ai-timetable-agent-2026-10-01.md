@@ -2,9 +2,9 @@
 
 ## 1. Status, mục tiêu và nguồn
 
-- Ngày: 2026-10-01; **DRAFT — chờ phê duyệt trước code**.
+- Ngày: 2026-10-01; **APPROVED — người dùng phê duyệt Plan 088 qua tin nhắn ngày 2026-10-01; đang triển khai**.
 - Nền tài liệu: v3; cải tiến được ghi nhận là [CR-V4-001](../../application-doc/v4/change-request/CR-V4-001-spring-ai-timetable-agent.md).
-- Authorization hiện tại: soạn kế hoạch/CR; chưa phê duyệt implementation.
+- Authorization hiện tại: triển khai Plan 088 đã được phê duyệt; dev/test độc lập bằng sub-agent. Provider chưa cài đặt; không có database MySQL test riêng, nên các gate live tương ứng chưa chạy. D08 giữ baseline snapshot-only trong khi chưa có lựa chọn mới.
 - Amendment 2026-10-01: [harness/tools/snapshot/cache](../../application-doc/v4/agent-contract/harness-tools-and-prompt-cache.md), người dùng yêu cầu cập nhật tài liệu; D08–D10 giữ đề xuất/TBD.
 - Provider/model: chưa chốt theo lựa chọn người dùng; giữ cấu hình linh hoạt.
 - Ngôn ngữ prompt được người dùng xác nhận 2026-10-01: system prompts bằng tiếng Anh, natural-language output cho người dùng bằng tiếng Việt; JSON keys/enums/codes/tool names giữ nguyên contract. Prompt version draft `timetable-agent-2`.

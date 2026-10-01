@@ -34,11 +34,11 @@ import com.JavaTraining.BaiTap_RS.timetable.repository.TimetablePeriodRepository
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableRevisionRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.Test;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -100,10 +100,10 @@ class TimetableValidationServiceTest {
         }
 
         @Test
-        void validateRevision_classOverlap_createsBlockingIssue() {
+        void validateRevisionClassOverlapCreatesBlockingIssue() {
                 Mockito.when(revisionRepository.findById(100L)).thenReturn(Optional.of(revision));
 
-                TimetablePeriod p1 = new TimetablePeriod(1L, 2, SessionType.MORNING, 1, "Tiết 1",
+                TimetablePeriod p1 = new TimetablePeriod(1L, 2, SessionType.MORNING, 1, "Tiáº¿t 1",
                                 LocalTime.of(7, 0), LocalTime.of(7, 45));
                 ReflectionTestUtils.setField(p1, "id", 10L);
 
@@ -137,12 +137,12 @@ class TimetableValidationServiceTest {
                 Mockito.when(schoolClassRepository.findAllById(Mockito.anyList())).thenReturn(List.of(sc));
 
                 Teacher t1 = new Teacher(
-                                1L, "GV01", "Thầy Nguyễn Văn X", LocalDate.of(1985, 1, 1), "MALE", "0900000001",
-                                "gv01@school.edu.vn", "Toán", LocalDate.of(2015, 9, 1), TeacherStatus.ACTIVE);
+                                1L, "GV01", "Tháº§y Nguyá»…n VÄƒn X", LocalDate.of(1985, 1, 1), "MALE", "0900000001",
+                                "gv01@school.edu.vn", "ToÃ¡n", LocalDate.of(2015, 9, 1), TeacherStatus.ACTIVE);
                 ReflectionTestUtils.setField(t1, "id", 10L);
                 Teacher t2 = new Teacher(
-                                2L, "GV02", "Thầy Nguyễn Văn Y", LocalDate.of(1985, 1, 1), "MALE", "0900000002",
-                                "gv02@school.edu.vn", "Văn", LocalDate.of(2015, 9, 1), TeacherStatus.ACTIVE);
+                                2L, "GV02", "Tháº§y Nguyá»…n VÄƒn Y", LocalDate.of(1985, 1, 1), "MALE", "0900000002",
+                                "gv02@school.edu.vn", "VÄƒn", LocalDate.of(2015, 9, 1), TeacherStatus.ACTIVE);
                 ReflectionTestUtils.setField(t2, "id", 20L);
                 Mockito.when(teacherRepository.findAllById(Mockito.anyList())).thenReturn(List.of(t1, t2));
 
@@ -159,10 +159,10 @@ class TimetableValidationServiceTest {
         }
 
         @Test
-        void validateRevision_teacherOverlap_createsBlockingIssue() {
+        void validateRevisionTeacherOverlapCreatesBlockingIssue() {
                 Mockito.when(revisionRepository.findById(100L)).thenReturn(Optional.of(revision));
 
-                TimetablePeriod p1 = new TimetablePeriod(1L, 2, SessionType.MORNING, 1, "Tiết 1",
+                TimetablePeriod p1 = new TimetablePeriod(1L, 2, SessionType.MORNING, 1, "Tiáº¿t 1",
                                 LocalTime.of(7, 0), LocalTime.of(7, 45));
                 ReflectionTestUtils.setField(p1, "id", 10L);
 
@@ -192,8 +192,8 @@ class TimetableValidationServiceTest {
                 Mockito.when(classSubjectRepository.findAllById(Mockito.anyList())).thenReturn(List.of(cs1, cs2));
 
                 Teacher t1 = new Teacher(
-                                1L, "GV01", "Thầy Nguyễn Văn X", LocalDate.of(1985, 1, 1), "MALE", "0900000001",
-                                "gv01@school.edu.vn", "Toán", LocalDate.of(2015, 9, 1), TeacherStatus.ACTIVE);
+                                1L, "GV01", "Tháº§y Nguyá»…n VÄƒn X", LocalDate.of(1985, 1, 1), "MALE", "0900000001",
+                                "gv01@school.edu.vn", "ToÃ¡n", LocalDate.of(2015, 9, 1), TeacherStatus.ACTIVE);
                 ReflectionTestUtils.setField(t1, "id", 10L);
                 Mockito.when(teacherRepository.findAllById(Mockito.anyList())).thenReturn(List.of(t1));
 
@@ -208,10 +208,10 @@ class TimetableValidationServiceTest {
         }
 
         @Test
-        void validateRevision_roomOverlap_createsBlockingIssue() {
+        void validateRevisionRoomOverlapCreatesBlockingIssue() {
                 Mockito.when(revisionRepository.findById(100L)).thenReturn(Optional.of(revision));
 
-                TimetablePeriod p1 = new TimetablePeriod(1L, 2, SessionType.MORNING, 1, "Tiết 1",
+                TimetablePeriod p1 = new TimetablePeriod(1L, 2, SessionType.MORNING, 1, "Tiáº¿t 1",
                                 LocalTime.of(7, 0), LocalTime.of(7, 45));
                 ReflectionTestUtils.setField(p1, "id", 10L);
 
@@ -240,7 +240,7 @@ class TimetableValidationServiceTest {
                 ReflectionTestUtils.setField(cs2, "id", 2L);
                 Mockito.when(classSubjectRepository.findAllById(Mockito.anyList())).thenReturn(List.of(cs1, cs2));
 
-                FunctionalRoom room = new FunctionalRoom("LAB_BIO", "Phòng Sinh học");
+                FunctionalRoom room = new FunctionalRoom("LAB_BIO", "PhÃ²ng Sinh há»c");
                 ReflectionTestUtils.setField(room, "id", 99L);
                 Mockito.when(roomRepository.findAllById(Mockito.anyList())).thenReturn(List.of(room));
 
@@ -259,10 +259,10 @@ class TimetableValidationServiceTest {
         }
 
         @Test
-        void validateRevision_teacherUnavailable_createsBlockingIssue() {
+        void validateRevisionTeacherUnavailableCreatesBlockingIssue() {
                 Mockito.when(revisionRepository.findById(100L)).thenReturn(Optional.of(revision));
 
-                TimetablePeriod p1 = new TimetablePeriod(1L, 2, SessionType.MORNING, 1, "Tiết 1",
+                TimetablePeriod p1 = new TimetablePeriod(1L, 2, SessionType.MORNING, 1, "Tiáº¿t 1",
                                 LocalTime.of(7, 0), LocalTime.of(7, 45));
                 ReflectionTestUtils.setField(p1, "id", 10L);
 
@@ -283,15 +283,15 @@ class TimetableValidationServiceTest {
                 Mockito.when(classSubjectRepository.findAllById(Mockito.anyList())).thenReturn(List.of(cs1));
 
                 Teacher t1 = new Teacher(
-                                1L, "GV01", "Thầy Nguyễn Văn X", LocalDate.of(1985, 1, 1), "MALE", "0900000001",
-                                "gv01@school.edu.vn", "Toán", LocalDate.of(2015, 9, 1), TeacherStatus.ACTIVE);
+                                1L, "GV01", "Tháº§y Nguyá»…n VÄƒn X", LocalDate.of(1985, 1, 1), "MALE", "0900000001",
+                                "gv01@school.edu.vn", "ToÃ¡n", LocalDate.of(2015, 9, 1), TeacherStatus.ACTIVE);
                 ReflectionTestUtils.setField(t1, "id", 10L);
                 Mockito.when(teacherRepository.findAllById(Mockito.anyList())).thenReturn(List.of(t1));
 
                 TeacherUnavailability unav = new TeacherUnavailability(
                                 10L, 1L, 2, null,
                                 LocalDate.of(2026, 9, 1), LocalDate.of(2026, 12, 31),
-                                SessionType.MORNING, "1,2", "Lịch bận");
+                                SessionType.MORNING, "1,2", "Lá»‹ch báº­n");
                 Mockito.when(unavailabilityRepository.findApprovedInSemester(Mockito.anyLong(), Mockito.any(),
                                 Mockito.any()))
                                 .thenReturn(List.of(unav));
@@ -302,6 +302,78 @@ class TimetableValidationServiceTest {
                                 .anyMatch(i -> "TEACHER_UNAVAILABLE".equals(i.code())));
         }
 
+        @Test
+        void checkCandidateAgainstExistingDetectsTeacherAndRoomUseAcrossClasses() {
+                LocalDate from = LocalDate.of(2026, 9, 1);
+                LocalDate to = LocalDate.of(2026, 12, 31);
+                TimetablePeriod period = new TimetablePeriod(1L, 2, SessionType.MORNING, 1, "TiÃ¡ÂºÂ¿t 1",
+                                LocalTime.of(7, 0), LocalTime.of(7, 45));
+                ReflectionTestUtils.setField(period, "id", 10L);
+                Mockito.when(periodRepository.findAllById(Mockito.anyList())).thenReturn(List.of(period));
+
+                TimetableEntry candidate = new TimetableEntry(100L, 1L, 10L, 99L, from, to);
+                ReflectionTestUtils.setField(candidate, "id", -1L);
+                TimetableEntry existingOtherClass = new TimetableEntry(100L, 2L, 10L, 99L, from, to);
+                ReflectionTestUtils.setField(existingOtherClass, "id", 2L);
+                Mockito.when(assignmentRepository.findAllById(Mockito.anyList())).thenReturn(List.of(
+                                assignment(1L, 1L, 10L), assignment(2L, 2L, 10L)));
+
+                ClassSubject firstClassSubject = new ClassSubject(5L, 1L, 1L, ClassSubjectStatus.ACTIVE);
+                ReflectionTestUtils.setField(firstClassSubject, "id", 1L);
+                ClassSubject secondClassSubject = new ClassSubject(6L, 2L, 1L, ClassSubjectStatus.ACTIVE);
+                ReflectionTestUtils.setField(secondClassSubject, "id", 2L);
+                Mockito.when(classSubjectRepository.findAllById(Mockito.anyList()))
+                                .thenReturn(List.of(firstClassSubject, secondClassSubject));
+                Mockito.when(schoolClassRepository.findAllById(Mockito.anyList())).thenReturn(List.of(
+                                schoolClass(5L), schoolClass(6L)));
+                Mockito.when(subjectRepository.findAllById(Mockito.anyList())).thenReturn(List.of(
+                                subject(1L, "MATH"), subject(2L, "LIT")));
+                Mockito.when(teacherRepository.findAllById(Mockito.anyList())).thenReturn(List.of(teacher(10L)));
+                FunctionalRoom room = new FunctionalRoom("LAB", "Lab");
+                ReflectionTestUtils.setField(room, "id", 99L);
+                Mockito.when(roomRepository.findAllById(Mockito.anyList())).thenReturn(List.of(room));
+                Mockito.when(subjectFunctionalRoomRepository.existsBySubjectIdAndFunctionalRoomId(
+                                Mockito.anyLong(), Mockito.eq(99L))).thenReturn(true);
+                Mockito.when(unavailabilityRepository.findApprovedInSemester(Mockito.anyLong(), Mockito.any(),
+                                Mockito.any())).thenReturn(List.of());
+
+                List<com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.response.ResTimetableIssueDTO> issues = validationService.checkCandidateAgainstExisting(
+                                revision, List.of(candidate), List.of(existingOtherClass));
+
+                Assertions.assertTrue(issues.stream().anyMatch(i -> "TEACHER_OVERLAP".equals(i.code())));
+                Assertions.assertTrue(issues.stream().anyMatch(i -> "ROOM_OVERLAP".equals(i.code())));
+        }
+
+        private SubjectTeachingAssignment assignment(Long id, Long classSubjectId, Long teacherId) {
+                SubjectTeachingAssignment result = new SubjectTeachingAssignment(classSubjectId, teacherId,
+                                LocalDate.of(2026, 9, 1), null, AssignmentStatus.ACTIVE, 1L);
+                ReflectionTestUtils.setField(result, "id", id);
+                return result;
+        }
+
+        private SchoolClass schoolClass(Long id) {
+                SchoolClass result = new SchoolClass(1L, 1L, "10A1", "10A1", 40, SchoolClassStatus.ACTIVE);
+                ReflectionTestUtils.setField(result, "id", id);
+                return result;
+        }
+
+        private Subject subject(Long id, String code) {
+                Subject result = new Subject(code, code,
+                                com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectType.ACADEMIC,
+                                com.JavaTraining.BaiTap_RS.academic.domain.entity.ApplicationScope.GRADE,
+                                com.JavaTraining.BaiTap_RS.academic.domain.entity.SubjectStatus.ACTIVE);
+                ReflectionTestUtils.setField(result, "id", id);
+                return result;
+        }
+
+        private Teacher teacher(Long id) {
+                Teacher result = new Teacher(1L, "GV" + id, "Teacher", LocalDate.of(1985, 1, 1), "MALE",
+                                "0900000001", "teacher@school.edu.vn", "ToÃƒÂ¡n", LocalDate.of(2015, 9, 1),
+                                TeacherStatus.ACTIVE);
+                ReflectionTestUtils.setField(result, "id", id);
+                return result;
+        }
+
 }
 
-        
+

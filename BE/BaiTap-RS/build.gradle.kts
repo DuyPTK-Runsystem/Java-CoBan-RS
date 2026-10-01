@@ -66,6 +66,8 @@ repositories {
 }
 
 dependencies {
+	implementation(platform("org.springframework.ai:spring-ai-bom:2.0.1"))
+	implementation("org.springframework.ai:spring-ai-client-chat")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-batch-jdbc")
 	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")

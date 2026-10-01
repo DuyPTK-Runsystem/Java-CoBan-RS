@@ -47,6 +47,7 @@ import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableEntryRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableHeadRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetablePeriodRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableRevisionRepository;
+import com.JavaTraining.BaiTap_RS.timetableagent.service.TimetableAgentWorkspaceCapabilityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -80,6 +81,7 @@ public class TimetableService {
     private final FunctionalRoomRepository roomRepository;
     private final TimetableValidationService validationService;
     private final TimetableCalendarService calendarService;
+    private final TimetableAgentWorkspaceCapabilityService timetableAgentCapabilityService;
 
     @Transactional(readOnly = true)
     public ResultPaginationDTO<ResTimetableSummaryDTO> pageSummaries(Long semesterId, Pageable pageable) {
@@ -386,7 +388,8 @@ public class TimetableService {
                 h != null ? h.getVersion() : 0L,
                 r.getBlockingCount(),
                 r.getWarningCount(),
-                capabilities);
+                capabilities,
+                timetableAgentCapabilityService.canUse(r.getStatus()));
     }
 
     private boolean matchesFilter(

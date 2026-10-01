@@ -20,5 +20,6 @@ public record ResTimetableDetailDTO(
                 Long headVersion,
                 Integer blockingCount,
                 Integer warningCount,
-                List<String> capabilities) {
+                List<String> capabilities,
+                boolean canUseTimetableAgent) {
 }

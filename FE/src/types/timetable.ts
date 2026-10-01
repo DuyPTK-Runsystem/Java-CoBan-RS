@@ -64,6 +64,7 @@ export interface TimetableDetail {
   blockingCount: number
   warningCount: number
   capabilities: TimetableCapabilities
+  canUseTimetableAgent?: boolean
 }
 
 export interface TimetableEntry {

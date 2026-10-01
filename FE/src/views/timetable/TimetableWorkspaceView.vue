@@ -14,6 +14,7 @@ import TimetableConflictPanel from '@/components/timetable/TimetableConflictPane
 import TimetableEntryDialog, { type AssignmentOption } from '@/components/timetable/TimetableEntryDialog.vue'
 import TimetablePublishDialog from '@/components/timetable/TimetablePublishDialog.vue'
 import TimetableWeekGrid from '@/components/timetable/TimetableWeekGrid.vue'
+import TimetableAgentWorkspace from '@/views/timetable/TimetableAgentWorkspace.vue'
 import { useAuthSession } from '@/composables/useAuthSession'
 import { fetchSchoolClasses } from '@/services/academicApi'
 import { fetchSubjectAssignmentsByClass } from '@/services/assignmentApi'
@@ -65,6 +66,7 @@ const teacherUnavailabilities = ref<TeacherUnavailability[]>([])
 const loadingState = ref<LoadingState>('loading')
 const generalError = ref('')
 const activeTab = ref<'GRID' | 'LOAD'>('GRID')
+const agentVisible = ref(false)
 
 // Filter mode: CLASS, TEACHER, ROOM
 const filterMode = ref<'CLASS' | 'TEACHER' | 'ROOM'>('CLASS')
@@ -99,6 +101,8 @@ const canEdit = computed(() => {
   }
   return detail.value.capabilities?.canEdit ?? false
 })
+
+const canUseTimetableAgent = computed(() => detail.value?.canUseTimetableAgent === true && canEdit.value)
 
 const isOfficeRole = computed(() => roles.value.includes('ADMIN') || roles.value.includes('ACADEMIC_OFFICE'))
 const canAddEntryInCurrentView = computed(() => canEdit.value && (
@@ -539,6 +543,17 @@ function focusIssueEntry(issue: TimetableIssue) {
   activeTab.value = 'GRID'
 }
 
+async function reloadAgentSchedule() {
+  const token = requireAccessToken()
+  if (!token || !detail.value) return
+  await loadEntriesAndReview(detail.value.revisionId)
+  try {
+    detail.value = await getTimetableDetail(detail.value.revisionId, token)
+  } catch (cause) {
+    generalError.value = extractApiErrorMessage(cause, 'Bản nháp đã lưu; chưa thể tải lại chi tiết lịch.')
+  }
+}
+
 onMounted(() => {
   void loadInitial()
 })
@@ -569,6 +584,14 @@ onMounted(() => {
 
       <div class="flex flex-wrap gap-2 items-center">
         <Button
+          v-if="canUseTimetableAgent"
+          :label="agentVisible ? 'Ẩn gợi ý thời khoá biểu' : 'Gợi ý thời khoá biểu'"
+          icon="pi pi-sparkles"
+          severity="secondary"
+          :aria-expanded="agentVisible"
+          @click="agentVisible = !agentVisible"
+        />
+        <Button
           v-if="canEdit"
           label="Kiểm tra lịch"
           icon="pi pi-check"
@@ -594,6 +617,18 @@ onMounted(() => {
     </div>
 
     <FormAlert v-if="generalError" :message="generalError" tone="error" />
+
+    <TimetableAgentWorkspace
+      v-if="agentVisible && detail"
+      :key="detail.revisionId"
+      :detail="detail"
+      :classes="classes"
+      :teachers="teachers"
+      :periods="periods"
+      :entries="entries"
+      @saved="reloadAgentSchedule"
+      @reload="reloadAgentSchedule"
+    />
 
     <!-- Calendar init warning if zero periods exist -->
     <div
