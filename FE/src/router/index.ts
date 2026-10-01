@@ -52,6 +52,14 @@ const router = createRouter({
       redirect: '/v2/notifications',
     },
     {
+      path: '/lesson-logs',
+      redirect: '/v2/lesson-logs',
+    },
+    {
+      path: '/lesson-log',
+      redirect: '/v2/lesson-logs',
+    },
+    {
       path: '/v2',
       component: () => import('@/views/shell/AuthenticatedV2ShellView.vue'),
       meta: { requiresAuth: true, module: 'v2', shell: 'authenticated' },

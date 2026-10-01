@@ -55,6 +55,18 @@ describe('router authentication guard', () => {
     expect(router.currentRoute.value.name).toBe('v2-student-edit')
   })
 
+  it('redirects /lesson-logs and /lesson-log paths to /v2/lesson-logs for authenticated user', async () => {
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'teacher01', roles: ['TEACHER'] } })
+
+    await router.push('/lesson-logs')
+    expect(router.currentRoute.value.path).toBe('/v2/lesson-logs')
+    expect(router.currentRoute.value.name).toBe('v2-lesson-logs')
+
+    await router.push('/lesson-log')
+    expect(router.currentRoute.value.path).toBe('/v2/lesson-logs')
+    expect(router.currentRoute.value.name).toBe('v2-lesson-logs')
+  })
+
   it('marks the v2 shell as authenticated and module-neutral', () => {
     const route = router.resolve('/v2')
 
