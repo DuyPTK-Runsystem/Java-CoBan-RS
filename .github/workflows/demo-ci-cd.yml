@@ -307,8 +307,8 @@ jobs:
           IMAGE: ${{ needs.release-image.outputs.image }}
           OPERATION: ${{ github.event.inputs.operation || 'deploy' }}
           SEED_TARGET_ID: ${{ vars.DEMO_SEED_TARGET_ID }}
-          ACA_MIN_REPLICAS: ${{ vars.ACA_MIN_REPLICAS }}
-          ACA_MAX_REPLICAS: ${{ vars.ACA_MAX_REPLICAS }}
+          ACA_MIN_REPLICAS: ${{ vars.ACA_MIN_REPLICAS || '1' }}
+          ACA_MAX_REPLICAS: ${{ vars.ACA_MAX_REPLICAS || '1' }}
         run: |
             set -euo pipefail
             app="$ACA_NAME"
@@ -354,7 +354,11 @@ jobs:
             else
               min_replicas="$ACA_MIN_REPLICAS"
               max_replicas="$ACA_MAX_REPLICAS"
-              test -n "$min_replicas" && test -n "$max_replicas"
+              if [[ ! "$min_replicas" =~ ^[0-9]+$ || ! "$max_replicas" =~ ^[0-9]+$ ]] ||
+                 (( max_replicas < min_replicas )); then
+                echo 'ACA replica limits must be nonnegative integers with max >= min.' >&2
+                exit 2
+              fi
             fi
 
             az containerapp update \
@@ -423,6 +427,8 @@ jobs:
           SEED_TARGET_ID: ${{ vars.DEMO_SEED_TARGET_ID }}
           EXPECTED_IMAGE: ${{ needs.release-image.outputs.image }}
           OPERATION: ${{ github.event.inputs.operation || 'deploy' }}
+          POSTFLIGHT_MARKER_TIMEOUT_SECONDS: 900
+          POSTFLIGHT_MARKER_POLL_INTERVAL_SECONDS: 15
         run: scripts/ci/run-demo-network-job.sh
 
       - name: Disable seed flag and verify application health
@@ -435,7 +441,7 @@ jobs:
           API_URL: ${{ needs.deploy-backend.outputs.api_url }}
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --retry 12 --retry-delay 5 "$API_URL/actuator/health" | jq -e '.status == "UP"' >/dev/null
+          curl --fail --silent --show-error --retry 12 --retry-delay 5 "$API_URL/actuator/health" | jq -e 'if .data.status == "UP" then true else error("Expected actuator health response .data.status to be UP") end' >/dev/null
           if [[ "$OPERATION" == 'bootstrap' ]]; then
             az containerapp update \
               --name "$ACA_NAME" --resource-group "$AZURE_RESOURCE_GROUP" \
@@ -509,7 +515,8 @@ jobs:
           npm run build
 
       - name: Deploy to Vercel
-        working-directory: FE
+        # The Vercel project already sets Root Directory to FE.
+        working-directory: .
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
@@ -587,7 +594,7 @@ jobs:
           set -euo pipefail
           api_host="$(az containerapp show --name "$ACA_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --query properties.configuration.ingress.fqdn --output tsv)"
           test -n "$api_host" && test "$api_host" != 'None'
-          curl --fail --silent --show-error "https://$api_host/actuator/health/readiness" | jq -e '.status == "UP"' >/dev/null
+          curl --fail --silent --show-error "https://$api_host/actuator/health/readiness" | jq -e 'if .data.status == "UP" then true else error("Expected actuator health response .data.status to be UP") end' >/dev/null
 
       - name: Disable MySQL public networking and remove broad firewall rules
         env:
@@ -636,5 +643,5 @@ jobs:
           scripts/ci/run-demo-network-job.sh
           api_host="$(az containerapp show --name "$ACA_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --query properties.configuration.ingress.fqdn --output tsv)"
           test -n "$api_host" && test "$api_host" != 'None'
-          curl --fail --silent --show-error --retry 12 --retry-delay 5 "https://$api_host/actuator/health" | jq -e '.status == "UP"' >/dev/null
+          curl --fail --silent --show-error --retry 12 --retry-delay 5 "https://$api_host/actuator/health" | jq -e 'if .data.status == "UP" then true else error("Expected actuator health response .data.status to be UP") end' >/dev/null
           echo 'Private MySQL access and ACA database health are healthy after public networking was disabled.'

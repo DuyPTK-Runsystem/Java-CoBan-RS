@@ -115,11 +115,20 @@ const navigation = computed<NavigationItem[]>(() => {
       icon: 'pi pi-calendar',
       active: Boolean(route?.path?.startsWith('/v2/my-timetable')),
     })
-    items.push({ label: 'Sổ đầu bài của tôi', to: '/v2/my-lesson-logs', icon: 'pi pi-file-edit', active: Boolean(route?.path?.startsWith('/v2/my-lesson-logs')) })
-    items.push({ label: 'Sổ tuần theo lớp', to: '/v2/lesson-logs', icon: 'pi pi-book', active: Boolean(route?.path?.startsWith('/v2/lesson-logs')) })
+    items.push({
+      label: 'Sổ đầu bài của tôi',
+      to: '/v2/my-lesson-logs',
+      icon: 'pi pi-file-edit',
+      active: Boolean(route?.path?.startsWith('/v2/my-lesson-logs')),
+    })
   }
-  if (roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE')) {
-    items.push({ label: 'Sổ đầu bài', to: '/v2/lesson-logs', icon: 'pi pi-book', active: Boolean(route?.path?.startsWith('/v2/lesson-logs')) })
+  if (roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE' || role === 'TEACHER')) {
+    items.push({
+      label: 'Sổ đầu bài',
+      to: '/v2/lesson-logs',
+      icon: 'pi pi-book',
+      active: Boolean(route?.path?.startsWith('/v2/lesson-logs')),
+    })
   }
   if (isStudentWorkspace(roles)) return items.filter((item) => isStudentWorkspacePath(item.to))
   if (isTeacherWorkspace(roles)) {

@@ -450,4 +450,36 @@ describe('AuthenticatedV2ShellView.vue', () => {
     expect(studentItem.exists()).toBe(true)
     expect(studentItem.attributes('data-active')).toBe('false')
   })
+
+  it('renders unified Sổ đầu bài navigation label without duplicates for teacher and admin', () => {
+    saveAuthSession({
+      accessToken: 'token-teacher-admin',
+      user: {
+        id: 15,
+        username: 'teacher_admin',
+        roles: ['ADMIN', 'TEACHER'],
+      },
+    })
+
+    const wrapper = mount(AuthenticatedV2ShellView, {
+      global: {
+        stubs: {
+          RouterView: true,
+          AuthenticatedLayout: {
+            props: ['navigation'],
+            template:
+              '<div class="mock-layout"><span v-for="item in navigation" :key="item.to" :data-to="item.to">{{ item.label }}</span></div>',
+          },
+        },
+      },
+    })
+
+    const lessonLogItems = wrapper.findAll('[data-to="/v2/lesson-logs"]')
+    expect(lessonLogItems).toHaveLength(1)
+    expect(lessonLogItems[0].text()).toBe('Sổ đầu bài')
+
+    const myLessonLogItem = wrapper.find('[data-to="/v2/my-lesson-logs"]')
+    expect(myLessonLogItem.exists()).toBe(true)
+    expect(myLessonLogItem.text()).toBe('Sổ đầu bài của tôi')
+  })
 })

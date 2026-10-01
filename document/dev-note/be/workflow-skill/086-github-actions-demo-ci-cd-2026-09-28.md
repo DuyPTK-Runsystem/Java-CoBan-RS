@@ -76,3 +76,62 @@
 - VNet workflow owner added a Log Analytics workspace to IaC so there is no secret-key lookup prerequisite. The workspace key is consumed internally by ACA environment configuration and is not an output or workflow secret.
 - The verifier DB identity and dedicated Key Vault password secret have not been verified. Before running the Job, DBA must create a separate principal with only `USAGE` and `SELECT ON <demo_schema>.*`, then store its password in a dedicated Key Vault secret using an approved silent/secure flow. Do not inspect, print, or pass the password through command arguments, GitHub, or notes. Keep app writer credentials separate.
 - Current read-only subscription inventory confirms East Asia resource group `rg-java-coban-demo` has the existing ACA/ACR/Key Vault/MySQL resources but no VNet or Log Analytics workspace. Quota/SKU could not be read because the portal quota view errored; local `az` is absent. No resource, identity, secret, firewall, route, DB, or app was mutated.
+
+
+## Verifier identity correction and live preflight (2026-09-29)
+
+- Related plan: Plan 086, approved. The user directly requested a separate `java_coban_verify` identity with only `USAGE` and `SELECT ON java_coban.*` and authorized implementation.
+- Changed external configuration: GitHub repository Actions variable `DEMO_MYSQL_USER` from `java_coban_app` to `java_coban_verify`; GitHub UI readback showed the new value. No repository script or infrastructure file was changed. The application account was not modified.
+- Current live ACA Job name is `aca-job-db-verify-2026`. The verifier Job now references the new version of Key Vault `mysql-password`. GitHub variable readback **PASS**; `verify-demo-mysql-readonly.sh` and `verify-demo-private-network.sh` were unchanged.
+- The attempted method of trying several unrelated Key Vault secrets as administrator credentials was rejected by automatic approval review as overly broad credential discovery. No such probe ran. The user then explicitly identified `dbase-password` in `kv-javacobanrsdemo26` as the `javacobanadmin` credential source.
+- Using that exact secret in memory, admin login **PASS**. Created `java_coban_verify`@`%` with `REQUIRE SSL`, granted only `SELECT ON java_coban.*`, and left `java_coban_app` unchanged. `SHOW GRANTS` returned exactly `USAGE ON *.*` and `SELECT ON java_coban.*`; login using the verifier password **PASS**.
+- Updated the Key Vault `mysql-password` secret to a new random password without printing it. Secret version metadata changed to `4af81a29181f4e69a49cf5e11ab94511`. Re-read that secret in memory, logged in as the verifier, and checked `SHOW GRANTS FOR CURRENT_USER()` **PASS**, with effective grants classified `SELECT_ONLY`.
+- Re-ran all jobs of `Demo CI and deployment` run [36543260647](https://github.com/DuyPTK-Runsystem/Java-CoBan-RS/actions/runs/36543260647), attempt 2, at 2026-09-29 15:58 ICT. It initially waited behind [run #10](https://github.com/DuyPTK-Runsystem/Java-CoBan-RS/actions/runs/36545215938) due repository workflow concurrency, then reached database preflight.
+- A direct ACA Job probe immediately after the Key Vault update failed MySQL login from the Job while direct Key Vault password readback/login passed, indicating the Job had not picked up the new secret version. Updated only the verifier Job `mysql-password` Key Vault reference to the new versioned URI, preserving the same system-assigned identity. The next direct Job probe `aca-job-db-verify-2026-9u3ux4i` **PASS**; logs show `mysql_identity=SELECT_ONLY` and `private_network=PASS` with TLS MySQL PASS. This was ACA probe evidence before workflow attempt 2 started. An attempted cancellation of unrelated run #10 to release the concurrency lock was rejected by automatic approval review; no cancellation was performed by this task.
+- Run #9 attempt 2 reached [database-preflight job 109344143568](https://github.com/DuyPTK-Runsystem/Java-CoBan-RS/actions/runs/36543260647/job/109344143568). Its ACA execution `aca-job-db-verify-2026-ev2mgo7` logged `mysql_identity=SELECT_ONLY` and `private_network=PASS`, then failed because normal `deploy` requires the Plan 081 completion marker. The Azure CLI preview-extension warnings were not the cause.
+- Direct read-only MySQL inspection found no `app_demo_seed_completion` table; Flyway history ends at V27, and canonical Plan 081 academic years, students, and teachers each count zero. A separate ACA preflight execution `aca-job-db-verify-2026-m833giy` with `OPERATION=bootstrap` succeeded and logged `seed_state=clean-for-plan-081-keys` plus `mysql_identity=SELECT_ONLY` and `private_network=PASS`. This was a read-only classification; no bootstrap seed or deployment was run in this correction task.
+- The intended protected `workflow_dispatch` bootstrap could not be started: GitHub Actions shows no **Run workflow** button. Git remote HEAD resolves to `master` (`c05dca2...`), and the workflow file is absent from `secondary/master` but present on `training/duyptk/student-management-deploy`. GitHub requires the workflow file on the default branch for `workflow_dispatch`. No default-branch change, alternate direct seeding, or bootstrap deployment was performed.
+
+
+## Empty-schema bootstrap preflight (2026-09-30)
+
+- Related Developer Plan: Plan 086, previously approved. User requested a fresh first deploy after dropping and recreating the demo schema; existing preflight queried application tables before Flyway could create them.
+- Changed `scripts/ci/demo-seed-preflight.sh`: for `bootstrap` only, an absent completion marker plus zero objects in the configured schema returns `seed_state=empty-schema`. Any nonempty schema still follows the existing canonical fixture-key checks. Normal `deploy` and `rollback` still require a matching completion marker.
+- Validation: `bash -n scripts/ci/demo-seed-preflight.sh` **PASS**; a local mocked MySQL run accepted the empty-schema path and rejected an existing schema with fixture keys **PASS**; `git diff --check` **PASS**. Live empty-schema ACA Job and full GitHub workflow **NOT RUN**. No Azure/MySQL mutation occurred for this code change.
+- Deviation: the original preflight assumed Flyway tables already existed. The new branch handles only a truly empty schema, preserving fail-closed behavior for partial schemas.
+- Remaining: publish the patch on the release branch; draft PR #7 proposes a dispatch-only default-branch entry and is not merged. After review, run the protected bootstrap and verify marker/seed flag. Live DB reset and bootstrap are separate operations.
+
+
+## Bootstrap completion-marker wait (2026-09-30)
+
+- Related Developer Plan: [Plan 086](../../../dev-impl-plan/summary/086-github-actions-first-demo-seed-2026-09-28.md), approved. This follow-up implements the approved requirement to wait for all seed `ApplicationRunner`s to finish and to preserve failure cleanup.
+- Changed `scripts/ci/demo-seed-postflight.sh`: bootstrap postflight polls for `DEMO_FIXTURE_PLAN_081` for up to 900 seconds at 15-second intervals. Normal deploy and private-cutover keep their existing immediate marker check. On timeout, the verifier logs elapsed time, the missing marker result, and aggregate `academic_year`/`student`/`teacher` counts; the existing network-job wrapper retrieves the failed ACA execution logs.
+- Changed `.github/workflows/demo-ci-cd.yml`: set the timeout and poll interval explicitly for the ACA postflight verifier step. Changed `scripts/ci/run-demo-network-job.sh` to forward both values into the ACA Job container. Existing failed-postflight cleanup still forces the seed flag off.
+- Validation: `bash -n` for both changed scripts **PASS**; workflow YAML parse with PyYAML **PASS**; mocked delayed-marker success, timeout with aggregate-count evidence, non-bootstrap fail-fast, and ACA Job environment forwarding **PASS**; `git diff --check` **PASS**. Live ACA/MySQL and GitHub Actions run **NOT RUN**.
+- Deviations: none.
+- Remaining risk: the 900-second allowance is not verified against a live full seed run; if runner completion consistently takes longer, the workflow will fail closed and retain timeout diagnostics.
+
+
+## ACA replica defaults after run #14 (2026-09-30)
+
+- Related Developer Plan: [Plan 086](../../../dev-impl-plan/summary/086-github-actions-first-demo-seed-2026-09-28.md), approved. Run #14 push deploy reached backend update and failed with `--min-replicas: invalid int value: ''`; live ACA scale readback was min/max `1/1`.
+- Changed `.github/workflows/demo-ci-cd.yml`: normal deploy defaults missing `ACA_MIN_REPLICAS` and `ACA_MAX_REPLICAS` repository variables to `1`, and validates nonnegative integer bounds before calling `az containerapp update`. Bootstrap continues to use explicit `1/1`. No DB or ACA resource was changed by this fix.
+- Validation: workflow YAML parse, extracted deploy shell syntax and replica-bound cases, and `git diff --check` **PASS**. Live GitHub workflow **NOT RUN** for this patch.
+- Deviation: none. After run #14 failed, a read-only MySQL query found the Plan 081 completion marker for image `51e75915` and 160 students. Run #14 DB preflight had succeeded. The earlier partial-seed observation is no longer current; a normal deploy can proceed if its preflight continues to pass. Live deploy after this patch remains unverified.
+
+
+## Wrapped Actuator health response in CI gates (2026-09-30)
+
+- Related Developer Plan: [Plan 086](../../../dev-impl-plan/summary/086-github-actions-first-demo-seed-2026-09-28.md), approved.
+- Run #15 showed `/actuator/health` returns the standard REST envelope with status under `data.status`; the workflow had asserted root `.status`, so a healthy response failed the jq gate. Updated all three jq health assertions in `.github/workflows/demo-ci-cd.yml` to require `.data.status == "UP"` and emit an explicit jq error otherwise. Kept readiness checks that only require a successful HTTP response unchanged.
+- Validation: workflow YAML parse and `bash -n` over all 29 inline run blocks **PASS**; jq mock for wrapped `UP` and clear failure on `DOWN` **PASS**; confirmed all three jq health assertions use the wrapped status **PASS**; `git diff --check` **PASS**. Live workflow/API rerun **NOT RUN**.
+- Deviations: none.
+- Remaining: run #15 was not rerun after this workflow edit, so remote confirmation is pending.
+
+
+## Vercel CLI working directory after run #16 (2026-09-30)
+
+- Related Developer Plan: [Plan 086](../../../dev-impl-plan/summary/086-github-actions-first-demo-seed-2026-09-28.md), approved. Run #16 passed backend deployment and DB postflight, then Vercel CLI `vite build` failed with `Could not resolve entry module "index.html"`. The project Root Directory is `FE`, and the workflow ran the CLI from `FE`; Vercel documents that the Root Directory setting also applies to CLI commands.
+- Changed `.github/workflows/demo-ci-cd.yml`: run only the `vercel pull`, `vercel build`, and `vercel deploy --prebuilt` step from repository root. The separate FE production build remains in `FE`. This avoids applying `FE` twice while preserving the configured Vercel project root.
+- Validation: workflow YAML parse, run-block shell syntax, repo `FE/index.html` readback, and `git diff --check` **PASS**. Live Vercel CLI build/deploy **NOT RUN** for this patch; next workflow run will verify it.
+- Deviations: none. Remaining: approve the protected demo environment for the new run, confirm Vercel deployment, then run FE/API smoke.

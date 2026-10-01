@@ -8,7 +8,7 @@
             "mainClass": "com.JavaTraining.BaiTap_RS.BaiTapRsApplication",
             "projectName": "BaiTap-RS",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/BE/BaiTap-RS/.env"
         }
     ]
 }
