@@ -1,13 +1,15 @@
-import { flushPromises, mount } from '@vue/test-utils'
+import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import ButtonStub from '@/test/stubs/ButtonStub.vue'
 import NotificationInboxView from '@/views/notification/NotificationInboxView.vue'
 import type { NotificationPage } from '@/types/notification'
-import { cancelNotification, createNotificationDraft, fetchManagedNotifications, fetchNotification, fetchNotificationInbox, fetchNotificationIndividualAudiences, fetchUnreadNotificationCount, markNotificationRead, publishNotification } from './notificationApi'
+import { cancelNotification, createNotificationDraft, fetchManagedNotifications, fetchNotification, fetchNotificationInbox, fetchNotificationIndividualAudiences, fetchUnreadNotificationCount, markNotificationRead, publishNotification, startNotificationEventStream } from './notificationApi'
 
 const fetchMock = vi.fn()
 const routerPush = vi.fn()
 const authSessionMock = { requireAccessToken: vi.fn(() => 'test-token'), roles: { value: [] } }
+
+enableAutoUnmount(afterEach)
 
 vi.mock('vue-router', () => ({ useRouter: () => ({ push: routerPush, back: vi.fn() }), useRoute: () => ({ params: { notificationId: '1' } }) }))
 vi.mock('@/composables/useAuthSession', () => ({ useAuthSession: () => authSessionMock }))
@@ -52,6 +54,18 @@ describe('notificationApi', () => {
     const nextButton = wrapper.findAllComponents(ButtonStub).find((button) => button.text().includes('Trang sau')); expect(nextButton).toBeDefined(); await nextButton!.trigger('click'); await flushPromises(); expect(fetchMock.mock.calls[1]?.[0]).toContain('page=1&size=20'); expect(wrapper.text()).toContain('Trang 2 / 2')
   })
 
+  it('reloads the visible inbox when the authenticated shell announces an inbox change', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ data: { meta: { page: 0, pageSize: 20, totalPages: 1, totalItems: 0 }, result: [] } }), { status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+    const wrapper = mount(NotificationInboxView, { global: { stubs: { Button: ButtonStub, NotificationList: true } } })
+    await flushPromises()
+    window.dispatchEvent(new Event('notification:inbox-changed'))
+    await flushPromises()
+
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    wrapper.unmount()
+  })
+
   it('calls fetchNotification with correct path', async () => {
     fetchMock.mockImplementation(() => Promise.resolve(new Response(JSON.stringify({ data: { id: 42 } }), { status: 200 }))); vi.stubGlobal('fetch', fetchMock); await fetchNotification('test-token', 42); const [url] = fetchMock.mock.calls[0]; expect(url).toContain('/api/v3/notifications/42')
   })
@@ -71,6 +85,106 @@ describe('notificationApi', () => {
 
   it('calls markNotificationRead endpoint', async () => {
     fetchMock.mockImplementation(() => Promise.resolve(new Response(JSON.stringify({ data: { id: 9, readAt: '2026-09-15T12:00:00' } }), { status: 200 }))); vi.stubGlobal('fetch', fetchMock); await markNotificationRead('test-token', 1); const [url, options] = fetchMock.mock.calls[0]; expect(url).toContain('/api/v3/notifications/1/read'); expect(options.method).toBe('POST')
+  })
+
+  it('opens an authenticated event stream and signals inbox changes without query tokens', async () => {
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('event: inbox-changed\n\n'))
+        controller.close()
+      },
+    })
+    fetchMock.mockResolvedValue(new Response(stream, { status: 200, headers: { 'Content-Type': 'text/event-stream' } }))
+    vi.stubGlobal('fetch', fetchMock)
+    const onInboxChanged = vi.fn()
+    const stop = startNotificationEventStream('test-token', onInboxChanged)
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    stop()
+
+    const [url, options] = fetchMock.mock.calls[0]
+    expect(url).toContain('/api/v3/notifications/events')
+    expect(url).not.toContain('test-token')
+    expect(options.headers.Authorization).toBe('Bearer test-token')
+    expect(options.headers.Accept).toBe('text/event-stream')
+    expect(onInboxChanged).toHaveBeenCalledTimes(2)
+  })
+
+  it('synchronizes on first connection even when a missed publish cannot be replayed', async () => {
+    const stream = new ReadableStream<Uint8Array>()
+    fetchMock.mockResolvedValue(new Response(stream, { headers: { 'Content-Type': 'text/event-stream' } }))
+    vi.stubGlobal('fetch', fetchMock)
+    const onInboxChanged = vi.fn()
+    const stop = startNotificationEventStream('test-token', onInboxChanged)
+    try {
+      await flushPromises()
+      expect(onInboxChanged).toHaveBeenCalledOnce()
+    } finally {
+      stop()
+    }
+  })
+
+  it('refreshes once per complete event when frames are split across network chunks', async () => {
+    let writer: ReadableStreamDefaultController<Uint8Array> | undefined
+    const stream = new ReadableStream<Uint8Array>({ start(controller) { writer = controller } })
+    fetchMock.mockResolvedValue(new Response(stream, { headers: { 'Content-Type': 'text/event-stream' } }))
+    vi.stubGlobal('fetch', fetchMock)
+    const onInboxChanged = vi.fn()
+    const stop = startNotificationEventStream('test-token', onInboxChanged)
+    try {
+      await flushPromises()
+      writer?.enqueue(new TextEncoder().encode(':connected\n\nevent:inbox-'))
+      await flushPromises()
+      expect(onInboxChanged).toHaveBeenCalledOnce()
+      writer?.enqueue(new TextEncoder().encode('changed\r\n\r'))
+      await flushPromises()
+      expect(onInboxChanged).toHaveBeenCalledOnce()
+      writer?.enqueue(new TextEncoder().encode('\n'))
+      await flushPromises()
+      expect(onInboxChanged).toHaveBeenCalledTimes(2)
+    } finally {
+      stop()
+      writer?.close()
+    }
+  })
+
+  it('resynchronizes after reconnect and stops the pending retry on cleanup', async () => {
+    vi.useFakeTimers()
+    fetchMock.mockImplementation(() => Promise.resolve(new Response(new ReadableStream<Uint8Array>({
+      start(controller) { controller.close() },
+    }))))
+    vi.stubGlobal('fetch', fetchMock)
+    const onInboxChanged = vi.fn()
+    const stop = startNotificationEventStream('test-token', onInboxChanged)
+    try {
+      await vi.advanceTimersByTimeAsync(0)
+      expect(onInboxChanged).toHaveBeenCalledOnce()
+      await vi.advanceTimersByTimeAsync(1000)
+      expect(onInboxChanged).toHaveBeenCalledTimes(2)
+      expect(fetchMock).toHaveBeenCalledTimes(2)
+      stop()
+      expect(vi.getTimerCount()).toBe(0)
+      await vi.advanceTimersByTimeAsync(30000)
+      expect(fetchMock).toHaveBeenCalledTimes(2)
+    } finally {
+      stop()
+      vi.useRealTimers()
+    }
+  })
+
+  it.each([401, 403])('does not synchronize or retry an unauthorized stream (%s)', async (status) => {
+    fetchMock.mockResolvedValue(new Response(null, { status }))
+    vi.stubGlobal('fetch', fetchMock)
+    const onInboxChanged = vi.fn()
+    const stop = startNotificationEventStream('test-token', onInboxChanged)
+    try {
+      await flushPromises()
+      expect(onInboxChanged).not.toHaveBeenCalled()
+      expect(fetchMock).toHaveBeenCalledOnce()
+      expect(fetchMock.mock.calls[0]?.[1].signal.aborted).toBe(false)
+    } finally {
+      stop()
+    }
+    expect(fetchMock.mock.calls[0]?.[1].signal.aborted).toBe(true)
   })
 
   it('serializes individual lookup filters without sending filter metadata to the composer', async () => {

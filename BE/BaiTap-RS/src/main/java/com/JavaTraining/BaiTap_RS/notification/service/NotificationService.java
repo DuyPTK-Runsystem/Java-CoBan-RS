@@ -43,15 +43,25 @@ public class NotificationService {
                 new NotificationEmailDeliveryService(teacherRepository, userRepository, mailSender, fromEmail));
     }
 
-    @Autowired
     public NotificationService(NotificationRepository repo, NotificationReceiptRepository receiptRepo,
             NotificationAudienceService audienceService, NotificationAuditService auditService,
             SchoolClassRepository schoolClassRepository,
             NotificationIndividualAudienceProjectionRepository projection,
             NotificationEmailDeliveryService emailDeliveryService) {
+        this(repo, receiptRepo, audienceService, auditService, schoolClassRepository, projection,
+                emailDeliveryService, null);
+    }
+
+    @Autowired
+    public NotificationService(NotificationRepository repo, NotificationReceiptRepository receiptRepo,
+            NotificationAudienceService audienceService, NotificationAuditService auditService,
+            SchoolClassRepository schoolClassRepository,
+            NotificationIndividualAudienceProjectionRepository projection,
+            NotificationEmailDeliveryService emailDeliveryService,
+            NotificationInboxEventService inboxEventService) {
         this.operations = new NotificationServiceOperations(new NotificationServiceWiring(
                 repo, receiptRepo, audienceService, auditService, schoolClassRepository, projection,
-                emailDeliveryService));
+                emailDeliveryService, inboxEventService));
     }
 
     @Transactional

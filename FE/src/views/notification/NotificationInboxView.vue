@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import FormAlert from '@/components/common/FormAlert.vue'
 import PageState from '@/components/common/PageState.vue'
 import NotificationList from '@/components/notification/NotificationList.vue'
 import { useAuthSession } from '@/composables/useAuthSession'
-import { fetchNotificationInbox, markNotificationRead } from '@/services/notificationApi'
+import {
+  fetchNotificationInbox,
+  markNotificationRead,
+  NOTIFICATION_INBOX_CHANGED_EVENT,
+} from '@/services/notificationApi'
 import type { NotificationItem } from '@/types/notification'
 import { extractApiErrorMessage, isApiError } from '@/types/api'
 import type { LoadingState } from '@/types/ui'
@@ -94,8 +98,17 @@ watch(unreadOnly, () => {
   void loadInbox()
 })
 
+function handleInboxChanged(): void {
+  void loadInbox()
+}
+
 onMounted(() => {
+  window.addEventListener(NOTIFICATION_INBOX_CHANGED_EVENT, handleInboxChanged)
   loadInbox()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener(NOTIFICATION_INBOX_CHANGED_EVENT, handleInboxChanged)
 })
 </script>
 
