@@ -1,4 +1,9 @@
 # BE Dev Note Summary
+
+## CR v4 — planning only
+
+- [Dev Note 088: Spring AI timetable agent plan](../summary/088-spring-ai-timetable-agent-plan-2026-10-01.md) — Docs-only; chưa triển khai backend/provider/migration; approval PENDING (2026-10-01).
+
 | 076.16 | notification | [Notification inbox SSE](notification/076.16-notification-inbox-sse-2026-10-01.md) | SSE endpoint, process-local recipient registry and post-commit dispatch; focused tests PASS; full tests FAIL 587/105; Checkstyle PASS with 976 warnings; PMD main PASS; build FAIL on baseline pmdTest and full tests | 2026-10-01 |
 | 086 | Ops | [Wrapped Actuator health response in CI gates](workflow-skill/086-github-actions-demo-ci-cd-2026-09-28.md#wrapped-actuator-health-response-in-ci-gates-2026-09-30) | All three jq health assertions read `.data.status` and report a clear failure otherwise; YAML/29 shell blocks and jq UP/DOWN mock PASS; live rerun NOT RUN. | 2026-09-30 |
 | 086 | Ops | [Bootstrap completion-marker wait](workflow-skill/086-github-actions-demo-ci-cd-2026-09-28.md#bootstrap-completion-marker-wait-2026-09-30) | Bootstrap postflight waits up to 900s for the Plan 081 marker, forwards timeout settings to ACA, and logs aggregate seed counts on timeout; bash/YAML/mock paths/diff check PASS; live ACA/MySQL NOT RUN. | 2026-09-30 |

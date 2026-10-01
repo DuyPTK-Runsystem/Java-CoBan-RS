@@ -1,5 +1,11 @@
 # Dev Plan Summary
 
+## CR cải tiến v4 trên nền v3
+
+| No. | Area | Plan | Status | Created |
+| --- | --- | --- | --- | --- |
+| 088 | BE/FE | [Spring AI timetable agent — CR-V4-001](088-spring-ai-timetable-agent-2026-10-01.md) | DRAFT — amendment hybrid/read tools/snapshot/cache D08–D10 đã ghi; chưa implementation | 2026-10-01 |
+
 ## Naming convention
 
 - Detailed dev plan files live in area folders under `document/dev-impl-plan/`.

@@ -1,5 +1,9 @@
 # BE Dev Plan Summary
 
+## CR v4 — draft trên nền v3
+
+- [Plan 088: Spring AI timetable agent](../summary/088-spring-ai-timetable-agent-2026-10-01.md) — DRAFT; snapshot, structured output, validation và application executor; implementation approval PENDING (2026-10-01).
+
 |   No. | Plan                                                                                                                                                            | Scope                                                                                                                                   | Status                                                                                                          | Created    |
 | ----: | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ---------- |
 | 087 | [Scorebook assignment context](../summary/087-scorebook-teacher-assignment-context-2026-09-29.md) | Teacher-only lookup of current GVBM context for scorebook dropdowns | IMPLEMENTED SLICE — focused tests/Checkstyle/PMD main PASS; full test OOM and pmdTest baseline block full build | 2026-09-29 |

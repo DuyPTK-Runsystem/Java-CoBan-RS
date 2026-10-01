@@ -1,5 +1,9 @@
 # FE Dev Plan Summary
 
+## CR v4 — draft trên nền v3
+
+- [Plan 088: Spring AI timetable agent](../summary/088-spring-ai-timetable-agent-2026-10-01.md) — DRAFT; constraints, preview/diff, approval/save/recovery và wireframe; implementation approval PENDING (2026-10-01).
+
 |   No. | Plan                                                                                                                                | Scope                                                                                                                                          | Status                                                                                  | Created    |
 | ----: | ----------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------- |
 | 087 | [Scorebook teacher assignment context](../summary/087-scorebook-teacher-assignment-context-2026-09-29.md) | Limit teacher scorebook context/dropdowns to effective assignments | IMPLEMENTED SLICE — FE test/lint/build PASS; backend full validation incomplete | 2026-09-29 |
