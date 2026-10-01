@@ -1,4 +1,5 @@
 import { apiClient } from '@/services/apiClient'
+import { apiBaseUrl } from '@/services/apiConfig'
 import type {
   NotificationInboxQuery,
   NotificationAudienceLookupQuery,
@@ -14,6 +15,81 @@ import type {
 } from '@/types/notification'
 
 export const NOTIFICATION_READ_EVENT = 'notification:read'
+export const NOTIFICATION_INBOX_CHANGED_EVENT = 'notification:inbox-changed'
+
+const EVENT_STREAM_PATH = '/api/v3/notifications/events'
+const MAX_RECONNECT_DELAY_MS = 30000
+
+export function startNotificationEventStream(token: string, onInboxChanged: () => void): () => void {
+  let stopped = false
+  let activeController: AbortController | undefined
+  let reconnectDelayMs = 1000
+  let reconnectTimer: number | undefined
+  let resumeReconnect: (() => void) | undefined
+
+  const waitBeforeReconnect = () => new Promise<void>((resolve) => {
+    resumeReconnect = resolve
+    reconnectTimer = window.setTimeout(() => {
+      reconnectTimer = undefined
+      resumeReconnect = undefined
+      resolve()
+    }, reconnectDelayMs)
+  })
+
+  const readEvents = async (): Promise<void> => {
+    while (!stopped) {
+      activeController = new AbortController()
+      let connectedAt = 0
+      try {
+        const response = await fetch(`${apiBaseUrl.replace(/\/$/, '')}${EVENT_STREAM_PATH}`, {
+          method: 'GET',
+          headers: {
+            Accept: 'text/event-stream',
+            Authorization: `Bearer ${token}`,
+          },
+          signal: activeController.signal,
+        })
+        if (response.status === 401 || response.status === 403) return
+        if (!response.ok || !response.body) throw new Error('Notification event stream unavailable')
+
+        // A publish can occur between the initial REST snapshot and SSE subscription.
+        // Refresh on every connection because the server does not replay missed events.
+        onInboxChanged()
+        connectedAt = Date.now()
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ''
+        while (!stopped) {
+          const { done, value } = await reader.read()
+          if (done) break
+          buffer += decoder.decode(value, { stream: true })
+          const frames = buffer.split(/\r?\n\r?\n/)
+          buffer = frames.pop() ?? ''
+          frames.forEach((frame) => {
+            if (frame.split(/\r?\n/).some((line) => /^event:\s*inbox-changed$/.test(line))) {
+              onInboxChanged()
+            }
+          })
+        }
+      } catch {
+        if (stopped || activeController.signal.aborted) return
+      }
+      if (stopped) return
+      if (connectedAt > 0 && Date.now() - connectedAt >= MAX_RECONNECT_DELAY_MS) reconnectDelayMs = 1000
+      await waitBeforeReconnect()
+      reconnectDelayMs = Math.min(reconnectDelayMs * 2, MAX_RECONNECT_DELAY_MS)
+    }
+  }
+
+  void readEvents()
+  return () => {
+    stopped = true
+    activeController?.abort()
+    if (reconnectTimer !== undefined) window.clearTimeout(reconnectTimer)
+    resumeReconnect?.()
+    resumeReconnect = undefined
+  }
+}
 
 function notificationPage(response: NotificationPage): NotificationPage {
   return {
@@ -91,11 +167,14 @@ export function fetchNotificationInbox(
 }
 
 export function fetchUnreadNotificationCount(token: string): Promise<number> {
-  return fetchNotificationInbox(token, {
-    unreadOnly: true,
-    page: 0,
-    pageSize: 1,
-  }).then((response) => Math.max(response.meta.totalItems, 0))
+  const params = paginationParams(0, 1)
+  params.set('unreadOnly', 'true')
+
+  return apiClient.get<NotificationPage>('/api/v3/notifications/inbox', {
+    token,
+    query: params,
+    cache: 'no-store',
+  }).then(notificationPage).then((response) => Math.max(response.meta.totalItems, 0))
 }
 
 export function fetchManagedNotifications(

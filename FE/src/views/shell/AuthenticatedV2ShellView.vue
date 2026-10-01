@@ -4,7 +4,12 @@ import { useRoute, useRouter } from 'vue-router'
 
 import AuthenticatedLayout, { type NavigationItem } from '@/components/common/AuthenticatedLayout.vue'
 import { clearAuthSession, getAuthSession } from '@/services/authSession'
-import { fetchUnreadNotificationCount, NOTIFICATION_READ_EVENT } from '@/services/notificationApi'
+import {
+  fetchUnreadNotificationCount,
+  NOTIFICATION_INBOX_CHANGED_EVENT,
+  NOTIFICATION_READ_EVENT,
+  startNotificationEventStream,
+} from '@/services/notificationApi'
 import { isStudentWorkspace, isStudentWorkspacePath, isTeacherWorkspace } from '@/services/studentNavigation'
 import { logout as logoutApi } from '@/services/userApi'
 
@@ -12,8 +17,11 @@ const router = useRouter()
 const route = useRoute()
 const session = computed(() => getAuthSession())
 const unreadNotificationCount = ref<number | null>(null)
+let stopNotificationEventStream: (() => void) | undefined
+let unreadCountRequestId = 0
 
 async function refreshUnreadNotificationCount(): Promise<void> {
+  const requestId = ++unreadCountRequestId
   const accessToken = session.value?.accessToken
   if (!accessToken) {
     unreadNotificationCount.value = null
@@ -21,10 +29,10 @@ async function refreshUnreadNotificationCount(): Promise<void> {
   }
 
   try {
-    unreadNotificationCount.value = await fetchUnreadNotificationCount(accessToken)
+    const count = await fetchUnreadNotificationCount(accessToken)
+    if (requestId === unreadCountRequestId) unreadNotificationCount.value = count
   } catch {
-    // The badge is supplemental; keep the authenticated workspace usable when counting fails.
-    unreadNotificationCount.value = null
+    // Preserve the last known badge when a refresh fails; it is supplemental to the workspace.
   }
 }
 
@@ -32,8 +40,15 @@ function handleNotificationRead(): void {
   void refreshUnreadNotificationCount()
 }
 
+function handleInboxChanged(): void {
+  void refreshUnreadNotificationCount()
+  window.dispatchEvent(new Event(NOTIFICATION_INBOX_CHANGED_EVENT))
+}
+
 onMounted(() => {
   window.addEventListener(NOTIFICATION_READ_EVENT, handleNotificationRead)
+  const accessToken = session.value?.accessToken
+  if (accessToken) stopNotificationEventStream = startNotificationEventStream(accessToken, handleInboxChanged)
   void refreshUnreadNotificationCount()
 })
 
@@ -43,6 +58,7 @@ onActivated(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener(NOTIFICATION_READ_EVENT, handleNotificationRead)
+  stopNotificationEventStream?.()
 })
 
 const navigation = computed<NavigationItem[]>(() => {

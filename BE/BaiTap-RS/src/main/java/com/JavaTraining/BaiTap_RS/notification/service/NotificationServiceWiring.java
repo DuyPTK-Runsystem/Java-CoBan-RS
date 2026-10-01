@@ -18,6 +18,19 @@ public final class NotificationServiceWiring {
             SchoolClassRepository schoolClassRepository,
             NotificationIndividualAudienceProjectionRepository individualAudienceProjectionRepository,
             NotificationEmailDeliveryService emailDeliveryService) {
+        this(notificationRepository, notificationReceiptRepository, notificationAudienceService,
+                notificationAuditService,
+                schoolClassRepository, individualAudienceProjectionRepository, emailDeliveryService, null);
+    }
+
+    public NotificationServiceWiring(NotificationRepository notificationRepository,
+            NotificationReceiptRepository notificationReceiptRepository,
+            NotificationAudienceService notificationAudienceService,
+            NotificationAuditService notificationAuditService,
+            SchoolClassRepository schoolClassRepository,
+            NotificationIndividualAudienceProjectionRepository individualAudienceProjectionRepository,
+            NotificationEmailDeliveryService emailDeliveryService,
+            NotificationInboxEventService inboxEventService) {
         NotificationResponseMapper responseMapper = new NotificationResponseMapper();
         NotificationAudienceDetailService audienceDetailService = schoolClassRepository == null
                 || individualAudienceProjectionRepository == null ? null
@@ -27,13 +40,14 @@ public final class NotificationServiceWiring {
         NotificationIdempotencyService idempotencyService = new NotificationIdempotencyService(notificationRepository);
         this.draftServiceComponent = new NotificationDraftService(notificationAuditService, requestValidator,
                 idempotencyService, responseMapper, notificationAudienceService);
-        this.lifecycleServiceComponent = new NotificationLifecycleService(notificationRepository, notificationReceiptRepository,
+        this.lifecycleServiceComponent = new NotificationLifecycleService(
+                notificationRepository, notificationReceiptRepository,
                 notificationAudienceService, notificationAuditService, responseMapper, requestValidator,
-                emailDeliveryService);
+                emailDeliveryService, inboxEventService);
         this.queryServiceComponent = new NotificationQueryService(notificationRepository, notificationReceiptRepository,
                 responseMapper, audienceDetailService);
-        this.readServiceComponent = new NotificationReadService(notificationReceiptRepository, notificationRepository,
-                notificationAuditService);
+        this.readServiceComponent = new NotificationReadService(
+                notificationReceiptRepository, notificationRepository, notificationAuditService);
     }
 
     public NotificationDraftService draftService() {

@@ -231,8 +231,8 @@ function submit(): void {
       <p
         v-if="
           form.presentCount !== null &&
-          form.absentCount !== null &&
-          Number(form.presentCount) + Number(form.absentCount) !== props.entry.rosterCountSnapshot
+            form.absentCount !== null &&
+            Number(form.presentCount) + Number(form.absentCount) !== props.entry.rosterCountSnapshot
         "
         class="validation-warning"
       >

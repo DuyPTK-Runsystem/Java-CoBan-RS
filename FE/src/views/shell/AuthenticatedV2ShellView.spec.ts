@@ -9,6 +9,7 @@ import AuthenticatedV2ShellView from './AuthenticatedV2ShellView.vue'
 const mocks = vi.hoisted(() => ({
   currentPath: '/v2/academic-years',
   fetchUnreadNotificationCount: vi.fn(),
+  startNotificationEventStream: vi.fn(),
   push: vi.fn(),
   replace: vi.fn(),
 }))
@@ -35,6 +36,7 @@ vi.mock('@/services/notificationApi', async (importOriginal) => {
   return {
     ...actual,
     fetchUnreadNotificationCount: mocks.fetchUnreadNotificationCount,
+    startNotificationEventStream: mocks.startNotificationEventStream,
   }
 })
 
@@ -57,6 +59,7 @@ describe('AuthenticatedV2ShellView.vue', () => {
     vi.clearAllMocks()
     mocks.currentPath = '/v2/academic-years'
     mocks.fetchUnreadNotificationCount.mockResolvedValue(0)
+    mocks.startNotificationEventStream.mockReturnValue(vi.fn())
   })
 
   afterEach(() => {
@@ -186,6 +189,58 @@ describe('AuthenticatedV2ShellView.vue', () => {
     expect(mocks.fetchUnreadNotificationCount).toHaveBeenNthCalledWith(1, 'token-stu-refresh')
     expect(mocks.fetchUnreadNotificationCount).toHaveBeenNthCalledWith(2, 'token-stu-refresh')
     expect(notificationLink.text()).toContain('1')
+  })
+
+  it('opens the event stream for the signed-in session and refreshes unread count on inbox change', async () => {
+    saveAuthSession({
+      accessToken: 'token-events',
+      user: { id: 24, username: 'student_events', roles: ['STUDENT'] },
+    })
+
+    const wrapper = mountShellWithRealLayout()
+    await flushPromises()
+    expect(mocks.startNotificationEventStream).toHaveBeenCalledWith('token-events', expect.any(Function))
+    const onInboxChanged = mocks.startNotificationEventStream.mock.calls[0][1]
+    onInboxChanged()
+    await flushPromises()
+
+    expect(mocks.fetchUnreadNotificationCount).toHaveBeenCalledTimes(2)
+    wrapper.unmount()
+    expect(mocks.startNotificationEventStream.mock.results[0]?.value).toHaveBeenCalledOnce()
+  })
+
+  it('updates the badge when publish happens between the initial snapshot and SSE connection', async () => {
+    const actual = await vi.importActual<typeof import('@/services/notificationApi')>('@/services/notificationApi')
+    mocks.startNotificationEventStream.mockImplementationOnce(actual.startNotificationEventStream)
+    mocks.fetchUnreadNotificationCount.mockResolvedValueOnce(2).mockResolvedValueOnce(3)
+    let connect: (response: Response) => void = () => {}
+    const pendingConnection = new Promise<Response>((resolve) => { connect = resolve })
+    const fetchStream = vi.fn(() => pendingConnection)
+    vi.stubGlobal('fetch', fetchStream)
+    saveAuthSession({
+      accessToken: 'token-connection-gap',
+      user: { id: 24, username: 'student_events', roles: ['STUDENT'] },
+    })
+    const wrapper = mountShellWithRealLayout()
+    try {
+      await flushPromises()
+      const notificationLink = wrapper.get('a[href="/v2/notifications"]')
+      expect(notificationLink.find('.navigation-item-badge').text()).toBe('2')
+
+      // Publish occurred before subscription; this stream has no inbox-changed frame to replay.
+      connect(new Response(new ReadableStream<Uint8Array>(), {
+        headers: { 'Content-Type': 'text/event-stream' },
+      }))
+      await flushPromises()
+
+      expect(notificationLink.find('.navigation-item-badge').text()).toBe('3')
+      expect(fetchStream).toHaveBeenCalledOnce()
+      expect(mocks.fetchUnreadNotificationCount).toHaveBeenCalledTimes(2)
+      expect(mocks.push).not.toHaveBeenCalled()
+    } finally {
+      wrapper.unmount()
+      vi.unstubAllGlobals()
+    }
   })
 
   it('hides Transcript tab and shows Class Transcript tab for TEACHER role', () => {

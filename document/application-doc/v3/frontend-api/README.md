@@ -23,3 +23,13 @@ thật và chạy integration test trong cùng plan. Browser/live evidence đư�
 
 Placement, timetable, notification, score import và lesson-log endpoint/DTO/enum: `TBD`
 cho đến Plan 073 contract checkpoint và plan capability tương ứng.
+
+### Notification realtime update
+
+- `GET /api/v3/notifications/events`: authenticated SSE stream; request phải gửi Bearer
+  token trong `Authorization` header.
+- Event `inbox-changed` không có payload nhạy cảm; FE tải lại inbox/unread count qua các
+  API hiện có.
+- FE reconnect và đồng bộ lại inbox khi stream kết thúc/mở lại. Server hiện hỗ trợ một
+  backend instance với connection registry in-memory; không bảo đảm delivery khi backend
+  restart, FE offline, hoặc publisher và SSE client nằm ở instance khác nhau.

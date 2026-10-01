@@ -12,6 +12,8 @@ import com.JavaTraining.BaiTap_RS.notification.domain.entity.NotificationStatus;
 import com.JavaTraining.BaiTap_RS.notification.repository.NotificationReceiptRepository;
 import com.JavaTraining.BaiTap_RS.notification.repository.NotificationRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 public class NotificationLifecycleService {
 
@@ -21,6 +23,7 @@ public class NotificationLifecycleService {
     private final NotificationResponseMapper responseMapper;
     private final NotificationRequestValidator requestValidator;
     private final NotificationEmailDeliveryService emailDeliveryService;
+    private final NotificationInboxEventService inboxEventService;
     private final NotificationLifecycleSupport lifecycleSupport;
 
     public NotificationLifecycleService(
@@ -37,6 +40,7 @@ public class NotificationLifecycleService {
                 notificationAuditService,
                 responseMapper,
                 requestValidator,
+                null,
                 null);
     }
 
@@ -48,12 +52,26 @@ public class NotificationLifecycleService {
             NotificationResponseMapper responseMapper,
             NotificationRequestValidator requestValidator,
             NotificationEmailDeliveryService emailDeliveryService) {
+        this(notificationRepository, notificationReceiptRepository, notificationAudienceService,
+                notificationAuditService, responseMapper, requestValidator, emailDeliveryService, null);
+    }
+
+    public NotificationLifecycleService(
+            NotificationRepository notificationRepository,
+            NotificationReceiptRepository notificationReceiptRepository,
+            NotificationAudienceService notificationAudienceService,
+            NotificationAuditService notificationAuditService,
+            NotificationResponseMapper responseMapper,
+            NotificationRequestValidator requestValidator,
+            NotificationEmailDeliveryService emailDeliveryService,
+            NotificationInboxEventService inboxEventService) {
         this.notificationRepository = notificationRepository;
         this.notificationAudienceService = notificationAudienceService;
         this.notificationAuditService = notificationAuditService;
         this.responseMapper = responseMapper;
         this.requestValidator = requestValidator;
         this.emailDeliveryService = emailDeliveryService;
+        this.inboxEventService = inboxEventService;
         this.lifecycleSupport = new NotificationLifecycleSupport(notificationRepository, notificationReceiptRepository);
     }
 
@@ -82,7 +100,25 @@ public class NotificationLifecycleService {
 
         Notification saved = notificationRepository.save(notification);
         notificationAuditService.auditPublish(actorUserId, saved, recipientUserIds.size());
+        notifyRecipientsAfterCommit(recipientUserIds);
         return responseMapper.toResponse(saved, null, null, true);
+    }
+
+    private void notifyRecipientsAfterCommit(Set<Long> recipientUserIds) {
+        if (inboxEventService == null || recipientUserIds.isEmpty()) {
+            return;
+        }
+        Set<Long> recipients = Set.copyOf(recipientUserIds);
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    inboxEventService.inboxChanged(recipients);
+                }
+            });
+        } else {
+            inboxEventService.inboxChanged(recipients);
+        }
     }
 
     public ResNotificationDTO cancel(Long id, Long actorUserId) {
