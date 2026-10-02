@@ -1,5 +1,7 @@
 # BE Dev Note Summary
 
+- [Dev Note 090: ISO weekday](timetable/090-iso-weekday-2026-10-02.md) — BE/FE/seed ISO; focused BE và toàn bộ FE gates PASS; full BE test/build FAIL (context/heap, pmdTest 476); checkstyleMain/pmdMain PASS; DB/browser NOT RUN (2026-10-02).
+
 - [Three workflow skills](workflow-skill/088-three-workflow-skills-2026-10-02.md) — Project-local Java rewrite safety, goal pause handoff, and subagent context budget; three skill validators PASS (2026-10-02).
 
 ## CR v4 — Plan 088 approved

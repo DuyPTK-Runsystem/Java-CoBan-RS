@@ -7,6 +7,9 @@ Lập lịch cho lớp và giáo viên theo tuần/học kỳ, kiểm tra confli
 
 ## Constraint bắt buộc
 
+- Weekday dùng ISO-8601 ở API, storage và UI mapping: `1=Thứ Hai` đến `7=Chủ Nhật` (Plan 090). Calendar mặc định sáu ngày học dùng `1..6`; seed Thứ Hai–Thứ Sáu dùng `1..5`. Ngày học được hỗ trợ là quyết định calendar, không phải một quy ước đánh số khác.
+- Dữ liệu weekday legacy phải được xác minh nguồn trước khi chuyển đổi; cập nhật code không tự sửa dữ liệu DB đã lưu.
+
 - Một lớp không có hai môn/tiết trùng cùng slot.
 - Một giáo viên không dạy hai lớp trùng slot.
 - Chỉ gắn phòng chức năng; cùng phòng chức năng không được dùng trùng slot. Không gán phòng học thông thường.

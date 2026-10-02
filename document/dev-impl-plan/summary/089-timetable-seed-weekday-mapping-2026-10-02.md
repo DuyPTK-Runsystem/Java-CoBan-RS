@@ -1,5 +1,7 @@
 # Developer Plan 089 — Sửa quy ước ngày của seed thời khóa biểu
 
+> **SUPERSEDED — 2026-10-02:** [Plan 090](090-iso-weekday-2026-10-02.md) thống nhất ISO `1=Thứ Hai .. 7=Chủ Nhật`. Không triển khai chuyển seed sang `2..6` hoặc marker repair V3 theo thiết kế bên dưới. Nội dung cũ được giữ làm lịch sử đề xuất; code seed `1..5` đã đúng ISO. Repair dữ liệu DB cần audit riêng.
+
 ## 1. Mục tiêu và nguồn
 
 - Ngày: 2026-10-02.

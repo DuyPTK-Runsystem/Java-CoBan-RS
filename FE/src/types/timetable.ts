@@ -28,6 +28,7 @@ export interface TimetableCapabilities {
 export interface TimetablePeriod {
   id: number
   semesterId?: number
+  /** ISO-8601 weekday: Monday=1 through Sunday=7. */
   dayOfWeek: number
   session: SessionType
   periodIndex: number
@@ -85,6 +86,7 @@ export interface TimetableEntry {
   teacherName: string
   roomCode?: string | null
   roomName?: string | null
+  /** ISO-8601 weekday: Monday=1 through Sunday=7. */
   dayOfWeek: number
   session: SessionType
   periodIndex: number
@@ -103,6 +105,7 @@ export interface TimetableIssue {
   functionalRoomId?: number | null
   roomName?: string | null
   periodId?: number | null
+  /** ISO-8601 weekday: Monday=1 through Sunday=7. */
   dayOfWeek?: number | null
   session?: SessionType | null
   periodIndex?: number | null

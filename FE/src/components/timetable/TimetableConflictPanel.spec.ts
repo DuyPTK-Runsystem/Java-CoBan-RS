@@ -10,6 +10,9 @@ describe('TimetableConflictPanel', () => {
         issues: [{
           code: 'LOAD_BELOW_TARGET',
           severity: 'WARNING',
+          dayOfWeek: 1,
+          session: 'MORNING',
+          periodIndex: 1,
           message: 'Giáo viên Phạm Minh Quân được xếp 2 tiết, thiếu so với định mức 15 tiết.',
           teacherName: 'Phạm Minh Quân',
         }],
@@ -19,6 +22,7 @@ describe('TimetableConflictPanel', () => {
     })
 
     expect(wrapper.text()).toContain('Cảnh báo')
+    expect(wrapper.text()).toContain('Thứ Hai, buổi sáng, tiết 1')
     expect(wrapper.text()).toContain('Giáo viên Phạm Minh Quân')
     expect(wrapper.text()).not.toContain('LOAD_BELOW_TARGET')
     expect(wrapper.find('.timetable-conflict-panel').classes()).toContain('w-full')

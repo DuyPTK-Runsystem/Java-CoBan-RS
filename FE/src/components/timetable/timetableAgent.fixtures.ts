@@ -6,12 +6,12 @@ export const agentAssignments: TimetableAgentAssignmentOption[] = [
   { id: 102, classId: 6, className: '6A', subjectName: 'Ngữ văn', teacherName: 'Thầy Minh' },
 ]
 export const agentPeriods: TimetablePeriod[] = [
-  { id: 201, dayOfWeek: 2, session: 'MORNING', periodIndex: 1, periodName: 'Tiết 1', startTime: '07:00', endTime: '07:45' },
-  { id: 202, dayOfWeek: 3, session: 'MORNING', periodIndex: 2, periodName: 'Tiết 2', startTime: '07:50', endTime: '08:35' },
+  { id: 201, dayOfWeek: 1, session: 'MORNING', periodIndex: 1, periodName: 'Tiết 1', startTime: '07:00', endTime: '07:45' },
+  { id: 202, dayOfWeek: 2, session: 'MORNING', periodIndex: 2, periodName: 'Tiết 2', startTime: '07:50', endTime: '08:35' },
 ]
 const held = { assignmentId: 101, periodId: 201, functionalRoomId: null, validFrom: '2026-10-05', validTo: '2026-12-31' }
 const added = { assignmentId: 102, periodId: 202, functionalRoomId: null, validFrom: '2026-10-05', validTo: '2026-12-31' }
-export const agentExistingEntries: TimetableEntry[] = [{ ...held, id: 1, entryId: 1, revisionId: 33, classId: 6, className: '6A', subjectId: 1, subjectName: 'Toán', teacherId: 1, teacherName: 'Cô Lan', dayOfWeek: 2, session: 'MORNING', periodIndex: 1 }]
+export const agentExistingEntries: TimetableEntry[] = [{ ...held, id: 1, entryId: 1, revisionId: 33, classId: 6, className: '6A', subjectId: 1, subjectName: 'Toán', teacherId: 1, teacherName: 'Cô Lan', dayOfWeek: 1, session: 'MORNING', periodIndex: 1 }]
 export const agentProposal: TimetableAgentProposal = {
   proposalId: 'proposal-demo', proposalVersion: 1, proposalHash: 'demo-hash', targetRevisionId: 33, expectedVersion: 7,
   status: 'READY_FOR_REVIEW', snapshotId: 'snapshot-demo', expiresAt: '2099-01-01T00:00:00Z',

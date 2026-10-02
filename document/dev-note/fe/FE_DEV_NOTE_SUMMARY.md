@@ -1,5 +1,7 @@
 # FE Dev Note Summary
 
+- [Dev Note 090: ISO weekday](../be/timetable/090-iso-weekday-2026-10-02.md) — BE/FE/seed ISO; focused BE và toàn bộ FE gates PASS; full BE test/build FAIL (context/heap, pmdTest 476); checkstyleMain/pmdMain PASS; DB/browser NOT RUN (2026-10-02).
+
 ## Chronological Summary
 
 - [Dev Note 088.1: Confirm active teacher-load policy before agent proposals](../be/timetableagent/088.1-confirm-active-policy-before-agent-2026-10-02.md) — Explicit current ACTIVE policy confirmation; 15 focused tests; full FE suite 660 tests, lint, build, Storybook PASS; coverage NOT RUN (2026-10-02).

@@ -12,6 +12,7 @@ import { getRoomsForSubject } from '@/services/subjectFunctionalRoomApi'
 import type { FunctionalRoom } from '@/types/functionalRoom'
 import type { TimetableEntry, TimetablePeriod } from '@/types/timetable'
 import type { TeacherUnavailability } from '@/types/teacherUnavailability'
+import { getIsoWeekdayLabel } from '@/utils/isoWeekday'
 
 export interface AssignmentOption {
   id: number
@@ -97,17 +98,9 @@ function conflictLabel(assignment: AssignmentOption): string {
 }
 
 const periodOptionsFormatted = computed(() => {
-  const days: Record<number, string> = {
-    2: 'Thứ 2',
-    3: 'Thứ 3',
-    4: 'Thứ 4',
-    5: 'Thứ 5',
-    6: 'Thứ 6',
-    7: 'Thứ 7',
-  }
   return props.periods.map((p) => ({
     id: p.id,
-    label: `${days[p.dayOfWeek] || p.dayOfWeek} · ${p.session === 'MORNING' ? 'Sáng' : 'Chiều'} · Tiết ${p.periodIndex} (${p.startTime} - ${p.endTime})`,
+    label: `${getIsoWeekdayLabel(p.dayOfWeek, true)} · ${p.session === 'MORNING' ? 'Sáng' : 'Chiều'} · Tiết ${p.periodIndex} (${p.startTime} - ${p.endTime})`,
   }))
 })
 

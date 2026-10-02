@@ -4,6 +4,7 @@ import Button from 'primevue/button'
 import FormAlert from '@/components/common/FormAlert.vue'
 import type { TimetablePeriod } from '@/types/timetable'
 import type { TimetableAgentAssignmentOption, TimetableAgentEntry, TimetableAgentPhase, TimetableAgentProposal, TimetableAgentReceipt } from '@/types/timetableAgent'
+import { SCHOOL_WEEKDAYS, getIsoWeekdayLabel } from '@/utils/isoWeekday'
 
 const props = defineProps<{
   proposal: TimetableAgentProposal | null
@@ -18,7 +19,7 @@ const props = defineProps<{
   canRetryPending?: boolean
 }>()
 const emit = defineEmits<{ approve: []; execute: []; recover: []; retryPending: []; reload: [] }>()
-const days = [{ id: 2, name: 'Thứ Hai' }, { id: 3, name: 'Thứ Ba' }, { id: 4, name: 'Thứ Tư' }, { id: 5, name: 'Thứ Năm' }, { id: 6, name: 'Thứ Sáu' }, { id: 7, name: 'Thứ Bảy' }]
+const days = SCHOOL_WEEKDAYS.map(({ value: id, label: name }) => ({ id, name }))
 const sessions = [{ id: 'MORNING', name: 'Sáng' }, { id: 'AFTERNOON', name: 'Chiều' }]
 const busy = computed(() => ['generating', 'approving', 'executing', 'recovering'].includes(props.phase))
 const statusText = computed(() => {
@@ -41,7 +42,7 @@ function unchanged(e: TimetableAgentEntry) { return props.proposal?.diff.unchang
 function label(e: TimetableAgentEntry) {
   const a = props.assignments.find((item) => item.id === e.assignmentId)
   const p = props.periods.find((item) => item.id === e.periodId)
-  return `${a?.className ?? ''} · ${a?.subjectName ?? `Phân công #${e.assignmentId}`} · ${a?.teacherName ?? ''} · ${days.find((d) => d.id === p?.dayOfWeek)?.name ?? 'Khung giờ'} ${p?.session === 'AFTERNOON' ? 'Chiều' : 'Sáng'} tiết ${p?.periodIndex ?? ''}`
+  return `${a?.className ?? ''} · ${a?.subjectName ?? `Phân công #${e.assignmentId}`} · ${a?.teacherName ?? ''} · ${p?.dayOfWeek ? getIsoWeekdayLabel(p.dayOfWeek) : 'Khung giờ'} ${p?.session === 'AFTERNOON' ? 'Chiều' : 'Sáng'} tiết ${p?.periodIndex ?? ''}`
 }
 function cell(classId: number, day: number, session: string, index: number) {
   return props.proposal?.entries.filter((e) => {

@@ -37,7 +37,7 @@ function mountReview(overrides: Record<string, unknown> = {}) {
     props: {
       proposal,
       phase: 'idle',
-      periods: [{ id: 701, dayOfWeek: 2, session: 'MORNING', periodIndex: 1, periodName: 'Tiết 1', startTime: '07:00', endTime: '07:45' }],
+      periods: [{ id: 701, dayOfWeek: 1, session: 'MORNING', periodIndex: 1, periodName: 'Tiết 1', startTime: '07:00', endTime: '07:45' }],
       assignments: [{ id: 501, classId: 11, className: '10A1', subjectName: 'Toán', teacherName: 'Cô An' }],
       receipt: null,
       canApprove: false,
@@ -54,6 +54,7 @@ describe('TimetableAgentReview', () => {
 
     expect(wrapper.text()).toContain('Kiểm tra tải giáo viên.')
     expect(wrapper.text()).toContain('Ưu tiên các tiết buổi sáng.')
+    expect(wrapper.text()).toContain('Thứ Hai Sáng tiết 1')
     await wrapper.get('button').trigger('click')
 
     expect(wrapper.emitted('approve')).toHaveLength(1)
