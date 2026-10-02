@@ -10,6 +10,7 @@ import com.JavaTraining.BaiTap_RS.teacher.domain.entity.Teacher;
 import com.JavaTraining.BaiTap_RS.teacher.repository.TeacherRepository;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests.ReqCreateRevisionDTO;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests.ReqCreateTimetableDTO;
+import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests.ReqConfirmTimetableTeacherLoadPolicyDTO;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests.ReqPublishTimetableDTO;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests.ReqUpdateTimetableEntriesDTO;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.response.ResTimetableDetailDTO;
@@ -112,6 +113,15 @@ public class TimetableController {
             @PathVariable("id") @Positive Long id,
             @Valid @RequestBody ReqUpdateTimetableEntriesDTO req) {
         return timetableService.updateEntries(id, req);
+    }
+
+    @PutMapping("/{id}/teacher-load-policy")
+    @PreAuthorize(ROLE_ADMIN_OFFICE)
+    @ApiMessage("Xác nhận chính sách định mức tiết dạy cho bản nháp")
+    public ResTimetableDetailDTO confirmTeacherLoadPolicy(
+            @PathVariable("id") @Positive Long id,
+            @Valid @RequestBody ReqConfirmTimetableTeacherLoadPolicyDTO req) {
+        return timetableService.confirmTeacherLoadPolicy(id, req);
     }
 
     @PostMapping("/{id}/validate")

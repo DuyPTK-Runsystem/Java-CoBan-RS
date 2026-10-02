@@ -145,6 +145,20 @@ export async function updateTimetableEntries(
   return normalizeDetail(detail)
 }
 
+export async function confirmTimetableTeacherLoadPolicy(
+  revisionId: number,
+  policyId: number,
+  expectedVersion: number,
+  token?: string,
+): Promise<TimetableDetail> {
+  const detail = await apiClient.put<TimetableDetail>(
+    `${basePath}/${revisionId}/teacher-load-policy`,
+    { policyId, expectedVersion },
+    { token },
+  )
+  return normalizeDetail(detail)
+}
+
 export function validateTimetableRevision(
   revisionId: number,
   token?: string,

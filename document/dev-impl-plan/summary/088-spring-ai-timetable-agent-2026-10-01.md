@@ -104,6 +104,16 @@ Tests bổ sung: read scope/pagination/truncation, immutable data khi nguồn đ
 
 ## 5. Spring AI integration đề xuất
 
+### Approved amendment — explicit teacher-load policy confirmation
+
+Approved by the user on 2026-10-02 to unblock proposal generation for existing drafts without changing v3 draft-creation behavior.
+
+- Keep `createDraft` policy optional. Add an ADMIN/ACADEMIC_OFFICE-only `PUT /api/v3/timetables/{id}/teacher-load-policy` accepting `{policyId, expectedVersion}`. The service accepts only a DRAFT, compares the expected revision version, binds only the canonical current ACTIVE teacher-load policy, increments the revision version, writes a timetable audit record, and returns the detail DTO. No migration is expected.
+- Expose the canonical current ACTIVE policy from the existing teacher-load-policy API so the FE does not choose an arbitrary row from a bounded page. In the agent workspace, show the policy version and an explicit confirmation action for an unbound/stale draft; keep proposal generation disabled until its policy binding matches the canonical current policy. After confirmation reload detail and use its new revision version.
+- Preserve the snapshot guard: proposals still reject missing, unavailable, or no-longer-current pinned policy.
+
+Test plan: `TimetableServiceTest` covers binding current ACTIVE policy, audit, invalidation of prior validation, stale expected version, non-DRAFT, no ACTIVE policy, inactive selection, and same-policy idempotent no-op; controller tests cover route/role/validation metadata; policy service and FE service tests cover canonical active selection; FE workspace tests cover confirmation, refreshed revision version, and generation disabled before a matching binding or after policy rotation. Regression retains `createDraft` without a policy. The service test mocks repository flush and does not prove the database `@Version` increment; an integration database check is needed for that evidence. Focused BE/FE checks are owned by independent QA.
+
 - Target dòng Spring AI **2.0.x stable**, đề xuất pin 2.0.1 qua BOM tại implementation checkpoint; verify artifact resolution/runtime trước khi coi là tương thích thực tế.
 - Spring Boot hiện là 4.0.7; tài liệu chính thức xác nhận Spring AI 2.0.x hỗ trợ Boot 4.0.x/4.1.x. Không cần đề xuất nâng Boot để áp dụng feature này.
 - `TimetableModelGateway` giữ adapter riêng cho proposal và tool calls, cấu hình provider/model, timeout/token/retry và flag `app.ai.timetable.enabled` (đề xuất default false).

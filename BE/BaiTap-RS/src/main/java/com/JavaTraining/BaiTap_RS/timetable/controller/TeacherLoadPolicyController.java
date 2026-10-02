@@ -40,6 +40,12 @@ public class TeacherLoadPolicyController {
         return service.pagePolicies(pageable);
     }
 
+    @GetMapping("/active")
+    @ApiMessage("Lấy chính sách định mức tiết dạy đang hoạt động hiện tại")
+    public ResTeacherLoadPolicyDTO getCurrentActivePolicy() {
+        return service.getCurrentActivePolicy();
+    }
+
     @PostMapping
     @ApiMessage("Tạo mới chính sách định mức tiết dạy")
     public ResponseEntity<ResTeacherLoadPolicyDTO> create(@Valid @RequestBody ReqCreatePolicyDTO req) {

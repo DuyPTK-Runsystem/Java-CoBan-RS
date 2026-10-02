@@ -13,6 +13,8 @@ const mocks = vi.hoisted(() => ({
   approveProposal: vi.fn(),
   executeProposal: vi.fn(),
   recoverByKey: vi.fn(),
+  getActivePolicy: vi.fn(),
+  confirmPolicy: vi.fn(),
   randomUUID: vi.fn(),
 }))
 
@@ -21,6 +23,8 @@ vi.mock('@/composables/useAuthSession', () => ({
 }))
 vi.mock('@/services/authSession', () => ({ getAuthSession: mocks.getAuthSession }))
 vi.mock('@/services/assignmentApi', () => ({ fetchSubjectAssignmentsByClass: mocks.fetchAssignments }))
+vi.mock('@/services/teacherLoadApi', () => ({ getActiveTeacherLoadPolicy: mocks.getActivePolicy }))
+vi.mock('@/services/timetableApi', () => ({ confirmTimetableTeacherLoadPolicy: mocks.confirmPolicy }))
 vi.mock('@/services/timetableAgentApi', () => ({
   createTimetableAgentProposal: mocks.createProposal,
   approveTimetableAgentProposal: mocks.approveProposal,
@@ -70,6 +74,9 @@ const receipt: TimetableAgentReceipt = {
 }
 
 const childProps: ComponentObjectPropsOptions = {
+  targetRevisionId: { type: Number, default: 0 },
+  expectedVersion: { type: Number, default: 0 },
+  classes: { type: Array as PropType<{ id: number; name: string }[]>, default: () => [] },
   canGenerate: { type: Boolean, default: false },
   canApprove: { type: Boolean, default: false },
   canExecute: { type: Boolean, default: false },
@@ -125,23 +132,42 @@ const detail = {
   blockingCount: 0,
   warningCount: 0,
   canUseTimetableAgent: true,
+  policyId: 20,
+  policyVersion: '2026-27',
   capabilities: { canEdit: true, canValidate: true, canPublish: false, canRevise: false },
+}
+
+const activePolicy = {
+  id: 20,
+  policyName: '2026-27',
+  sourceDocument: 'Decision 01',
+  effectiveFrom: '2026-09-01',
+  effectiveTo: null,
+  policyVersion: 1,
+  standardPeriodsHighSchool: 19,
+  homeroomReduction: 4,
+  nursingChildReduction: 3,
+  active: true,
+  version: 1,
+  rules: [],
 }
 
 let wrapper: VueWrapper | undefined
 
-function mountWorkspace() {
+async function mountWorkspace(detailOverride = detail) {
   wrapper = mount(TimetableAgentWorkspace, {
-    props: { detail, classes: [], teachers: [], periods: [], entries: [] },
+    props: { detail: detailOverride, classes: [], teachers: [], periods: [], entries: [] },
     global: { stubs: { TimetableAgentPanel: PanelStub, TimetableAgentReview: ReviewStub } },
   })
+  await flushPromises()
   return wrapper
 }
 
-async function generateAndApprove(target = mountWorkspace()) {
-  await target.get('#generate').trigger('click')
+async function generateAndApprove(target?: VueWrapper) {
+  const workspace = target ?? await mountWorkspace()
+  await workspace.get('#generate').trigger('click')
   await flushPromises()
-  await target.get('#approve').trigger('click')
+  await workspace.get('#approve').trigger('click')
   await flushPromises()
 }
 
@@ -151,6 +177,8 @@ describe('TimetableAgentWorkspace', () => {
     mocks.requireAccessToken.mockReset().mockReturnValue('session-token')
     mocks.getAuthSession.mockReset().mockReturnValue({ user: { id: 7 } })
     mocks.fetchAssignments.mockReset().mockResolvedValue([])
+    mocks.getActivePolicy.mockReset().mockResolvedValue(activePolicy)
+    mocks.confirmPolicy.mockReset().mockResolvedValue({ ...detail, version: 8 })
     mocks.createProposal.mockReset().mockResolvedValue(proposal())
     mocks.approveProposal.mockReset().mockImplementation(async (value: TimetableAgentProposal) => proposal({ ...value, status: 'APPROVED', capabilities: { canGenerate: true, canApprove: false, canExecute: true } }))
     mocks.executeProposal.mockReset()
@@ -165,8 +193,28 @@ describe('TimetableAgentWorkspace', () => {
     vi.unstubAllGlobals()
   })
 
+  it('maps API class codes and names to visible agent options', () => {
+    const target = mount(TimetableAgentWorkspace, {
+      props: {
+        detail,
+        classes: [
+          { id: 11, academicYearId: 3, gradeLevelId: 10, classCode: '10A1', className: 'Lớp 10A1', capacity: 40, status: 'ACTIVE' },
+          { id: 12, academicYearId: 3, gradeLevelId: 10, classCode: '10A2', className: null, capacity: 40, status: 'ACTIVE' },
+        ],
+        teachers: [], periods: [], entries: [],
+      },
+      global: { stubs: { TimetableAgentPanel: PanelStub, TimetableAgentReview: ReviewStub } },
+    })
+
+    expect(target.findComponent(PanelStub).props('classes')).toEqual([
+      { id: 11, name: '10A1 · Lớp 10A1' },
+      { id: 12, name: '10A2' },
+    ])
+    target.unmount()
+  })
+
   it('clears approval when request inputs change and disables a stale proposal', async () => {
-    const target = mountWorkspace()
+    const target = await mountWorkspace()
     await target.get('#generate').trigger('click')
     await flushPromises()
     await target.get('#approve').trigger('click')
@@ -190,7 +238,7 @@ describe('TimetableAgentWorkspace', () => {
       status: 'APPROVED',
       capabilities: { canGenerate: true, canApprove: false, canExecute: true },
     }))
-    const target = mountWorkspace()
+    const target = await mountWorkspace()
     await target.get('#generate').trigger('click')
     await flushPromises()
     await target.get('#approve').trigger('click')
@@ -203,7 +251,7 @@ describe('TimetableAgentWorkspace', () => {
 
   it('clears the pending key for a definitive stale response', async () => {
     mocks.executeProposal.mockRejectedValueOnce(new ApiError(409, 'Timetable revision is stale.'))
-    const target = mountWorkspace()
+    const target = await mountWorkspace()
     await generateAndApprove(target)
     await target.get('#execute').trigger('click')
     await flushPromises()
@@ -216,7 +264,7 @@ describe('TimetableAgentWorkspace', () => {
 
   it('retries the exact pending action only after its lease expires', async () => {
     mocks.executeProposal.mockRejectedValueOnce(new Error('connection lost')).mockResolvedValueOnce(receipt)
-    const target = mountWorkspace()
+    const target = await mountWorkspace()
     await generateAndApprove(target)
     await target.get('#execute').trigger('click')
     await flushPromises()
@@ -261,7 +309,7 @@ describe('TimetableAgentWorkspace', () => {
 
   it('retains the action key across reload and recovers by key without executing twice', async () => {
     mocks.executeProposal.mockRejectedValueOnce(new Error('connection lost'))
-    const first = mountWorkspace()
+    const first = await mountWorkspace()
     await generateAndApprove(first)
     await first.get('#execute').trigger('click')
     await flushPromises()
@@ -276,7 +324,7 @@ describe('TimetableAgentWorkspace', () => {
     first.unmount()
     wrapper = undefined
     mocks.recoverByKey.mockResolvedValueOnce(receipt)
-    const restored = mountWorkspace()
+    const restored = await mountWorkspace()
     expect(restored.findComponent(ReviewStub).props('pendingRecovery')).toBe(true)
     expect(restored.findComponent(ReviewStub).props('phase')).toBe('response-lost')
     await restored.get('#recover').trigger('click')
@@ -287,5 +335,44 @@ describe('TimetableAgentWorkspace', () => {
     expect(sessionStorage.getItem(key)).toBeNull()
     expect(restored.findComponent(ReviewStub).props('receipt')).toEqual(receipt)
     expect(restored.emitted('saved')).toEqual([[receipt]])
+  })
+
+  it('requires explicit current-policy confirmation before generating', async () => {
+    const target = await mountWorkspace({ ...detail, policyId: null, policyVersion: null })
+
+    expect(target.findComponent(PanelStub).props('canGenerate')).toBe(false)
+    expect(target.findAll('button').some((button) => button.text().includes('Xác nhận chính sách'))).toBe(true)
+    await target.findAll('button').find((button) => button.text().includes('Xác nhận chính sách'))!.trigger('click')
+    await flushPromises()
+
+    expect(mocks.confirmPolicy).toHaveBeenCalledWith(42, 20, 7, 'session-token')
+    expect(target.emitted('reload')).toHaveLength(1)
+    expect(target.findComponent(PanelStub).props('canGenerate')).toBe(false)
+
+    await target.setProps({ detail: { ...detail, policyId: 20, policyVersion: '2026-27', version: 8 } })
+    expect(target.findComponent(PanelStub).props('canGenerate')).toBe(true)
+    expect(target.findComponent(PanelStub).props('expectedVersion')).toBe(8)
+  })
+
+  it('keeps generation disabled when there is no active policy', async () => {
+    mocks.getActivePolicy.mockResolvedValueOnce(null)
+    const target = await mountWorkspace({ ...detail, policyId: null, policyVersion: null })
+
+    expect(target.findComponent(PanelStub).props('canGenerate')).toBe(false)
+    expect(target.text()).toContain('Chưa có chính sách định mức tiết dạy đang hoạt động')
+    expect(mocks.createProposal).not.toHaveBeenCalled()
+  })
+
+  it('refreshes the canonical policy before generating and blocks when it changed', async () => {
+    const replacement = { ...activePolicy, id: 21, policyName: '2027-28' }
+    mocks.getActivePolicy.mockReset().mockResolvedValueOnce(activePolicy).mockResolvedValueOnce(replacement)
+    const target = await mountWorkspace()
+
+    await target.get('#generate').trigger('click')
+    await flushPromises()
+
+    expect(mocks.createProposal).not.toHaveBeenCalled()
+    expect(target.findComponent(PanelStub).props('canGenerate')).toBe(false)
+    expect(target.text()).toContain('Chính sách hiện hành đã thay đổi')
   })
 })

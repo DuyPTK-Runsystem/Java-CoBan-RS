@@ -54,6 +54,11 @@ public class TeacherLoadPolicyService {
         return policyRepository.findFirstByStatusOrderByEffectiveFromDesc(TeacherLoadPolicyStatus.ACTIVE);
     }
 
+    @Transactional(readOnly = true)
+    public ResTeacherLoadPolicyDTO getCurrentActivePolicy() {
+        return getActivePolicy().map(this::toDTO).orElse(null);
+    }
+
     @Transactional
     public ResTeacherLoadPolicyDTO create(ReqCreatePolicyDTO req) {
         if (policyRepository.existsByVersion(req.version())) {

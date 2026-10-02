@@ -37,6 +37,7 @@ export interface TimetablePeriod {
 }
 
 export interface TimetableSummary {
+  revisionId: number
   timetableId: number
   semesterId: number
   semesterName: string
@@ -58,7 +59,7 @@ export interface TimetableDetail {
   effectiveFrom: string
   effectiveTo?: string | null
   policyId?: number | null
-  policyVersion?: number | null
+  policyVersion?: string | null
   version: number
   headVersion: number
   blockingCount: number

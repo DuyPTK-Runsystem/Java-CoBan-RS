@@ -6,10 +6,12 @@ import { useAuthSession } from '@/composables/useAuthSession'
 import { getAuthSession } from '@/services/authSession'
 import { fetchSubjectAssignmentsByClass } from '@/services/assignmentApi'
 import { approveTimetableAgentProposal, createTimetableAgentProposal, executeTimetableAgentProposal, getTimetableAgentActionByKey } from '@/services/timetableAgentApi'
+import { confirmTimetableTeacherLoadPolicy } from '@/services/timetableApi'
+import { getActiveTeacherLoadPolicy } from '@/services/teacherLoadApi'
 import { extractApiErrorMessage, isApiError } from '@/types/api'
 import type { SchoolClass } from '@/types/academic'
 import type { Teacher } from '@/types/teacher'
-import type { TimetableDetail, TimetableEntry, TimetablePeriod } from '@/types/timetable'
+import type { TeacherLoadPolicy, TimetableDetail, TimetableEntry, TimetablePeriod } from '@/types/timetable'
 import type { TimetableAgentActionState, TimetableAgentAssignmentOption, TimetableAgentPendingAction, TimetableAgentPhase, TimetableAgentProposal, TimetableAgentReceipt, TimetableAgentRequest } from '@/types/timetableAgent'
 
 const props = defineProps<{ detail: TimetableDetail; classes: SchoolClass[]; teachers: Teacher[]; periods: TimetablePeriod[]; entries: TimetableEntry[] }>()
@@ -21,6 +23,10 @@ const phase = ref<TimetableAgentPhase>('idle')
 const error = ref('')
 const assignments = ref<TimetableAgentAssignmentOption[]>([])
 const assignmentsLoading = ref(false)
+const activePolicy = ref<TeacherLoadPolicy | null>(null)
+const policyLoading = ref(true)
+const policySaving = ref(false)
+const policyError = ref('')
 const approvedBinding = ref<string | null>(null)
 const pending = ref<TimetableAgentPendingAction | null>(null)
 const recoveryAllowsRetry = ref(false)
@@ -33,7 +39,10 @@ let pendingStorageKey: string | null = null
 onBeforeUnmount(() => { window.clearInterval(timer); requestEpoch++; assignmentEpoch++ })
 const busy = computed(() => ['generating', 'approving', 'executing', 'recovering'].includes(phase.value))
 const editable = computed(() => ['DRAFT', 'VALIDATED'].includes(props.detail.status))
-const available = computed(() => props.detail.canUseTimetableAgent === true && editable.value)
+const policyConfirmed = computed(() => !!activePolicy.value && props.detail.policyId === activePolicy.value.id
+  && props.detail.policyVersion === activePolicy.value.policyName)
+const needsPolicyConfirmation = computed(() => props.detail.status === 'DRAFT' && !policyConfirmed.value)
+const available = computed(() => props.detail.canUseTimetableAgent === true && editable.value && policyConfirmed.value)
 const expired = computed(() => !!proposal.value && (!Number.isFinite(Date.parse(proposal.value.expiresAt)) || Date.parse(proposal.value.expiresAt) <= now.value))
 const stale = computed(() => !!proposal.value && (proposal.value.targetRevisionId !== props.detail.revisionId || proposal.value.expectedVersion !== props.detail.version))
 const blocked = computed(() => proposal.value?.issues.some((i) => i.severity === 'BLOCKING') ?? true)
@@ -45,7 +54,10 @@ const canExecute = computed(() => available.value && phase.value === 'idle' && !
 const displayPhase = computed(() => receipt.value || pending.value ? phase.value : stale.value ? 'stale' : expired.value ? 'expired' : phase.value)
 const canRetryPending = computed(() => !!pending.value && available.value && !busy.value
   && (recoveryAllowsRetry.value || (retryAfter.value !== null && now.value >= retryAfter.value)))
-const classOptions = computed(() => props.classes.map((c) => ({ id: c.id, name: c.name })))
+const classOptions = computed(() => [...new Map(props.classes.map((c) => [c.id, {
+  id: c.id,
+  name: c.className ? `${c.classCode} · ${c.className}` : c.classCode,
+}])).values()])
 const labelOptions = computed(() => {
   const byId = new Map(assignments.value.map((a) => [a.id, a]))
   props.entries.forEach((e) => { if (!byId.has(e.assignmentId)) byId.set(e.assignmentId, { id: e.assignmentId, classId: e.classId, className: e.className, subjectName: e.subjectName, teacherName: e.teacherName }) })
@@ -103,6 +115,67 @@ function inputChanged() {
 watch(() => [props.detail.version, props.detail.status, props.detail.canUseTimetableAgent], () => { approvedBinding.value = null })
 watch(expired, (value) => { if (value) approvedBinding.value = null })
 
+async function loadActivePolicy() {
+  const token = requireAccessToken()
+  if (!token) { policyLoading.value = false; return }
+  policyLoading.value = true
+  policyError.value = ''
+  try {
+    activePolicy.value = await getActiveTeacherLoadPolicy(token)
+  } catch (cause) {
+    activePolicy.value = null
+    policyError.value = extractApiErrorMessage(cause, 'Không thể tải chính sách định mức tiết dạy đang hoạt động.')
+  } finally { policyLoading.value = false }
+}
+
+async function refreshPolicyConfirmation(expectedPolicy?: TeacherLoadPolicy): Promise<boolean> {
+  const token = requireAccessToken()
+  if (!token) return false
+  policyLoading.value = true
+  policyError.value = ''
+  try {
+    activePolicy.value = await getActiveTeacherLoadPolicy(token)
+    if (expectedPolicy) {
+      return activePolicy.value?.id === expectedPolicy.id
+        && activePolicy.value.policyName === expectedPolicy.policyName
+    }
+    return policyConfirmed.value
+  } catch (cause) {
+    activePolicy.value = null
+    policyError.value = extractApiErrorMessage(cause, 'Không thể tải chính sách định mức tiết dạy đang hoạt động.')
+    return false
+  } finally { policyLoading.value = false }
+}
+
+async function confirmPolicy() {
+  if (!activePolicy.value || policySaving.value || busy.value || pending.value || props.detail.status !== 'DRAFT') return
+  const selectedPolicy = activePolicy.value
+  const targetRevisionId = props.detail.revisionId
+  const expectedVersion = props.detail.version
+  const token = requireAccessToken()
+  if (!token) return
+  policySaving.value = true
+  policyError.value = ''
+  try {
+    if (!(await refreshPolicyConfirmation(selectedPolicy))) {
+      if (!policyError.value) policyError.value = 'Chính sách hiện hành đã thay đổi. Hãy xác nhận lại chính sách đang hoạt động.'
+      return
+    }
+    if (props.detail.revisionId !== targetRevisionId || props.detail.version !== expectedVersion
+      || props.detail.status !== 'DRAFT') {
+      policyError.value = 'Bản nháp đã thay đổi. Tải lại rồi xác nhận chính sách hiện hành.'
+      return
+    }
+    await confirmTimetableTeacherLoadPolicy(targetRevisionId, selectedPolicy.id, expectedVersion, token)
+    emit('reload')
+  } catch (cause) {
+    await loadActivePolicy()
+    policyError.value = extractApiErrorMessage(cause, 'Không thể xác nhận chính sách. Hãy tải lại bản nháp.')
+  } finally { policySaving.value = false }
+}
+
+void loadActivePolicy()
+
 async function classesChanged(ids: number[]) {
   const epoch = ++assignmentEpoch
   assignments.value = []
@@ -132,7 +205,22 @@ async function generate(request: TimetableAgentRequest) {
   const token = requireAccessToken()
   if (!token) return
   const epoch = ++requestEpoch
+  const revisionId = props.detail.revisionId
+  const revisionVersion = props.detail.version
   approvedBinding.value = null; proposal.value = null; receipt.value = null; error.value = ''; phase.value = 'generating'
+  if (!(await refreshPolicyConfirmation())) {
+    if (epoch !== requestEpoch) return
+    phase.value = 'idle'
+    if (!policyError.value) policyError.value = 'Chính sách hiện hành đã thay đổi. Xác nhận policy mới trước khi tạo gợi ý.'
+    return
+  }
+  if (epoch !== requestEpoch) return
+  if (revisionId !== props.detail.revisionId || revisionVersion !== props.detail.version
+    || request.targetRevisionId !== revisionId || request.expectedVersion !== revisionVersion) {
+    phase.value = 'stale'
+    error.value = 'Bản nháp đã thay đổi. Tải lại trước khi tạo gợi ý.'
+    return
+  }
   try {
     const result = await createTimetableAgentProposal(request, token)
     if (epoch !== requestEpoch) return
@@ -222,13 +310,24 @@ async function recover() {
 <template>
   <section aria-label="Gợi ý thời khoá biểu" class="agent-workspace">
     <div class="agent-steps" aria-label="Các bước">1. Ràng buộc → 2. Xem gợi ý → 3. Duyệt phương án → 4. Lưu bản nháp</div>
+    <div v-if="policyLoading || needsPolicyConfirmation || policyError" class="policy-confirmation" role="status">
+      <span v-if="policyLoading">Đang tải chính sách định mức tiết dạy hiện hành…</span>
+      <template v-else-if="activePolicy && needsPolicyConfirmation">
+        <span>Chính sách hiện hành: {{ activePolicy.policyName }} (áp dụng từ {{ activePolicy.effectiveFrom }}). Xác nhận chính sách này cho bản nháp trước khi tạo gợi ý.</span>
+        <button type="button" :disabled="policySaving" @click="confirmPolicy">
+          {{ policySaving ? 'Đang xác nhận…' : 'Xác nhận chính sách' }}
+        </button>
+      </template>
+      <span v-else-if="!activePolicy && !policyError">Chưa có chính sách định mức tiết dạy đang hoạt động. Hãy kích hoạt chính sách trong phần cài đặt.</span>
+      <span v-if="policyError" class="policy-error">{{ policyError }}</span>
+    </div>
     <div class="agent-layout">
-      <TimetableAgentPanel :target-revision-id="detail.revisionId" :expected-version="detail.version" :default-valid-from="detail.effectiveFrom" :default-valid-to="detail.effectiveTo ?? ''" :classes="classOptions" :assignments="assignments" :existing-entries="entries" :can-generate="available && !pending && phase !== 'response-lost' && (proposal?.capabilities.canGenerate ?? true)" :busy="busy || !!pending" :assignments-loading="assignmentsLoading" @generate="generate" @input-changed="inputChanged" @classes-changed="classesChanged" />
+      <TimetableAgentPanel :target-revision-id="detail.revisionId" :expected-version="detail.version" :default-valid-from="detail.effectiveFrom" :default-valid-to="detail.effectiveTo ?? ''" :classes="classOptions" :assignments="assignments" :existing-entries="entries" :can-generate="available && !policyLoading && !policySaving && !pending && phase !== 'response-lost' && (proposal?.capabilities.canGenerate ?? true)" :busy="busy || !!pending || policySaving" :assignments-loading="assignmentsLoading" @generate="generate" @input-changed="inputChanged" @classes-changed="classesChanged" />
       <TimetableAgentReview :proposal="proposal" :receipt="receipt" :phase="displayPhase" :periods="periods" :assignments="labelOptions" :can-approve="canApprove" :can-execute="canExecute" :error="error" :pending-recovery="!!pending" :can-retry-pending="canRetryPending" @approve="approve" @execute="execute" @recover="recover" @retry-pending="retryPending" @reload="emit('reload')" />
     </div>
   </section>
 </template>
 
 <style scoped>
-.agent-steps{padding:1rem;color:#536773;font-size:.9rem}.agent-layout{display:grid;grid-template-columns:minmax(280px,330px) minmax(0,1fr);gap:1.25rem}@media(max-width:950px){.agent-layout{grid-template-columns:1fr}}
+.agent-steps{padding:1rem;color:#536773;font-size:.9rem}.policy-confirmation{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:0 1rem 1rem;padding:.8rem 1rem;border:1px solid #f0c36d;border-radius:.5rem;background:#fffbeb;color:#744210}.policy-confirmation button{flex-shrink:0;border:0;border-radius:.35rem;padding:.55rem .8rem;background:#0f766e;color:white;font-weight:600}.policy-confirmation button:disabled{opacity:.6}.policy-error{color:#b42318}.agent-layout{display:grid;grid-template-columns:minmax(280px,330px) minmax(0,1fr);gap:1.25rem}@media(max-width:950px){.agent-layout{grid-template-columns:1fr}.policy-confirmation{align-items:flex-start;flex-direction:column}}
 </style>

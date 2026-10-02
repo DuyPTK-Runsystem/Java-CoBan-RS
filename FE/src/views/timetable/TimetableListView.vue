@@ -18,6 +18,7 @@ import { extractApiErrorMessage } from '@/types/api'
 import type { Semester } from '@/types/academic'
 import type { TimetableRevisionStatus, TimetableSummary } from '@/types/timetable'
 import type { LoadingState } from '@/types/ui'
+import { timetableWorkspacePath } from './timetableWorkspacePath'
 
 const router = useRouter()
 const route = useRoute()
@@ -139,7 +140,7 @@ async function handleCreateTimetable() {
       token,
     )
     isCreateDialogVisible.value = false
-    void router.push(`/v2/timetables/${res.timetableId}`)
+    void router.push(timetableWorkspacePath(res.revisionId))
   } catch (err) {
     createError.value = extractApiErrorMessage(err, 'Không thể tạo thời khóa biểu')
   } finally {
@@ -147,8 +148,8 @@ async function handleCreateTimetable() {
   }
 }
 
-function navigateToWorkspace(timetableId: number) {
-  void router.push(`/v2/timetables/${timetableId}`)
+function navigateToWorkspace(revisionId: number) {
+  void router.push(timetableWorkspacePath(revisionId))
 }
 
 onMounted(() => {
@@ -245,7 +246,7 @@ onMounted(() => {
               icon="pi pi-external-link"
               size="small"
               text
-              @click="navigateToWorkspace(data.timetableId)"
+              @click="navigateToWorkspace(data.revisionId)"
             />
           </template>
         </Column>

@@ -4,6 +4,7 @@
 
 ## Chronological Summary
 
+- [Dev Note 088.1: Confirm active teacher-load policy before agent proposals](../be/timetableagent/088.1-confirm-active-policy-before-agent-2026-10-02.md) — Focused BE PASS; full BE test FAIL; Checkstyle PASS with warnings, pmdMain PASS; pmdTest/build FAIL on 476 project findings outside changed timetable tests; FE gates PASS (2026-10-02).
 | No. | Area | Note | Status | Updated |
 | --- | --- | --- | --- | --- |
 | 088 | BE/FE | [Spring AI timetable agent implementation](088-spring-ai-timetable-agent-implementation-2026-10-01.md) | APPROVED; implementation/validation đang chạy; FE offline gates PASS tại note; provider/MySQL live NOT RUN | 2026-10-01 |
@@ -160,3 +161,4 @@
 ```text
 NNN-short-topic-yyyy-mm-dd.md
 ```
+| 088 | Timetable | [Điều hướng đúng revision từ danh sách TKB](../fe/timetable/088-timetable-list-revision-routing-2026-10-02.md) | Bổ sung revisionId summary; focused service/FE route tests, scoped ESLint, npm build, checkstyleMain/Test và pmdMain PASS; full backend test gián đoạn do OOM, pmdTest FAIL 476, build excluding tests PASS, standard build incomplete | 2026-10-02 |

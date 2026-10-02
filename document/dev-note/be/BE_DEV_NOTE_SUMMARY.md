@@ -4,6 +4,7 @@
 
 ## CR v4 — Plan 088 approved
 
+- [Dev Note 088.1: Confirm active teacher-load policy before agent proposals](timetableagent/088.1-confirm-active-policy-before-agent-2026-10-02.md) — Focused BE PASS; full test FAIL 608/119/1; Checkstyle PASS with warnings, pmdMain PASS; pmdTest/build FAIL on 476 findings outside changed timetable tests; FE tests/lint/build/Storybook PASS (2026-10-02).
 - [Dev Note 088: Spring AI timetable agent implementation](../summary/088-spring-ai-timetable-agent-implementation-2026-10-01.md) — Người dùng đã approve; backend đang tích hợp/validation; provider runtime và MySQL cô lập NOT RUN (2026-10-01).
 
 | 076.16 | notification | [Notification inbox SSE](notification/076.16-notification-inbox-sse-2026-10-01.md) | SSE endpoint, process-local recipient registry and post-commit dispatch; focused tests PASS; full tests FAIL 587/105; Checkstyle PASS with 976 warnings; PMD main PASS; build FAIL on baseline pmdTest and full tests | 2026-10-01 |

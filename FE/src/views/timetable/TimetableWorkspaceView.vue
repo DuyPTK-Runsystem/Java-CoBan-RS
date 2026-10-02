@@ -16,7 +16,7 @@ import TimetablePublishDialog from '@/components/timetable/TimetablePublishDialo
 import TimetableWeekGrid from '@/components/timetable/TimetableWeekGrid.vue'
 import TimetableAgentWorkspace from '@/views/timetable/TimetableAgentWorkspace.vue'
 import { useAuthSession } from '@/composables/useAuthSession'
-import { fetchSchoolClasses } from '@/services/academicApi'
+import { fetchSchoolClasses, fetchSemesters } from '@/services/academicApi'
 import { fetchSubjectAssignmentsByClass } from '@/services/assignmentApi'
 import { lookupFunctionalRooms } from '@/services/functionalRoomApi'
 import { fetchTeachers } from '@/services/teacherApi'
@@ -318,12 +318,14 @@ async function loadInitial() {
   loadingState.value = 'loading'
   generalError.value = ''
   try {
-    const [d, cl, tc, rm] = await Promise.all([
+    const [d, tc, rm, semesters] = await Promise.all([
       getTimetableDetail(timetableId.value, token),
-      fetchSchoolClasses(token),
       fetchTeachers(token),
       lookupFunctionalRooms(undefined, token),
+      fetchSemesters(token),
     ])
+    const academicYearId = semesters.find((semester) => semester.id === d.semesterId)?.academicYearId
+    const cl = academicYearId === undefined ? [] : await fetchSchoolClasses(token, academicYearId)
     detail.value = d
     classes.value = cl
     teachers.value = tc
