@@ -164,3 +164,5 @@
 NNN-short-topic-yyyy-mm-dd.md
 ```
 | 088 | Timetable | [Điều hướng đúng revision từ danh sách TKB](../fe/timetable/088-timetable-list-revision-routing-2026-10-02.md) | Bổ sung revisionId summary; focused service/FE route tests, scoped ESLint, npm build, checkstyleMain/Test và pmdMain PASS; full backend test gián đoạn do OOM, pmdTest FAIL 476, build excluding tests PASS, standard build incomplete | 2026-10-02 |
+
+- 2026-10-02 — [091: Autofill số tiết yêu cầu từ TKB](../fe/timetable/091-timetable-demand-autofill-2026-10-02.md) — validation xem Dev Note.

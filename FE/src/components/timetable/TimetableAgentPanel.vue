@@ -30,6 +30,7 @@ const classIds = ref<number[]>([])
 const validFrom = ref(props.defaultValidFrom)
 const validTo = ref(props.defaultValidTo)
 const demands = ref<Record<number, number | null>>({})
+const editedDemands = new Set<number>()
 const lockedEntryIds = ref<number[]>([])
 const preferences = ref('')
 const userRequest = ref('')
@@ -56,6 +57,36 @@ watch([classIds, validFrom, validTo, demands, lockedEntryIds, preferences, userR
 watch(demandConfirmed, () => emit('inputChanged'), { flush: 'sync' })
 watch([scopedAssignments, scopedEntries], () => {
   lockedEntryIds.value = lockedEntryIds.value.filter((id) => scopedEntries.value.some((e) => (e.entryId ?? e.id) === id))
+})
+
+function editDemand(assignmentId: number, value: number | null) {
+  editedDemands.add(assignmentId)
+  demands.value[assignmentId] = value
+}
+
+watch([scopedAssignments, () => props.existingEntries, validFrom, validTo], () => {
+  const next = { ...demands.value }
+  for (const assignment of scopedAssignments.value) {
+    if (editedDemands.has(assignment.id)) continue
+    const rows = props.existingEntries.filter((entry) => entry.revisionId === props.targetRevisionId
+      && entry.assignmentId === assignment.id && entry.classId === assignment.classId
+      && entry.validTo >= validFrom.value && (!validTo.value || entry.validFrom <= validTo.value))
+    // Count one weekly pattern rather than adding successive effective schedules.
+    const firstDate = rows.reduce((date, entry) => {
+      const start = entry.validFrom > validFrom.value ? entry.validFrom : validFrom.value
+      return date === '' || start < date ? start : date
+    }, '')
+    const slots = new Set(rows.filter((entry) => entry.validFrom <= firstDate && entry.validTo >= firstDate)
+      .map((entry) => `${entry.dayOfWeek}:${entry.session}:${entry.periodIndex}`))
+    next[assignment.id] = slots.size || null
+  }
+  if (Object.keys(next).some((id) => next[Number(id)] !== demands.value[Number(id)])) demands.value = next
+}, { immediate: true, deep: true })
+
+watch(() => props.targetRevisionId, () => {
+  editedDemands.clear()
+  demands.value = {}
+  classIds.value = []
 })
 
 function submit() {
@@ -91,7 +122,7 @@ function submit() {
       <p v-else-if="!scopedAssignments.length">Chọn lớp có phân công đang hoạt động.</p>
       <div v-for="a in scopedAssignments" :key="a.id" class="agent-demand">
         <label :for="`agent-demand-${a.id}`">{{ a.className }} · {{ a.subjectName }} · {{ a.teacherName }}</label>
-        <InputNumber v-model="demands[a.id]" :input-id="`agent-demand-${a.id}`" :min="1" :use-grouping="false" :disabled="busy" />
+        <InputNumber :model-value="demands[a.id]" :input-id="`agent-demand-${a.id}`" :min="1" :use-grouping="false" :disabled="busy" @update:model-value="editDemand(a.id, $event)" />
       </div>
       <div class="agent-confirm"><Checkbox v-model="demandConfirmed" input-id="agent-demand-confirm" binary :disabled="busy || !scopedAssignments.length" /><label for="agent-demand-confirm">Tôi xác nhận bảng số tiết trên.</label></div>
       <label for="agent-locked">Tiết giữ nguyên</label>

@@ -84,6 +84,60 @@ describe('TimetableAgentPanel', () => {
     expect(wrapper.emitted('classesChanged')).toEqual([[[11]]])
   })
 
+  it('autofills one weekly pattern from matching entries without adding successive schedules', async () => {
+    const row: TimetableEntry = {
+      id: 1, revisionId: 42, assignmentId: 501, periodId: 71,
+      validFrom: '2026-10-01', validTo: '2026-11-30',
+      classId: 11, className: '10A1', subjectId: 90, subjectName: 'Toán',
+      teacherId: 20, teacherName: 'Cô An', dayOfWeek: 1, session: 'MORNING', periodIndex: 1,
+    }
+    const wrapper = mountPanel(true, [
+      row, { ...row, id: 2, periodIndex: 2 },
+      { ...row, id: 3, validFrom: '2026-12-01', validTo: '2026-12-31', periodIndex: 3 },
+      { ...row, id: 4, assignmentId: 502, periodIndex: 4 },
+      { ...row, id: 5, classId: 12, periodIndex: 4 },
+      { ...row, id: 6, revisionId: 43, periodIndex: 4 },
+      { ...row, id: 7 },
+    ])
+    wrapper.findComponent(MultiSelectStub).vm.$emit('update:modelValue', [11])
+    await nextTick()
+    expect(wrapper.findComponent(InputNumberStub).props('modelValue')).toBe(2)
+    expect(wrapper.get('button[type="submit"]').attributes('disabled')).toBeDefined()
+
+    await wrapper.get('#agent-from').setValue('2026-12-01')
+    expect(wrapper.findComponent(InputNumberStub).props('modelValue')).toBe(1)
+    await wrapper.get('#agent-from').setValue('2026-12-31')
+    await wrapper.setProps({ existingEntries: [] })
+    expect(wrapper.findComponent(InputNumberStub).props('modelValue')).toBeNull()
+  })
+
+  it('fills asynchronously loaded assignments and preserves manual edits including cleared values', async () => {
+    const row: TimetableEntry = {
+      id: 1, revisionId: 42, assignmentId: 501, periodId: 71,
+      validFrom: '2026-11-01', validTo: '2026-12-31',
+      classId: 11, className: '10A1', subjectId: 90, subjectName: 'Toán',
+      teacherId: 20, teacherName: 'Cô An', dayOfWeek: 1, session: 'MORNING', periodIndex: 1,
+    }
+    const wrapper = mountPanel()
+    await wrapper.setProps({ assignments: [] })
+    wrapper.findComponent(MultiSelectStub).vm.$emit('update:modelValue', [11])
+    await nextTick()
+    await wrapper.setProps({ assignments, existingEntries: [row] })
+    expect(wrapper.findComponent(InputNumberStub).props('modelValue')).toBe(1)
+    wrapper.findComponent(InputNumberStub).vm.$emit('update:modelValue', 4)
+    await nextTick()
+    await wrapper.setProps({ existingEntries: [row, { ...row, id: 2, periodIndex: 2 }] })
+    expect(wrapper.findComponent(InputNumberStub).props('modelValue')).toBe(4)
+    wrapper.findComponent(InputNumberStub).vm.$emit('update:modelValue', null)
+    await nextTick()
+    await wrapper.get('#agent-from').setValue('2026-11-01')
+    expect(wrapper.findComponent(InputNumberStub).props('modelValue')).toBeNull()
+    await wrapper.setProps({ targetRevisionId: 43 })
+    wrapper.findComponent(MultiSelectStub).vm.$emit('update:modelValue', [11])
+    await nextTick()
+    expect(wrapper.findComponent(InputNumberStub).props('modelValue')).toBeNull()
+  })
+
   it('keeps generation unavailable when the backend capability is false', async () => {
     const wrapper = mountPanel(false)
 
