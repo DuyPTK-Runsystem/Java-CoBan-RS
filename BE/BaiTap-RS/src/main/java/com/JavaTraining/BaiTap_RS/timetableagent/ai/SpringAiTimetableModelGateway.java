@@ -3,11 +3,17 @@ package com.JavaTraining.BaiTap_RS.timetableagent.ai;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Set;
 
 import com.JavaTraining.BaiTap_RS.timetableagent.domain.DTOs.TimetableAgentModelProposalDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.AdvisorParams;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.SystemMessage;
@@ -23,6 +29,8 @@ import org.springframework.ai.tool.metadata.ToolMetadata;
 import org.springframework.core.io.ClassPathResource;
 
 public class SpringAiTimetableModelGateway implements TimetableAgentModelGateway {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpringAiTimetableModelGateway.class);
 
     private static final String PROPOSAL_SCHEMA_PATH = "ai/timetable/timetable-proposal.schema.json";
     private static final String ACTION_SCHEMA_PATH = "ai/timetable/save-timetable-draft.schema.json";
@@ -61,12 +69,18 @@ public class SpringAiTimetableModelGateway implements TimetableAgentModelGateway
                     .advisors(AdvisorParams.toolCallingAdvisorAutoRegister(false))
                     .call()
                     .chatResponse();
-            requireSingleCompleteGeneration(response);
+            ModelResponseValidator.requireSingleCompleteGeneration(response, "proposal");
             if (response.getResult().getOutput().getToolCalls() != null
                     && !response.getResult().getOutput().getToolCalls().isEmpty()) {
                 throw new TimetableAgentModelException("Proposal phase must not return tool calls.");
             }
-            TimetableAgentModelProposalDTO proposal = converter.convert(response.getResult().getOutput().getText());
+            String proposalJson = response.getResult().getOutput().getText();
+            if ((proposalJson == null || proposalJson.isBlank()) && LOGGER.isWarnEnabled()) {
+                LOGGER.warn("Timetable proposal response rejected: category=EMPTY_OUTPUT finishReasonCategory={}",
+                        ModelResponseValidator.finishReasonCategory(response));
+            }
+            TimetableAgentModelProposalDTO proposal = ProposalOutputParser.convert(
+                    converter, proposalJson, response);
             outcome = "SUCCESS";
             return proposal;
         } finally {
@@ -131,7 +145,7 @@ public class SpringAiTimetableModelGateway implements TimetableAgentModelGateway
                     .advisors(AdvisorParams.toolCallingAdvisorAutoRegister(false))
                     .call()
                     .chatResponse();
-            requireSingleCompleteGeneration(response);
+            ModelResponseValidator.requireSingleCompleteGeneration(response, "action");
             List<org.springframework.ai.chat.messages.AssistantMessage.ToolCall> calls = response.getResult()
                     .getOutput().getToolCalls();
             if (calls == null || calls.size() != 1) {
@@ -145,24 +159,100 @@ public class SpringAiTimetableModelGateway implements TimetableAgentModelGateway
         }
     }
 
-    private void requireSingleCompleteGeneration(ChatResponse response) {
-        if (response == null || response.getResults().size() != 1 || response.getResult().getOutput() == null) {
-            throw new TimetableAgentModelException("Model must return exactly one complete generation.");
-        }
-        String finishReason = response.getResult().getMetadata() == null ? null
-                : response.getResult().getMetadata().getFinishReason();
-        if (finishReason != null && Set.of("length", "max_tokens", "content_filter", "refusal")
-                .contains(finishReason.toLowerCase(java.util.Locale.ROOT))) {
-            throw new TimetableAgentModelException("Model output was truncated or refused.");
-        }
-    }
-
     private String readResource(String path) {
         try (InputStream inputStream = new ClassPathResource(path).getInputStream()) {
             return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException exception) {
             throw new TimetableAgentModelException("Required timetable AI contract resource is unavailable.",
                     exception);
+        }
+    }
+
+    private static final class ProposalOutputParser {
+
+        private static TimetableAgentModelProposalDTO convert(
+                StructuredOutputConverter<TimetableAgentModelProposalDTO> converter, String proposalJson,
+                ChatResponse response) {
+            try {
+                return converter.convert(proposalJson);
+            } catch (TimetableAgentInvalidOutputException exception) {
+                String errorCategory = exception.getCause() instanceof JsonProcessingException
+                        ? "JSON_DECODE" : "CONTRACT_VALIDATION";
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Timetable proposal output rejected: category={} finishReasonCategory={} "
+                                    + "validationMessage={} modelOutputLength={} modelOutputSha256={}",
+                            errorCategory, ModelResponseValidator.finishReasonCategory(response),
+                            exception.getMessage(), proposalJson == null ? 0 : proposalJson.length(),
+                            sha256(proposalJson));
+                }
+                throw exception;
+            }
+        }
+
+        private static String sha256(String value) {
+            try {
+                byte[] bytes = value == null ? new byte[0] : value.getBytes(StandardCharsets.UTF_8);
+                return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
+            } catch (NoSuchAlgorithmException exception) {
+                throw new IllegalStateException("SHA-256 is unavailable.", exception);
+            }
+        }
+    }
+
+    private static final class ModelResponseValidator {
+
+        private static void requireSingleCompleteGeneration(ChatResponse response, String phase) {
+            if (isIncomplete(response)) {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Timetable model response rejected: phase={} category=INCOMPLETE_GENERATION "
+                                    + "responsePresent={} generationCount={}",
+                            phase, response != null, response == null ? 0 : response.getResults().size());
+                }
+                throw new TimetableAgentModelException("Model must return exactly one complete generation.");
+            }
+            String finishReason = finishReason(response);
+            if (isTruncatedOrRefused(finishReason)) {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Timetable model response rejected: phase={} category=TRUNCATED_OR_REFUSED "
+                                    + "finishReasonCategory={}", phase, finishReasonCategory(finishReason));
+                }
+                throw new TimetableAgentModelException("Model output was truncated or refused.");
+            }
+        }
+
+        private static boolean isIncomplete(ChatResponse response) {
+            return response == null || response.getResults().size() != 1
+                    || response.getResult().getOutput() == null;
+        }
+
+        private static String finishReason(ChatResponse response) {
+            return response.getResult().getMetadata() == null ? null
+                    : response.getResult().getMetadata().getFinishReason();
+        }
+
+        private static boolean isTruncatedOrRefused(String finishReason) {
+            return finishReason != null && Set.of("length", "max_tokens", "content_filter", "refusal")
+                    .contains(finishReason.toLowerCase(java.util.Locale.ROOT));
+        }
+
+        private static String finishReasonCategory(ChatResponse response) {
+            if (response == null || response.getResult() == null || response.getResult().getMetadata() == null) {
+                return "UNKNOWN";
+            }
+            return finishReasonCategory(finishReason(response));
+        }
+
+        private static String finishReasonCategory(String reason) {
+            if (reason == null || reason.isBlank()) {
+                return "UNKNOWN";
+            }
+            return switch (reason.toLowerCase(java.util.Locale.ROOT)) {
+                case "length", "max_tokens" -> "LENGTH";
+                case "content_filter" -> "CONTENT_FILTER";
+                case "refusal" -> "REFUSAL";
+                case "stop" -> "STOP";
+                default -> "OTHER";
+            };
         }
     }
 }

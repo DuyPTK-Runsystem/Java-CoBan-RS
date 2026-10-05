@@ -20,17 +20,27 @@ import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableHeadRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableRevisionRepository;
 import com.JavaTraining.BaiTap_RS.timetableagent.domain.DTOs.requests.ReqCreateTimetableAgentProposalDTO;
 import com.JavaTraining.BaiTap_RS.timetableagent.domain.TimetableAgentSnapshot.TimetableAgentSnapshotEntry;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class TimetableAgentSnapshotEntries {
 
     private final TimetableRevisionRepository revisionRepository;
     private final TimetableHeadRepository headRepository;
     private final TimetableEntryRepository entryRepository;
+    private final TimetableAgentContextMetadata contextMetadata;
+
+    @Autowired
+    public TimetableAgentSnapshotEntries(TimetableRevisionRepository revisionRepository,
+            TimetableHeadRepository headRepository, TimetableEntryRepository entryRepository,
+            TimetableAgentContextMetadata contextMetadata) {
+        this.revisionRepository = revisionRepository;
+        this.headRepository = headRepository;
+        this.entryRepository = entryRepository;
+        this.contextMetadata = contextMetadata;
+    }
 
     public TimetableRevision revision(ReqCreateTimetableAgentProposalDTO request) {
         TimetableRevision revision = revisionRepository.findById(request.targetRevisionId())
@@ -53,8 +63,12 @@ public class TimetableAgentSnapshotEntries {
                 .map(this::snapshotEntry)
                 .sorted(Comparator.comparing(TimetableAgentSnapshotEntry::entryId)).toList();
         validateLockedEntryScope(request, currentEntries, catalog.activeAssignments(), catalog.classSubjectById());
-        return new EntryData(currentEntries, currentPublishedContext(revision, request,
-                catalog.selectedAssignmentIds(), currentEntries));
+        List<TimetableAgentSnapshotEntry> publishedEntries = currentPublishedContext(revision, request,
+                catalog.selectedAssignmentIds(), currentEntries);
+        TimetableAgentContextMetadata.ContextAssignments contextAssignments = contextMetadata.read(currentEntries,
+                publishedEntries, catalog.selectedAssignmentIds());
+        return new EntryData(currentEntries, publishedEntries, contextAssignments.teacherIds(),
+                contextAssignments.classIds());
     }
 
     private List<TimetableAgentSnapshotEntry> currentPublishedContext(TimetableRevision target,
@@ -134,6 +148,7 @@ public class TimetableAgentSnapshotEntries {
         return new AppException(HttpStatus.UNPROCESSABLE_ENTITY, message);
     }
 
-    public record EntryData(List<TimetableAgentSnapshotEntry> current, List<TimetableAgentSnapshotEntry> published) {
+    public record EntryData(List<TimetableAgentSnapshotEntry> current, List<TimetableAgentSnapshotEntry> published,
+            Map<Long, Long> contextAssignmentTeacherIds, Map<Long, Long> contextAssignmentClassIds) {
     }
 }

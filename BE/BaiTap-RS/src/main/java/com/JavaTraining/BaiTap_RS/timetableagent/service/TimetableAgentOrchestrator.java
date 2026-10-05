@@ -5,6 +5,7 @@ import com.JavaTraining.BaiTap_RS.timetableagent.ai.TimetableAgentModelGateway;
 import com.JavaTraining.BaiTap_RS.timetableagent.ai.TimetableAgentModelGatewayResolver;
 import com.JavaTraining.BaiTap_RS.timetableagent.config.TimetableAgentProperties;
 import com.JavaTraining.BaiTap_RS.timetableagent.domain.DTOs.requests.ReqCreateTimetableAgentProposalDTO;
+import com.JavaTraining.BaiTap_RS.timetableagent.domain.DTOs.response.ResTimetableAgentIssueDTO;
 import com.JavaTraining.BaiTap_RS.timetableagent.domain.DTOs.response.ResTimetableAgentProposalDTO;
 import com.JavaTraining.BaiTap_RS.timetableagent.domain.TimetableAgentSnapshot;
 import com.JavaTraining.BaiTap_RS.timetableagent.domain.TimetableAgentValidationResult;
@@ -12,6 +13,7 @@ import com.JavaTraining.BaiTap_RS.timetableagent.domain.entity.TimetableAgentPro
 import com.JavaTraining.BaiTap_RS.timetableagent.repository.TimetableAgentProposalRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TimetableAgentOrchestrator {
 
     private final TimetableAgentProperties properties;
@@ -39,6 +42,13 @@ public class TimetableAgentOrchestrator {
         }
         inputLimits.validateRequest(request);
         TimetableAgentSnapshot snapshot = snapshotService.create(actorId, request);
+        if (log.isInfoEnabled()) {
+            log.info("TIMETABLE_AGENT_DEBUG snapshot-created snapshotId={} actorId={} targetRevisionId={} classIds={} "
+                            + "demandCount={} currentEntryCount={} publishedContextCount={} assignmentMetadataCount={}",
+                    snapshot.snapshotId(), actorId, snapshot.targetRevisionId(), snapshot.classIds(),
+                    snapshot.demands().size(), snapshot.currentEntries().size(), snapshot.publishedContextEntries().size(),
+                    snapshot.assignments().size());
+        }
         inputLimits.validateSnapshot(snapshot);
         TimetableAgentPayloadCodec codec = new TimetableAgentPayloadCodec(objectMapper);
         TimetableAgentProposalGenerator.GeneratedProposal completed = new TimetableAgentProposalGenerator(
@@ -47,6 +57,12 @@ public class TimetableAgentOrchestrator {
         TimetableAgentProposal stored = TimetableAgentProposalFactory.create(actorId, snapshot, completed,
                 codec, properties.getProposalTtl());
         proposalRepository.saveAndFlush(stored);
+        if (log.isInfoEnabled()) {
+            log.info("TIMETABLE_AGENT_DEBUG persisted snapshotId={} proposalId={} proposalStatus={} validationStatus={} "
+                            + "issueCodes={}",
+                    snapshot.snapshotId(), stored.getId(), completed.proposal().status(), completed.result().status(),
+                    completed.result().issues().stream().map(ResTimetableAgentIssueDTO::code).toList());
+        }
         return response(stored, completed.result());
     }
 

@@ -159,6 +159,61 @@ class TimetableValidationServiceTest {
         }
 
         @Test
+        void validateRevisionDoesNotReportClassOverlapForDifferentClassesAtSameTime() {
+                Mockito.when(revisionRepository.findById(100L)).thenReturn(Optional.of(revision));
+
+                TimetablePeriod period = new TimetablePeriod(1L, 2, SessionType.MORNING, 1, "Period 1",
+                                LocalTime.of(7, 0), LocalTime.of(7, 45));
+                ReflectionTestUtils.setField(period, "id", 10L);
+                TimetableEntry first = new TimetableEntry(100L, 1L, 10L, null,
+                                LocalDate.of(2026, 9, 1), LocalDate.of(2026, 12, 31));
+                ReflectionTestUtils.setField(first, "id", 101L);
+                TimetableEntry second = new TimetableEntry(100L, 2L, 10L, null,
+                                LocalDate.of(2026, 9, 1), LocalDate.of(2026, 12, 31));
+                ReflectionTestUtils.setField(second, "id", 102L);
+                Mockito.when(entryRepository.findByRevisionId(100L)).thenReturn(List.of(first, second));
+                Mockito.when(periodRepository.findAllById(Mockito.anyList())).thenReturn(List.of(period));
+
+                SubjectTeachingAssignment firstAssignment = new SubjectTeachingAssignment(
+                                1L, 10L, LocalDate.of(2026, 9, 1), null, AssignmentStatus.ACTIVE, 1L);
+                ReflectionTestUtils.setField(firstAssignment, "id", 1L);
+                SubjectTeachingAssignment secondAssignment = new SubjectTeachingAssignment(
+                                2L, 20L, LocalDate.of(2026, 9, 1), null, AssignmentStatus.ACTIVE, 1L);
+                ReflectionTestUtils.setField(secondAssignment, "id", 2L);
+                Mockito.when(assignmentRepository.findAllById(Mockito.anyList()))
+                                .thenReturn(List.of(firstAssignment, secondAssignment));
+
+                ClassSubject firstClassSubject = new ClassSubject(5L, 1L, 1L, ClassSubjectStatus.ACTIVE);
+                ReflectionTestUtils.setField(firstClassSubject, "id", 1L);
+                ClassSubject secondClassSubject = new ClassSubject(6L, 2L, 1L, ClassSubjectStatus.ACTIVE);
+                ReflectionTestUtils.setField(secondClassSubject, "id", 2L);
+                Mockito.when(classSubjectRepository.findAllById(Mockito.anyList()))
+                                .thenReturn(List.of(firstClassSubject, secondClassSubject));
+
+                SchoolClass firstClass = new SchoolClass(1L, 1L, "10A1", "10A1", 40, SchoolClassStatus.ACTIVE);
+                ReflectionTestUtils.setField(firstClass, "id", 5L);
+                SchoolClass secondClass = new SchoolClass(1L, 1L, "10A2", "10A2", 40, SchoolClassStatus.ACTIVE);
+                ReflectionTestUtils.setField(secondClass, "id", 6L);
+                Mockito.when(schoolClassRepository.findAllById(Mockito.anyList()))
+                                .thenReturn(List.of(firstClass, secondClass));
+                Teacher firstTeacher = Mockito.mock(Teacher.class);
+                Mockito.when(firstTeacher.getId()).thenReturn(10L);
+                Teacher secondTeacher = Mockito.mock(Teacher.class);
+                Mockito.when(secondTeacher.getId()).thenReturn(20L);
+                Mockito.when(teacherRepository.findAllById(Mockito.anyList()))
+                                .thenReturn(List.of(firstTeacher, secondTeacher));
+                Mockito.when(unavailabilityRepository.findApprovedInSemester(Mockito.anyLong(), Mockito.any(),
+                                Mockito.any())).thenReturn(List.of());
+                Mockito.when(revisionRepository.save(Mockito.any())).thenReturn(revision);
+
+                ResTimetableReviewDTO review = validationService.validateRevision(100L);
+
+                Assertions.assertFalse(review.issues().stream()
+                                .anyMatch(issue -> "CLASS_OVERLAP".equals(issue.code())),
+                                "entries in different classes at the same time must not be class conflicts");
+        }
+
+        @Test
         void validateRevisionTeacherOverlapCreatesBlockingIssue() {
                 Mockito.when(revisionRepository.findById(100L)).thenReturn(Optional.of(revision));
 
@@ -375,5 +430,3 @@ class TimetableValidationServiceTest {
         }
 
 }
-
-

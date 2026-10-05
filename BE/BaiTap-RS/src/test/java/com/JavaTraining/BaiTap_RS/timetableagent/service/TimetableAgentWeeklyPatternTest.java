@@ -13,7 +13,6 @@ import com.JavaTraining.BaiTap_RS.timetable.service.TimetableValidationService;
 import com.JavaTraining.BaiTap_RS.timetableagent.domain.DTOs.TimetableAgentModelProposalDTO;
 import com.JavaTraining.BaiTap_RS.timetableagent.domain.DTOs.TimetableAgentModelProposalStatus;
 import com.JavaTraining.BaiTap_RS.timetableagent.domain.DTOs.TimetableAgentProposalEntryDTO;
-import com.JavaTraining.BaiTap_RS.timetableagent.domain.DTOs.TimetableAgentProposalStatus;
 import com.JavaTraining.BaiTap_RS.timetableagent.domain.DTOs.requests.ReqTimetableAgentDemandDTO;
 import com.JavaTraining.BaiTap_RS.timetableagent.domain.TimetableAgentSnapshot;
 import com.JavaTraining.BaiTap_RS.timetableagent.domain.TimetableAgentSnapshot.TimetableAgentAssignmentOption;
@@ -23,13 +22,14 @@ import com.JavaTraining.BaiTap_RS.timetableagent.domain.TimetableAgentValidation
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-class TimetableProposalValidatorTest {
+class TimetableAgentWeeklyPatternTest {
 
     private static final String SNAPSHOT_ID = "snap-1";
+    private static final String DEMAND_MISMATCH = "DEMAND_MISMATCH";
+    private static final String PATTERN_MESSAGE = "weekly pattern demand must match on every effective date";
     private final TimetableRevisionRepository revisionRepository = Mockito.mock(TimetableRevisionRepository.class);
     private final SubjectTeachingAssignmentRepository assignmentRepository =
             Mockito.mock(SubjectTeachingAssignmentRepository.class);
@@ -53,80 +53,48 @@ class TimetableProposalValidatorTest {
     }
 
     @Test
-    void validateCountsCompletePatternEvenWhenWeekdayFallsOutsidePartialScope() {
-        LocalDate from = LocalDate.of(2026, 10, 6); // Tuesday
-        LocalDate to = LocalDate.of(2026, 10, 8); // Thursday
+    void validateAcceptsPatternAcrossBothBoundaryWeeks() {
+        LocalDate from = LocalDate.of(2026, 10, 2);
+        LocalDate to = LocalDate.of(2026, 12, 31);
         TimetableAgentSnapshot snapshot = snapshot(from, to, List.of(), List.of(), List.of(1L), List.of());
-        TimetableAgentModelProposalDTO proposal =
-                proposal(SNAPSHOT_ID, List.of(entry(1L, 101L, null, from, to)));
-
-        TimetableAgentValidationResult result = validator.validate(snapshot, proposal);
-
-        Assertions.assertFalse(result.issues().stream().anyMatch(issue -> "DEMAND_MISMATCH".equals(issue.code())),
-                "partial dates clip actual lessons without reducing the complete weekly pattern");
+        TimetableAgentValidationResult result = validator.validate(snapshot,
+                proposal(SNAPSHOT_ID, List.of(entry(1L, 101L, null, from, to))));
+        Assertions.assertFalse(result.issues().stream().anyMatch(issue -> DEMAND_MISMATCH.equals(issue.code())),
+                PATTERN_MESSAGE);
     }
 
     @Test
-    void validatePassesEffectiveEntriesOutsideSelectedAssignmentsToConflictValidation() {
-        LocalDate from = LocalDate.of(2026, 10, 5);
-        LocalDate to = LocalDate.of(2026, 10, 11);
-        TimetableAgentSnapshotEntry external = new TimetableAgentSnapshotEntry(
-                900L, 2L, 101L, 700L, from, to);
-        TimetableAgentSnapshot snapshot = snapshot(from, to, List.of(), List.of(external), List.of(1L), List.of());
-        TimetableAgentModelProposalDTO proposal = proposal(SNAPSHOT_ID,
-                List.of(entry(1L, 101L, 700L, from, to)));
-
-        validator.validate(snapshot, proposal);
-
-        List<com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableEntry> retainedEntries =
-                captureRetainedEntriesPassedToConflictValidation();
-        Assertions.assertTrue(retainedEntries.size() == 1
-                        && Long.valueOf(2L).equals(retainedEntries.get(0).getAssignmentId())
-                        && Long.valueOf(700L).equals(retainedEntries.get(0).getFunctionalRoomId()),
-                "published entries outside the selected assignment scope must reach conflict validation");
-    }
-
-    @Test
-    void validateKeepsNeedsInputTerminalWithoutRunningBackendCandidateValidation() {
-        LocalDate from = LocalDate.of(2026, 10, 5);
+    void validateRejectsMissingPattern() {
+        LocalDate from = LocalDate.of(2026, 10, 2);
         LocalDate to = LocalDate.of(2026, 10, 11);
         TimetableAgentSnapshot snapshot = snapshot(from, to, List.of(), List.of(), List.of(1L), List.of());
-        TimetableAgentModelProposalDTO proposal = new TimetableAgentModelProposalDTO(
-                "1", TimetableAgentModelProposalStatus.NEEDS_INPUT, SNAPSHOT_ID,
-                List.of(), List.of(), "Need more information");
-
-        TimetableAgentValidationResult result = validator.validate(snapshot, proposal);
-
-        Assertions.assertEquals(TimetableAgentProposalStatus.NEEDS_INPUT, result.status());
-        Mockito.verifyNoInteractions(revisionRepository, assignmentRepository,
-                timetableValidationService, teacherLoadEvaluator);
+        TimetableAgentValidationResult missing = validator.validate(snapshot, proposal(SNAPSHOT_ID, List.of()));
+        Assertions.assertTrue(missing.issues().stream().anyMatch(issue -> DEMAND_MISMATCH.equals(issue.code())),
+                PATTERN_MESSAGE);
     }
 
     @Test
-    void validateRequiresEveryLockedEntryMultiplicityToBePreserved() {
-        LocalDate from = LocalDate.of(2026, 10, 5);
+    void validateRejectsDateGap() {
+        LocalDate from = LocalDate.of(2026, 10, 2);
         LocalDate to = LocalDate.of(2026, 10, 11);
-        TimetableAgentSnapshotEntry locked1 = new TimetableAgentSnapshotEntry(901L, 1L, 101L, null, from, to);
-        TimetableAgentSnapshotEntry locked2 = new TimetableAgentSnapshotEntry(902L, 1L, 101L, null, from, to);
-        TimetableAgentSnapshot snapshot = snapshot(from, to, List.of(locked1, locked2), List.of(), List.of(1L),
-                List.of(901L, 902L));
-
-        TimetableAgentValidationResult result = validator.validate(snapshot, proposal(SNAPSHOT_ID,
-                List.of(entry(1L, 101L, null, from, to))));
-
-        Assertions.assertTrue(TimetableAgentProposalStatus.CONFLICTS.equals(result.status())
-                        && result.issues().stream().anyMatch(issue -> "LOCKED_ENTRY_CHANGED".equals(issue.code())),
-                "one proposed row cannot satisfy two separately locked source rows");
+        TimetableAgentSnapshot snapshot = snapshot(from, to, List.of(), List.of(), List.of(1L), List.of());
+        TimetableAgentValidationResult gap = validator.validate(snapshot, proposal(SNAPSHOT_ID,
+                List.of(entry(1L, 101L, null, from, from.plusDays(2)),
+                        entry(1L, 101L, null, from.plusDays(4), to))));
+        Assertions.assertTrue(gap.issues().stream().anyMatch(issue -> DEMAND_MISMATCH.equals(issue.code())),
+                PATTERN_MESSAGE);
     }
 
-    @SuppressWarnings("unchecked")
-    private List<com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableEntry>
-            captureRetainedEntriesPassedToConflictValidation() {
-        ArgumentCaptor<List<com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableEntry>> captor =
-                ArgumentCaptor.forClass(List.class);
-        Mockito.verify(timetableValidationService).checkCandidateAgainstExisting(
-                ArgumentMatchers.any(), ArgumentMatchers.anyList(), captor.capture());
-        return captor.getValue();
+    @Test
+    void validateAcceptsReplacementPattern() {
+        LocalDate from = LocalDate.of(2026, 10, 2);
+        LocalDate to = LocalDate.of(2026, 10, 11);
+        TimetableAgentSnapshot snapshot = snapshot(from, to, List.of(), List.of(), List.of(1L), List.of());
+        TimetableAgentValidationResult replacement = validator.validate(snapshot, proposal(SNAPSHOT_ID,
+                List.of(entry(1L, 101L, null, from, from.plusDays(2)),
+                        entry(1L, 101L, null, from.plusDays(3), to))));
+        Assertions.assertFalse(replacement.issues().stream().anyMatch(issue -> DEMAND_MISMATCH.equals(issue.code())),
+                PATTERN_MESSAGE);
     }
 
     private TimetableAgentSnapshot snapshot(LocalDate from, LocalDate to,

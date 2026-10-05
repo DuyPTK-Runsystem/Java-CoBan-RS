@@ -43,7 +43,8 @@ public final class TimetableAgentSnapshotDocument {
                 catalog.assignmentOptions(), calendar.periodOptions(), calendar.roomOptions(),
                 calendar.subjectRoomIds(),
                 calendar.availability(), calendar.closedDates(),
-                entries.current(), entries.published());
+                entries.current(), entries.published(), entries.contextAssignmentTeacherIds(),
+                entries.contextAssignmentClassIds());
         String sourceJson = codec.write(source);
         String fingerprint = TimetableAgentPayloadCodec.hash(codec.write(new SnapshotFingerprintSource(sourceJson,
                 policy.eligibility(), policy.homeroom(), policy.loads())));
@@ -66,7 +67,8 @@ public final class TimetableAgentSnapshotDocument {
             List<TimetableAgentPeriodOption> periods, List<TimetableAgentRoomOption> rooms,
             Map<Long, List<Long>> subjectRoomIds, List<TimetableAgentAvailabilityOption> approvedAvailability,
             List<LocalDate> closedDates, List<TimetableAgentSnapshotEntry> currentEntries,
-            List<TimetableAgentSnapshotEntry> publishedContextEntries) {
+            List<TimetableAgentSnapshotEntry> publishedContextEntries,
+            Map<Long, Long> contextAssignmentTeacherIds, Map<Long, Long> contextAssignmentClassIds) {
     }
 
     private record SnapshotFingerprintSource(String safeSource, List<TimetableAgentLoadEligibility> eligibility,

@@ -32,8 +32,10 @@ import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TeacherLoadPolicyStatu
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TeacherUnavailability;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableCalendar;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableEntry;
+import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableHead;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetablePeriod;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableRevision;
+import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableRevisionStatus;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TeacherLoadEligibilityRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TeacherLoadPolicyRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TeacherLoadRuleRepository;
@@ -89,7 +91,8 @@ class TimetableSnapshotServiceTest {
     @BeforeEach
     void setUp() {
         snapshotService = new TimetableSnapshotService(
-                new TimetableAgentSnapshotEntries(revisionRepository, headRepository, entryRepository),
+                new TimetableAgentSnapshotEntries(revisionRepository, headRepository, entryRepository,
+                        new TimetableAgentContextMetadata(assignmentRepository, classSubjectRepository)),
                 new TimetableAgentSnapshotCatalog(classSubjectRepository,
                         new TimetableAgentSnapshotAssignments(assignmentRepository),
                         new TimetableAgentSnapshotAssignmentLabels(schoolClassRepository, subjectRepository,
@@ -167,6 +170,88 @@ class TimetableSnapshotServiceTest {
     }
 
     @Test
+    void createSerializesCompactClassIdsForUniqueCurrentAndPublishedContextAssignments() throws Exception {
+        LocalDate from = LocalDate.of(2026, 10, 5);
+        LocalDate to = LocalDate.of(2026, 12, 31);
+        TimetableEntry selectedEntry = new TimetableEntry(42L, 501L, 701L, null, from, to);
+        ReflectionTestUtils.setField(selectedEntry, "id", 810L);
+        TimetableEntry currentContext = new TimetableEntry(42L, 601L, 701L, null, from, to);
+        ReflectionTestUtils.setField(currentContext, "id", 811L);
+        Mockito.when(entryRepository.findByRevisionId(42L)).thenReturn(List.of(selectedEntry, currentContext));
+
+        TimetableRevision published = new TimetableRevision(13L, 5L, 2, from, to, 13L);
+        published.setStatus(TimetableRevisionStatus.PUBLISHED);
+        ReflectionTestUtils.setField(published, "id", 43L);
+        Mockito.when(revisionRepository.findById(43L)).thenReturn(Optional.of(published));
+        TimetableHead head = new TimetableHead(5L);
+        head.setCurrentRevisionId(43L);
+        Mockito.when(headRepository.findBySemesterId(5L)).thenReturn(Optional.of(head));
+        TimetableEntry selectedPublished = new TimetableEntry(43L, 501L, 701L, null, from, to);
+        ReflectionTestUtils.setField(selectedPublished, "id", 901L);
+        TimetableEntry sameClassPublished = new TimetableEntry(43L, 601L, 701L, null, from, to);
+        ReflectionTestUtils.setField(sameClassPublished, "id", 902L);
+        TimetableEntry otherClassPublished = new TimetableEntry(43L, 602L, 701L, null, from, to);
+        ReflectionTestUtils.setField(otherClassPublished, "id", 903L);
+        TimetableEntry missingAssignmentPublished = new TimetableEntry(43L, 603L, 701L, null, from, to);
+        ReflectionTestUtils.setField(missingAssignmentPublished, "id", 904L);
+        TimetableEntry missingClassSubjectPublished = new TimetableEntry(43L, 604L, 701L, null, from, to);
+        ReflectionTestUtils.setField(missingClassSubjectPublished, "id", 905L);
+        TimetableEntry missingClassIdPublished = new TimetableEntry(43L, 605L, 701L, null, from, to);
+        ReflectionTestUtils.setField(missingClassIdPublished, "id", 906L);
+        Mockito.when(entryRepository.findByRevisionId(43L)).thenReturn(List.of(selectedPublished,
+                sameClassPublished, otherClassPublished, missingAssignmentPublished,
+                missingClassSubjectPublished, missingClassIdPublished));
+
+        SubjectTeachingAssignment sameClass = contextAssignment(601L, 101L);
+        SubjectTeachingAssignment otherClass = contextAssignment(602L, 102L);
+        SubjectTeachingAssignment missingClassSubject = contextAssignment(604L, 103L);
+        SubjectTeachingAssignment missingClassId = contextAssignment(605L, 104L);
+        Mockito.when(assignmentRepository.findAllById(ArgumentMatchers.any())).thenReturn(List.of(
+                sameClass, otherClass, missingClassSubject, missingClassId));
+        ClassSubject sameClassSubject = new ClassSubject(11L, 99L, 5L, ClassSubjectStatus.ACTIVE);
+        ReflectionTestUtils.setField(sameClassSubject, "id", 101L);
+        ClassSubject otherClassSubject = new ClassSubject(12L, 99L, 5L, ClassSubjectStatus.ACTIVE);
+        ReflectionTestUtils.setField(otherClassSubject, "id", 102L);
+        ClassSubject withoutClassId = new ClassSubject(null, 99L, 5L, ClassSubjectStatus.ACTIVE);
+        ReflectionTestUtils.setField(withoutClassId, "id", 104L);
+        Mockito.when(classSubjectRepository.findAllById(ArgumentMatchers.any()))
+                .thenReturn(List.of(sameClassSubject, otherClassSubject, withoutClassId));
+
+        TimetableAgentSnapshot snapshot = snapshotService.create(9L, request(List.of(501L), List.of()));
+        var snapshotData = new ObjectMapper().readTree(snapshot.snapshotJson()).path("data");
+        var contextClassIds = snapshotData.path("contextAssignmentClassIds");
+        var contextTeacherIds = snapshotData.path("contextAssignmentTeacherIds");
+
+        Assertions.assertAll("compact context assignment class mapping",
+                () -> Assertions.assertEquals(11L, contextClassIds.path("601").asLong(),
+                        "an out-of-selection assignment from the selected class remains useful context"),
+                () -> Assertions.assertEquals(12L, contextClassIds.path("602").asLong(),
+                        "an assignment from another class is retained for class overlap reasoning"),
+                () -> Assertions.assertFalse(contextClassIds.has("501"),
+                        "selected assignments must not be duplicated in the context map"),
+                () -> Assertions.assertFalse(contextClassIds.has("603"),
+                        "missing assignments must be omitted"),
+                () -> Assertions.assertFalse(contextClassIds.has("604"),
+                        "assignments with missing class subjects must be omitted"),
+                () -> Assertions.assertFalse(contextClassIds.has("605"),
+                        "class subjects without a class ID must be omitted"),
+                () -> Assertions.assertEquals(2, contextClassIds.size(),
+                        "context should contain only unique assignment-to-class pairs"),
+                () -> Assertions.assertEquals(201L, contextTeacherIds.path("601").asLong(),
+                        "extracting class metadata must preserve existing teacher metadata"),
+                () -> Assertions.assertEquals(201L, contextTeacherIds.path("602").asLong(),
+                        "teacher metadata remains available for another-class context"));
+    }
+
+    private SubjectTeachingAssignment contextAssignment(Long assignmentId, Long classSubjectId) {
+        SubjectTeachingAssignment assignment = new SubjectTeachingAssignment(999L, 201L,
+                LocalDate.of(2026, 9, 1), null, AssignmentStatus.ACTIVE, 5L);
+        ReflectionTestUtils.setField(assignment, "id", assignmentId);
+        ReflectionTestUtils.setField(assignment, "classSubjectId", classSubjectId);
+        return assignment;
+    }
+
+    @Test
     void createRejectsIncompleteWeeklyDemandBeforeBuildingModelContext() {
         expectRejectedWithoutTimetableWrites(() -> snapshotService.create(9L, request(List.of(), List.of())));
     }
@@ -229,4 +314,3 @@ class TimetableSnapshotServiceTest {
                 "the snapshot must preserve approved scope data while omitting private reasons");
     }
 }
-

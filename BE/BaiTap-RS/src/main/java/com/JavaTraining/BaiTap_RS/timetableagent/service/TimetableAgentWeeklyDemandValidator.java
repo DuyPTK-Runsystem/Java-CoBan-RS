@@ -34,33 +34,19 @@ public class TimetableAgentWeeklyDemandValidator {
             LocalDate effectiveTo = min(snapshot.validTo(), weekEnd,
                     assignment.validTo() == null ? snapshot.validTo() : assignment.validTo());
             if (!effectiveFrom.isAfter(effectiveTo)) {
-                int actual = countOccurrences(snapshot, proposed, assignmentId, dayByPeriod,
-                        effectiveFrom, effectiveTo);
-                if (actual != demandPerWeek) {
-                    issues.add(TimetableAgentValidationIssues.blocking("DEMAND_MISMATCH",
-                            "demands[assignmentId=" + assignmentId + "]",
-                            "Proposal has " + actual + " weekly occurrences for week " + weekStart
-                                    + "; confirmed demand is " + demandPerWeek + "."));
+                for (LocalDate date = effectiveFrom; !date.isAfter(effectiveTo); date = date.plusDays(1)) {
+                    int actual = countPatternSlots(proposed, assignmentId, dayByPeriod, date);
+                    if (actual != demandPerWeek) {
+                        issues.add(TimetableAgentValidationIssues.blocking("DEMAND_MISMATCH",
+                                "demands[assignmentId=" + assignmentId + "]",
+                                "Proposal has " + actual + " weekly pattern slots effective on " + date
+                                        + " in week " + weekStart + "; confirmed demand is " + demandPerWeek + "."));
+                        break;
+                    }
                 }
             }
             weekStart = weekStart.plusWeeks(1);
         }
-    }
-
-    private boolean hasOccurrence(LocalDate entryFrom, LocalDate entryTo, LocalDate effectiveFrom,
-            LocalDate effectiveTo, int dayOfWeek, List<LocalDate> closedDates) {
-        LocalDate from = max(entryFrom, effectiveFrom);
-        LocalDate to = min(entryTo, effectiveTo);
-        LocalDate first = from.with(TemporalAdjusters.nextOrSame(DayOfWeek.of(dayOfWeek)));
-        if (first.isAfter(to)) {
-            return false;
-        }
-        for (LocalDate occurrence = first; !occurrence.isAfter(to); occurrence = occurrence.plusWeeks(1)) {
-            if (!closedDates.contains(occurrence)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private LocalDate max(LocalDate... dates) {
@@ -71,17 +57,13 @@ public class TimetableAgentWeeklyDemandValidator {
         return java.util.Arrays.stream(dates).min(Comparator.naturalOrder()).orElseThrow();
     }
 
-    private int countOccurrences(TimetableAgentSnapshot snapshot,
-            List<TimetableAgentProposalEntryDTO> proposed, Long assignmentId, Map<Long, Integer> dayByPeriod,
-            LocalDate effectiveFrom, LocalDate effectiveTo) {
+    private int countPatternSlots(List<TimetableAgentProposalEntryDTO> proposed, Long assignmentId,
+            Map<Long, Integer> dayByPeriod, LocalDate date) {
         int actual = 0;
         for (TimetableAgentProposalEntryDTO entry : proposed) {
-            if (!Objects.equals(assignmentId, entry.assignmentId())) {
-                continue;
-            }
-            Integer day = dayByPeriod.get(entry.periodId());
-            if (day != null && hasOccurrence(entry.validFrom(), entry.validTo(), effectiveFrom, effectiveTo, day,
-                    snapshot.closedDates())) {
+            if (Objects.equals(assignmentId, entry.assignmentId())
+                    && dayByPeriod.containsKey(entry.periodId())
+                    && !date.isBefore(entry.validFrom()) && !date.isAfter(entry.validTo())) {
                 actual++;
             }
         }

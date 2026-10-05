@@ -2,6 +2,7 @@ package com.JavaTraining.BaiTap_RS.timetableagent.config;
 
 import java.time.Duration;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +13,8 @@ public class TimetableAgentProperties {
     private boolean enabled;
     private Duration proposalTtl = Duration.ofMinutes(15);
     private Duration providerTimeout = Duration.ofSeconds(30);
-    private int maxModelCalls = 3;
+    @Value("${app.ai.timetable.max-model-calls:3}")
+    private int maxModelCalls;
     private int maxClassCount;
     private int maxContextCharacters;
     private int maxRequestCharacters;

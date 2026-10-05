@@ -1,5 +1,17 @@
 # BE Dev Note Summary
 
+- 2026-10-05 — [088.9 Weekly-pattern demand validation](timetableagent/088.9-weekly-pattern-demand-validation-2026-10-05.md): boundary-week pattern checks; focused 8/8 PASS; Checkstyle PASS; full test FAIL (Spring context), PMD/build FAIL; runtime NOT RUN.
+
+- 2026-10-05 — [088.8 Partial-week prompt guide](timetableagent/088.8-partial-week-prompt-guide-2026-10-05.md): recurring weekly-pattern guidance and full bilingual prompt; text consistency/diff checks PASS; Java validator unchanged; backend gates/runtime NOT RUN.
+
+- 2026-10-05 — [088.7 Retained same-class conflict context](timetableagent/088.7-retained-class-conflict-context-2026-10-05.md): four production files implemented; focused regression/JaCoCo and Checkstyle PASS; PMD fails 8 findings in adjacent dirty `TimetableAgentDomainValidation.java` (preexisting status unproven), so `build -x test` FAIL; full suite skipped at user's request; provider/runtime NOT RUN.
+- 2026-10-05 — [088.6 Actionable invalid-schema repair feedback](timetableagent/088.6-actionable-invalid-schema-feedback-2026-10-05.md): exact root/entry guidance for bounded repair; focused QA 4/4 and Checkstyle PASS; full test incomplete (context failures/exit 130), pmdMain 19 and pmdTest 476 findings, build blocked at PMD; runtime NOT RUN.
+- 2026-10-05 — [088.5 Log invalid model proposal output](timetableagent/088.5-invalid-proposal-full-output-log-2026-10-05.md): rejected proposal logs now include the complete JSON-escaped model response and safe validation category; diff check PASS; test/Checkstyle/PMD/build/runtime NOT RUN because Gradle 9.5.1 download is blocked.
+- 2026-10-05 — [088.4 Diagnose invalid timetable proposals safely](timetableagent/088.4-invalid-schema-diagnostics-2026-10-05.md): added privacy-safe category/attempt/normalized finish-reason diagnostics; diff check PASS; test, Checkstyle, PMD, build, and runtime NOT RUN (Gradle 9.5.1 download blocked).
+- 2026-10-05 — [088.3 Clarify scope and period requests in the prompt](timetableagent/088.3-scope-and-period-prompt-2026-10-05.md): defines assignment/date scope, period-index lookup, in-scope entry handling, and absent-slot behavior; diff check PASS; tests/build/runtime NOT RUN.
+- 2026-10-05 — [088.2 Read hard constraints from the snapshot](timetableagent/088.2-hard-constraints-snapshot-prompt-2026-10-05.md): prompt now points to hard constraints/demands in `SNAPSHOT` and preferences in `USER_REQUEST`; diff check PASS; backend gates/runtime NOT RUN.
+- 2026-10-05 — [088.1 Remove missing OUTPUT_SCHEMA prompt blocker](timetableagent/088.1-output-schema-prompt-2026-10-05.md): native structured output is now the prompt's stated schema source; backend Gradle gates NOT RUN due blocked Gradle distribution download.
+
 - [Dev Note 090: ISO weekday](timetable/090-iso-weekday-2026-10-02.md) — BE/FE/seed ISO; focused BE và toàn bộ FE gates PASS; full BE test/build FAIL (context/heap, pmdTest 476); checkstyleMain/pmdMain PASS; DB/browser NOT RUN (2026-10-02).
 
 - [Three workflow skills](workflow-skill/088-three-workflow-skills-2026-10-02.md) — Project-local Java rewrite safety, goal pause handoff, and subagent context budget; three skill validators PASS (2026-10-02).
