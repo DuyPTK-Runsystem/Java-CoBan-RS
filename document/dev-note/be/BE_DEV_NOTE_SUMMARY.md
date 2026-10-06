@@ -1,4 +1,30 @@
 # BE Dev Note Summary
+
+- 2026-10-06 — [088.10 Timetable agent domain validation PMD cleanup](timetableagent/088.10-timetable-agent-domain-validation-pmd-2026-10-06.md): resolved the eight `pmdMain` findings with three conflict helpers; final `pmdMain` PASS (0), Checkstyle PASS with 980 warnings, `build -x test -x pmdTest` PASS; completed full test FAIL (503/96, `ClientOptions.kt:561`/OOM); `pmdTest` skipped by user.
+
+- 2026-10-06 — [093 Timetable agent occupied-context normalization](timetableagent/093-timetable-agent-context-normalization-2026-10-06.md): same-key overlapping current/published occupancy is normalized across model context, retained validation, and teacher-load inputs; focused regression 11/11 PASS; Checkstyle PASS with 980 repository warnings; PMD/build -x test FAIL only on 8 known DomainValidation findings; full suite omitted per user instruction; runtime NOT RUN.
+
+- 2026-10-05 — [088.9 Weekly-pattern demand validation](timetableagent/088.9-weekly-pattern-demand-validation-2026-10-05.md): boundary-week pattern checks; focused 8/8 PASS; Checkstyle PASS; full test FAIL (Spring context), PMD/build FAIL; runtime NOT RUN.
+
+- 2026-10-05 — [088.8 Partial-week prompt guide](timetableagent/088.8-partial-week-prompt-guide-2026-10-05.md): recurring weekly-pattern guidance and full bilingual prompt; text consistency/diff checks PASS; Java validator unchanged; backend gates/runtime NOT RUN.
+
+- 2026-10-05 — [088.7 Retained same-class conflict context](timetableagent/088.7-retained-class-conflict-context-2026-10-05.md): four production files implemented; focused regression/JaCoCo and Checkstyle PASS; PMD fails 8 findings in adjacent dirty `TimetableAgentDomainValidation.java` (preexisting status unproven), so `build -x test` FAIL; full suite skipped at user's request; provider/runtime NOT RUN.
+- 2026-10-05 — [088.6 Actionable invalid-schema repair feedback](timetableagent/088.6-actionable-invalid-schema-feedback-2026-10-05.md): exact root/entry guidance for bounded repair; focused QA 4/4 and Checkstyle PASS; full test incomplete (context failures/exit 130), pmdMain 19 and pmdTest 476 findings, build blocked at PMD; runtime NOT RUN.
+- 2026-10-05 — [088.5 Log invalid model proposal output](timetableagent/088.5-invalid-proposal-full-output-log-2026-10-05.md): rejected proposal logs now include the complete JSON-escaped model response and safe validation category; diff check PASS; test/Checkstyle/PMD/build/runtime NOT RUN because Gradle 9.5.1 download is blocked.
+- 2026-10-05 — [088.4 Diagnose invalid timetable proposals safely](timetableagent/088.4-invalid-schema-diagnostics-2026-10-05.md): added privacy-safe category/attempt/normalized finish-reason diagnostics; diff check PASS; test, Checkstyle, PMD, build, and runtime NOT RUN (Gradle 9.5.1 download blocked).
+- 2026-10-05 — [088.3 Clarify scope and period requests in the prompt](timetableagent/088.3-scope-and-period-prompt-2026-10-05.md): defines assignment/date scope, period-index lookup, in-scope entry handling, and absent-slot behavior; diff check PASS; tests/build/runtime NOT RUN.
+- 2026-10-05 — [088.2 Read hard constraints from the snapshot](timetableagent/088.2-hard-constraints-snapshot-prompt-2026-10-05.md): prompt now points to hard constraints/demands in `SNAPSHOT` and preferences in `USER_REQUEST`; diff check PASS; backend gates/runtime NOT RUN.
+- 2026-10-05 — [088.1 Remove missing OUTPUT_SCHEMA prompt blocker](timetableagent/088.1-output-schema-prompt-2026-10-05.md): native structured output is now the prompt's stated schema source; backend Gradle gates NOT RUN due blocked Gradle distribution download.
+
+- [Dev Note 090: ISO weekday](timetable/090-iso-weekday-2026-10-02.md) — BE/FE/seed ISO; focused BE và toàn bộ FE gates PASS; full BE test/build FAIL (context/heap, pmdTest 476); checkstyleMain/pmdMain PASS; DB/browser NOT RUN (2026-10-02).
+
+- [Three workflow skills](workflow-skill/088-three-workflow-skills-2026-10-02.md) — Project-local Java rewrite safety, goal pause handoff, and subagent context budget; three skill validators PASS (2026-10-02).
+
+## CR v4 — Plan 088 approved
+
+- [Dev Note 088.1: Confirm active teacher-load policy before agent proposals](timetableagent/088.1-confirm-active-policy-before-agent-2026-10-02.md) — Focused BE PASS; full test FAIL 608/119/1; Checkstyle PASS with warnings, pmdMain PASS; pmdTest/build FAIL on 476 findings outside changed timetable tests; FE tests/lint/build/Storybook PASS (2026-10-02).
+- [Dev Note 088: Spring AI timetable agent implementation](../summary/088-spring-ai-timetable-agent-implementation-2026-10-01.md) — Người dùng đã approve; backend đang tích hợp/validation; provider runtime và MySQL cô lập NOT RUN (2026-10-01).
+
 | 076.16 | notification | [Notification inbox SSE](notification/076.16-notification-inbox-sse-2026-10-01.md) | SSE endpoint, process-local recipient registry and post-commit dispatch; focused tests PASS; full tests FAIL 587/105; Checkstyle PASS with 976 warnings; PMD main PASS; build FAIL on baseline pmdTest and full tests | 2026-10-01 |
 | 086 | Ops | [Wrapped Actuator health response in CI gates](workflow-skill/086-github-actions-demo-ci-cd-2026-09-28.md#wrapped-actuator-health-response-in-ci-gates-2026-09-30) | All three jq health assertions read `.data.status` and report a clear failure otherwise; YAML/29 shell blocks and jq UP/DOWN mock PASS; live rerun NOT RUN. | 2026-09-30 |
 | 086 | Ops | [Bootstrap completion-marker wait](workflow-skill/086-github-actions-demo-ci-cd-2026-09-28.md#bootstrap-completion-marker-wait-2026-09-30) | Bootstrap postflight waits up to 900s for the Plan 081 marker, forwards timeout settings to ACA, and logs aggregate seed counts on timeout; bash/YAML/mock paths/diff check PASS; live ACA/MySQL NOT RUN. | 2026-09-30 |
@@ -136,3 +162,5 @@ Plan 078 documentation sync (2026-09-10): cập nhật trạng thái Plan 078 tr
 |   083 | enrollment | [Placement stable pagination](enrollment/083-placement-stable-pagination-2026-09-23.md) | Follow-up fixes zero-based request binding; compileJava and Chrome page 1/2 PASS; tests/Checkstyle/PMD/full build/diff check NOT RUN | 2026-09-24 |
 - [086 — ACA replica defaults](workflow-skill/086-github-actions-demo-ci-cd-2026-09-28.md): run #14 empty min replica fix; YAML/shell validation PASS; live rerun NOT RUN.
 - [086 — Vercel CLI root](workflow-skill/086-github-actions-demo-ci-cd-2026-09-28.md): run #16 double-root build path fix; static validation PASS, live deploy pending.
+
+- [094 — Timetable model payload logging](timetableagent/094-timetable-model-payload-logging-2026-10-06.md): DEBUG full request/raw responses; QA pending.

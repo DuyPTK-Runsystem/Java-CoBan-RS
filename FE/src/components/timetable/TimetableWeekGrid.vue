@@ -2,6 +2,7 @@
 import Button from 'primevue/button'
 
 import type { SessionType, TimetableEntry, TimetablePeriod } from '@/types/timetable'
+import { SCHOOL_WEEKDAYS } from '@/utils/isoWeekday'
 
 const props = defineProps<{
   periods: TimetablePeriod[]
@@ -17,14 +18,7 @@ const emit = defineEmits<{
   (e: 'editEntry', entry: TimetableEntry): void
 }>()
 
-const days = [
-  { day: 2, label: 'Thứ Hai' },
-  { day: 3, label: 'Thứ Ba' },
-  { day: 4, label: 'Thứ Tư' },
-  { day: 5, label: 'Thứ Năm' },
-  { day: 6, label: 'Thứ Sáu' },
-  { day: 7, label: 'Thứ Bảy' },
-]
+const days = SCHOOL_WEEKDAYS.map(({ value: day, label }) => ({ day, label }))
 
 const morningPeriods = [1, 2, 3, 4]
 const afternoonPeriods = [1, 2, 3, 4]

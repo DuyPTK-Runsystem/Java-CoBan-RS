@@ -75,8 +75,8 @@ export function getTeacherLoads(
 }
 
 export async function getActiveTeacherLoadPolicy(token?: string): Promise<TeacherLoadPolicy | null> {
-  const page = await apiClient.get<PaginatedPolicyResult>('/api/v3/teacher-load-policies', { token, query: { page: 0, size: 100 } })
-  return (page.result ?? []).map((item) => mapPolicy(item as unknown as Record<string, unknown>)).find((policy) => policy.active) ?? null
+  const policy = await apiClient.get<Record<string, unknown> | null>('/api/v3/teacher-load-policies/active', { token })
+  return policy ? mapPolicy(policy) : null
 }
 
 export async function listTeacherLoadPolicies(token?: string): Promise<TeacherLoadPolicy[]> {

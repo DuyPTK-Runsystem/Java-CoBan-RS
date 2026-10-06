@@ -21,12 +21,15 @@ describe('teacherLoadApi', () => {
   })
 
   it('handles load evaluation, policies and eligibilities', async () => {
-    fetchMock.mockImplementation(() =>
-      Promise.resolve(new Response(JSON.stringify({ data: { meta: {}, result: [] } }), { status: 200 })),
-    )
+    fetchMock.mockImplementation((input: RequestInfo | URL) => {
+      const data = String(input).includes('/active')
+        ? { id: 7, version: 'policy-current', source: 'Decision 01', effectiveFrom: '2026-09-01', status: 'ACTIVE', versionLock: 2 }
+        : { meta: {}, result: [] }
+      return Promise.resolve(new Response(JSON.stringify({ data }), { status: 200 }))
+    })
     vi.stubGlobal('fetch', fetchMock)
 
-    await getActiveTeacherLoadPolicy('token')
+    const active = await getActiveTeacherLoadPolicy('token')
     await listTeacherLoadPolicies('token')
      await createTeacherLoadPolicy({
        policyName: 'Chính sách 2026',
@@ -51,7 +54,9 @@ describe('teacherLoadApi', () => {
      }, 'token')
 
     const urls = fetchMock.mock.calls.map(([url]) => url)
-    expect(urls[0]).toContain('/api/v3/teacher-load-policies?')
+    expect(active?.id).toBe(7)
+    expect(active?.policyName).toBe('policy-current')
+    expect(urls[0]).toContain('/api/v3/teacher-load-policies/active')
     expect(urls[1]).toContain('/api/v3/teacher-load-policies')
     expect(urls[2]).toContain('/api/v3/teacher-load-policies')
      expect(urls[3]).toContain('/api/v3/teacher-load-policies/1/activate')

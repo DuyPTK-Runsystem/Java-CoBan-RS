@@ -47,6 +47,7 @@ final class DemoTimetableEntryPlanner {
 
     /* package */
     Map<PeriodKey, TimetablePeriod> ensurePeriods(Long calendarId, List<SlotSeed> schedule) {
+        // Period keys carry the catalog's ISO-8601 weekday number unchanged (Monday=1).
         Map<PeriodKey, TimetablePeriod> periods = persistenceGateway.periodRepository()
                 .findByCalendarIdOrderByDayOfWeekAscSessionAscPeriodIndexAsc(calendarId).stream()
                 .collect(Collectors.toMap(

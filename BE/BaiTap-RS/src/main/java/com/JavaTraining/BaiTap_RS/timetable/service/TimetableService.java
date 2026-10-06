@@ -27,6 +27,7 @@ import com.JavaTraining.BaiTap_RS.teacher.domain.entity.Teacher;
 import com.JavaTraining.BaiTap_RS.teacher.repository.TeacherRepository;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests.ReqCreateRevisionDTO;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests.ReqCreateTimetableDTO;
+import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests.ReqConfirmTimetableTeacherLoadPolicyDTO;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests.ReqEntryItemDTO;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.requests.ReqUpdateTimetableEntriesDTO;
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.response.ResTimetableDetailDTO;
@@ -35,6 +36,7 @@ import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.response.ResTimetableRev
 import com.JavaTraining.BaiTap_RS.timetable.domain.DTOs.response.ResTimetableSummaryDTO;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.SessionType;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TeacherLoadPolicy;
+import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TeacherLoadPolicyStatus;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableAudit;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableEntry;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableHead;
@@ -47,6 +49,7 @@ import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableEntryRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableHeadRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetablePeriodRepository;
 import com.JavaTraining.BaiTap_RS.timetable.repository.TimetableRevisionRepository;
+import com.JavaTraining.BaiTap_RS.timetableagent.service.TimetableAgentWorkspaceCapabilityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -65,6 +68,9 @@ import org.springframework.transaction.annotation.Transactional;
 })
 public class TimetableService {
 
+    private static final String STALE_REVISION_MESSAGE =
+            "Bản thời khóa biểu đã bị sửa đổi bởi người khác. Vui lòng tải lại.";
+
     private final TimetableHeadRepository headRepository;
     private final TimetableRevisionRepository revisionRepository;
     private final TimetableEntryRepository entryRepository;
@@ -80,6 +86,7 @@ public class TimetableService {
     private final FunctionalRoomRepository roomRepository;
     private final TimetableValidationService validationService;
     private final TimetableCalendarService calendarService;
+    private final TimetableAgentWorkspaceCapabilityService timetableAgentCapabilityService;
 
     @Transactional(readOnly = true)
     public ResultPaginationDTO<ResTimetableSummaryDTO> pageSummaries(Long semesterId, Pageable pageable) {
@@ -97,6 +104,7 @@ public class TimetableService {
                     Semester s = semesterMap.get(r.getSemesterId());
                     TimetableHead h = headMap.get(r.getTimetableId());
                     return new ResTimetableSummaryDTO(
+                            r.getId(),
                             r.getTimetableId(),
                             r.getSemesterId(),
                             s != null ? s.getName() : "N/A",
@@ -146,6 +154,50 @@ public class TimetableService {
                 head.getId(), revision.getId(), "CREATE_DRAFT", AuditContext.currentUserId(),
                 "Tạo mới bản nháp revision " + nextRev));
 
+        return toDetailDTO(revision, head, semester);
+    }
+
+    @Transactional
+    public ResTimetableDetailDTO confirmTeacherLoadPolicy(
+            Long revisionId, ReqConfirmTimetableTeacherLoadPolicyDTO req) {
+        TimetableRevision revision = revisionRepository.findByIdForUpdate(revisionId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy bản thời khóa biểu"));
+        if (revision.getStatus() != TimetableRevisionStatus.DRAFT) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "Chỉ có thể xác nhận policy cho bản nháp");
+        }
+        if (!Objects.equals(revision.getVersion(), req.expectedVersion())) {
+            throw new AppException(HttpStatus.CONFLICT,
+                    STALE_REVISION_MESSAGE);
+        }
+
+        TeacherLoadPolicy selectedPolicy = policyRepository.findById(req.policyId())
+                .orElseThrow(() -> new AppException(HttpStatus.UNPROCESSABLE_ENTITY,
+                        "Không tìm thấy chính sách định mức tiết dạy đang hoạt động"));
+        TeacherLoadPolicy currentPolicy = policyRepository
+                .findFirstByStatusOrderByEffectiveFromDesc(TeacherLoadPolicyStatus.ACTIVE)
+                .orElseThrow(() -> new AppException(HttpStatus.UNPROCESSABLE_ENTITY,
+                        "Hiện không có chính sách định mức tiết dạy đang hoạt động"));
+        if (!Objects.equals(selectedPolicy.getId(), currentPolicy.getId())) {
+            throw new AppException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Chính sách đã chọn không còn là policy đang hoạt động hiện tại");
+        }
+
+        if (Objects.equals(revision.getPolicyId(), currentPolicy.getId())) {
+            TimetableHead head = headRepository.findById(revision.getTimetableId()).orElse(null);
+            Semester semester = semesterRepository.findById(revision.getSemesterId()).orElse(null);
+            return toDetailDTO(revision, head, semester);
+        }
+
+        revision.setPolicyId(currentPolicy.getId());
+        revision.setValidationFingerprint(null);
+        revision.setBlockingCount(0);
+        revision.setWarningCount(0);
+        revision = revisionRepository.saveAndFlush(revision);
+        TimetableHead head = headRepository.findById(revision.getTimetableId()).orElse(null);
+        Semester semester = semesterRepository.findById(revision.getSemesterId()).orElse(null);
+        auditRepository.save(new TimetableAudit(
+                revision.getTimetableId(), revision.getId(), "CONFIRM_TEACHER_LOAD_POLICY",
+                AuditContext.currentUserId(), "Xác nhận policy " + currentPolicy.getVersion()));
         return toDetailDTO(revision, head, semester);
     }
 
@@ -262,7 +314,7 @@ public class TimetableService {
         }
         if (!Objects.equals(revision.getVersion(), expectedVersion)) {
             throw new AppException(HttpStatus.CONFLICT,
-                    "Bản thời khóa biểu đã bị sửa đổi bởi người khác. Vui lòng tải lại.");
+                    STALE_REVISION_MESSAGE);
         }
     }
 
@@ -293,7 +345,7 @@ public class TimetableService {
         TimetableRevision revision = findRevision(revisionId);
         if (expectedVersion != null && !Objects.equals(revision.getVersion(), expectedVersion)) {
             throw new AppException(HttpStatus.CONFLICT,
-                    "Bản thời khóa biểu đã bị sửa đổi bởi người khác. Vui lòng tải lại.");
+                    STALE_REVISION_MESSAGE);
         }
         return validationService.validateRevision(revisionId);
     }
@@ -308,7 +360,7 @@ public class TimetableService {
         TimetableRevision source = findRevision(revisionId);
         if (req.expectedVersion() != null && !Objects.equals(source.getVersion(), req.expectedVersion())) {
             throw new AppException(HttpStatus.CONFLICT,
-                    "Bản thời khóa biểu đã bị sửa đổi bởi người khác. Vui lòng tải lại.");
+                    STALE_REVISION_MESSAGE);
         }
 
         TimetableHead head = headRepository.findById(source.getTimetableId())
@@ -386,7 +438,8 @@ public class TimetableService {
                 h != null ? h.getVersion() : 0L,
                 r.getBlockingCount(),
                 r.getWarningCount(),
-                capabilities);
+                capabilities,
+                timetableAgentCapabilityService.canUse(r.getStatus()));
     }
 
     private boolean matchesFilter(

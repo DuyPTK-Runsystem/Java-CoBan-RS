@@ -1,0 +1,16 @@
+curl --url 'http://localhost:8081/api/v4/timetable-agent/proposals' \
+  -H 'Accept: application/json' \
+  -H 'Accept-Language: vi,en-US;q=0.9,en;q=0.8' \
+  -H 'Authorization:   \
+  -H 'Connection: keep-alive' \
+  -H 'Content-Type: application/json' \
+  -H 'Origin: http://localhost:5173' \
+  -H 'Referer: http://localhost:5173/' \
+  -H 'Sec-Fetch-Dest: empty' \
+  -H 'Sec-Fetch-Mode: cors' \
+  -H 'Sec-Fetch-Site: same-site' \
+  -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36' \
+  -H 'sec-ch-ua: "Chromium";v="154", "Google Chrome";v="154", "Not A(Brand";v="99"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "Linux"' \
+  --data-raw '{"targetRevisionId":3,"expectedVersion":1,"classIds":[1],"validFrom":"2026-10-02","validTo":"2026-12-31","demands":[{"assignmentId":17,"periodsPerWeek":5},{"assignmentId":113,"periodsPerWeek":2},{"assignmentId":81,"periodsPerWeek":2},{"assignmentId":5,"periodsPerWeek":6},{"assignmentId":33,"periodsPerWeek":3},{"assignmentId":161,"periodsPerWeek":1},{"assignmentId":137,"periodsPerWeek":1},{"assignmentId":145,"periodsPerWeek":1},{"assignmentId":97,"periodsPerWeek":2},{"assignmentId":45,"periodsPerWeek":2}],"lockedEntryIds":[],"preferences":"Môn Toán và Ngữ Văn ưu tiên xếp lịch theo block 2 tiết nếu có thể","userRequest":"Bỏ trống tiết 1-2 sáng thứ Hai và tiết 1 sáng thứ Sáu\nKhông xếp lịch cho học sinh chỉ học 1 tiết trong một buổi"}'

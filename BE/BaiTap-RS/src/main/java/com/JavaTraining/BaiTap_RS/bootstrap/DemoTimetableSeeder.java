@@ -102,7 +102,7 @@ public class DemoTimetableSeeder {
                     head.getId(), revision.getId(), TIMETABLE_SEED_ACTION, null,
                     "seedKey=PLAN-081-FULL-V2;semester=" + semesterCode
                             + ";classes=6A1-9A4;subjectEntries=" + plannedEntries.size()
-                            + ";dayOfWeek=1-5"));
+                            + ";dayOfWeek=1-5;weekdayConvention=ISO-8601"));
             head.setCurrentRevisionId(revision.getId());
             persistenceGateway.headRepository().save(head);
         }

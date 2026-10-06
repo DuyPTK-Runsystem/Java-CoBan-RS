@@ -5,6 +5,8 @@ endpoint hoặc thay thế backend authorization.
 
 ## Shared response/error expectations
 
+- Timetable `dayOfWeek` và weekly teacher unavailability dùng ISO-8601: `1=Thứ Hai .. 7=Chủ Nhật` (Plan 090). FE render nhãn từ mapping ISO dùng chung; không dùng số weekday làm tên thứ. Grid mặc định giữ Thứ Hai–Thứ Bảy (`1..6`), seed Thứ Hai–Thứ Sáu (`1..5`).
+
 - Mọi list response phân trang dùng `ResultPaginationDTO`: `meta` gồm `page` zero-based,
   `pageSize`, `totalPages`, `totalItems`; `result` chứa danh sách DTO. Không tạo page
   response riêng theo version hoặc domain.

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import com.JavaTraining.BaiTap_RS.timetable.domain.entity.TimetableRevisionStatus;
 
 public record ResTimetableSummaryDTO(
+                Long revisionId,
                 Long timetableId,
                 Long semesterId,
                 String semesterName,

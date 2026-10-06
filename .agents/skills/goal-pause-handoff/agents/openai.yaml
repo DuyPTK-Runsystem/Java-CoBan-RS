@@ -1,0 +1,5 @@
+interface:
+  display_name: "goal-pause-handoff"
+  short_description: "Pause unfinished goals with a clear handoff"
+  default_prompt: "Use $goal-pause-handoff for the current authorized task."
+

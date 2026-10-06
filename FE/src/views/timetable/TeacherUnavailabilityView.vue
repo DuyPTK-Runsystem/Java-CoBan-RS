@@ -35,6 +35,7 @@ import type {
   UpdateUnavailabilityPayload,
 } from '@/types/teacherUnavailability'
 import type { LoadingState } from '@/types/ui'
+import { getIsoWeekdayLabel } from '@/utils/isoWeekday'
 
 const confirm = useConfirm()
 const { roles, requireAccessToken } = useAuthSession()
@@ -72,15 +73,7 @@ const statusOptions = [
 
 function getDayLabel(day?: number | null): string {
   if (!day) return ''
-  const days: Record<number, string> = {
-    2: 'Thứ 2',
-    3: 'Thứ 3',
-    4: 'Thứ 4',
-    5: 'Thứ 5',
-    6: 'Thứ 6',
-    7: 'Thứ 7',
-  }
-  return days[day] ?? `Thứ ${day}`
+  return getIsoWeekdayLabel(day, true)
 }
 
 function getStatusSeverity(status: TeacherUnavailabilityStatus): 'warn' | 'success' | 'danger' | 'secondary' {

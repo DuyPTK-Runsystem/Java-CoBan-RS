@@ -307,8 +307,18 @@ jobs:
           IMAGE: ${{ needs.release-image.outputs.image }}
           OPERATION: ${{ github.event.inputs.operation || 'deploy' }}
           SEED_TARGET_ID: ${{ vars.DEMO_SEED_TARGET_ID }}
+          DEMO_KEY_VAULT_NAME: ${{ vars.DEMO_KEY_VAULT_NAME }}
           ACA_MIN_REPLICAS: ${{ vars.ACA_MIN_REPLICAS || '1' }}
           ACA_MAX_REPLICAS: ${{ vars.ACA_MAX_REPLICAS || '1' }}
+          TIMETABLE_AI_ENABLED: ${{ vars.APP_AI_TIMETABLE_ENABLED || 'false' }}
+          TIMETABLE_AI_MAX_CLASS_COUNT: ${{ vars.APP_AI_TIMETABLE_MAX_CLASS_COUNT || '0' }}
+          TIMETABLE_AI_MAX_CONTEXT_CHARACTERS: ${{ vars.APP_AI_TIMETABLE_MAX_CONTEXT_CHARACTERS || '0' }}
+          TIMETABLE_AI_MAX_REQUEST_CHARACTERS: ${{ vars.APP_AI_TIMETABLE_MAX_REQUEST_CHARACTERS || '0' }}
+          TIMETABLE_AI_MAX_PREFERENCES_CHARACTERS: ${{ vars.APP_AI_TIMETABLE_MAX_PREFERENCES_CHARACTERS || '0' }}
+          TIMETABLE_AI_MAX_PROPOSAL_ENTRIES: ${{ vars.APP_AI_TIMETABLE_MAX_PROPOSAL_ENTRIES || '0' }}
+          ROUTER_BASE_URL: ${{ vars.SPRING_AI_OPENAI_BASE_URL }}
+          ROUTER_MODEL: ${{ vars.SPRING_AI_OPENAI_CHAT_MODEL }}
+          ROUTER_API_KEY_SECRET_NAME: ${{ vars.SPRING_AI_OPENAI_API_KEY_SECRET_NAME }}
         run: |
             set -euo pipefail
             app="$ACA_NAME"
@@ -318,6 +328,11 @@ jobs:
             target="$SEED_TARGET_ID"
             test -n "$app" && test -n "$group" && test -n "$target"
 
+            test -n "$ROUTER_BASE_URL" || { echo 'Missing GitHub variable SPRING_AI_OPENAI_BASE_URL.' >&2; exit 1; }
+            test -n "$ROUTER_MODEL" || { echo 'Missing GitHub variable SPRING_AI_OPENAI_CHAT_MODEL.' >&2; exit 1; }
+            test -n "$ROUTER_API_KEY_SECRET_NAME" || { echo 'Missing GitHub variable SPRING_AI_OPENAI_API_KEY_SECRET_NAME.' >&2; exit 1; }
+            test -n "$DEMO_KEY_VAULT_NAME" || { echo 'Missing GitHub variable DEMO_KEY_VAULT_NAME.' >&2; exit 1; }
+
             mode="$(az containerapp show --name "$app" --resource-group "$group" --query properties.configuration.activeRevisionsMode --output tsv)"
             if [ "$mode" != 'Single' ]; then
               echo 'Refusing deployment: Container App must use Single revision mode.' >&2
@@ -326,6 +341,18 @@ jobs:
 
             api_url="https://$(az containerapp show --name "$app" --resource-group "$group" --query properties.configuration.ingress.fqdn --output tsv)"
             test -n "$api_url"
+
+            identity_type="$(az containerapp show --name "$app" --resource-group "$group" --query identity.type --output tsv)"
+            case ",$identity_type," in
+              *,SystemAssigned,*) ;;
+              *) echo 'Container App needs a system-assigned managed identity with Key Vault secret read access.' >&2; exit 1 ;;
+            esac
+
+            # Configure provider credentials as ACA Key Vault references. The
+            # workflow receives only the secret name, never the API key value.
+            az containerapp secret set \
+              --name "$app" --resource-group "$group" \
+              --secrets "spring-ai-openai-api-key=keyvaultref:https://${DEMO_KEY_VAULT_NAME}.vault.azure.net/secrets/${ROUTER_API_KEY_SECRET_NAME},identityref:system"
 
             if [ "$operation" = 'bootstrap' ]; then
               seed_flag='true'
@@ -365,7 +392,19 @@ jobs:
               --name "$app" --resource-group "$group" \
               --image "$image" \
               --min-replicas "$min_replicas" --max-replicas "$max_replicas" \
-              --set-env-vars APP_SEED_DEMO_ENABLED="$seed_flag" APP_SEED_DEMO_TARGET_ID="$target" APP_SEED_DEMO_DEPLOYMENT_REF="$image"
+              --set-env-vars \
+                APP_SEED_DEMO_ENABLED="$seed_flag" \
+                APP_SEED_DEMO_TARGET_ID="$target" \
+                APP_SEED_DEMO_DEPLOYMENT_REF="$image" \
+                SPRING_AI_OPENAI_BASE_URL="$ROUTER_BASE_URL" \
+                SPRING_AI_OPENAI_API_KEY=secretref:spring-ai-openai-api-key \
+                SPRING_AI_OPENAI_CHAT_MODEL="$ROUTER_MODEL" \
+                APP_AI_TIMETABLE_ENABLED="$TIMETABLE_AI_ENABLED" \
+                APP_AI_TIMETABLE_MAX_CLASS_COUNT="$TIMETABLE_AI_MAX_CLASS_COUNT" \
+                APP_AI_TIMETABLE_MAX_CONTEXT_CHARACTERS="$TIMETABLE_AI_MAX_CONTEXT_CHARACTERS" \
+                APP_AI_TIMETABLE_MAX_REQUEST_CHARACTERS="$TIMETABLE_AI_MAX_REQUEST_CHARACTERS" \
+                APP_AI_TIMETABLE_MAX_PREFERENCES_CHARACTERS="$TIMETABLE_AI_MAX_PREFERENCES_CHARACTERS" \
+                APP_AI_TIMETABLE_MAX_PROPOSAL_ENTRIES="$TIMETABLE_AI_MAX_PROPOSAL_ENTRIES"
 
             deadline=$((SECONDS + 900))
             until curl --fail --silent --show-error "$api_url/actuator/health/readiness" >/dev/null; do

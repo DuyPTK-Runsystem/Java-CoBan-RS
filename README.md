@@ -24,6 +24,8 @@ Tạo file cấu hình local, rồi thay password mẫu bằng một giá trị 
 cp docker/.env.example docker/.env
 ```
 
+Trong `docker/.env`, thay `MYSQL_ROOT_PASSWORD` bằng mật khẩu local và điền ba biến 9Router: `SPRING_AI_OPENAI_BASE_URL`, `SPRING_AI_OPENAI_API_KEY`, `SPRING_AI_OPENAI_CHAT_MODEL` theo giá trị tài khoản 9Router. Nếu chưa dùng timetable agent, giữ `APP_AI_TIMETABLE_ENABLED=false`; nếu bật, cả năm biến `APP_AI_TIMETABLE_MAX_*` phải là số dương. Không commit `docker/.env`.
+
 Khởi động backend và MySQL:
 
 ```bash

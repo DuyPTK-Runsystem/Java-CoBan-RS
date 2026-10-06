@@ -27,7 +27,7 @@ public class TimetableCalendarDefaultService {
 
     private List<TimetablePeriod> defaultPeriods(Long calendarId) {
         List<TimetablePeriod> periods = new ArrayList<>();
-        for (int dayOfWeek = 2; dayOfWeek <= 7; dayOfWeek++) {
+        for (int dayOfWeek = 1; dayOfWeek <= 6; dayOfWeek++) {
             addSession(periods, calendarId, dayOfWeek, SessionType.MORNING, "Sáng", 7, 0);
             addSession(periods, calendarId, dayOfWeek, SessionType.AFTERNOON, "Chiều", 13, 0);
         }

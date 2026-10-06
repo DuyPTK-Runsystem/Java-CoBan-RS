@@ -71,7 +71,7 @@ class TimetablePublishServiceTest {
                 ResTimetableDetailDTO mockDetail = new ResTimetableDetailDTO(
                                 1L, 1L, "HK1", 10L, 1, TimetableRevisionStatus.PUBLISHED,
                                 LocalDate.of(2026, 9, 1), null, null, null,
-                                0L, 0L, 0, 0, List.of());
+                                0L, 0L, 0, 0, List.of(), false);
                 Mockito.when(timetableService.getDetail(10L)).thenReturn(mockDetail);
 
                 ReqPublishTimetableDTO req = new ReqPublishTimetableDTO(0L, 0L);

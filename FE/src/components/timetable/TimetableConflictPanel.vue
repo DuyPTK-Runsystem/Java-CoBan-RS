@@ -3,6 +3,7 @@ import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 
 import type { TimetableIssue } from '@/types/timetable'
+import { getIsoWeekdayLabel } from '@/utils/isoWeekday'
 
 defineProps<{
   issues: TimetableIssue[]
@@ -16,13 +17,9 @@ const emit = defineEmits<{
   (e: 'revalidate'): void
 }>()
 
-const dayLabels: Record<number, string> = {
-  2: 'Thứ Hai', 3: 'Thứ Ba', 4: 'Thứ Tư', 5: 'Thứ Năm', 6: 'Thứ Sáu', 7: 'Thứ Bảy',
-}
-
 function issueTime(issue: TimetableIssue): string | null {
   if (!issue.dayOfWeek && !issue.session && !issue.periodIndex) return null
-  const day = issue.dayOfWeek ? (dayLabels[issue.dayOfWeek] || `Thứ ${issue.dayOfWeek}`) : 'Chưa rõ ngày'
+  const day = issue.dayOfWeek ? getIsoWeekdayLabel(issue.dayOfWeek) : 'Chưa rõ ngày'
   const session = issue.session ? `buổi ${issue.session === 'MORNING' ? 'sáng' : 'chiều'}` : null
   const period = issue.periodIndex ? `tiết ${issue.periodIndex}` : null
   return [day, session, period].filter(Boolean).join(', ')

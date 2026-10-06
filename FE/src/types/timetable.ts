@@ -28,6 +28,7 @@ export interface TimetableCapabilities {
 export interface TimetablePeriod {
   id: number
   semesterId?: number
+  /** ISO-8601 weekday: Monday=1 through Sunday=7. */
   dayOfWeek: number
   session: SessionType
   periodIndex: number
@@ -37,6 +38,7 @@ export interface TimetablePeriod {
 }
 
 export interface TimetableSummary {
+  revisionId: number
   timetableId: number
   semesterId: number
   semesterName: string
@@ -58,12 +60,13 @@ export interface TimetableDetail {
   effectiveFrom: string
   effectiveTo?: string | null
   policyId?: number | null
-  policyVersion?: number | null
+  policyVersion?: string | null
   version: number
   headVersion: number
   blockingCount: number
   warningCount: number
   capabilities: TimetableCapabilities
+  canUseTimetableAgent?: boolean
 }
 
 export interface TimetableEntry {
@@ -83,6 +86,7 @@ export interface TimetableEntry {
   teacherName: string
   roomCode?: string | null
   roomName?: string | null
+  /** ISO-8601 weekday: Monday=1 through Sunday=7. */
   dayOfWeek: number
   session: SessionType
   periodIndex: number
@@ -101,6 +105,7 @@ export interface TimetableIssue {
   functionalRoomId?: number | null
   roomName?: string | null
   periodId?: number | null
+  /** ISO-8601 weekday: Monday=1 through Sunday=7. */
   dayOfWeek?: number | null
   session?: SessionType | null
   periodIndex?: number | null
