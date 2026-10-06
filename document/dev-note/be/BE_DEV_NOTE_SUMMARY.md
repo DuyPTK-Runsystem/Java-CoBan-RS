@@ -1,5 +1,9 @@
 # BE Dev Note Summary
 
+- 2026-10-06 — [088.10 Timetable agent domain validation PMD cleanup](timetableagent/088.10-timetable-agent-domain-validation-pmd-2026-10-06.md): resolved the eight `pmdMain` findings with three conflict helpers; final `pmdMain` PASS (0), Checkstyle PASS with 980 warnings, `build -x test -x pmdTest` PASS; completed full test FAIL (503/96, `ClientOptions.kt:561`/OOM); `pmdTest` skipped by user.
+
+- 2026-10-06 — [093 Timetable agent occupied-context normalization](timetableagent/093-timetable-agent-context-normalization-2026-10-06.md): same-key overlapping current/published occupancy is normalized across model context, retained validation, and teacher-load inputs; focused regression 11/11 PASS; Checkstyle PASS with 980 repository warnings; PMD/build -x test FAIL only on 8 known DomainValidation findings; full suite omitted per user instruction; runtime NOT RUN.
+
 - 2026-10-05 — [088.9 Weekly-pattern demand validation](timetableagent/088.9-weekly-pattern-demand-validation-2026-10-05.md): boundary-week pattern checks; focused 8/8 PASS; Checkstyle PASS; full test FAIL (Spring context), PMD/build FAIL; runtime NOT RUN.
 
 - 2026-10-05 — [088.8 Partial-week prompt guide](timetableagent/088.8-partial-week-prompt-guide-2026-10-05.md): recurring weekly-pattern guidance and full bilingual prompt; text consistency/diff checks PASS; Java validator unchanged; backend gates/runtime NOT RUN.
@@ -158,3 +162,5 @@ Plan 078 documentation sync (2026-09-10): cập nhật trạng thái Plan 078 tr
 |   083 | enrollment | [Placement stable pagination](enrollment/083-placement-stable-pagination-2026-09-23.md) | Follow-up fixes zero-based request binding; compileJava and Chrome page 1/2 PASS; tests/Checkstyle/PMD/full build/diff check NOT RUN | 2026-09-24 |
 - [086 — ACA replica defaults](workflow-skill/086-github-actions-demo-ci-cd-2026-09-28.md): run #14 empty min replica fix; YAML/shell validation PASS; live rerun NOT RUN.
 - [086 — Vercel CLI root](workflow-skill/086-github-actions-demo-ci-cd-2026-09-28.md): run #16 double-root build path fix; static validation PASS, live deploy pending.
+
+- [094 — Timetable model payload logging](timetableagent/094-timetable-model-payload-logging-2026-10-06.md): DEBUG full request/raw responses; QA pending.

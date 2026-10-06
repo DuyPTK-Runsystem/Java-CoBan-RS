@@ -35,7 +35,8 @@ public class TimetableAgentSnapshotLoads {
         LocalDate weekStart = request.validFrom().with(java.time.temporal.TemporalAdjusters.previousOrSame(
                 java.time.DayOfWeek.MONDAY));
         while (!weekStart.isAfter(request.validTo())) {
-            for (ResTeacherLoadDTO load : teacherLoadEvaluator.evaluateLoads(entries, weekStart, weekStart.plusDays(6),
+            for (ResTeacherLoadDTO load : teacherLoadEvaluator.evaluateLoads(
+                    TimetableAgentOccupiedContext.normalizedEntities(entries), weekStart, weekStart.plusDays(6),
                     revision.getPolicyId())) {
                 result.add(new TimetableAgentWeeklyLoad(load.teacherId(), weekStart, load.assignedPeriods(),
                         load.targetPeriods(), load.basePeriods(), load.reductions(), load.evaluationStatus()));

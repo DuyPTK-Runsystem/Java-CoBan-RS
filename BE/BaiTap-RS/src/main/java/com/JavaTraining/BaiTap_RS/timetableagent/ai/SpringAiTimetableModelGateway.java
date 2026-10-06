@@ -34,6 +34,8 @@ public class SpringAiTimetableModelGateway implements TimetableAgentModelGateway
 
     private static final String PROPOSAL_SCHEMA_PATH = "ai/timetable/timetable-proposal.schema.json";
     private static final String ACTION_SCHEMA_PATH = "ai/timetable/save-timetable-draft.schema.json";
+    private static final String PROPOSAL_PHASE = "proposal";
+    private static final String ACTION_PHASE = "action";
     private static final String SAVE_TOOL_NAME = "saveTimetableDraft";
     private static final String SAVE_TOOL_DESCRIPTION =
             "Request the application to save the exact user-approved timetable draft.";
@@ -58,6 +60,8 @@ public class SpringAiTimetableModelGateway implements TimetableAgentModelGateway
                 + "\n\nUSER_REQUEST (DATA):\n" + prompt.userRequest();
         StructuredOutputConverter<TimetableAgentModelProposalDTO> converter =
                 new TimetableAgentProposalConverter(objectMapper, schema);
+        TimetableAgentModelTrace.request(PROPOSAL_PHASE, prompt.systemInstructions(), userContent,
+                converter.getJsonSchema());
         long started = System.nanoTime();
         ChatResponse response = null;
         String outcome = "FAILED";
@@ -69,7 +73,8 @@ public class SpringAiTimetableModelGateway implements TimetableAgentModelGateway
                     .advisors(AdvisorParams.toolCallingAdvisorAutoRegister(false))
                     .call()
                     .chatResponse();
-            ModelResponseValidator.requireSingleCompleteGeneration(response, "proposal");
+            TimetableAgentModelTrace.response(PROPOSAL_PHASE, response);
+            ModelResponseValidator.requireSingleCompleteGeneration(response, PROPOSAL_PHASE);
             if (response.getResult().getOutput().getToolCalls() != null
                     && !response.getResult().getOutput().getToolCalls().isEmpty()) {
                 throw new TimetableAgentModelException("Proposal phase must not return tool calls.");
@@ -84,7 +89,7 @@ public class SpringAiTimetableModelGateway implements TimetableAgentModelGateway
             outcome = "SUCCESS";
             return proposal;
         } finally {
-            TimetableAgentModelUsage.from(response).record("proposal", outcome, System.nanoTime() - started);
+            TimetableAgentModelUsage.from(response).record(PROPOSAL_PHASE, outcome, System.nanoTime() - started);
         }
     }
 
@@ -134,18 +139,20 @@ public class SpringAiTimetableModelGateway implements TimetableAgentModelGateway
             }
         };
 
+        String userContent = "APPROVED_PROPOSAL_REFERENCE (JSON):\n" + prompt.approvedProposalReference();
+        TimetableAgentModelTrace.request(ACTION_PHASE, prompt.systemInstructions(), userContent, schema);
         long started = System.nanoTime();
         ChatResponse response = null;
         String outcome = "FAILED";
         try {
             response = chatClient.prompt()
-                    .messages(new SystemMessage(prompt.systemInstructions()), new UserMessage(
-                            "APPROVED_PROPOSAL_REFERENCE (JSON):\n" + prompt.approvedProposalReference()))
+                    .messages(new SystemMessage(prompt.systemInstructions()), new UserMessage(userContent))
                     .options(ToolCallingChatOptions.builder().toolCallbacks(guardedCallback))
                     .advisors(AdvisorParams.toolCallingAdvisorAutoRegister(false))
                     .call()
                     .chatResponse();
-            ModelResponseValidator.requireSingleCompleteGeneration(response, "action");
+            TimetableAgentModelTrace.response(ACTION_PHASE, response);
+            ModelResponseValidator.requireSingleCompleteGeneration(response, ACTION_PHASE);
             List<org.springframework.ai.chat.messages.AssistantMessage.ToolCall> calls = response.getResult()
                     .getOutput().getToolCalls();
             if (calls == null || calls.size() != 1) {
@@ -155,7 +162,7 @@ public class SpringAiTimetableModelGateway implements TimetableAgentModelGateway
             outcome = "SUCCESS";
             return new TimetableAgentToolCall(call.id(), call.name(), call.arguments());
         } finally {
-            TimetableAgentModelUsage.from(response).record("action", outcome, System.nanoTime() - started);
+            TimetableAgentModelUsage.from(response).record(ACTION_PHASE, outcome, System.nanoTime() - started);
         }
     }
 

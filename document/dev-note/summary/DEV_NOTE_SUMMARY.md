@@ -1,5 +1,9 @@
 # Dev Note Summary
 
+- 2026-10-06 — [088.10 Timetable agent domain validation PMD cleanup](../be/timetableagent/088.10-timetable-agent-domain-validation-pmd-2026-10-06.md) — `pmdMain` PASS with 0 violations after extracting conflict helpers; Checkstyle PASS with 980 baseline warnings; build PASS excluding `test` and user-skipped `pmdTest`; full test FAIL 503/96 with `ClientOptions.kt:561` and OOM; runtime NOT RUN.
+
+- 2026-10-06 — [093 Timetable agent occupied-context normalization](../be/timetableagent/093-timetable-agent-context-normalization-2026-10-06.md): focused regression 11/11 PASS; Checkstyle PASS with 980 repository warnings; PMD/build -x test FAIL only on 8 known DomainValidation findings; full suite omitted per user instruction; runtime NOT RUN.
+
 - 2026-10-05 — [088.9 Weekly-pattern demand validation](../be/timetableagent/088.9-weekly-pattern-demand-validation-2026-10-05.md): boundary-week pattern checks; focused 8/8 PASS; Checkstyle PASS; full test FAIL (Spring context), PMD/build FAIL; runtime NOT RUN.
 
 - 2026-10-05 — [088.8 Partial-week prompt guide](../be/timetableagent/088.8-partial-week-prompt-guide-2026-10-05.md): recurring weekly-pattern guidance and full bilingual prompt; text consistency/diff checks PASS; Java validator unchanged; backend gates/runtime NOT RUN.
@@ -179,3 +183,5 @@ NNN-short-topic-yyyy-mm-dd.md
 - 2026-10-05 — [088.5: Ghi đầy đủ response model khi proposal sai schema](../be/timetableagent/088.5-invalid-proposal-full-output-log-2026-10-05.md) — Chỉ ghi model output khi converter từ chối; nội dung được JSON-escape thành một dòng; diff-check PASS; backend gates/runtime NOT RUN do sandbox chặn tải Gradle 9.5.1.
 
 - 2026-10-02 — [091: Autofill số tiết yêu cầu từ TKB](../fe/timetable/091-timetable-demand-autofill-2026-10-02.md) — validation xem Dev Note.
+
+- [094 — Timetable model payload logging](../be/timetableagent/094-timetable-model-payload-logging-2026-10-06.md): DEBUG full request/raw responses; QA pending.

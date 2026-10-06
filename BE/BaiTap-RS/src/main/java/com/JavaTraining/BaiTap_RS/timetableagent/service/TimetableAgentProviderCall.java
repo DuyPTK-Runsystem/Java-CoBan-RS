@@ -12,12 +12,15 @@ import org.springframework.http.HttpStatus;
 
 public final class TimetableAgentProviderCall {
 
+    private static final String REQUEST_ID = "requestId";
+
     private TimetableAgentProviderCall() {
     }
 
     public static <T> T call(Supplier<T> supplier, long deadline) {
         long remaining = remaining(deadline);
-        FutureTask<T> call = new FutureTask<>(supplier::get);
+        String requestId = org.slf4j.MDC.get(REQUEST_ID);
+        FutureTask<T> call = new FutureTask<>(() -> withRequestId(supplier, requestId));
         Thread.ofVirtual().name("timetable-agent-proposal").start(call);
         try {
             return requireValue(call.get(remaining, TimeUnit.NANOSECONDS));
@@ -30,6 +33,20 @@ public final class TimetableAgentProviderCall {
             throw new AppException(HttpStatus.REQUEST_TIMEOUT, "The timetable model request was cancelled.", exception);
         } catch (ExecutionException exception) {
             throw propagate(exception);
+        }
+    }
+
+    /* default */ static <T> T withRequestId(Supplier<T> supplier, String requestId) {
+        String previous = org.slf4j.MDC.get(REQUEST_ID);
+        org.slf4j.MDC.put(REQUEST_ID, requestId == null || requestId.isBlank() ? "N/A" : requestId);
+        try {
+            return supplier.get();
+        } finally {
+            if (previous == null) {
+                org.slf4j.MDC.remove(REQUEST_ID);
+            } else {
+                org.slf4j.MDC.put(REQUEST_ID, previous);
+            }
         }
     }
 

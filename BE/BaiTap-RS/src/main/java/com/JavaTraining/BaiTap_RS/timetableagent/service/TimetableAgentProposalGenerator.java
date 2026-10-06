@@ -17,6 +17,7 @@ import com.JavaTraining.BaiTap_RS.timetableagent.domain.DTOs.response.ResTimetab
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
@@ -119,6 +120,12 @@ public class TimetableAgentProposalGenerator {
                     snapshot.snapshotId(), snapshot.targetRevisionId(), snapshot.classIds().size(),
                     snapshot.demands().size(), snapshot.assignments().size(), snapshot.currentEntries().size(),
                     snapshot.publishedContextEntries().size(), userRequest.length());
+        }
+        if (log.isDebugEnabled()) {
+            String requestId = MDC.get("requestId");
+            log.debug(">>>TimetableAgent (model snapshot): snapshotId={} snapshotLength={} snapshotJson={} [{}] [{}]",
+                    snapshot.snapshotId(), snapshot.snapshotJson().length(), snapshot.snapshotJson(),
+                    Thread.currentThread().getName(), requestId == null || requestId.isBlank() ? "N/A" : requestId);
         }
         TimetableAgentModelProposalDTO proposal = TimetableAgentProviderCall.call(() -> gateway.propose(prompt),
                 deadline);

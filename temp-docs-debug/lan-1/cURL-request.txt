@@ -1,7 +1,7 @@
 curl --url 'http://localhost:8081/api/v4/timetable-agent/proposals' \
   -H 'Accept: application/json' \
   -H 'Accept-Language: vi,en-US;q=0.9,en;q=0.8' \
-  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjpbIkFDQURFTUlDX09GRklDRSJdLCJleHAiOjE3OTE3OTQ1MjAsInN1YiI6ImFjYWRlbWljLm9mZmljZSIsImlhdCI6MTc5MDkzMDUyMCwidXNlcl9pZCI6Mn0.2915x3Nv-jA2dFqPLCMXaSL2UKoe7u-u_Okk4x-Q30U' \
+  -H 'Authorization:   \
   -H 'Connection: keep-alive' \
   -H 'Content-Type: application/json' \
   -H 'Origin: http://localhost:5173' \

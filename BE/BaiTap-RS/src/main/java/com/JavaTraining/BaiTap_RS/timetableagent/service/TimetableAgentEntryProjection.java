@@ -87,7 +87,7 @@ public class TimetableAgentEntryProjection {
             retained.add(toEntity(snapshot, entry.assignmentId(), entry.periodId(), entry.functionalRoomId(),
                     entry.validFrom(), entry.validTo(), syntheticId--));
         }
-        return retained;
+        return TimetableAgentOccupiedContext.normalizedEntities(retained);
     }
 
     public List<TimetableEntry> toEntities(TimetableAgentSnapshot snapshot,

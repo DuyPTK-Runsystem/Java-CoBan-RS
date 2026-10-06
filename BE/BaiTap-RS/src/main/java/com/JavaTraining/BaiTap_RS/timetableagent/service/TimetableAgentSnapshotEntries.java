@@ -83,19 +83,14 @@ public class TimetableAgentSnapshotEntries {
         if (published == null || published.getStatus() != TimetableRevisionStatus.PUBLISHED) {
             return List.of();
         }
-        Set<String> targetKeys = targetEntries.stream().map(this::entryKey).collect(Collectors.toSet());
-        return entryRepository.findByRevisionId(published.getId()).stream()
+        List<TimetableEntry> publishedRows = entryRepository.findByRevisionId(published.getId());
+        List<TimetableAgentSnapshotEntry> publishedContext = publishedRows.stream()
                 .filter(entry -> !entry.getValidFrom().isAfter(request.validTo())
                         && !entry.getValidTo().isBefore(request.validFrom()))
                 .filter(entry -> !selectedAssignmentIds.contains(entry.getAssignmentId()))
                 .map(this::snapshotEntry)
-                .filter(entry -> !targetKeys.contains(entryKey(entry)))
                 .sorted(Comparator.comparing(TimetableAgentSnapshotEntry::entryId)).toList();
-    }
-
-    private String entryKey(TimetableAgentSnapshotEntry entry) {
-        return entry.assignmentId() + ":" + entry.periodId() + ":" + entry.functionalRoomId()
-                + ":" + entry.validFrom() + ":" + entry.validTo();
+        return TimetableAgentOccupiedContext.withoutCurrentOverlap(targetEntries, publishedContext);
     }
 
     private boolean outsideRevisionDates(TimetableRevision revision, ReqCreateTimetableAgentProposalDTO request) {

@@ -39,7 +39,9 @@ public class TimetableAgentModelActionService {
 
     private TimetableAgentToolCall boundedSaveCall(TimetableAgentModelGateway gateway,
             TimetableAgentActionPrompt prompt) {
-        FutureTask<TimetableAgentToolCall> call = new FutureTask<>(() -> gateway.requestSave(prompt));
+        String requestId = org.slf4j.MDC.get("requestId");
+        FutureTask<TimetableAgentToolCall> call = new FutureTask<>(() ->
+                TimetableAgentProviderCall.withRequestId(() -> gateway.requestSave(prompt), requestId));
         Thread.ofVirtual().name("timetable-agent-save-call").start(call);
         try {
             return call.get(properties.getProviderTimeout().toMillis(), TimeUnit.MILLISECONDS);
