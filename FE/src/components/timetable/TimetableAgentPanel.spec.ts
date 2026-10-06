@@ -172,7 +172,54 @@ describe('TimetableAgentPanel', () => {
     await nextTick()
 
     expect(lockedPicker!.props('options')).toEqual([
-      { id: 2, label: '10A1 · Toán · Sáng tiết 2 · 2026-11-01 → 2026-11-30' },
+      { id: 2, label: '10A1 · Toán · Thứ Hai · Sáng tiết 2 · 2026-11-01 → 2026-11-30' },
     ])
+  })
+
+  it('renders demands as a table with classes as rows and subjects as columns', async () => {
+    const multiAssignments = [
+      { id: 101, classId: 11, className: '10A1', subjectName: 'Toán', teacherName: 'Cô An' },
+      { id: 102, classId: 11, className: '10A1', subjectName: 'Văn', teacherName: 'Thầy Bình' },
+      { id: 103, classId: 12, className: '10A2', subjectName: 'Toán', teacherName: 'Cô An' },
+    ]
+    const wrapper = mount(TimetableAgentPanel, {
+      props: {
+        targetRevisionId: 42,
+        expectedVersion: 7,
+        defaultValidFrom: '2026-10-05',
+        defaultValidTo: '2026-12-31',
+        classes: [{ id: 11, name: '10A1' }, { id: 12, name: '10A2' }],
+        assignments: multiAssignments,
+        existingEntries: [],
+        canGenerate: true,
+        busy: false,
+      },
+      global: {
+        stubs: {
+          MultiSelect: MultiSelectStub,
+          InputNumber: InputNumberStub,
+          Checkbox: CheckboxStub,
+          Textarea: TextareaStub,
+          Button: ButtonStub,
+        },
+      },
+    })
+    const classPicker = wrapper.findComponent(MultiSelectStub)
+    classPicker.vm.$emit('update:modelValue', [11, 12])
+    await nextTick()
+
+    const headers = wrapper.findAll('th').map((th) => th.text())
+    expect(headers).toEqual(['Lớp', 'Toán', 'Văn'])
+
+    const rows = wrapper.findAll('tbody tr')
+    expect(rows).toHaveLength(2)
+
+    // Row 1: 10A1
+    expect(rows[0]!.find('td').text()).toBe('10A1')
+    // Row 2: 10A2 has no Văn, so should render dash
+    expect(rows[1]!.text()).toContain('—')
+
+    const inputNumbers = wrapper.findAllComponents(InputNumberStub)
+    expect(inputNumbers).toHaveLength(3)
   })
 })
