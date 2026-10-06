@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>V4-001 · Gợi ý thời khoá biểu</title>
+<style>
+:root{font-family:system-ui,sans-serif;color:#172c39;background:#f3f6f8}*{box-sizing:border-box}body{margin:0}main{max-width:1250px;margin:auto;padding:28px}header{display:flex;justify-content:space-between;align-items:center;gap:16px}h1{font-size:26px;margin:8px 0}h2{font-size:19px;margin:0 0 16px}h3{font-size:16px}p{line-height:1.6}.muted{color:#536773}.tag{display:inline-block;background:#e4edf6;color:#285076;border-radius:20px;padding:5px 12px;font-size:13px}.notice{border-left:4px solid #c98620;background:#fff4dc;padding:12px 16px;margin:18px 0}.layout{display:grid;grid-template-columns:330px 1fr;gap:20px}.card{background:white;border:1px solid #dce4e9;border-radius:12px;padding:20px;box-shadow:0 4px 14px #172c3905;margin-bottom:20px}label{display:block;font-size:14px;font-weight:600;margin-top:14px}input,select,textarea{width:100%;margin-top:6px;padding:10px;border:1px solid #b8c8d1;border-radius:6px;background:white;color:#172c39;font:inherit}textarea{min-height:88px}button{padding:11px 15px;border:1px solid #b8c8d1;border-radius:6px;background:#f4f7f9;color:#536773;font:inherit}button.primary{background:#245b72;color:white;border-color:#245b72}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:13px;min-width:520px}th,td{border:1px solid #dce4e9;padding:11px;text-align:left;vertical-align:top}th{background:#f5f8fa}td small{display:block;color:#536773;margin-top:4px}.new{background:#e6f4ed}.hold{background:#edf1f5}.state{border-radius:8px;border:1px solid #dce4e9;padding:14px;margin:12px 0}.good{border-left:4px solid #2b865c}.bad{border-left:4px solid #b95737}.steps{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.steps span{background:#fff;border:1px solid #dce4e9;padding:8px 12px;border-radius:6px}a{color:#245b72}@media(max-width:850px){main{padding:16px}.layout{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body><main>
+<header><div><span class="tag">CR v4 · Nền thời khoá biểu v3</span><h1>Gợi ý thời khoá biểu</h1><div class="muted">Học kỳ I · Bản nháp · Xem phương án trước khi lưu</div></div><a href="README.md">Hướng dẫn review</a></header>
+<div class="notice"><strong>Wireframe draft.</strong> Dữ liệu minh hoạ; các nút chưa hoạt động. Chưa gọi AI hoặc lưu thời khoá biểu.</div>
+<div class="steps" aria-label="Các bước"><span>1. Ràng buộc</span><span>2. Xem gợi ý</span><span>3. Duyệt phương án</span><span>4. Lưu bản nháp</span></div>
+<div class="layout">
+<section class="card"><h2>Yêu cầu xếp lịch</h2>
+<label for="classes">Lớp cần xếp</label><input id="classes" value="6A, 6B" readonly>
+<label for="from">Áp dụng từ</label><input id="from" type="date" value="2026-10-05" readonly>
+<label for="to">Đến ngày</label><input id="to" type="date" value="2026-12-31" readonly>
+<label for="demands">Số tiết yêu cầu mỗi tuần</label><textarea id="demands" readonly>6A · Toán · Cô Lan: 4 tiết
+6A · Ngữ văn · Thầy Minh: 4 tiết
+6B · Toán · Cô Lan: 4 tiết</textarea>
+<p class="muted">Bảng số tiết cần được xác nhận trước khi tạo gợi ý.</p>
+<label for="locked">Tiết giữ nguyên</label><input id="locked" value="6A · Thứ Hai · Sáng tiết 1" readonly>
+<label for="preferences">Ưu tiên</label><textarea id="preferences" readonly>Ưu tiên Toán ở đầu buổi. Hạn chế tiết trống giữa buổi của giáo viên.</textarea>
+<p class="muted">Lịch bận đã duyệt, phân công, phòng chức năng và định mức được kiểm tra theo dữ liệu của trường.</p>
+<button class="primary" disabled>Tạo gợi ý</button>
+</section>
+<section>
+<div class="card"><h2>Phương án đề xuất · Lớp 6A</h2><div class="tag">Ví dụ trạng thái: sẵn sàng để review</div><p class="muted">Màu xanh: tiết mới hoặc thay đổi. Màu xám: tiết giữ nguyên. Grid minh hoạ chưa điền đủ lịch.</p>
+<div class="table-wrap"><table><thead><tr><th>Buổi / tiết</th><th>Thứ Hai</th><th>Thứ Ba</th><th>Thứ Tư</th><th>Thứ Năm</th><th>Thứ Sáu</th></tr></thead><tbody>
+<tr><th>Sáng · 1</th><td class="hold">Chào cờ<small>Giữ nguyên</small></td><td class="new">Toán<small>Cô Lan</small></td><td>—</td><td class="new">Toán<small>Cô Lan</small></td><td>—</td></tr>
+<tr><th>Sáng · 2</th><td class="new">Ngữ văn<small>Thầy Minh</small></td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><th>Sáng · 3</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><th>Sáng · 4</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><th>Chiều · 1</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><th>Chiều · 2</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><th>Chiều · 3</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><th>Chiều · 4</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+</tbody></table></div></div>
+<div class="card"><h2>Thay đổi và kết quả kiểm tra</h2><p><strong>Ví dụ:</strong> thêm 2 tiết Toán, chuyển 1 tiết Ngữ văn; giữ nguyên các tiết đã khoá. Lịch ngoài các lớp được chọn không thay đổi.</p><div class="state good"><strong>Kết quả backend minh hoạ:</strong> không có lỗi chặn; còn 1 ưu tiên chưa đáp ứng.</div><p class="muted">Cô Lan còn một khoảng trống giữa buổi. Phương án ưu tiên tránh trùng lịch bận đã duyệt.</p><div class="actions"><button disabled>Duyệt phương án</button><button class="primary" disabled>Lưu bản nháp</button><button disabled>Điều chỉnh yêu cầu</button></div><p class="muted">Lưu khả dụng sau khi duyệt đúng phương án. Chỉnh yêu cầu hoặc dữ liệu thay đổi cần kiểm tra và duyệt lại.</p></div>
+</section></div>
+<section class="card"><h2>Các trạng thái cần review</h2>
+<div class="state bad"><strong>Thiếu thông tin:</strong> chưa xác nhận số tiết môn Toán của lớp 6B. Bổ sung trước khi tạo gợi ý.</div>
+<div class="state bad"><strong>Cần sửa phương án:</strong> giáo viên bị trùng lịch trong cùng tiết. Chưa được duyệt hoặc lưu.</div>
+<div class="state bad"><strong>Dữ liệu đã thay đổi:</strong> có lịch bận mới được duyệt. Kiểm tra phương án mới và duyệt lại.</div>
+<div class="state"><strong>Chưa tìm được phương án:</strong> hệ thống đã hết lượt thử. Giữ yêu cầu để điều chỉnh hoặc xếp thủ công.</div>
+<div class="state"><strong>Mất kết nối khi lưu:</strong> kiểm tra trạng thái hành động trước khi thử lại.</div>
+<div class="state good"><strong>Đã lưu bản nháp:</strong> application xác nhận lưu thành công. Mở lại lịch để kiểm tra; công bố qua quy trình hiện có.</div>
+</section>
+</main></body></html>

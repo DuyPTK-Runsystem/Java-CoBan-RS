@@ -1,9 +1,28 @@
 # Dev Note Summary
 
+- 2026-10-06 — [088.10 Timetable agent domain validation PMD cleanup](../be/timetableagent/088.10-timetable-agent-domain-validation-pmd-2026-10-06.md) — `pmdMain` PASS with 0 violations after extracting conflict helpers; Checkstyle PASS with 980 baseline warnings; build PASS excluding `test` and user-skipped `pmdTest`; full test FAIL 503/96 with `ClientOptions.kt:561` and OOM; runtime NOT RUN.
+
+- 2026-10-06 — [093 Timetable agent occupied-context normalization](../be/timetableagent/093-timetable-agent-context-normalization-2026-10-06.md): focused regression 11/11 PASS; Checkstyle PASS with 980 repository warnings; PMD/build -x test FAIL only on 8 known DomainValidation findings; full suite omitted per user instruction; runtime NOT RUN.
+
+- 2026-10-05 — [088.9 Weekly-pattern demand validation](../be/timetableagent/088.9-weekly-pattern-demand-validation-2026-10-05.md): boundary-week pattern checks; focused 8/8 PASS; Checkstyle PASS; full test FAIL (Spring context), PMD/build FAIL; runtime NOT RUN.
+
+- 2026-10-05 — [088.8 Partial-week prompt guide](../be/timetableagent/088.8-partial-week-prompt-guide-2026-10-05.md): recurring weekly-pattern guidance and full bilingual prompt; text consistency/diff checks PASS; Java validator unchanged; backend gates/runtime NOT RUN.
+
+- 2026-10-05 — [088.7 Retained same-class conflict context](../be/timetableagent/088.7-retained-class-conflict-context-2026-10-05.md): focused regression/JaCoCo and Checkstyle PASS; PMD 8 findings in adjacent dirty file (preexisting status unproven) block `build -x test`; full suite skipped at user's request; provider/runtime NOT RUN.
+- 2026-10-05 — [088.3 Clarify scope and period requests in the prompt](../be/timetableagent/088.3-scope-and-period-prompt-2026-10-05.md): prompt defines assignment/date scope, maps requested periods by day/session/index, permits changes to unlocked in-scope entries, and treats absent periods as satisfying blank requests; diff check PASS; automated/runtime checks NOT RUN.
+- 2026-10-05 — [088.2 Read hard constraints from the snapshot](../be/timetableagent/088.2-hard-constraints-snapshot-prompt-2026-10-05.md): removed the nonexistent separate hard-constraints/preferences/demands block claim; prompt distinguishes specific absent data from empty collections; diff check PASS; backend gates/runtime NOT RUN. Scope-policy and student-attendance issues remain out of scope.
+- 2026-10-05 — [088.1 Remove missing OUTPUT_SCHEMA prompt blocker](../be/timetableagent/088.1-output-schema-prompt-2026-10-05.md): prompt aligned with native structured output; focused/full BE tests, Checkstyle, PMD, and build NOT RUN because Gradle 9.5.1 download was blocked. Other missing prompt blocks remain out of scope.
+
+- [Dev Note 090: ISO weekday](../be/timetable/090-iso-weekday-2026-10-02.md) — BE/FE/seed ISO; focused BE và toàn bộ FE gates PASS; full BE test/build FAIL (context/heap, pmdTest 476); checkstyleMain/pmdMain PASS; DB/browser NOT RUN (2026-10-02).
+
+- [Three workflow skills](../be/workflow-skill/088-three-workflow-skills-2026-10-02.md) — User-approved project-local skills; validators PASS; Plan 088 stays paused (2026-10-02).
+
 ## Chronological Summary
 
+- [Dev Note 088.1: Confirm active teacher-load policy before agent proposals](../be/timetableagent/088.1-confirm-active-policy-before-agent-2026-10-02.md) — Focused BE PASS; full BE test FAIL; Checkstyle PASS with warnings, pmdMain PASS; pmdTest/build FAIL on 476 project findings outside changed timetable tests; FE gates PASS (2026-10-02).
 | No. | Area | Note | Status | Updated |
 | --- | --- | --- | --- | --- |
+| 088 | BE/FE | [Spring AI timetable agent implementation](088-spring-ai-timetable-agent-implementation-2026-10-01.md) | APPROVED; implementation/validation đang chạy; FE offline gates PASS tại note; provider/MySQL live NOT RUN | 2026-10-01 |
 | 076.17 | FE | [SSE badge connection synchronization](../fe/notification/076.17-sse-badge-connection-sync-2026-10-01.md) | Initial-connection gap fixed; regression red then green; lint, 636 tests, coverage, build and local Chrome badge 3 to 4 without refresh PASS | 2026-10-01 |
 | 076.16 | BE/FE | [Notification inbox SSE](../be/notification/076.16-notification-inbox-sse-2026-10-01.md) | SSE callback directly refreshes badge; no-store and latest-request guard; diff-check PASS, tests/live UI NOT RUN. Earlier FE lint/coverage/build PASS; backend baseline blockers documented in note | 2026-10-01 |
 |   001 | BE             | [Base Backend Theo Boilerplate, Rút Gọn User/Auth](../be/user-auth/001-base-boilerplate-user-auth-2026-08-17.md)                                                                                  | Completed                                                                                                                                                                                                                                                                                                                                                            | 2026-08-17 |
@@ -157,3 +176,12 @@
 ```text
 NNN-short-topic-yyyy-mm-dd.md
 ```
+| 088 | Timetable | [Điều hướng đúng revision từ danh sách TKB](../fe/timetable/088-timetable-list-revision-routing-2026-10-02.md) | Bổ sung revisionId summary; focused service/FE route tests, scoped ESLint, npm build, checkstyleMain/Test và pmdMain PASS; full backend test gián đoạn do OOM, pmdTest FAIL 476, build excluding tests PASS, standard build incomplete | 2026-10-02 |
+
+- 2026-10-05 — [088.6: Phản hồi sửa proposal sai schema rõ ràng](../be/timetableagent/088.6-actionable-invalid-schema-feedback-2026-10-05.md) — Retry nêu rõ root keys và vị trí validFrom/validTo, cấm wrapper; focused QA 4/4 và Checkstyle PASS; full test incomplete do context failures/exit 130, PMD/build FAIL theo findings; runtime NOT RUN.
+- 2026-10-05 — [088.4: Chẩn đoán proposal sai schema an toàn](../be/timetableagent/088.4-invalid-schema-diagnostics-2026-10-05.md) — Log phân loại lỗi, lượt retry và finish reason đã chuẩn hóa; diff-check PASS; test/Checkstyle/PMD/build/runtime NOT RUN do Gradle 9.5.1 cần tải nhưng mạng sandbox từ chối.
+- 2026-10-05 — [088.5: Ghi đầy đủ response model khi proposal sai schema](../be/timetableagent/088.5-invalid-proposal-full-output-log-2026-10-05.md) — Chỉ ghi model output khi converter từ chối; nội dung được JSON-escape thành một dòng; diff-check PASS; backend gates/runtime NOT RUN do sandbox chặn tải Gradle 9.5.1.
+
+- 2026-10-02 — [091: Autofill số tiết yêu cầu từ TKB](../fe/timetable/091-timetable-demand-autofill-2026-10-02.md) — validation xem Dev Note.
+
+- [094 — Timetable model payload logging](../be/timetableagent/094-timetable-model-payload-logging-2026-10-06.md): DEBUG full request/raw responses; QA pending.

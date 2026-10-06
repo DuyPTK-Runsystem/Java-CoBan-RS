@@ -7,6 +7,7 @@ export interface TeacherUnavailability {
   teacherId: number
   teacherName: string
   semesterId: number
+  /** ISO-8601 weekday: Monday=1 through Sunday=7. */
   dayOfWeek?: number | null
   specificDate?: string | null
   validFrom: string
@@ -26,6 +27,7 @@ export interface TeacherUnavailability {
 export interface CreateUnavailabilityPayload {
   semesterId: number
   teacherId?: number | null
+  /** ISO-8601 weekday: Monday=1 through Sunday=7. */
   dayOfWeek?: number | null
   specificDate?: string | null
   validFrom: string
@@ -37,6 +39,7 @@ export interface CreateUnavailabilityPayload {
 
 export interface UpdateUnavailabilityPayload {
   expectedVersion: number
+  /** ISO-8601 weekday: Monday=1 through Sunday=7. */
   dayOfWeek?: number | null
   specificDate?: string | null
   validFrom: string

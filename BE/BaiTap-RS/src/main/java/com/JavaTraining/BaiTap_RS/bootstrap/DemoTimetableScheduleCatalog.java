@@ -1,5 +1,6 @@
 package com.JavaTraining.BaiTap_RS.bootstrap;
 
+import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -833,8 +834,9 @@ public final class DemoTimetableScheduleCatalog {
             int dayOfWeek,
             SessionType session,
             int... periodIndexes) {
-        if (dayOfWeek < 1 || dayOfWeek > 5) {
-            throw new IllegalArgumentException("Plan 081 timetable only supports Monday-Friday (1-5)");
+        // Seed dayOfWeek values follow ISO-8601: Monday=1 through Sunday=7.
+        if (dayOfWeek < DayOfWeek.MONDAY.getValue() || dayOfWeek > DayOfWeek.FRIDAY.getValue()) {
+            throw new IllegalArgumentException("Plan 081 timetable only supports ISO weekdays Monday-Friday (1-5)");
         }
         SlotSeed[] result = new SlotSeed[periodIndexes.length];
         for (int index = 0; index < periodIndexes.length; index++) {

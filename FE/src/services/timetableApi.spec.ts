@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   createTimetable,
+  confirmTimetableTeacherLoadPolicy,
   createTimetableRevision,
   getMyTimetable,
   getTimetableDetail,
@@ -55,5 +56,16 @@ describe('timetableApi', () => {
     // Check Idempotency-Key header on publish call
     const publishHeaders = fetchMock.mock.calls[7][1]?.headers
     expect(publishHeaders?.['Idempotency-Key']).toBe('idemp-key-1')
+  })
+
+  it('confirms an active teacher-load policy with the revision optimistic version', async () => {
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ data: { revisionId: 10, version: 1 } }), { status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const detail = await confirmTimetableTeacherLoadPolicy(10, 7, 0, 'token')
+
+    expect(detail.version).toBe(1)
+    expect(fetchMock.mock.calls[0][0]).toContain('/api/v3/timetables/10/teacher-load-policy')
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({ policyId: 7, expectedVersion: 0 })
   })
 })

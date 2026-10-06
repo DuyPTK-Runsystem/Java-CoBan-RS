@@ -1,11 +1,14 @@
 package com.JavaTraining.BaiTap_RS.bootstrap;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.JavaTraining.BaiTap_RS.academic.domain.entity.AcademicYear;
@@ -85,7 +88,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
         "spring.datasource.username=sa",
         "spring.datasource.password=",
         "spring.jpa.hibernate.ddl-auto=none",
-        "app.seed.demo.enabled=true"
+        "app.seed.demo.enabled=true",
+        "spring.ai.model.audio.speech=none",
+        "spring.ai.model.audio.transcription=none",
+        "spring.ai.model.chat=none",
+        "spring.ai.model.embedding=none",
+        "spring.ai.model.image=none",
+        "spring.ai.model.moderation=none"
 })
 class DemoDataSeederIntegrationTest {
 
@@ -613,6 +622,8 @@ class DemoDataSeederIntegrationTest {
                         semesterCode + " has a functional-room conflict");
             }
         }
+        assertCatalogScheduleMatches(semesterCode, expectedStart, classIdsByCode,
+                classCodesById, classSubjectsById, assignmentsById, subjectCodesById, periodsById, entries);
         Map<String, Long> entriesByClass = entries.stream()
                 .collect(Collectors.groupingBy(entry -> classCodesById.get(
                         classSubjectsById.get(assignmentsById.get(entry.getAssignmentId()).getClassSubjectId())
@@ -661,6 +672,9 @@ class DemoDataSeederIntegrationTest {
         assertTrue(audits.stream().anyMatch(audit -> "SEED_PLAN_081_FULL_V2".equals(audit.getAction())
                 && audit.getDetails().contains("semester=" + semesterCode)),
                 semesterCode + " must include the full timetable audit marker");
+        assertTrue(audits.stream().anyMatch(audit -> "SEED_PLAN_081_FULL_V2".equals(audit.getAction())
+                && audit.getDetails().contains("weekdayConvention=ISO-8601")),
+                semesterCode + " seed marker must identify ISO-8601 weekday semantics");
         return new TimetableSnapshot(
                 head.getId(),
                 head.getCurrentRevisionId(),
@@ -670,7 +684,68 @@ class DemoDataSeederIntegrationTest {
                 entries.stream().collect(Collectors.toMap(
                         TimetableEntry::getId,
                         entry -> entry.getFunctionalRoomId() == null ? 0L : entry.getFunctionalRoomId())),
+                entries.stream().collect(Collectors.toMap(
+                        TimetableEntry::getId,
+                        entry -> periodSignature(periodsById.get(entry.getPeriodId())))),
                 audits.size());
+    }
+
+    private static String scheduleSignature(DemoTimetableScheduleCatalog.SlotSeed slot) {
+        return slot.subjectCode() + "|" + slot.dayOfWeek() + "|" + slot.session() + "|" + slot.periodIndex();
+    }
+
+    private static String scheduleSignature(String subjectCode, TimetablePeriod period) {
+        return subjectCode + "|" + periodSignature(period);
+    }
+
+    private static String periodSignature(TimetablePeriod period) {
+        return period.getDayOfWeek() + "|" + period.getSession() + "|" + period.getPeriodIndex();
+    }
+
+    private void assertCatalogScheduleMatches(
+            String semesterCode,
+            LocalDate expectedStart,
+            Map<String, Long> classIdsByCode,
+            Map<Long, String> classCodesById,
+            Map<Long, ClassSubject> classSubjectsById,
+            Map<Long, SubjectTeachingAssignment> assignmentsById,
+            Map<Long, String> subjectCodesById,
+            Map<Long, TimetablePeriod> periodsById,
+            List<TimetableEntry> entries) {
+        LocalDate firstMonday = expectedStart.with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
+        Map<String, List<DemoTimetableScheduleCatalog.SlotSeed>> catalog = DemoTimetableScheduleCatalog.schedules();
+        Map<String, List<String>> expectedScheduleByClass = classIdsByCode.keySet().stream()
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        classCode -> catalog.get(semesterCode + "|" + classCode).stream()
+                                .map(DemoDataSeederIntegrationTest::scheduleSignature)
+                                .sorted()
+                                .toList()));
+        Map<String, List<String>> actualScheduleByClass = entries.stream()
+                .map(entry -> seededSlot(entry, classCodesById, classSubjectsById, assignmentsById,
+                        subjectCodesById, periodsById))
+                .collect(Collectors.groupingBy(
+                        SeededSlot::classCode,
+                        Collectors.mapping(SeededSlot::signature, Collectors.toList())));
+        actualScheduleByClass.replaceAll((classCode, signatures) -> signatures.stream().sorted().toList());
+        assertEquals(
+                new CatalogScheduleCheck(DayOfWeek.MONDAY, expectedScheduleByClass),
+                new CatalogScheduleCheck(firstMonday.getDayOfWeek(), actualScheduleByClass),
+                semesterCode + " seeded slots must preserve catalog ISO weekday, subject, and period values");
+    }
+
+    private SeededSlot seededSlot(
+            TimetableEntry entry,
+            Map<Long, String> classCodesById,
+            Map<Long, ClassSubject> classSubjectsById,
+            Map<Long, SubjectTeachingAssignment> assignmentsById,
+            Map<Long, String> subjectCodesById,
+            Map<Long, TimetablePeriod> periodsById) {
+        SubjectTeachingAssignment assignment = assignmentsById.get(entry.getAssignmentId());
+        ClassSubject classSubject = classSubjectsById.get(assignment.getClassSubjectId());
+        String classCode = classCodesById.get(classSubject.getClassId());
+        String subjectCode = subjectCodesById.get(classSubject.getSubjectId());
+        return new SeededSlot(classCode, scheduleSignature(subjectCode, periodsById.get(entry.getPeriodId())));
     }
 
     private void assertTimetableUnchanged(TimetableSnapshot before, String semesterCode) {
@@ -689,6 +764,15 @@ class DemoDataSeederIntegrationTest {
                         TimetableEntry::getId,
                         entry -> entry.getFunctionalRoomId() == null ? 0L : entry.getFunctionalRoomId())),
                 semesterCode + " rerun must preserve room bindings");
+        Map<Long, String> periodKeysByEntry = timetableEntryRepository.findByRevisionId(before.revisionId()).stream()
+                .collect(Collectors.toMap(
+                        TimetableEntry::getId,
+                        entry -> {
+                            TimetablePeriod period = timetablePeriodRepository.findById(entry.getPeriodId()).orElseThrow();
+                            return periodSignature(period);
+                        }));
+        assertEquals(before.periodKeysByEntry(), periodKeysByEntry,
+                semesterCode + " rerun must preserve ISO weekday, session, and period assignment");
         assertEquals(before.auditCount(), timetableAuditRepository.findByRevisionIdOrderByCreatedAtDesc(
                 before.revisionId()).size(), semesterCode + " rerun must not duplicate audit rows");
     }
@@ -1114,6 +1198,12 @@ class DemoDataSeederIntegrationTest {
     private record TeacherFixture(String username, String name) {
     }
 
+    private record SeededSlot(String classCode, String signature) {
+    }
+
+    private record CatalogScheduleCheck(DayOfWeek mondayWeekday, Map<String, List<String>> schedules) {
+    }
+
     private record TimetableSnapshot(
             Long headId,
             Long currentRevisionId,
@@ -1121,6 +1211,7 @@ class DemoDataSeederIntegrationTest {
             Integer revisionNumber,
             Set<Long> entryIds,
             Map<Long, Long> roomIdsByEntry,
+            Map<Long, String> periodKeysByEntry,
             int auditCount) {
     }
 }

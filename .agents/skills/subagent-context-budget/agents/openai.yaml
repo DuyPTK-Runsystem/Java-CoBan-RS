@@ -1,0 +1,5 @@
+interface:
+  display_name: "subagent-context-budget"
+  short_description: "Manage subagent context and bounded assignments"
+  default_prompt: "Use $subagent-context-budget for the current authorized task."
+

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Timetable Agent Debug"
+  short_description: "Trace timetable suggestion failures quickly"
+  default_prompt: "Use $timetable-agent-debug to trace this timetable suggestion failure from logs to the responsible layer."

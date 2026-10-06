@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -17,6 +17,19 @@ const popupStatus = ref<'success' | 'failure'>('success')
 const popupMessage = ref('')
 const successRedirect = ref('/v2/attendance')
 
+let autoDismissTimer: ReturnType<typeof setTimeout> | null = null
+
+function clearDismissTimer(): void {
+  if (autoDismissTimer !== null) {
+    clearTimeout(autoDismissTimer)
+    autoDismissTimer = null
+  }
+}
+
+onUnmounted(() => {
+  clearDismissTimer()
+})
+
 function localizedAuthError(error: unknown, fallback: string): string {
   const message = error instanceof Error ? error.message.trim() : ''
   const knownTranslations: Record<string, string> = {
@@ -32,6 +45,7 @@ function localizedAuthError(error: unknown, fallback: string): string {
 
 async function handleSubmit(values: LoginValues): Promise<void> {
   submitting.value = true
+  clearDismissTimer()
   try {
     const session = await login(values)
     saveAuthSession(session)
@@ -41,6 +55,9 @@ async function handleSubmit(values: LoginValues): Promise<void> {
     popupStatus.value = 'success'
     popupMessage.value = 'Đăng nhập thành công.'
     popupVisible.value = true
+    autoDismissTimer = setTimeout(() => {
+      void closePopup()
+    }, 1500)
   } catch (error) {
     if (isApiError(error, 401)) {
       clearAuthSession()
@@ -54,6 +71,7 @@ async function handleSubmit(values: LoginValues): Promise<void> {
 }
 
 async function closePopup(): Promise<void> {
+  clearDismissTimer()
   const shouldNavigate = popupStatus.value === 'success'
   popupVisible.value = false
   if (shouldNavigate) {

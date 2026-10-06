@@ -16,6 +16,7 @@ import type {
   TeacherUnavailability,
   UpdateUnavailabilityPayload,
 } from '@/types/teacherUnavailability'
+import { SCHOOL_WEEKDAYS } from '@/utils/isoWeekday'
 
 const props = defineProps<{
   visible: boolean
@@ -44,7 +45,7 @@ const emit = defineEmits<{
 const selectedSemesterId = ref<number | null>(null)
 const selectedTeacherId = ref<number | null>(null)
 const repeatType = ref<'WEEKLY' | 'SPECIFIC_DATE'>('WEEKLY')
-const dayOfWeek = ref<number>(2)
+const dayOfWeek = ref<number>(1)
 const specificDate = ref<Date | null>(null)
 const validFrom = ref<Date | null>(new Date())
 const validTo = ref<Date | null>(new Date())
@@ -55,14 +56,7 @@ const errors = ref<Record<string, string>>({})
 
 const isEdit = computed(() => Boolean(props.unavailability))
 
-const dayOfWeekOptions = [
-  { label: 'Thứ Hai', value: 2 },
-  { label: 'Thứ Ba', value: 3 },
-  { label: 'Thứ Tư', value: 4 },
-  { label: 'Thứ Năm', value: 5 },
-  { label: 'Thứ Sáu', value: 6 },
-  { label: 'Thứ Bảy', value: 7 },
-]
+const dayOfWeekOptions = SCHOOL_WEEKDAYS.map(({ label, value }) => ({ label, value }))
 
 const sessionOptions = [
   { label: 'Buổi Sáng (Tiết 1 - 4)', value: 'MORNING' },
@@ -80,7 +74,7 @@ watch(
         specificDate.value = new Date(val.specificDate)
       } else {
         repeatType.value = 'WEEKLY'
-        dayOfWeek.value = val.dayOfWeek ?? 2
+        dayOfWeek.value = val.dayOfWeek ?? 1
       }
       validFrom.value = new Date(val.validFrom)
       validTo.value = new Date(val.validTo)
@@ -94,7 +88,7 @@ watch(
       selectedSemesterId.value = props.semesters[0]?.id ?? null
       selectedTeacherId.value = props.currentTeacherId ?? props.teachers[0]?.id ?? null
       repeatType.value = 'WEEKLY'
-      dayOfWeek.value = 2
+      dayOfWeek.value = 1
       specificDate.value = null
       validFrom.value = new Date()
       validTo.value = new Date()

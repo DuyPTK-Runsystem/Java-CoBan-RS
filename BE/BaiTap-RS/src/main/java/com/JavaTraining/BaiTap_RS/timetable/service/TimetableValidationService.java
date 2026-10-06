@@ -146,6 +146,29 @@ public class TimetableValidationService {
         return issues;
     }
 
+    /**
+     * Validates proposed rows against the existing rows that the caller has already
+     * scope-checked. Existing rows are context only: unrelated conflicts among them
+     * do not make a new proposal invalid.
+     */
+    public List<ResTimetableIssueDTO> checkCandidateAgainstExisting(
+            TimetableRevision revision,
+            List<TimetableEntry> candidates,
+            List<TimetableEntry> existing) {
+        List<TimetableEntry> candidateRows = candidates == null ? List.of() : candidates;
+        List<TimetableEntry> existingRows = existing == null ? List.of() : existing;
+        if (candidateRows.isEmpty()) {
+            return List.of();
+        }
+        List<TimetableEntry> contextRows = new ArrayList<>(candidateRows);
+        contextRows.addAll(existingRows);
+        Set<Long> candidateIds = candidateRows.stream().map(TimetableEntry::getId).collect(Collectors.toSet());
+        return checkAllConflicts(revision, contextRows).stream()
+                .filter(issue -> issue.entryIds() != null
+                        && issue.entryIds().stream().anyMatch(candidateIds::contains))
+                .toList();
+    }
+
     private void validateSingleEntry(
             TimetableEntry entry,
             ValidationContext ctx,

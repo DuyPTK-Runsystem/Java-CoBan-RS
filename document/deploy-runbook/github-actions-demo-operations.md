@@ -30,6 +30,11 @@ Configure these repository-level Actions variables:
 | DEMO_MYSQL_HOST / DEMO_MYSQL_DATABASE / DEMO_MYSQL_USER | Private DB connection coordinates and a read-only preflight user. |
 | DEMO_KEY_VAULT_NAME | Key Vault holding the existing DB credential. |
 | DEMO_MYSQL_PASSWORD_SECRET_NAME | Key Vault secret name for the DB credential. |
+| SPRING_AI_OPENAI_BASE_URL | 9Router OpenAI-compatible API base URL; use the exact URL shown by 9Router. |
+| SPRING_AI_OPENAI_CHAT_MODEL | Exact model identifier enabled for the 9Router API key/account. |
+| SPRING_AI_OPENAI_API_KEY_SECRET_NAME | Key Vault secret name containing the 9Router API key (the value is never stored in GitHub). |
+| APP_AI_TIMETABLE_ENABLED | Optional GitHub variable; defaults to `false`. Set to `true` only after the 9Router key and model access are ready. |
+| APP_AI_TIMETABLE_MAX_CLASS_COUNT / APP_AI_TIMETABLE_MAX_CONTEXT_CHARACTERS / APP_AI_TIMETABLE_MAX_REQUEST_CHARACTERS / APP_AI_TIMETABLE_MAX_PREFERENCES_CHARACTERS / APP_AI_TIMETABLE_MAX_PROPOSAL_ENTRIES | Positive GitHub variables required when enabling the timetable agent; defaults of `0` keep it unavailable. |
 | VITE_API_BASE_URL | The BE origin used for the CI FE build, without /api. |
 | VERCEL_ORG_ID / VERCEL_PROJECT_ID | IDs for the Vercel FE project. Set its root directory to FE. |
 
@@ -39,6 +44,8 @@ Configure these repository-level Actions secrets:
 - VERCEL_TOKEN: project-scoped token sufficient to pull production settings and deploy this Vercel project.
 
 The workflow uses the Vercel CLI to pull production project settings, build, and deploy the prebuilt output. Keep VITE_API_BASE_URL in the Vercel production environment aligned with the ACA origin. The workflow injects the live ACA ingress origin for its production FE build.
+
+For the 9Router key, add a secret to the same Azure Key Vault referenced by `DEMO_KEY_VAULT_NAME`; set its name in `SPRING_AI_OPENAI_API_KEY_SECRET_NAME`. Enable the Container App's system-assigned managed identity and grant it `Key Vault Secrets User` on the vault (or the individual secret scope, if supported by the selected setup). The deploy workflow checks that the system identity exists before configuring the secret reference. GitHub Actions passes only the secret name into `az containerapp secret set`; the API key value stays in Key Vault and ACA exposes it to Spring as `SPRING_AI_OPENAI_API_KEY`. Set `SPRING_AI_OPENAI_CHAT_MODEL` to the exact model identifier enabled by 9Router for that account. In local Docker, copy `docker/.env.example` to the ignored `docker/.env`, then fill the provider URL, key, and model there. Never commit that file or put the key in a Docker build argument/image.
 
 ## Azure identities and permissions
 

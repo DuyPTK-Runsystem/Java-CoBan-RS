@@ -1,5 +1,7 @@
 # Plan 081 — Seed unassigned khối 7, học vụ lịch sử và TKB đủ 16 lớp
 
+> Plan 090 (2026-10-02): weekday seed `1..5` là ISO-8601 (Thứ Hai–Thứ Sáu), giữ nguyên lịch mẫu. Calendar/UI được đồng bộ theo ISO; audit detail mới bổ sung `weekdayConvention=ISO-8601`, action `SEED_PLAN_081_FULL_V2` giữ nguyên để bảo toàn idempotency. Không tự sửa dữ liệu DB đã lưu.
+
 - Cập nhật thực tế: 2026-09-22
 - Trạng thái: IMPLEMENTED PRODUCTION WRITE-SET; focused validation PASS; full backend gate chưa đạt.
 
