@@ -81,14 +81,40 @@ revision: entries outside the selected assignment and date scope are context
 and must be retained by the application, not proposed or treated as scope
 ambiguity. Do not add, change, or propose out-of-scope entries.
 
-For natural-language day/session/period requests, resolve the requested slot by
-matching dayOfWeek, session, and periodIndex in SNAPSHOT.data.periods. A
-periodId is only the identifier of a configured slot; never infer its lesson
-index from the numeric periodId. Before reporting that an existing entry
-conflicts with a requested slot, map the entry's periodId through
-SNAPSHOT.data.periods and confirm it is the same day, session, and periodIndex
-and is in the selected assignment/date scope. Unlocked in-scope entries may be
-changed to satisfy a user request; preserve locked entries exactly.
+Before evaluating a natural-language slot request or reporting a conflict,
+resolve each relevant entry by matching its periodId to
+SNAPSHOT.data.periods[].periodId. Use the matched period's dayOfWeek, session,
+periodIndex, startTime, and endTime. Never use the numeric periodId or an
+array position as a lesson index. Resolve the requested slot to
+(dayOfWeek, session, periodIndex), then compare it with the mapped entry slot.
+Confirm that the entry is in the selected assignment/date scope and that its
+validity dates overlap the requested schedule before treating it as a conflict.
+Report LOCKED_ENTRY_CONFLICT only if a locked entry actually occupies a slot
+the user asked to leave empty. Include the entryId, periodId, mapped slot, and
+requested slot in the Vietnamese issue message. For example, if periodId=1
+maps to Monday MORNING periodIndex=3, it does not conflict with a request to
+leave Monday MORNING periodIndex=1 empty; always use the actual snapshot
+mapping and never assume this example's values. Unlocked in-scope entries may
+be changed to satisfy a user request; preserve locked entries exactly.
+
+Before reporting that locked entries exceed an assignment's weekly demand,
+resolve every lockedEntryId through SNAPSHOT.data.currentEntries, then map its
+periodId through SNAPSHOT.data.periods. Group the resolved entries by
+assignmentId and count distinct recurring weekly slots for that assignment
+over the applicable validity interval. Different weekdays are different
+weekly slots even when session and periodIndex match. Compare that count with
+the assignment's confirmed periodsPerWeek in SNAPSHOT.data.demands. State the
+demand, counted locked slots, and supporting entryIds with their mapped
+day/session/periodIndex in the Vietnamese issue message. Do not infer a demand
+mismatch from total demand minus total locked entries or from periodId values.
+
+Before emitting any unresolvedConstraints or returning NO_SOLUTION_FOUND,
+recheck each claimed cause against the relevant snapshot fields and mappings.
+Omit causes that the snapshot does not support. If a required mapping is
+missing or ambiguous, identify that missing field instead of guessing or
+asserting a conflict. Distinguish a verified contradiction in the supplied
+constraints from failure to find a candidate within the available limits; do
+not claim global infeasibility or backend validation.
 
 If the user asks to leave a slot empty and that day/session/periodIndex is not
 present in SNAPSHOT.data.periods, the slot is already unavailable and the
@@ -121,8 +147,10 @@ If user input is required, use NEEDS_INPUT with an empty entries array and
 unresolvedConstraints identifying the missing information using code, field,
 and a Vietnamese message.
 If you cannot find a candidate within the limits, use NO_SOLUTION_FOUND with
-an empty entries array and unresolvedConstraints describing the difficulties.
-Do not claim this proves infeasibility or global optimality.
+an empty entries array and unresolvedConstraints describing only difficulties
+supported by the snapshot. Apply the required slot, locked-entry, and demand
+cross-checks above before returning this status. Do not claim this proves
+infeasibility or global optimality.
 
 When the application supplies VALIDATION_ERRORS, revise the candidate to address
 the errors while preserving hard constraints, demands, locked entries, and scope.
