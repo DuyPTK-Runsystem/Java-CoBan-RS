@@ -1,5 +1,8 @@
 # Dev Note Summary
 
+- 2026-10-07 — [088.12 Ẩn explanation khi gợi ý TKB thành công](../fe/timetable/088.12-hide-successful-timetable-agent-explanation-2026-10-07.md): ẩn explanation ở proposal thành công, giữ khi cần xử lý; lint, 124 file/667 tests, coverage, build và Storybook PASS; browser/live NOT RUN.
+- 2026-10-07 — [088.11 Gộp duyệt và lưu gợi ý TKB](../fe/timetable/088.11-combine-timetable-agent-save-action-2026-10-07.md): một nút chạy tuần tự hai API; lint, 124 file/666 tests, coverage, build và Storybook PASS; browser/live NOT RUN.
+
 - 2026-10-06 — [088.10 Timetable agent domain validation PMD cleanup](../be/timetableagent/088.10-timetable-agent-domain-validation-pmd-2026-10-06.md) — `pmdMain` PASS with 0 violations after extracting conflict helpers; Checkstyle PASS with 980 baseline warnings; build PASS excluding `test` and user-skipped `pmdTest`; full test FAIL 503/96 with `ClientOptions.kt:561` and OOM; runtime NOT RUN.
 
 - 2026-10-06 — [093 Timetable agent occupied-context normalization](../be/timetableagent/093-timetable-agent-context-normalization-2026-10-06.md): focused regression 11/11 PASS; Checkstyle PASS with 980 repository warnings; PMD/build -x test FAIL only on 8 known DomainValidation findings; full suite omitted per user instruction; runtime NOT RUN.

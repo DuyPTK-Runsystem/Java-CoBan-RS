@@ -51,6 +51,7 @@ const canApprove = computed(() => available.value && phase.value === 'idle' && !
   && proposal.value?.status === 'READY_FOR_REVIEW' && proposal.value.capabilities.canApprove)
 const canExecute = computed(() => available.value && phase.value === 'idle' && !pending.value && !expired.value && !stale.value && !blocked.value
   && proposal.value?.status === 'APPROVED' && proposal.value.capabilities.canExecute && approvedBinding.value === binding(proposal.value))
+const canSave = computed(() => canApprove.value || canExecute.value)
 const displayPhase = computed(() => receipt.value || pending.value ? phase.value : stale.value ? 'stale' : expired.value ? 'expired' : phase.value)
 const canRetryPending = computed(() => !!pending.value && available.value && !busy.value
   && (recoveryAllowsRetry.value || (retryAfter.value !== null && now.value >= retryAfter.value)))
@@ -228,19 +229,33 @@ async function generate(request: TimetableAgentRequest) {
     phase.value = 'idle'
   } catch (cause) { if (epoch === requestEpoch) failure(cause) }
 }
-async function approve() {
-  if (!canApprove.value || !proposal.value) return
+async function saveSuggestion() {
+  if (canApprove.value && proposal.value) {
+    const token = requireAccessToken()
+    if (!token) return
+    const original = binding(proposal.value)
+    const epoch = ++requestEpoch
+    phase.value = 'approving'; error.value = ''
+    try {
+      const approved = await approveTimetableAgentProposal(proposal.value, token)
+      if (epoch !== requestEpoch) return
+      if (binding(approved) !== original || approved.status !== 'APPROVED') {
+        proposal.value = null
+        throw new Error('Phương án duyệt không khớp. Tạo phương án mới và lưu lại.')
+      }
+      proposal.value = approved; approvedBinding.value = original; phase.value = 'idle'
+    } catch (cause) { if (epoch === requestEpoch) { failure(cause); return } }
+  }
+  if (!canExecute.value || !proposal.value) return
+  await execute()
+}
+async function execute() {
+  if (!canExecute.value || !proposal.value) return
   const token = requireAccessToken()
   if (!token) return
-  const original = binding(proposal.value)
-  const epoch = ++requestEpoch
-  phase.value = 'approving'; error.value = ''
-  try {
-    const approved = await approveTimetableAgentProposal(proposal.value, token)
-    if (epoch !== requestEpoch) return
-    if (binding(approved) !== original || approved.status !== 'APPROVED') throw new Error('Phương án duyệt không khớp. Tạo phương án mới và duyệt lại.')
-    proposal.value = approved; approvedBinding.value = original; phase.value = 'idle'
-  } catch (cause) { if (epoch === requestEpoch) failure(cause) }
+  const action: TimetableAgentPendingAction = { proposalId: proposal.value.proposalId, proposalVersion: proposal.value.proposalVersion, targetRevisionId: props.detail.revisionId, idempotencyKey: crypto.randomUUID() }
+  try { retainPending(action) } catch (cause) { failure(cause); return }
+  await runPending(action, token)
 }
 function saved(result: TimetableAgentReceipt, action: TimetableAgentPendingAction) {
   if (result.status !== 'SAVED_DRAFT' || result.proposalId !== action.proposalId || result.targetRevisionId !== action.targetRevisionId
@@ -278,14 +293,6 @@ async function runPending(action: TimetableAgentPendingAction, token: string) {
     error.value = 'Chưa nhận được kết quả lưu. Hãy kiểm tra trạng thái hành động.'
   }
 }
-async function execute() {
-  if (!canExecute.value || !proposal.value) return
-  const token = requireAccessToken()
-  if (!token) return
-  const action: TimetableAgentPendingAction = { proposalId: proposal.value.proposalId, proposalVersion: proposal.value.proposalVersion, targetRevisionId: props.detail.revisionId, idempotencyKey: crypto.randomUUID() }
-  try { retainPending(action) } catch (cause) { failure(cause); return }
-  await runPending(action, token)
-}
 async function retryPending() {
   if (!canRetryPending.value || !pending.value) return
   const token = requireAccessToken()
@@ -309,7 +316,7 @@ async function recover() {
 
 <template>
   <section aria-label="Gợi ý thời khoá biểu" class="agent-workspace">
-    <div class="agent-steps" aria-label="Các bước">1. Ràng buộc → 2. Xem gợi ý → 3. Duyệt phương án → 4. Lưu bản nháp</div>
+    <div class="agent-steps" aria-label="Các bước">1. Ràng buộc → 2. Xem gợi ý → 3. Lưu gợi ý</div>
     <div v-if="policyLoading || needsPolicyConfirmation || policyError" class="policy-confirmation" role="status">
       <span v-if="policyLoading">Đang tải chính sách định mức tiết dạy hiện hành…</span>
       <template v-else-if="activePolicy && needsPolicyConfirmation">
@@ -323,7 +330,7 @@ async function recover() {
     </div>
     <div class="agent-layout">
       <TimetableAgentPanel :target-revision-id="detail.revisionId" :expected-version="detail.version" :default-valid-from="detail.effectiveFrom" :default-valid-to="detail.effectiveTo ?? ''" :classes="classOptions" :assignments="assignments" :existing-entries="entries" :can-generate="available && !policyLoading && !policySaving && !pending && phase !== 'response-lost' && (proposal?.capabilities.canGenerate ?? true)" :busy="busy || !!pending || policySaving" :assignments-loading="assignmentsLoading" @generate="generate" @input-changed="inputChanged" @classes-changed="classesChanged" />
-      <TimetableAgentReview :proposal="proposal" :receipt="receipt" :phase="displayPhase" :periods="periods" :assignments="labelOptions" :can-approve="canApprove" :can-execute="canExecute" :error="error" :pending-recovery="!!pending" :can-retry-pending="canRetryPending" @approve="approve" @execute="execute" @recover="recover" @retry-pending="retryPending" @reload="emit('reload')" />
+      <TimetableAgentReview :proposal="proposal" :receipt="receipt" :phase="displayPhase" :periods="periods" :assignments="labelOptions" :can-save="canSave" :error="error" :pending-recovery="!!pending" :can-retry-pending="canRetryPending" @save="saveSuggestion" @recover="recover" @retry-pending="retryPending" @reload="emit('reload')" />
     </div>
   </section>
 </template>

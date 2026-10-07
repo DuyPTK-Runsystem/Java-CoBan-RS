@@ -4,6 +4,8 @@
 
 ## Chronological Summary
 
+- [Dev Note 088.12: Ẩn explanation khi gợi ý TKB thành công](timetable/088.12-hide-successful-timetable-agent-explanation-2026-10-07.md) — Ẩn explanation ở READY_FOR_REVIEW/APPROVED/SAVED; lint, 124 file/667 tests, coverage, build, Storybook PASS; browser/live NOT RUN (2026-10-07).
+- [Dev Note 088.11: Gộp duyệt và lưu gợi ý TKB](timetable/088.11-combine-timetable-agent-save-action-2026-10-07.md) — Một nút “Lưu gợi ý” chạy duyệt rồi lưu; full FE tests 666/666, coverage, lint, build và Storybook PASS; browser/live NOT RUN (2026-10-07).
 - [Dev Note 088.1: Confirm active teacher-load policy before agent proposals](../be/timetableagent/088.1-confirm-active-policy-before-agent-2026-10-02.md) — Explicit current ACTIVE policy confirmation; 15 focused tests; full FE suite 660 tests, lint, build, Storybook PASS; coverage NOT RUN (2026-10-02).
 | No. | Module | Note | Status | Updated |
 | --- | --- | --- | --- | --- |

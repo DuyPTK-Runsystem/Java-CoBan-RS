@@ -12,19 +12,20 @@ const props = defineProps<{
   periods: TimetablePeriod[]
   assignments: TimetableAgentAssignmentOption[]
   receipt: TimetableAgentReceipt | null
-  canApprove: boolean
-  canExecute: boolean
+  canSave: boolean
   error?: string
   pendingRecovery?: boolean
   canRetryPending?: boolean
 }>()
-const emit = defineEmits<{ approve: []; execute: []; recover: []; retryPending: []; reload: [] }>()
+const emit = defineEmits<{ save: []; recover: []; retryPending: []; reload: [] }>()
 const days = SCHOOL_WEEKDAYS.map(({ value: id, label: name }) => ({ id, name }))
 const sessions = [{ id: 'MORNING', name: 'Sáng' }, { id: 'AFTERNOON', name: 'Chiều' }]
 const busy = computed(() => ['generating', 'approving', 'executing', 'recovering'].includes(props.phase))
+const showExplanation = computed(() => !!props.proposal
+  && !['READY_FOR_REVIEW', 'APPROVED', 'SAVED'].includes(props.proposal.status))
 const statusText = computed(() => {
   const phaseLabels: Partial<Record<TimetableAgentPhase, string>> = {
-    generating: 'Đang tạo gợi ý…', approving: 'Đang duyệt phương án…', executing: 'Đang lưu bản nháp…', recovering: 'Đang kiểm tra kết quả lưu…',
+    generating: 'Đang tạo gợi ý…', approving: 'Đang chuẩn bị lưu gợi ý…', executing: 'Đang lưu gợi ý…', recovering: 'Đang kiểm tra kết quả lưu…',
     'response-lost': 'Chưa xác định kết quả lưu. Kiểm tra trạng thái trước khi tiếp tục.',
     'invalid-schema': 'Gợi ý chưa có cấu trúc hợp lệ.', 'provider-timeout': 'Quá thời gian tạo gợi ý.', denied: 'Bạn không có quyền thực hiện thao tác này.',
     unavailable: 'Gợi ý thời khoá biểu hiện chưa khả dụng.', stale: 'Dữ liệu đã thay đổi. Tạo phương án mới và duyệt lại.', expired: 'Phương án đã hết hạn. Tạo phương án mới và duyệt lại.',
@@ -54,7 +55,7 @@ function cell(classId: number, day: number, session: string, index: number) {
 </script>
 
 <template>
-  <section class="agent-review" aria-label="Xem và duyệt phương án" :aria-busy="busy">
+  <section class="agent-review" aria-label="Xem gợi ý thời khoá biểu" :aria-busy="busy">
     <h3>Phương án đề xuất</h3>
     <FormAlert :tone="receipt ? 'success' : 'info'" :message="receipt ? 'Đã lưu bản nháp theo kết quả của máy chủ.' : statusText" />
     <FormAlert v-if="error" :message="error" />
@@ -68,7 +69,7 @@ function cell(classId: number, day: number, session: string, index: number) {
       <Button label="Tải lại thời khoá biểu" :disabled="busy" @click="emit('reload')" />
     </template>
     <template v-if="proposal">
-      <p class="agent-explanation">{{ proposal.explanation }}</p>
+      <p v-if="showExplanation" class="agent-explanation">{{ proposal.explanation }}</p>
       <FormAlert v-for="(issue, i) in proposal.issues" :key="`${issue.code}-${i}`" :tone="issue.severity === 'BLOCKING' ? 'error' : 'warning'" :message="issue.message" />
       <p v-if="proposal.entries.length">Xanh: tiết mới hoặc thay đổi. Xám: tiết giữ nguyên. Mỗi tiết hiển thị khoảng ngày áp dụng.</p>
       <section v-for="c in previewClasses" :key="c.id" class="agent-class-grid">
@@ -95,10 +96,9 @@ function cell(classId: number, day: number, session: string, index: number) {
         <div v-for="group in [{name: 'Thêm / thay đổi', rows: proposal.diff.added}, {name: 'Bỏ', rows: proposal.diff.removed}, {name: 'Giữ nguyên', rows: proposal.diff.unchanged}]" :key="group.name"><h4>{{ group.name }}</h4><ul><li v-for="entry in group.rows" :key="key(entry)">{{ label(entry) }} · {{ entry.validFrom }} → {{ entry.validTo }}</li></ul></div>
       </details>
       <div v-if="!receipt" class="agent-actions">
-        <Button label="Duyệt phương án" :loading="phase === 'approving'" :disabled="busy || !canApprove" @click="canApprove && emit('approve')" />
-        <Button label="Lưu bản nháp" :loading="phase === 'executing'" :disabled="busy || !canExecute" @click="canExecute && emit('execute')" />
+        <Button label="Lưu gợi ý" :loading="phase === 'approving' || phase === 'executing'" :disabled="busy || !canSave" @click="canSave && emit('save')" />
       </div>
-      <p v-if="!receipt" class="agent-hint">Duyệt và lưu là hai bước riêng. Chỉnh yêu cầu cần tạo gợi ý và duyệt lại. Công bố qua quy trình hiện có.</p>
+      <p v-if="!receipt" class="agent-hint">Lưu gợi ý sẽ duyệt phương án rồi lưu vào bản nháp. Công bố qua quy trình hiện có.</p>
     </template>
   </section>
 </template>
