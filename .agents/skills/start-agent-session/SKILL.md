@@ -65,6 +65,15 @@ Chỉ đọc tài liệu phù hợp khi task cần; không tải toàn bộ tài
 - Parallel delivery: từ Plan 073, đọc `document/dev-impl-plan/summary/MASTER_PLAN_V3-2026-09-09.md` và plan BE/FE tương ứng; không áp dụng mô hình chờ toàn bộ BE hoàn thành rồi mới bắt đầu FE.
 - Open decisions: các mục `TBD` trong v3, đặc biệt quy định định mức tiết/tuần, phải được xác nhận trước khi code phần bị ảnh hưởng; không tự suy đoán giá trị nghiệp vụ.
 
+### Version v4
+
+- Entry point: đọc `document/application-doc/v4/README.md` để xác định CR v4 hiện có và tài liệu nền được kế thừa.
+- V4 hiện là các change request cải tiến trên nền v3, chưa phải baseline thay thế v3. Đọc requirement v3 và module liên quan cùng CR v4; không diễn giải CR/DRAFT/TBD thành quyết định đã duyệt hoặc sửa ngầm contract v2/v3.
+- Change request: chọn CR phù hợp trong `document/application-doc/v4/change-request/`; hiện có `CR-V4-001-spring-ai-timetable-agent.md` cho agent gợi ý và lưu thời khóa biểu.
+- Timetable agent: khi task liên quan CR-V4-001, đọc `document/application-doc/v3/modules/02-TimetableAndTeachingLoad.md` làm requirement nền, CR-V4-001 và các contract liên quan trong `document/application-doc/v4/agent-contract/` theo phần việc (schema proposal/save, prompt, hoặc harness/tools/snapshot/prompt cache).
+- Kế hoạch triển khai và thiết kế FE: theo link trong README/CR; với CR-V4-001 hiện có Developer Plan 088 và wireframe được CR dẫn chiếu. Chỉ đọc khi scope cần.
+- Nếu chưa có CR hoặc tài liệu v4 cho capability được yêu cầu, xác định khoảng trống và hỏi/xác nhận hướng tài liệu trước khi coi đó là requirement; không tự tạo baseline v4 tổng quát.
+
 ### Tài liệu dùng chung
 
 - Backend workflow: đọc `.codex/workflows/WORKFLOW-BACKEND.md` và các reference được dẫn tới khi task sửa backend.
