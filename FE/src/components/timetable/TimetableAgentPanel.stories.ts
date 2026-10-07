@@ -8,7 +8,9 @@ const meta = {
 } satisfies Meta<typeof TimetableAgentPanel>
 export default meta
 type Story = StoryObj<typeof meta>
-export const Idle: Story = {}
+export const Idle: Story = {
+  parameters: { docs: { description: { story: 'Chọn lớp để nạp lịch hiện có. Các tiết trong phạm vi sẽ được chọn sẵn ở “Tiết giữ nguyên”; có thể bỏ chọn tiết muốn thay đổi.' } } },
+}
 export const Generating: Story = { args: { busy: true } }
 export const Disabled: Story = { args: { canGenerate: false } }
 export const AssignmentsLoading: Story = { args: { assignmentsLoading: true } }

@@ -78,8 +78,7 @@ const childProps: ComponentObjectPropsOptions = {
   expectedVersion: { type: Number, default: 0 },
   classes: { type: Array as PropType<{ id: number; name: string }[]>, default: () => [] },
   canGenerate: { type: Boolean, default: false },
-  canApprove: { type: Boolean, default: false },
-  canExecute: { type: Boolean, default: false },
+  canSave: { type: Boolean, default: false },
   canRetryPending: { type: Boolean, default: false },
   busy: { type: Boolean, default: false },
   assignmentsLoading: { type: Boolean, default: false },
@@ -112,11 +111,10 @@ const PanelStub = createActionStub('TimetableAgentPanelStub', [
 ], ['generate', 'inputChanged', 'classesChanged'])
 
 const ReviewStub = createActionStub('TimetableAgentReviewStub', [
-  { id: 'approve', label: 'approve', event: 'approve' },
-  { id: 'execute', label: 'execute', event: 'execute' },
+  { id: 'save', label: 'save', event: 'save' },
   { id: 'recover', label: 'recover', event: 'recover' },
   { id: 'retry', label: 'retry', event: 'retryPending' },
-], ['approve', 'execute', 'recover', 'retryPending', 'reload'])
+], ['save', 'recover', 'retryPending', 'reload'])
 
 const detail = {
   timetableId: 1,
@@ -163,11 +161,11 @@ async function mountWorkspace(detailOverride = detail) {
   return wrapper
 }
 
-async function generateAndApprove(target?: VueWrapper) {
+async function generateAndSave(target?: VueWrapper) {
   const workspace = target ?? await mountWorkspace()
   await workspace.get('#generate').trigger('click')
   await flushPromises()
-  await workspace.get('#approve').trigger('click')
+  await workspace.get('#save').trigger('click')
   await flushPromises()
 }
 
@@ -181,7 +179,7 @@ describe('TimetableAgentWorkspace', () => {
     mocks.confirmPolicy.mockReset().mockResolvedValue({ ...detail, version: 8 })
     mocks.createProposal.mockReset().mockResolvedValue(proposal())
     mocks.approveProposal.mockReset().mockImplementation(async (value: TimetableAgentProposal) => proposal({ ...value, status: 'APPROVED', capabilities: { canGenerate: true, canApprove: false, canExecute: true } }))
-    mocks.executeProposal.mockReset()
+    mocks.executeProposal.mockReset().mockResolvedValue(receipt)
     mocks.recoverByKey.mockReset()
     mocks.randomUUID.mockReset().mockReturnValue('stable-action-key')
     vi.stubGlobal('crypto', { randomUUID: mocks.randomUUID })
@@ -217,18 +215,19 @@ describe('TimetableAgentWorkspace', () => {
     const target = await mountWorkspace()
     await target.get('#generate').trigger('click')
     await flushPromises()
-    await target.get('#approve').trigger('click')
+    await target.get('#save').trigger('click')
     await flushPromises()
-    expect(target.findComponent(ReviewStub).props('canExecute')).toBe(true)
+    expect(mocks.approveProposal).toHaveBeenCalledTimes(1)
+    expect(mocks.executeProposal).toHaveBeenCalledTimes(1)
 
     await target.get('#edit').trigger('click')
     expect(target.findComponent(ReviewStub).props('proposal')).toBeNull()
-    expect(target.findComponent(ReviewStub).props('canExecute')).toBe(false)
+    expect(target.findComponent(ReviewStub).props('canSave')).toBe(false)
 
     await target.get('#generate').trigger('click')
     await flushPromises()
     await target.setProps({ detail: { ...detail, version: 8 } })
-    expect(target.findComponent(ReviewStub).props('canApprove')).toBe(false)
+    expect(target.findComponent(ReviewStub).props('canSave')).toBe(false)
   })
 
   it('rejects an approval response whose immutable proposal binding changed', async () => {
@@ -241,10 +240,10 @@ describe('TimetableAgentWorkspace', () => {
     const target = await mountWorkspace()
     await target.get('#generate').trigger('click')
     await flushPromises()
-    await target.get('#approve').trigger('click')
+    await target.get('#save').trigger('click')
     await flushPromises()
 
-    expect(target.findComponent(ReviewStub).props('canExecute')).toBe(false)
+    expect(target.findComponent(ReviewStub).props('canSave')).toBe(false)
     expect(target.findComponent(ReviewStub).props('error')).toContain('không khớp')
     expect(mocks.executeProposal).not.toHaveBeenCalled()
   })
@@ -252,8 +251,7 @@ describe('TimetableAgentWorkspace', () => {
   it('clears the pending key for a definitive stale response', async () => {
     mocks.executeProposal.mockRejectedValueOnce(new ApiError(409, 'Timetable revision is stale.'))
     const target = await mountWorkspace()
-    await generateAndApprove(target)
-    await target.get('#execute').trigger('click')
+    await generateAndSave(target)
     await flushPromises()
 
     expect(sessionStorage.getItem('timetable-agent.pending.7.42')).toBeNull()
@@ -265,8 +263,7 @@ describe('TimetableAgentWorkspace', () => {
   it('retries the exact pending action only after its lease expires', async () => {
     mocks.executeProposal.mockRejectedValueOnce(new Error('connection lost')).mockResolvedValueOnce(receipt)
     const target = await mountWorkspace()
-    await generateAndApprove(target)
-    await target.get('#execute').trigger('click')
+    await generateAndSave(target)
     await flushPromises()
     const pending = JSON.parse(sessionStorage.getItem('timetable-agent.pending.7.42') ?? 'null') as {
       idempotencyKey: string
@@ -310,15 +307,14 @@ describe('TimetableAgentWorkspace', () => {
   it('retains the action key across reload and recovers by key without executing twice', async () => {
     mocks.executeProposal.mockRejectedValueOnce(new Error('connection lost'))
     const first = await mountWorkspace()
-    await generateAndApprove(first)
-    await first.get('#execute').trigger('click')
+    await generateAndSave(first)
     await flushPromises()
 
     const key = 'timetable-agent.pending.7.42'
     const pending = JSON.parse(sessionStorage.getItem(key) ?? 'null') as { idempotencyKey: string }
     expect(pending.idempotencyKey).toBe('stable-action-key')
     expect(first.findComponent(ReviewStub).props('phase')).toBe('response-lost')
-    expect(first.findComponent(ReviewStub).props('canExecute')).toBe(false)
+    expect(first.findComponent(ReviewStub).props('canSave')).toBe(false)
     expect(mocks.executeProposal).toHaveBeenCalledTimes(1)
 
     first.unmount()

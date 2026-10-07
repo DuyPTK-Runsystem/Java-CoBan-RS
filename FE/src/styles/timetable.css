@@ -29,3 +29,21 @@
 .timetable-settings-dialog .p-dialog-footer{padding-top:0}.settings-form-grid{align-items:start}
 @media (max-width:639px){.timetable-settings-dialog .p-dialog-content{padding:.9rem}.timetable-settings-dialog .p-dialog-footer{padding:.75rem}.timetable-settings-dialog .p-dialog-footer>div{flex-wrap:wrap}.timetable-settings-dialog .p-dialog-footer .p-button{flex:1 1 100%}}
 }
+
+.agent-multiselect-panel .p-multiselect-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+.agent-multiselect-panel .p-multiselect-header::after {
+  content: 'Tất cả';
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  transition: color 0.15s ease;
+}
+.agent-multiselect-panel .p-multiselect-header:hover::after {
+  color: #111827;
+}
