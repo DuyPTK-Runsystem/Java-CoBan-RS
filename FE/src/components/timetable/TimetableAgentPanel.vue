@@ -61,8 +61,8 @@ watch([classIds, validFrom, validTo, demands, lockedEntryIds, preferences, userR
   emit('inputChanged')
 }, { deep: true, flush: 'sync' })
 watch(demandConfirmed, () => emit('inputChanged'), { flush: 'sync' })
-watch([scopedAssignments, scopedEntries], () => {
-  lockedEntryIds.value = lockedEntryIds.value.filter((id) => scopedEntries.value.some((e) => (e.entryId ?? e.id) === id))
+watch(scopedEntries, (entries) => {
+  lockedEntryIds.value = entries.map((entry) => entry.entryId ?? entry.id).filter((id): id is number => id !== undefined)
 })
 
 function editDemand(assignmentId: number, value: number | null) {

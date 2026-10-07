@@ -174,6 +174,35 @@ describe('TimetableAgentPanel', () => {
     expect(lockedPicker!.props('options')).toEqual([
       { id: 2, label: '10A1 · Toán · Thứ Hai · Sáng tiết 2 · 2026-11-01 → 2026-11-30' },
     ])
+    expect(lockedPicker!.props('modelValue')).toEqual([2])
+  })
+
+  it('selects every scoped entry by default, then submits the user-selected subset', async () => {
+    const row: TimetableEntry = {
+      id: 1, revisionId: 42, assignmentId: 501, periodId: 71,
+      validFrom: '2026-11-01', validTo: '2026-11-30',
+      classId: 11, className: '10A1', subjectId: 90, subjectName: 'Toán',
+      teacherId: 20, teacherName: 'Cô An', dayOfWeek: 1, session: 'MORNING', periodIndex: 1,
+    }
+    const rows = [row, { ...row, id: 2, periodIndex: 2 }, { ...row, id: 3, classId: 12, className: '10A2', assignmentId: 502 }]
+    const wrapper = mountPanel(true, rows, '2026-11-01', '2026-11-30')
+    const [classPicker, lockedPicker] = wrapper.findAllComponents(MultiSelectStub)
+    classPicker!.vm.$emit('update:modelValue', [11])
+    await nextTick()
+
+    expect(lockedPicker!.props('modelValue')).toEqual([1, 2])
+
+    classPicker!.vm.$emit('update:modelValue', [11, 12])
+    await nextTick()
+    expect(lockedPicker!.props('modelValue')).toEqual([1, 2, 3])
+
+    lockedPicker!.vm.$emit('update:modelValue', [2])
+    wrapper.findComponent(InputNumberStub).vm.$emit('update:modelValue', 4)
+    wrapper.findComponent(CheckboxStub).vm.$emit('update:modelValue', true)
+    await nextTick()
+    await wrapper.find('form').trigger('submit')
+
+    expect(wrapper.emitted('generate')?.[0]?.[0]).toMatchObject({ lockedEntryIds: [2] })
   })
 
   it('renders demands as a table with classes as rows and subjects as columns', async () => {

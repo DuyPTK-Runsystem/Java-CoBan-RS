@@ -1,5 +1,6 @@
 # Dev Note Summary
 
+- 2026-10-07 — [088.13 Mặc định giữ nguyên tất cả tiết TKB](../fe/timetable/088.13-default-lock-all-timetable-entries-2026-10-07.md): chọn sẵn mọi entry trong scope; lint, 124 file/668 tests, coverage, build và Storybook PASS; browser/live NOT RUN.
 - 2026-10-07 — [088.12 Ẩn explanation khi gợi ý TKB thành công](../fe/timetable/088.12-hide-successful-timetable-agent-explanation-2026-10-07.md): ẩn explanation ở proposal thành công, giữ khi cần xử lý; lint, 124 file/667 tests, coverage, build và Storybook PASS; browser/live NOT RUN.
 - 2026-10-07 — [088.11 Gộp duyệt và lưu gợi ý TKB](../fe/timetable/088.11-combine-timetable-agent-save-action-2026-10-07.md): một nút chạy tuần tự hai API; lint, 124 file/666 tests, coverage, build và Storybook PASS; browser/live NOT RUN.
 
