@@ -55,6 +55,84 @@ describe('router authentication guard', () => {
     expect(router.currentRoute.value.name).toBe('v2-student-edit')
   })
 
+  it.each([
+    ['/library/books', 'v2-library-books'],
+    ['/library/books/new', 'v2-library-book-create'],
+    ['/library/books/42/edit', 'v2-library-book-edit'],
+    ['/library/books/42', 'v2-library-book-detail'],
+  ])('redirects catalog alias %s to its intended route', async (path, name) => {
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'reader', roles: ['STUDENT'] } })
+    await router.push(path)
+    expect(router.currentRoute.value.name).toBe(name)
+  })
+
+  it('keeps the static create route ahead of the dynamic book detail route', () => {
+    expect(router.resolve('/v2/library/books/new').name).toBe('v2-library-book-create')
+    expect(router.resolve('/v2/library/books/42/edit').name).toBe('v2-library-book-edit')
+  })
+
+  it.each(['STUDENT', 'TEACHER'] as const)('lets %s reach catalog reader pages while role UX remains in the views', async (role) => {
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'reader', roles: [role] } })
+    await router.push('/v2/library/books')
+    expect(router.currentRoute.value.name).toBe('v2-library-books')
+    await router.push('/v2/library/books/new')
+    expect(router.currentRoute.value.name).toBe('v2-library-book-create')
+    expect(getAuthSession()?.user.roles).toEqual([role])
+  })
+
+  it('preserves student restrictions and workspace when STUDENT also has LIBRARIAN access', async () => {
+    const roles = ['STUDENT', 'LIBRARIAN'] as const
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 14, username: 'student-librarian', roles: [...roles] } })
+
+    await router.push('/register')
+    expect(router.currentRoute.value.path).toBe('/v2/attendance')
+
+    for (const path of ['/v2/attendance', '/v2/transcripts', '/v2/notifications', '/v2/library/books', '/v2/library/books/new', '/v2/library/books/42/edit']) {
+      await router.push(path)
+      expect(router.currentRoute.value.fullPath).toBe(path)
+    }
+
+    for (const path of ['/v2/academic-years', '/v2/class-transcripts', '/v2/enrollments']) {
+      await router.push(path)
+      expect(router.currentRoute.value.path).toBe('/v2/attendance')
+    }
+    expect(getAuthSession()?.user.roles).toEqual([...roles])
+  })
+
+  it('preserves teacher academic restrictions when TEACHER also has LIBRARIAN access', async () => {
+    const roles = ['TEACHER', 'LIBRARIAN'] as const
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 15, username: 'teacher-librarian', roles: [...roles] } })
+
+    await router.push('/register')
+    expect(router.currentRoute.value.path).toBe('/v2/academic-catalog/classes')
+
+    for (const path of ['/v2/academic-catalog/classes', '/v2/academic-catalog/subjects', '/v2/attendance', '/v2/my-timetable', '/v2/lesson-logs', '/v2/library/books', '/v2/library/books/new', '/v2/library/books/42/edit']) {
+      await router.push(path)
+      expect(router.currentRoute.value.fullPath).toBe(path)
+    }
+
+    for (const path of ['/v2/academic-years', '/v2/enrollments', '/v2/scorebooks/operations']) {
+      await router.push(path)
+      expect(router.currentRoute.value.name).toBe('v2-attendance')
+    }
+    expect(getAuthSession()?.user.roles).toEqual([...roles])
+  })
+
+  it('keeps ADMIN and LIBRARIAN union access to management and library routes', async () => {
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 16, username: 'admin-librarian', roles: ['ADMIN', 'LIBRARIAN'] } })
+    for (const path of ['/v2/academic-years', '/v2/library/books', '/v2/library/books/new', '/v2/library/books/42/edit']) {
+      await router.push(path)
+      expect(router.currentRoute.value.fullPath).toBe(path)
+    }
+  })
+
+  it('lands a pure LIBRARIAN on catalog and leaves the library menu scope to the shell', async () => {
+    saveAuthSession({ accessToken: 'jwt-token', user: { id: 9, username: 'librarian', roles: ['LIBRARIAN'] } })
+    await router.push('/register')
+    expect(router.currentRoute.value.path).toBe('/v2/library/books')
+    expect(router.currentRoute.value.name).toBe('v2-library-books')
+  })
+
   it('redirects /lesson-logs and /lesson-log paths to /v2/lesson-logs for authenticated user', async () => {
     saveAuthSession({ accessToken: 'jwt-token', user: { id: 4, username: 'teacher01', roles: ['TEACHER'] } })
 

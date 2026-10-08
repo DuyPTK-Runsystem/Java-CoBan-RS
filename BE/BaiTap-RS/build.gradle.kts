@@ -85,6 +85,8 @@ dependencies {
 	implementation("org.apache.poi:poi-ooxml:5.4.1")
 	implementation("org.springframework.boot:spring-boot-flyway")
 	implementation("org.flywaydb:flyway-mysql")
+	implementation("com.google.zxing:core:3.5.3")
+	implementation("com.google.zxing:javase:3.5.3")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("com.mysql:mysql-connector-j")

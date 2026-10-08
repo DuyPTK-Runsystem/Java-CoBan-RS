@@ -19,6 +19,7 @@ export function isTeacherWorkspace(roles: UserRole[]): boolean {
 export function firstPermittedWorkspacePath(roles: UserRole[]): string {
   if (isStudentWorkspace(roles)) return '/v2/attendance'
   if (isTeacherWorkspace(roles)) return '/v2/academic-catalog/classes'
+  if (roles.includes('LIBRARIAN') && !roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE')) return '/v2/library/books'
   if (roles.includes('ADMIN') || roles.includes('ACADEMIC_OFFICE')) return '/v2/academic-years'
   return '/v2/attendance'
 }

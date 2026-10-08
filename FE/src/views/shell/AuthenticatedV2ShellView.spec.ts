@@ -89,6 +89,7 @@ describe('AuthenticatedV2ShellView.vue', () => {
     })
 
     expect(wrapper.findAll('[data-to]').map((item) => [item.attributes('data-to'), item.text()])).toEqual([
+      ['/v2/library/books', 'Danh mục sách'],
       ['/v2/attendance', 'Điểm danh'],
       ['/v2/transcripts', 'Bảng điểm'],
       ['/v2/notifications', 'Thông báo'],
@@ -96,6 +97,107 @@ describe('AuthenticatedV2ShellView.vue', () => {
     expect(wrapper.find('[data-to="/v2/transcripts"]').exists()).toBe(true)
     expect(wrapper.find('[data-to="/v2/notifications"]').attributes('data-active')).toBe('false')
     expect(wrapper.find('[data-to="/v2/class-transcripts"]').exists()).toBe(false)
+  })
+
+  it('keeps a pure LIBRARIAN shell limited to catalog and notification inbox', () => {
+    saveAuthSession({ accessToken: 'token-lib', user: { id: 31, username: 'librarian', roles: ['LIBRARIAN'] } })
+    const wrapper = mount(AuthenticatedV2ShellView, {
+      global: {
+        stubs: {
+          RouterView: true,
+          AuthenticatedLayout: {
+            props: ['navigation'],
+            template: '<div><a v-for="item in navigation" :key="item.to" :href="item.to">{{ item.label }}</a></div>',
+          },
+        },
+      },
+    })
+
+    expect(wrapper.findAll('a').map((item) => item.attributes('href'))).toEqual(['/v2/library/books', '/v2/notifications'])
+  })
+
+  it.each(['STUDENT', 'TEACHER'] as const)('includes catalog access for %s while retaining its existing workspace menu', (role) => {
+    saveAuthSession({ accessToken: `token-${role.toLowerCase()}`, user: { id: 32, username: role.toLowerCase(), roles: [role] } })
+    const wrapper = mount(AuthenticatedV2ShellView, {
+      global: {
+        stubs: {
+          RouterView: true,
+          AuthenticatedLayout: {
+            props: ['navigation'],
+            template: '<div><a v-for="item in navigation" :key="item.to" :href="item.to">{{ item.label }}</a></div>',
+          },
+        },
+      },
+    })
+
+    expect(wrapper.find('a[href="/v2/library/books"]').exists()).toBe(true)
+    expect(wrapper.find('a[href="/v2/academic-years"]').exists()).toBe(false)
+    expect(wrapper.find('a[href="/v2/attendance"]').exists()).toBe(true)
+  })
+
+  it('keeps student workspace tabs and transcript access for STUDENT with LIBRARIAN role', () => {
+    saveAuthSession({ accessToken: 'token-student-librarian', user: { id: 33, username: 'student-librarian', roles: ['STUDENT', 'LIBRARIAN'] } })
+    const wrapper = mount(AuthenticatedV2ShellView, {
+      global: {
+        stubs: {
+          RouterView: true,
+          AuthenticatedLayout: {
+            props: ['navigation'],
+            template: '<div><a v-for="item in navigation" :key="item.to" :href="item.to">{{ item.label }}</a></div>',
+          },
+        },
+      },
+    })
+
+    expect(wrapper.findAll('a').map((item) => item.attributes('href'))).toEqual([
+      '/v2/library/books',
+      '/v2/attendance',
+      '/v2/transcripts',
+      '/v2/notifications',
+    ])
+  })
+
+  it('keeps teacher restrictions and library management access for TEACHER with LIBRARIAN role', () => {
+    saveAuthSession({ accessToken: 'token-teacher-librarian', user: { id: 34, username: 'teacher-librarian', roles: ['TEACHER', 'LIBRARIAN'] } })
+    const wrapper = mount(AuthenticatedV2ShellView, {
+      global: {
+        stubs: {
+          RouterView: true,
+          AuthenticatedLayout: {
+            props: ['navigation'],
+            template: '<div><a v-for="item in navigation" :key="item.to" :href="item.to">{{ item.label }}</a></div>',
+          },
+        },
+      },
+    })
+
+    expect(wrapper.find('a[href="/v2/library/books"]').exists()).toBe(true)
+    expect(wrapper.find('a[href="/v2/academic-catalog/classes"]').exists()).toBe(true)
+    expect(wrapper.find('a[href="/v2/academic-catalog/subjects"]').exists()).toBe(true)
+    expect(wrapper.find('a[href="/v2/my-timetable"]').exists()).toBe(true)
+    expect(wrapper.find('a[href="/v2/lesson-logs"]').exists()).toBe(true)
+    expect(wrapper.find('a[href="/v2/academic-years"]').exists()).toBe(false)
+    expect(wrapper.find('a[href="/v2/enrollments"]').exists()).toBe(false)
+    expect(wrapper.find('a[href="/v2/scorebooks/operations"]').exists()).toBe(false)
+  })
+
+  it('preserves admin management navigation when ADMIN also has LIBRARIAN role', () => {
+    saveAuthSession({ accessToken: 'token-admin-librarian', user: { id: 35, username: 'admin-librarian', roles: ['ADMIN', 'LIBRARIAN'] } })
+    const wrapper = mount(AuthenticatedV2ShellView, {
+      global: {
+        stubs: {
+          RouterView: true,
+          AuthenticatedLayout: {
+            props: ['navigation'],
+            template: '<div><a v-for="item in navigation" :key="item.to" :href="item.to">{{ item.label }}</a></div>',
+          },
+        },
+      },
+    })
+
+    expect(wrapper.find('a[href="/v2/library/books"]').exists()).toBe(true)
+    expect(wrapper.find('a[href="/v2/academic-years"]').exists()).toBe(true)
+    expect(wrapper.find('a[href="/v2/enrollments"]').exists()).toBe(true)
   })
 
   it('marks the Notification tab active for STUDENT on the inbox route', () => {

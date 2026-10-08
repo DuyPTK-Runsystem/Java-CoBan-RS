@@ -23,6 +23,7 @@ export interface ValidationError {
 }
 
 export interface ApiErrorDetails {
+  code?: string
   kind: ApiErrorKind
   rawMessages: string[]
   globalMessages: string[]
@@ -31,6 +32,7 @@ export interface ApiErrorDetails {
 }
 
 export class ApiError extends Error {
+  readonly code?: string
   readonly status: number
   readonly kind: ApiErrorKind
   readonly rawMessages: string[]
@@ -41,6 +43,7 @@ export class ApiError extends Error {
   constructor(status: number, message: string, details: Partial<ApiErrorDetails> = {}) {
     super(message)
     this.name = 'ApiError'
+    this.code = details.code
     this.status = status
     this.kind = details.kind ?? 'http'
     this.rawMessages = details.rawMessages ?? []

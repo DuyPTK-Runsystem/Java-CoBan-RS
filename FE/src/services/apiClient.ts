@@ -19,6 +19,8 @@ export interface ApiClientConfig {
 }
 
 interface ErrorPayload {
+  code?: unknown
+  fieldErrors?: unknown
   error?: unknown
   message?: unknown
   errors?: unknown
@@ -89,8 +91,9 @@ function normalizeErrors(payload: ErrorPayload | null): { rawMessages: string[];
     }
   })
 
-  if (validationMap.size === 0 && payload?.errors && typeof payload.errors === 'object' && !Array.isArray(payload.errors)) {
-    Object.entries(payload.errors as Record<string, unknown>).forEach(([field, value]) => {
+  const fieldErrors = payload?.fieldErrors ?? payload?.errors
+  if (fieldErrors && typeof fieldErrors === 'object' && !Array.isArray(fieldErrors)) {
+    Object.entries(fieldErrors as Record<string, unknown>).forEach(([field, value]) => {
       const messages = asMessages(value)
       if (isFieldName(field) && messages.length > 0) validationMap.set(field, messages)
     })
@@ -146,6 +149,7 @@ async function toApiError(response: Response): Promise<ApiError> {
     : details
   return new ApiError(response.status, safePayloadMessage(payload, response.status, safeDetails), {
     ...safeDetails,
+    code: typeof payload?.code === 'string' ? payload.code : undefined,
     kind: kindForStatus(response.status),
   })
 }

@@ -63,6 +63,7 @@ onBeforeUnmount(() => {
 
 const navigation = computed<NavigationItem[]>(() => {
   const items: NavigationItem[] = [
+    { label: 'Danh mục sách', to: '/v2/library/books', icon: 'pi pi-book' },
     { label: 'Năm học & học kỳ', to: '/v2/academic-years', icon: 'pi pi-calendar' },
     { label: 'Khối', to: '/v2/academic-catalog/grades', icon: 'pi pi-sitemap' },
     { label: 'Lớp', to: '/v2/academic-catalog/classes', icon: 'pi pi-building' },
@@ -146,7 +147,10 @@ const navigation = computed<NavigationItem[]>(() => {
       active: Boolean(route?.path?.startsWith('/v2/lesson-logs')),
     })
   }
-  if (isStudentWorkspace(roles)) return items.filter((item) => isStudentWorkspacePath(item.to))
+  const catalogOnly = roles.includes('LIBRARIAN')
+    && !roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE' || role === 'TEACHER' || role === 'STUDENT')
+  if (catalogOnly) return items.filter((item) => item.to === '/v2/library/books' || item.to === '/v2/notifications')
+  if (isStudentWorkspace(roles)) return items.filter((item) => isStudentWorkspacePath(item.to) || item.to === '/v2/library/books')
   if (isTeacherWorkspace(roles)) {
     const teacherRestrictedPaths = new Set([
       '/v2/academic-years',
