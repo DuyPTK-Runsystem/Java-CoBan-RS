@@ -1,0 +1,3325 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Wireframe tương tác quản lý cấp phát và thu hồi thẻ thư viện · Academic Core v5.">
+  <title>Quản lý cấp phát &amp; thu hồi thẻ thư viện · Academic Core</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-strong: #3525ce;
+      --primary-light: #eef2ff;
+      --secondary: #505f76;
+      --surface: #f7f9fb;
+      --surface-card: #ffffff;
+      --low: #f2f4f6;
+      --line: #e2e8f0;
+      --outline: #c7c4d8;
+      --text-main: #191c1e;
+      --text-muted: #64748b;
+      --error: #ba1a1a;
+      --error-bg: #ffdad6;
+      --success: #047857;
+      --success-bg: #d1fae5;
+      --warning: #b45309;
+      --warning-bg: #fef3c7;
+      --info: #1d4ed8;
+      --info-bg: #dbeafe;
+      --font-family: Roboto, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-family);
+      background: var(--surface);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    a { color: inherit; text-decoration: none; }
+    [hidden] { display: none !important; }
+
+    /* Top control rail (preview controls) */
+    .demo-rail {
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 8px 24px;
+      background: #1e293b;
+      color: #f1f5f9;
+      border-bottom: 1px solid #334155;
+      font-size: 13px;
+      z-index: 10;
+    }
+    .demo-rail strong { font-weight: 700; color: #38bdf8; }
+    .demo-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .demo-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .demo-control label { color: #cbd5e1; font-size: 12px; font-weight: 500; }
+    .demo-controls select {
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      background: #0f172a;
+      color: #f8fafc;
+      font-size: 12.5px;
+    }
+    .demo-nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .demo-tab-btn {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #94a3b8;
+      background: transparent;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+    }
+    .demo-tab-btn:hover { color: #f8fafc; background: #334155; }
+    .demo-tab-btn.active { color: #ffffff; background: #2563eb; border-color: #3b82f6; }
+
+    /* App Shell */
+    .app-shell { min-height: calc(100vh - 48px); display: flex; flex-direction: column; }
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 8;
+      display: flex;
+      height: 64px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      border-bottom: 1px solid var(--line);
+      background: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: #1e293b;
+      font-weight: 700;
+      font-size: 16px;
+    }
+    .brand-mark {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: 9px;
+      color: white;
+      background: var(--primary-strong);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+    .header-actions { display: flex; align-items: center; gap: 16px; }
+    .welcome { color: var(--text-muted); font-size: 14px; }
+    .user-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    /* App body */
+    .app-body { display: flex; flex: 1; }
+    .sidebar {
+      position: sticky;
+      top: 64px;
+      width: 260px;
+      height: calc(100vh - 64px);
+      flex: 0 0 260px;
+      overflow-y: auto;
+      padding: 24px 16px;
+      border-right: 1px solid var(--line);
+      background: #ffffff;
+    }
+    .sidebar nav { display: grid; gap: 5px; }
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: #475569;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+    .sidebar a:hover { background: var(--low); color: #1e293b; }
+    .sidebar a.active {
+      color: var(--primary-strong);
+      background: var(--primary-light);
+      font-weight: 700;
+    }
+    .nav-icon { width: 18px; text-align: center; font-size: 15px; opacity: 0.85; }
+
+    /* Page Content */
+    .page-content {
+      flex: 1;
+      min-width: 0;
+      width: min(100%, 1280px);
+      margin: 0 auto;
+      padding: 28px 32px 48px;
+    }
+
+    .page-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .page-heading h1 {
+      margin: 0 0 6px;
+      font-size: 26px;
+      line-height: 34px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .page-heading p { margin: 0; color: var(--text-muted); font-size: 14px; }
+    .heading-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+    /* Buttons */
+    .button {
+      display: inline-flex;
+      min-height: 38px;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 0 16px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      color: #ffffff;
+      background: var(--primary);
+      font-size: 13.5px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .button:hover { background: var(--primary-strong); }
+    .button.secondary {
+      border-color: #cbd5e1;
+      color: #334155;
+      background: #ffffff;
+    }
+    .button.secondary:hover { background: var(--low); border-color: #94a3b8; }
+    .button.text {
+      border-color: transparent;
+      color: var(--primary-strong);
+      background: transparent;
+      padding: 4px 8px;
+      min-height: 32px;
+    }
+    .button.text:hover { background: var(--primary-light); }
+    .button.danger {
+      border-color: var(--error);
+      color: white;
+      background: var(--error);
+    }
+    .button.danger:hover { background: #991b1b; }
+    .button.warning {
+      border-color: #d97706;
+      color: white;
+      background: #d97706;
+    }
+    .button.warning:hover { background: #b45309; }
+    .button.sm { min-height: 30px; padding: 0 10px; font-size: 12.5px; }
+
+    .icon-button {
+      display: inline-grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      color: #475569;
+      background: transparent;
+      font-size: 16px;
+      transition: all 0.15s;
+    }
+    .icon-button:hover { background: var(--low); color: #0f172a; }
+
+    /* Surface Cards & Sections */
+    .surface {
+      margin-bottom: 22px;
+      padding: 22px 24px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-card);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    /* KPI Stats Cards */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .kpi-card {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .kpi-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .kpi-icon.blue { background: #eff6ff; color: #2563eb; }
+    .kpi-icon.green { background: #ecfdf5; color: #059669; }
+    .kpi-icon.amber { background: #fffbeb; color: #d97706; }
+    .kpi-icon.red { background: #fef2f2; color: #dc2626; }
+    .kpi-meta { display: grid; gap: 3px; }
+    .kpi-label { font-size: 12.5px; color: var(--text-muted); font-weight: 500; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: #0f172a; line-height: 1.2; }
+
+    /* Quick Filter Tabs */
+    .view-filter-tabs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 12px;
+      overflow-x: auto;
+    }
+    .tab-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748b;
+      background: #f1f5f9;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab-pill:hover { background: #e2e8f0; color: #1e293b; }
+    .tab-pill.active { background: var(--primary-strong); color: #ffffff; }
+    .tab-badge {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(0,0,0,0.08);
+    }
+    .tab-pill.active .tab-badge { background: rgba(255,255,255,0.25); color: #fff; }
+
+    /* Search & Filter Toolbar */
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1.8fr) repeat(3, minmax(130px, 1fr)) auto auto;
+      align-items: end;
+      gap: 12px;
+      padding: 18px 20px;
+    }
+    .field { display: grid; gap: 6px; min-width: 0; }
+    .field label { color: #334155; font-size: 13px; font-weight: 600; }
+    .control {
+      width: 100%;
+      height: 38px;
+      padding: 0 11px;
+      border: 1px solid var(--outline);
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 13.5px;
+    }
+    .control:focus { outline: 2px solid #c7d2fe; border-color: var(--primary); }
+    textarea.control { height: auto; min-height: 80px; padding: 8px 11px; resize: vertical; }
+
+    /* Batch Selection Toolbar */
+    .bulk-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px 18px;
+      margin-bottom: 16px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      color: #1e3a8a;
+      font-size: 13.5px;
+    }
+    .bulk-bar strong { font-weight: 700; }
+    .bulk-actions { display: flex; align-items: center; gap: 8px; }
+
+    /* Table Styles */
+    .table-shell {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+    .data-table {
+      width: 100%;
+      min-width: 960px;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    .data-table th {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      color: #475569;
+      background: #f8fafc;
+      text-align: left;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .data-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #edf0f4;
+      vertical-align: middle;
+    }
+    .data-table tbody tr:nth-child(even) { background: #fbfcfd; }
+    .data-table tbody tr:hover { background: #f8fafc; }
+    .data-table tbody tr.row-selected { background: #eff6ff; }
+    .data-table tbody tr:last-child td { border-bottom: 0; }
+
+    /* Patron Cell */
+    .patron-cell { display: flex; align-items: center; gap: 12px; }
+    .patron-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: #334155;
+      font-weight: 700;
+      font-size: 14px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    .patron-avatar.teacher { background: #e0e7ff; color: #4338ca; }
+    .patron-meta { display: grid; gap: 2px; }
+    .patron-name { font-weight: 600; color: #0f172a; }
+    .patron-sub { font-size: 12px; color: var(--text-muted); display: flex; gap: 6px; align-items: center; }
+
+    /* Status Tags / Badges */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .tag.success { color: #065f46; background: #d1fae5; }
+    .tag.warning { color: #854d0e; background: #fef9c3; }
+    .tag.danger { color: #991b1b; background: #fee2e2; }
+    .tag.info { color: #1e40af; background: #dbeafe; }
+    .tag.neutral { color: #475569; background: #f1f5f9; }
+
+    .card-code-tag {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      color: #1e3a8a;
+    }
+
+    .table-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 18px;
+      color: #475569;
+      font-size: 13px;
+    }
+    .pager-buttons { display: flex; align-items: center; gap: 6px; }
+    .pager-buttons button {
+      min-width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #ffffff;
+      color: #334155;
+      font-weight: 500;
+    }
+    .pager-buttons button:hover:not(:disabled) { background: var(--low); }
+    .pager-buttons button.current {
+      border-color: var(--primary);
+      color: #ffffff;
+      background: var(--primary);
+      font-weight: 700;
+    }
+
+    /* ========================================================
+       LIBRARY CARD COMPONENT (CSS CR-80 SPECIFICATION)
+       Ratio 85.6mm x 54mm (1.585)
+       Web preview: 520px x 328px
+       ======================================================== */
+    .library-card-wrapper {
+      perspective: 1000px;
+      display: inline-block;
+    }
+    .library-card {
+      width: 520px;
+      height: 328px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      border: 1px solid #cbd5e1;
+      font-family: var(--font-family);
+    }
+    .card-banner {
+      background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+      color: #ffffff;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      z-index: 2;
+    }
+    .card-logo-emblem {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: #ffffff;
+      padding: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    }
+    .card-logo-emblem svg { width: 40px; height: 40px; }
+    .card-banner-divider {
+      width: 1.5px;
+      height: 34px;
+      background: rgba(255, 255, 255, 0.4);
+    }
+    .card-banner-texts { display: flex; flex-direction: column; gap: 2px; }
+    .card-banner-dept {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      opacity: 0.95;
+    }
+    .card-banner-school {
+      font-size: 14.5px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    .card-inner-body {
+      flex: 1;
+      padding: 12px 20px 16px 20px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 2;
+    }
+    .card-type-title {
+      color: #047857;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin-left: 156px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .card-grid-content {
+      display: flex;
+      gap: 20px;
+      flex: 1;
+    }
+    .card-col-qr {
+      width: 138px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .qr-frame {
+      width: 130px;
+      height: 130px;
+      background: #ffffff;
+      border: 2px solid #2563eb;
+      border-radius: 10px;
+      padding: 5px;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qr-frame svg { width: 100%; height: 100%; }
+    .card-code-display {
+      margin-top: 8px;
+      text-align: center;
+    }
+    .card-code-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    .card-code-string {
+      font-size: 16.5px;
+      font-weight: 900;
+      color: #0f172a;
+      font-family: ui-monospace, monospace;
+      letter-spacing: 0.3px;
+    }
+
+    .card-col-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 7.5px;
+      padding-top: 2px;
+    }
+    .card-field-row {
+      display: grid;
+      grid-template-columns: 22px 95px 1fr;
+      align-items: center;
+      font-size: 13.5px;
+      line-height: 1.25;
+    }
+    .card-field-icon {
+      color: #2563eb;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      font-size: 14px;
+    }
+    .card-field-lbl { color: #334155; font-weight: 500; font-size: 13px; }
+    .card-field-val {
+      color: #0f172a;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Card Watermarks & Accents */
+    .card-lotus-watermark {
+      position: absolute;
+      right: 12px;
+      bottom: -12px;
+      width: 210px;
+      height: 210px;
+      opacity: 0.16;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .card-bottom-strip-left {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 175px;
+      height: 26px;
+      background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+      border-top-right-radius: 20px;
+      z-index: 1;
+    }
+    .card-bottom-strip-accents {
+      position: absolute;
+      bottom: 0;
+      left: 162px;
+      display: flex;
+      gap: 4px;
+      z-index: 1;
+    }
+    .accent-stripe {
+      width: 9px;
+      height: 16px;
+      background: #60a5fa;
+      transform: skewX(-28deg);
+      border-radius: 2px;
+    }
+
+    /* Card Revoked Overlay */
+    .card-revoked-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(185, 28, 28, 0.88);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      z-index: 15;
+      text-align: center;
+      padding: 24px;
+      backdrop-filter: blur(2px);
+    }
+    .card-revoked-stamp {
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      border: 4px solid #ffffff;
+      padding: 8px 24px;
+      border-radius: 8px;
+      transform: rotate(-8deg);
+      text-transform: uppercase;
+    }
+
+    /* Detail View Layout */
+    .detail-grid-layout {
+      display: grid;
+      grid-template-columns: 540px 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+    .detail-info-card {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .detail-info-list { display: grid; gap: 14px; }
+    .detail-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 10px;
+      font-size: 13.5px;
+    }
+    .detail-info-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .detail-info-label { color: var(--text-muted); font-weight: 500; }
+    .detail-info-value { color: #0f172a; font-weight: 600; text-align: right; }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(2px);
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      width: min(100%, 620px);
+      max-height: min(92vh, 880px);
+      overflow-y: auto;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #ffffff;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+    }
+    .modal.lg { width: min(100%, 820px); }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 24px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    .modal-header h2 { margin: 0; color: #1e293b; font-size: 19px; line-height: 26px; font-weight: 700; }
+    .modal-body { display: grid; gap: 18px; padding: 20px 24px 24px; }
+    .modal-caption { margin: 0; color: var(--text-muted); font-size: 13.5px; line-height: 1.45; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .field.wide { grid-column: 1 / -1; }
+    .required { color: var(--error); }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    /* Alerts */
+    .alert {
+      margin: 0;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      line-height: 1.45;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .alert.error { color: #991b1b; background: var(--error-bg); }
+    .alert.warning { color: #854d0e; background: var(--warning-bg); }
+    .alert.info { color: #1e40af; background: var(--info-bg); }
+    .alert.success { color: #065f46; background: var(--success-bg); }
+
+    /* Verification Simulator Steps */
+    .verify-steps {
+      display: grid;
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 13px;
+    }
+    .verify-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+    }
+    .verify-step.pass { border-color: #86efac; background: #f0fdf4; color: #166534; }
+    .verify-step.fail { border-color: #fca5a5; background: #fef2f2; color: #991b1b; }
+    .step-badge {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      background: #e2e8f0;
+      color: #334155;
+    }
+    .verify-step.pass .step-badge { background: #22c55e; color: #ffffff; }
+    .verify-step.fail .step-badge { background: #ef4444; color: #ffffff; }
+
+    /* State Screens (Loading, Empty, Error, Forbidden) */
+    .state-surface {
+      display: grid;
+      justify-items: center;
+      gap: 12px;
+      padding: 48px 24px;
+      text-align: center;
+    }
+    .state-surface h2 { margin: 0; color: #1e293b; font-size: 20px; }
+    .state-surface p { max-width: 520px; margin: 0; color: var(--text-muted); line-height: 1.5; font-size: 14px; }
+    .state-icon {
+      display: grid;
+      width: 48px;
+      height: 48px;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--primary-strong);
+      background: var(--primary-light);
+      font-size: 22px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 100;
+      display: none;
+      max-width: min(440px, calc(100vw - 32px));
+      padding: 13px 18px;
+      border-radius: 8px;
+      color: #065f46;
+      background: #d1fae5;
+      border: 1px solid #a7f3d0;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.15);
+      font-size: 13.5px;
+      font-weight: 500;
+    }
+    .toast.show { display: block; animation: toastIn 0.2s ease-out; }
+    @keyframes toastIn { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* Print Preview Layout & Rules */
+    .print-sheet {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      background: #ffffff;
+      padding: 20px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1100px) {
+      .toolbar { grid-template-columns: repeat(3, 1fr); }
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .detail-grid-layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .demo-rail { flex-direction: column; align-items: flex-start; }
+      .demo-controls { width: 100%; }
+      .app-header { padding: 0 16px; }
+      .welcome { display: none; }
+      .app-body { display: block; }
+      .sidebar { position: static; width: 100%; height: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 10px 16px; }
+      .sidebar nav { display: flex; overflow-x: auto; gap: 4px; }
+      .sidebar a { white-space: nowrap; }
+      .page-content { padding: 20px 16px; }
+      .toolbar { grid-template-columns: 1fr; }
+      .kpi-row { grid-template-columns: 1fr; }
+      .library-card { width: 100%; max-width: 520px; }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Print media */
+    @media print {
+      body {
+        background: #ffffff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .demo-rail, .app-header, .sidebar, .page-heading, .view-filter-tabs, .toolbar, .kpi-row,
+      .bulk-bar, .pagination, .table-shell, .heading-actions, .toast, .no-print,
+      .modal-backdrop:not(#printBatchModal),
+      #issueCardModal, #revokeCardModal, #reissueCardModal,
+      #suspendPatronModal, #qrDetailModal, #verifyModal, #activatePatronModal {
+        display: none !important;
+      }
+      .page-content { padding: 0 !important; width: 100% !important; margin: 0 !important; }
+      .surface { border: 0 !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; }
+
+      /* Hiển thị sạch hộp thoại in phôi thẻ */
+      #printBatchModal.open {
+        display: block !important;
+        position: static !important;
+        inset: auto !important;
+        width: 100% !important;
+        height: auto !important;
+        background: transparent !important;
+        padding: 0 !important;
+      }
+      #printBatchModal:not(.open) {
+        display: none !important;
+      }
+      #printBatchModal .modal {
+        width: 100% !important;
+        max-width: none !important;
+        max-height: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      #printBatchModal .modal-header,
+      #printBatchModal .modal-caption,
+      #printBatchModal .modal-actions,
+      #printBatchModal #printBatchSummary,
+      #printBatchModal .alert,
+      #printBatchModal .modal-body > div:first-child {
+        display: none !important;
+      }
+      #printBatchModal .modal-body {
+        padding: 0 !important;
+        display: block !important;
+      }
+
+      .print-sheet {
+        display: grid !important;
+        grid-template-columns: repeat(2, 85.6mm) !important;
+        gap: 6mm 8mm !important;
+        padding: 10mm 12mm !important;
+        margin: 0 auto !important;
+        border: none !important;
+        width: fit-content !important;
+      }
+      .library-card {
+        width: 85.6mm !important;
+        height: 54mm !important;
+        page-break-inside: avoid !important;
+        border: 0.5pt solid #cbd5e1 !important;
+        box-shadow: none !important;
+        background: #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .card-banner {
+        padding: 3.5mm 4mm !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .card-logo-emblem { width: 9mm !important; height: 9mm !important; }
+      .card-banner-dept { font-size: 6pt !important; }
+      .card-banner-school { font-size: 7.5pt !important; }
+      .card-type-title { font-size: 11pt !important; margin-left: 26mm !important; }
+      .card-col-qr { width: 23mm !important; }
+      .qr-frame { width: 22mm !important; height: 22mm !important; }
+      .card-code-string { font-size: 8pt !important; }
+      .card-field-row { font-size: 7pt !important; grid-template-columns: 4mm 16mm 1fr !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Demo Control Rail (Giả lập vai trò, trạng thái hiển thị) -->
+  <aside class="demo-rail" aria-label="Điều khiển xem trước wireframe">
+    <div>
+      <strong>Wireframe tương tác</strong> · Quản lý cấp phát &amp; thu hồi thẻ thư viện (Plan 097)
+    </div>
+    <div class="demo-controls">
+      <div class="demo-nav-tabs">
+        <button type="button" class="demo-tab-btn active" id="tabNavManagement">Quản lý thẻ &amp; bạn đọc</button>
+        <button type="button" class="demo-tab-btn" id="tabNavMyCard">Thẻ thư viện của tôi</button>
+        <button type="button" class="demo-tab-btn" id="tabNavSampleCompare">Đối chiếu mẫu gốc (CR-80)</button>
+      </div>
+      <div class="demo-control">
+        <label for="roleMode">Vai trò xem trước:</label>
+        <select id="roleMode">
+          <option value="librarian" selected>Thủ thư (LIBRARIAN)</option>
+          <option value="admin">Quản trị viên (ADMIN)</option>
+          <option value="reader">Bạn đọc đã đăng nhập (STUDENT / TEACHER)</option>
+        </select>
+      </div>
+      <div class="demo-control">
+        <label for="stateMode">Trạng thái màn hình:</label>
+        <select id="stateMode">
+          <option value="normal" selected>Bình thường (Normal)</option>
+          <option value="loading">Đang tải (Loading)</option>
+          <option value="empty">Không có dữ liệu (Empty)</option>
+          <option value="error">Lỗi kết nối (Error 500)</option>
+          <option value="forbidden">Không có quyền (Forbidden 403)</option>
+          <option value="conflict">Xung đột phiên bản (Conflict 409)</option>
+        </select>
+      </div>
+    </div>
+  </aside>
+
+  <div class="app-shell">
+    <!-- Header chuẩn Academic Core -->
+    <header class="app-header">
+      <a class="brand" href="#" aria-label="Academic Core">
+        <span class="brand-mark">AC</span>
+        <span>Academic Core</span>
+      </a>
+      <div class="header-actions">
+        <span class="welcome" id="headerUserWelcome">Xin chào, <strong>thu.hoang (Thủ thư)</strong></span>
+        <span class="user-badge" id="headerRoleBadge">LIBRARIAN</span>
+        <button class="button text" type="button" id="logoutButton">↪ Đăng xuất</button>
+      </div>
+    </header>
+
+    <div class="app-body">
+      <!-- Sidebar điều hướng chuẩn Academic Core -->
+      <aside class="sidebar">
+        <nav aria-label="Điều hướng chức năng">
+          <a href="#"><span class="nav-icon">▦</span><span>Năm học &amp; học kỳ</span></a>
+          <a href="#"><span class="nav-icon">⌘</span><span>Khối</span></a>
+          <a href="#"><span class="nav-icon">▤</span><span>Lớp</span></a>
+          <a href="#"><span class="nav-icon">▣</span><span>Môn học</span></a>
+          <a href="#"><span class="nav-icon">↔</span><span>Quản lí môn học các lớp</span></a>
+          <a href="#"><span class="nav-icon">♧</span><span>Xếp lớp</span></a>
+          <a href="#"><span class="nav-icon">▤</span><span>Hồ sơ giáo viên</span></a>
+          <a href="#"><span class="nav-icon">▣</span><span>Phân công giảng dạy</span></a>
+          <a href="#"><span class="nav-icon">▦</span><span>Điểm danh</span></a>
+          <a href="#"><span class="nav-icon">📚</span><span>Danh mục sách</span></a>
+          <a class="active" href="#" id="sideNavPatronCard"><span class="nav-icon">🪪</span><span>Bạn đọc &amp; Thẻ thư viện</span></a>
+          <a href="#"><span class="nav-icon">🔔</span><span>Thông báo</span></a>
+        </nav>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="page-content" id="appMain">
+
+        <!-- ==========================================
+             VIEW 1: QUẢN LÝ BẠN ĐỌC & CẤP PHÁT THẺ THƯ VIỆN
+             ========================================== -->
+        <section id="managementView">
+          <div class="page-heading">
+            <div>
+              <h1>Bạn đọc &amp; Thẻ thư viện</h1>
+              <p>Quản lý hồ sơ bạn đọc, phát hành thẻ mới, thu hồi thẻ kèm lý do, cấp lại thẻ và in thẻ học sinh/giáo viên.</p>
+            </div>
+            <div class="heading-actions manager-only">
+              <button class="button secondary" type="button" id="btnVerifyModal">
+                <span>🔍</span> Giả lập xác thực QR
+              </button>
+              <button class="button secondary" type="button" id="btnActivatePatronModal">
+                <span>👤</span> Kích hoạt bạn đọc
+              </button>
+              <button class="button" type="button" id="btnIssueCardModal">
+                <span>🪪</span> Phát hành thẻ mới
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Thống kê nhanh -->
+          <div class="kpi-row">
+            <div class="kpi-card">
+              <div class="kpi-icon blue">👥</div>
+              <div class="kpi-meta">
+                <span class="kpi-label">Tổng số bạn đọc</span>
+                <span class="kpi-value" id="kpiTotalPatrons">12</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon green">🪪</div>
+              <div class="kpi-meta">
+                <span class="kpi-label">Thẻ đang hoạt động</span>
+                <span class="kpi-value" id="kpiActiveCards">8</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon amber">⏳</div>
+              <div class="kpi-meta">
+                <span class="kpi-label">Chưa cấp thẻ / Hết hạn</span>
+                <span class="kpi-value" id="kpiPendingCards">3</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon red">🚫</div>
+              <div class="kpi-meta">
+                <span class="kpi-label">Thẻ đã thu hồi</span>
+                <span class="kpi-value" id="kpiRevokedCards">2</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bộ lọc & Tìm kiếm -->
+          <div class="surface toolbar" aria-label="Bộ lọc danh sách bạn đọc và thẻ">
+            <div class="field">
+              <label for="searchInput">Tìm kiếm bạn đọc</label>
+              <input class="control" id="searchInput" type="search" placeholder="Tên, mã bạn đọc, mã học sinh/GV, mã thẻ...">
+            </div>
+            <div class="field">
+              <label for="typeFilter">Đối tượng</label>
+              <select class="control" id="typeFilter">
+                <option value="">Tất cả đối tượng</option>
+                <option value="STUDENT">Học sinh</option>
+                <option value="TEACHER">Giáo viên</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="patronStatusFilter">Trạng thái bạn đọc</label>
+              <select class="control" id="patronStatusFilter">
+                <option value="">Tất cả trạng thái bạn đọc</option>
+                <option value="ACTIVE">Đang hoạt động</option>
+                <option value="BORROWING_SUSPENDED">Bị đình chỉ mượn</option>
+                <option value="CLOSED">Đã đóng hồ sơ</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cardStatusFilter">Trạng thái thẻ</label>
+              <select class="control" id="cardStatusFilter">
+                <option value="">Tất cả trạng thái thẻ</option>
+                <option value="ACTIVE">Thẻ đang hiệu lực</option>
+                <option value="EXPIRED">Thẻ đã hết hạn</option>
+                <option value="REVOKED">Thẻ đã thu hồi</option>
+                <option value="NONE">Chưa cấp thẻ</option>
+              </select>
+            </div>
+            <button class="button secondary" id="btnFilterSubmit" type="button">⌕ Lọc</button>
+            <button class="button text" id="btnFilterReset" type="button">↺ Đặt lại</button>
+          </div>
+
+          <!-- Quick Tabs phân loại -->
+          <div class="view-filter-tabs">
+            <button type="button" class="tab-pill active" data-tab="all">Tất cả bạn đọc <span class="tab-badge" id="tabBadgeAll">12</span></button>
+            <button type="button" class="tab-pill" data-tab="active-card">Có thẻ hiệu lực <span class="tab-badge" id="tabBadgeActiveCard">8</span></button>
+            <button type="button" class="tab-pill" data-tab="no-card">Chưa cấp thẻ <span class="tab-badge" id="tabBadgeNoCard">2</span></button>
+            <button type="button" class="tab-pill" data-tab="revoked-expired">Đã thu hồi / Hết hạn <span class="tab-badge" id="tabBadgeRevoked">3</span></button>
+            <button type="button" class="tab-pill" data-tab="suspended">Bị đình chỉ mượn <span class="tab-badge" id="tabBadgeSuspended">1</span></button>
+          </div>
+
+          <!-- Thanh thao tác hàng loạt khi có checkbox được chọn -->
+          <div class="bulk-bar" id="bulkBar" hidden>
+            <div>
+              Đã chọn <strong id="bulkSelectedCount">0</strong> bạn đọc trong danh sách.
+            </div>
+            <div class="bulk-actions">
+              <button class="button sm secondary" type="button" id="btnBatchPrintSelected">🖨 In thẻ các mục đã chọn</button>
+              <button class="button sm" type="button" id="btnBatchIssueSelected">🪪 Cấp phát thẻ hàng loạt</button>
+              <button class="button sm text" type="button" id="btnBulkDeselect">Bỏ chọn tất cả</button>
+            </div>
+          </div>
+
+          <!-- State Surface Container (Hiển thị khi loading, empty, error, forbidden) -->
+          <div id="managementStateSurface"></div>
+
+          <!-- Table Surface -->
+          <div class="surface" id="tableSurface">
+            <div class="table-shell">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th style="width: 40px; text-align: center;">
+                      <input type="checkbox" id="selectAllCheckbox" aria-label="Chọn tất cả">
+                    </th>
+                    <th>Bạn đọc</th>
+                    <th>Lớp / Tổ</th>
+                    <th>Trạng thái bạn đọc</th>
+                    <th>Thẻ hiện tại</th>
+                    <th>Thời hạn thẻ</th>
+                    <th style="text-align: right;">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="patronTableRows">
+                  <!-- Dữ liệu JS render -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Phân trang -->
+            <div class="pagination">
+              <span id="pageSummary">Đang tải...</span>
+              <div class="pager-buttons">
+                <label for="pageSizeSelect" style="color:var(--text-muted); font-size:12px;">Dòng/trang:</label>
+                <select class="control" id="pageSizeSelect" style="width:68px; height:34px; padding:0 6px;">
+                  <option value="5">5</option>
+                  <option value="10" selected>10</option>
+                  <option value="20">20</option>
+                </select>
+                <button id="prevPageBtn" aria-label="Trang trước">‹</button>
+                <span id="pageIndicator">1 / 1</span>
+                <button id="nextPageBtn" aria-label="Trang sau">›</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ==========================================
+             VIEW 2: CHI TIẾT HỒ SƠ BẠN ĐỌC & THẺ THƯ VIỆN
+             ========================================== -->
+        <section id="detailView" hidden>
+          <div class="page-heading">
+            <div>
+              <button class="button text" type="button" id="btnBackToManagement">← Quay lại danh sách bạn đọc</button>
+              <h1 id="detailHeadingName" style="margin-top: 8px;">Nguyễn Văn A</h1>
+              <p id="detailHeadingMeta">Học sinh · Lớp 6A1 · Mã độc giả: DG-0001234</p>
+            </div>
+            <div class="heading-actions" id="detailHeadingActions">
+              <!-- Render theo quyền và trạng thái thẻ -->
+            </div>
+          </div>
+
+          <div class="detail-grid-layout">
+            <!-- Cột trái: Thẻ thư viện số CR-80 -->
+            <div style="display: flex; flex-direction: column; gap: 16px; align-items: center;">
+              <div class="library-card-wrapper" id="detailCardWrapper">
+                <!-- Template thẻ HTML CR-80 render ở đây -->
+              </div>
+              <div style="display: flex; gap: 10px; width: 100%; justify-content: center;" class="no-print">
+                <button class="button sm secondary" type="button" id="btnPrintSingleCard">🖨 In thẻ này (CR-80)</button>
+                <button class="button sm secondary" type="button" id="btnViewCardQr">🔍 Xem mã QR &amp; Payload</button>
+              </div>
+            </div>
+
+            <!-- Cột phải: Thông tin bạn đọc chi tiết -->
+            <div class="detail-info-card">
+              <h3 style="margin-bottom: 16px; font-size: 16px; color: #1e293b;">Thông tin bạn đọc &amp; Quyền mượn</h3>
+              <div class="detail-info-list" id="detailInfoList">
+                <!-- Render chi tiết -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Bảng lịch sử thẻ thư viện đã cấp -->
+          <div class="surface" style="margin-top: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <div>
+                <h3 style="font-size: 16px; color: #1e293b; margin: 0 0 4px;">Lịch sử thẻ thư viện</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Danh sách toàn bộ các thẻ đã từng được cấp cho bạn đọc này.</p>
+              </div>
+            </div>
+            <div class="table-shell">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Mã thẻ</th>
+                    <th>Ngày phát hành</th>
+                    <th>Ngày hết hạn</th>
+                    <th>Trạng thái thẻ</th>
+                    <th>Lý do thu hồi / Ghi chú</th>
+                    <th>Người thực hiện</th>
+                    <th style="text-align: right;">Mã QR</th>
+                  </tr>
+                </thead>
+                <tbody id="cardHistoryRows">
+                  <!-- Dữ liệu render từ JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ==========================================
+             VIEW 3: THẺ THƯ VIỆN CỦA TÔI (CHO BẠN ĐỌC)
+             ========================================== -->
+        <section id="myCardView" hidden>
+          <div class="page-heading">
+            <div>
+              <h1>Thẻ thư viện điện tử của tôi</h1>
+              <p>Thẻ thư viện số tích hợp mã QR xác thực phục vụ mượn, trả sách và sử dụng phòng đọc tại trường.</p>
+            </div>
+            <div class="heading-actions">
+              <button class="button secondary" type="button" id="btnReportLostCard">⚠ Báo mất thẻ</button>
+            </div>
+          </div>
+
+          <div class="surface" style="display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 36px 20px;">
+            <div class="library-card-wrapper" id="myCardContainer">
+              <!-- Render card CR-80 cá nhân -->
+            </div>
+
+            <div style="max-width: 520px; width: 100%; display: grid; gap: 14px;">
+              <div class="alert info" id="myCardEligibilityAlert">
+                <span>ℹ</span>
+                <div>
+                  <strong>Điều kiện mượn sách: Đủ điều kiện</strong>
+                  <div style="font-size: 12.5px; margin-top: 3px;">Bạn có thể mượn tối đa 3 đầu sách cùng lúc với thời hạn 14 ngày/lần mượn.</div>
+                </div>
+              </div>
+
+              <div class="surface" style="padding: 16px; border-radius: 8px; margin: 0; background: #f8fafc;">
+                <h4 style="font-size: 14px; margin-bottom: 8px; color: #1e293b;">Hướng dẫn sử dụng thẻ điện tử</h4>
+                <ul style="padding-left: 20px; font-size: 13px; color: #475569; display: grid; gap: 6px;">
+                  <li>Xuất trình mã QR trên màn hình điện thoại hoặc thẻ nhựa in tại quầy mượn sách.</li>
+                  <li>Mã QR được mã hóa chữ ký HMAC-SHA256, không chia sẻ mã cho người khác mượn hộ.</li>
+                  <li>Nếu làm mất thẻ nhựa vật lý, hãy bấm nút <strong>Báo mất thẻ</strong> ở trên để khóa thẻ kịp thời.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ==========================================
+             VIEW 4: ĐỐI CHIẾU MẪU GỐC (CR-80 TEMPLATE REFERENCE)
+             ========================================== -->
+        <section id="sampleCompareView" hidden>
+          <div class="page-heading">
+            <div>
+              <h1>Đối chiếu quy cách mẫu thẻ thư viện CR-80</h1>
+              <p>So sánh song song giữa ảnh mẫu thực tế <code>sample-library-card.jpg</code> và bản dựng HTML5/CSS3 chuẩn kỹ thuật.</p>
+            </div>
+          </div>
+
+          <div class="surface" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 28px;">
+            <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
+              <h3 style="font-size: 15px; color: #1e293b; font-weight: 700;">1. Ảnh mẫu gốc (sample-library-card.jpg)</h3>
+              <div style="width: 520px; height: 328px; border-radius: 16px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                <img src="sample-library-card.jpg" alt="Mẫu thẻ thư viện gốc" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              <small style="color: var(--text-muted); font-size: 12px;">Được lưu trữ tại document/wireframes/fe/library/097-library-patron-and-card/sample-library-card.jpg</small>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
+              <h3 style="font-size: 15px; color: #1e293b; font-weight: 700;">2. Bản dựng HTML5 / CSS3 tương tác</h3>
+              <div class="library-card-wrapper" id="sampleCompareReconstruct">
+                <!-- Reconstructed card -->
+              </div>
+              <small style="color: var(--text-muted); font-size: 12px;">Tái lập 100% vector SVG, tỷ lệ CR-80 85.6mm × 54mm, không phụ thuộc font/ảnh ngoài</small>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+
+  <!-- ==========================================
+       MODAL 1: PHÁT HÀNH THẺ THƯ VIỆN MỚI
+       ========================================== -->
+  <div class="modal-backdrop" id="issueCardModal" role="dialog" aria-modal="true" aria-labelledby="issueCardModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="issueCardModalTitle">Phát hành thẻ thư viện mới</h2>
+        <button class="icon-button" type="button" data-close="issueCardModal" aria-label="Đóng">✕</button>
+      </div>
+      <form class="modal-body" id="issueCardForm">
+        <p class="modal-caption">Phát hành thẻ thư viện số với mã thẻ duy nhất và chữ ký HMAC-SHA256.</p>
+
+        <div class="alert error" id="issueCardAlert" hidden></div>
+
+        <div class="field">
+          <label for="issuePatronSelect">Chọn bạn đọc cần cấp thẻ <span class="required">*</span></label>
+          <select class="control" id="issuePatronSelect" required>
+            <!-- Render options -->
+          </select>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="issuePolicySelect">Chính sách thời hạn <span class="required">*</span></label>
+            <select class="control" id="issuePolicySelect">
+              <option value="12">12 tháng (Mặc định phân hệ v5)</option>
+              <option value="school_year">Đến hết năm học (31/05/2027)</option>
+              <option value="24">24 tháng (Trọn cấp THCS)</option>
+              <option value="custom">Tùy chỉnh ngày hết hạn</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="issueExpiresAt">Ngày hết hạn dự kiến <span class="required">*</span></label>
+            <input class="control" id="issueExpiresAt" type="date" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="issueCardPrefixPreview">Mã thẻ dự kiến được sinh</label>
+          <input class="control" id="issueCardPrefixPreview" type="text" readonly value="LIB-2026-000109" style="background: #f8fafc; font-weight: 700; color: #1e3a8a;">
+          <small style="color: var(--text-muted); font-size: 12px;">Hệ thống bảo đảm ràng buộc duy nhất: mỗi bạn đọc chỉ có tối đa 01 thẻ mang trạng thái ACTIVE.</small>
+        </div>
+
+        <div class="field">
+          <label for="issueNotes">Ghi chú phát hành</label>
+          <textarea class="control" id="issueNotes" placeholder="Nhập ghi chú hoặc lý do cấp phát nếu có..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button class="button secondary" type="button" data-close="issueCardModal">Hủy</button>
+          <button class="button" type="submit" id="btnSubmitIssueCard">Xác nhận phát hành thẻ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ==========================================
+       MODAL 2: THU HỒI THẺ THƯ VIỆN KÈM LÝ DO
+       ========================================== -->
+  <div class="modal-backdrop" id="revokeCardModal" role="dialog" aria-modal="true" aria-labelledby="revokeCardModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="revokeCardModalTitle">Thu hồi thẻ thư viện</h2>
+        <button class="icon-button" type="button" data-close="revokeCardModal" aria-label="Đóng">✕</button>
+      </div>
+      <form class="modal-body" id="revokeCardForm">
+        <div class="alert warning">
+          <span>⚠</span>
+          <div>
+            <strong>Cảnh báo thu hồi thẻ:</strong>
+            <div style="font-size: 12.5px; margin-top: 2px;">Thẻ sau khi thu hồi sẽ chuyển vĩnh viễn sang trạng thái <strong>REVOKED</strong> và không thể sử dụng để mượn sách.</div>
+          </div>
+        </div>
+
+        <div class="detail-info-list" style="background:#f8fafc; padding:12px 16px; border-radius:8px; border:1px solid #e2e8f0;">
+          <div class="detail-info-row">
+            <span class="detail-info-label">Mã thẻ:</span>
+            <strong class="card-code-tag" id="revokeCardNoText">LIB-2026-000101</strong>
+          </div>
+          <div class="detail-info-row">
+            <span class="detail-info-label">Bạn đọc sở hữu:</span>
+            <strong id="revokePatronNameText">Nguyễn Văn A (6A1)</strong>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="revokeReasonSelect">Lý do thu hồi <span class="required">*</span></label>
+          <select class="control" id="revokeReasonSelect" required>
+            <option value="">-- Chọn lý do thu hồi --</option>
+            <option value="LOST">Báo mất thẻ vật lý</option>
+            <option value="DAMAGED">Thẻ bị hư hỏng / mờ mã QR không quét được</option>
+            <option value="TRANSFERRED">Bạn đọc chuyển trường / thôi việc / tốt nghiệp</option>
+            <option value="VIOLATION">Tịch thu do vi phạm nghiêm trọng quy chế thư viện</option>
+            <option value="REISSUE_REPLACE">Thu hồi để cấp đổi thẻ mới</option>
+            <option value="OTHER">Lý do khác</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="revokeNotes">Ghi chú chi tiết <span class="required">*</span></label>
+          <textarea class="control" id="revokeNotes" required placeholder="Ghi nhận cụ thể lý do thu hồi, biên bản hoặc thời điểm phát sinh..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button class="button secondary" type="button" data-close="revokeCardModal">Hủy</button>
+          <button class="button danger" type="submit" id="btnSubmitRevokeCard">Xác nhận thu hồi thẻ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ==========================================
+       MODAL 3: CẤP LẠI THẺ (REISSUE CARD)
+       ========================================== -->
+  <div class="modal-backdrop" id="reissueCardModal" role="dialog" aria-modal="true" aria-labelledby="reissueCardModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="reissueCardModalTitle">Cấp lại thẻ thư viện</h2>
+        <button class="icon-button" type="button" data-close="reissueCardModal" aria-label="Đóng">✕</button>
+      </div>
+      <form class="modal-body" id="reissueCardForm">
+        <p class="modal-caption">Quy trình cấp lại sẽ tự động <strong>thu hồi thẻ cũ</strong> và tạo một thẻ mới có mã thẻ &amp; chữ ký số mới cho bạn đọc.</p>
+
+        <div class="detail-info-list" style="background:#f8fafc; padding:12px 16px; border-radius:8px; border:1px solid #e2e8f0;">
+          <div class="detail-info-row">
+            <span class="detail-info-label">Bạn đọc:</span>
+            <strong id="reissuePatronNameText">Nguyễn Văn A</strong>
+          </div>
+          <div class="detail-info-row">
+            <span class="detail-info-label">Thẻ cũ bị thay thế:</span>
+            <strong class="card-code-tag" id="reissueOldCardNoText">LIB-2026-000101</strong>
+          </div>
+          <div class="detail-info-row">
+            <span class="detail-info-label">Mã thẻ mới dự kiến:</span>
+            <strong class="card-code-tag" style="color:#059669;" id="reissueNewCardNoText">LIB-2026-000110</strong>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="reissueReasonSelect">Lý do cấp lại <span class="required">*</span></label>
+          <select class="control" id="reissueReasonSelect" required>
+            <option value="LOST">Mất thẻ cũ</option>
+            <option value="DAMAGED">Thẻ cũ bị gãy / hỏng mã quét</option>
+            <option value="INFO_UPDATE">Đổi thông tin học sinh (lớp/họ tên)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="reissueExpiresAt">Thời hạn thẻ mới <span class="required">*</span></label>
+          <input class="control" id="reissueExpiresAt" type="date" required>
+        </div>
+
+        <div class="field">
+          <label for="reissueNotes">Ghi chú cấp lại</label>
+          <textarea class="control" id="reissueNotes" placeholder="Nhập lý do cấp lại hoặc ghi chú thu phí làm lại thẻ (nếu có)..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button class="button secondary" type="button" data-close="reissueCardModal">Hủy</button>
+          <button class="button" type="submit" id="btnSubmitReissueCard">Xác nhận cấp lại thẻ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ==========================================
+       MODAL 4: TẠM ĐÌNH CHỈ / GỠ ĐÌNH CHỈ MƯỢN SÁCH
+       ========================================== -->
+  <div class="modal-backdrop" id="suspendPatronModal" role="dialog" aria-modal="true" aria-labelledby="suspendPatronModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="suspendPatronModalTitle">Đình chỉ quyền mượn sách</h2>
+        <button class="icon-button" type="button" data-close="suspendPatronModal" aria-label="Đóng">✕</button>
+      </div>
+      <form class="modal-body" id="suspendPatronForm">
+        <div class="alert warning" id="suspendNotice">
+          <span>ℹ</span>
+          <div>
+            <strong>Quy tắc nghiệp vụ Plan 097:</strong>
+            <div style="font-size: 12.5px; margin-top: 2px;">Tạm đình chỉ mượn sách chỉ áp dụng trong phân hệ Thư viện, <strong>không khóa tài khoản trường học</strong> hoặc ảnh hưởng chức năng học vụ khác của bạn đọc.</div>
+          </div>
+        </div>
+
+        <div class="detail-info-list" style="background:#f8fafc; padding:12px 16px; border-radius:8px; border:1px solid #e2e8f0;">
+          <div class="detail-info-row">
+            <span class="detail-info-label">Bạn đọc:</span>
+            <strong id="suspendPatronNameText">Nguyễn Văn A</strong>
+          </div>
+          <div class="detail-info-row">
+            <span class="detail-info-label">Trạng thái hiện tại:</span>
+            <span id="suspendCurrentStatusBadge">Đang hoạt động</span>
+          </div>
+        </div>
+
+        <div class="field" id="suspendActionGroup">
+          <label for="suspendActionSelect">Hành động <span class="required">*</span></label>
+          <select class="control" id="suspendActionSelect">
+            <option value="SUSPEND">Tạm đình chỉ quyền mượn (BORROWING_SUSPENDED)</option>
+            <option value="UNSUSPEND">Gỡ đình chỉ / Khôi phục quyền mượn (ACTIVE)</option>
+          </select>
+        </div>
+
+        <div class="field" id="suspendReasonGroup">
+          <label for="suspendReason" id="suspendReasonLabel">Lý do đình chỉ <span class="required">*</span></label>
+          <textarea class="control" id="suspendReason" placeholder="Ví dụ: Mượn sách quá hạn hơn 30 ngày chưa hoàn trả, đang bồi thường sách mất..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button class="button secondary" type="button" data-close="suspendPatronModal">Hủy</button>
+          <button class="button danger" type="submit" id="btnSubmitSuspendPatron">Xác nhận cập nhật</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ==========================================
+       MODAL 5: XEM MÃ QR & PAYLOAD CHỮ KÝ SỐ
+       ========================================== -->
+  <div class="modal-backdrop" id="qrDetailModal" role="dialog" aria-modal="true" aria-labelledby="qrDetailModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="qrDetailModalTitle">Mã QR &amp; Chữ ký số HMAC-SHA256</h2>
+        <button class="icon-button" type="button" data-close="qrDetailModal" aria-label="Đóng">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 12px 0;">
+          <div class="qr-frame" style="width: 180px; height: 180px;" id="qrLargeDisplay">
+            <!-- QR SVG -->
+          </div>
+          <div class="card-code-string" id="qrCardNoLarge" style="font-size: 20px;">LIB-2026-000101</div>
+        </div>
+
+        <div class="field">
+          <label>Payload mã hóa trong QR (Định dạng v1 chuẩn Module 02 / Plan 097)</label>
+          <div style="background: #0f172a; color: #38bdf8; font-family: ui-monospace, monospace; font-size: 12px; padding: 12px; border-radius: 8px; word-break: break-all; line-height: 1.5;" id="qrRawPayloadText">
+            v1|LIB-2026-000101|PAT-001|21700|8f3e2b9a7c4d1e5f0a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f
+          </div>
+        </div>
+
+        <div class="detail-info-list" style="background:#f8fafc; padding:12px 16px; border-radius:8px; border:1px solid #e2e8f0; font-size:12.5px;">
+          <div class="detail-info-row">
+            <span class="detail-info-label">Phiên bản payload:</span>
+            <strong>v1</strong>
+          </div>
+          <div class="detail-info-row">
+            <span class="detail-info-label">Mã bạn đọc (Patron ID):</span>
+            <strong id="qrPatronIdMeta">PAT-001</strong>
+          </div>
+          <div class="detail-info-row">
+            <span class="detail-info-label">Hết hạn (Epoch Day):</span>
+            <strong id="qrEpochDayMeta">21700 (31/05/2029)</strong>
+          </div>
+          <div class="detail-info-row">
+            <span class="detail-info-label">Thuật toán ký:</span>
+            <strong>HMAC-SHA256 (Khóa bí mật máy chủ)</strong>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="button secondary" type="button" id="btnCopyPayload">📋 Sao chép chuỗi QR</button>
+          <button class="button" type="button" data-close="qrDetailModal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==========================================
+       MODAL 6: GIẢ LẬP XÁC THỰC MÃ QR (VERIFY QR SIMULATOR)
+       ========================================== -->
+  <div class="modal-backdrop" id="verifyModal" role="dialog" aria-modal="true" aria-labelledby="verifyModalTitle">
+    <div class="modal lg">
+      <div class="modal-header">
+        <h2 id="verifyModalTitle">Giả lập quét &amp; Xác thực mã QR thẻ thư viện</h2>
+        <button class="icon-button" type="button" data-close="verifyModal" aria-label="Đóng">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-caption">Mô phỏng quy trình kiểm tra 6 bước theo đặc tả <code>POST /api/v2/library-cards/verify</code> (Kiểm tra chữ ký HMAC, hạn dùng, trạng thái thẻ và điều kiện bạn đọc).</p>
+
+        <div class="field">
+          <label for="verifyPayloadInput">Chuỗi quét từ đầu đọc QR hoặc mã thẻ tra cứu</label>
+          <div style="display: flex; gap: 8px;">
+            <input class="control" id="verifyPayloadInput" style="font-family: monospace; font-size: 13px;" placeholder="Dán payload: v1|LIB-2026-000101|PAT-001|21700|signature hoặc nhập mã thẻ">
+            <button class="button" type="button" id="btnRunVerify">Kiểm tra ngay</button>
+          </div>
+          <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
+            <span style="font-size: 12px; color: var(--text-muted);">Mẫu thử:</span>
+            <button class="button sm text" type="button" id="btnSampleValid">Thẻ hợp lệ (6A1)</button>
+            <button class="button sm text" type="button" id="btnSampleRevoked">Thẻ đã thu hồi</button>
+            <button class="button sm text" type="button" id="btnSampleExpired">Thẻ đã hết hạn</button>
+            <button class="button sm text" type="button" id="btnSampleSuspended">Bạn đọc bị đình chỉ</button>
+            <button class="button sm text" type="button" id="btnSampleTampered">Dữ liệu bị làm giả</button>
+          </div>
+        </div>
+
+        <!-- Kết quả xác thực 6 bước -->
+        <div class="verify-steps" id="verifyStepsList">
+          <div class="verify-step" id="step1">
+            <span class="step-badge">1</span>
+            <span>Phân tích cấu trúc dữ liệu &amp; phiên bản <code>v1</code></span>
+          </div>
+          <div class="verify-step" id="step2">
+            <span class="step-badge">2</span>
+            <span>Xác thực chữ ký số HMAC-SHA256 với Secret Key</span>
+          </div>
+          <div class="verify-step" id="step3">
+            <span class="step-badge">3</span>
+            <span>Kiểm tra ngày hết hạn theo múi giờ <code>Asia/Ho_Chi_Minh</code></span>
+          </div>
+          <div class="verify-step" id="step4">
+            <span class="step-badge">4</span>
+            <span>Tra cứu thực thể thẻ trong cơ sở dữ liệu MySQL</span>
+          </div>
+          <div class="verify-step" id="step5">
+            <span class="step-badge">5</span>
+            <span>Kiểm tra trạng thái thẻ (Phải là <code>ACTIVE</code>)</span>
+          </div>
+          <div class="verify-step" id="step6">
+            <span class="step-badge">6</span>
+            <span>Kiểm tra điều kiện mượn của hồ sơ bạn đọc (Patron Eligibility)</span>
+          </div>
+        </div>
+
+        <!-- Banner kết quả tổng kết -->
+        <div id="verifyOutcomeBox"></div>
+
+        <div class="modal-actions">
+          <button class="button secondary" type="button" data-close="verifyModal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==========================================
+       MODAL 7: IN THẺ HÀNG LOẠT / ĐƠN LẺ
+       ========================================== -->
+  <div class="modal-backdrop" id="printBatchModal" role="dialog" aria-modal="true" aria-labelledby="printBatchModalTitle">
+    <div class="modal lg">
+      <div class="modal-header">
+        <h2 id="printBatchModalTitle">Xem trước &amp; In thẻ thư viện</h2>
+        <button class="icon-button" type="button" data-close="printBatchModal" aria-label="Đóng">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <p class="modal-caption" id="printBatchSummary">Hiển thị danh sách phôi thẻ chuẩn bị in trên giấy khổ A4 hoặc máy in thẻ nhựa.</p>
+          <div style="display: flex; gap: 8px;">
+            <button class="button secondary sm" type="button" id="btnFilterPrintGrade6">Chỉ lớp 6A1</button>
+            <button class="button secondary sm" type="button" id="btnFilterPrintAllActive">Tất cả thẻ Active</button>
+          </div>
+        </div>
+
+        <div class="print-sheet" id="printSheetContainer">
+          <!-- Các thẻ được render ở đây -->
+        </div>
+
+        <div class="alert info">
+          <span>🖨</span>
+          <div>
+            <strong>Hướng dẫn in ấn:</strong>
+            <div style="font-size: 12.5px; margin-top: 2px;">Khi bấm "In ngay", trình duyệt sẽ mở hộp thoại in với CSS <code>@media print</code> chuẩn kích thước ISO CR-80 (85.6mm × 54mm). Hãy chọn tỷ lệ <strong>100% (Actual Size)</strong> và bật <strong>Background Graphics</strong>.</div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="button secondary" type="button" data-close="printBatchModal">Đóng</button>
+          <button class="button" type="button" id="btnTriggerBrowserPrint">🖨 In ngay (Ctrl + P)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==========================================
+       MODAL 8: KÍCH HOẠT BẠN ĐỌC MỚI (ACTIVATE PATRON)
+       ========================================== -->
+  <div class="modal-backdrop" id="activatePatronModal" role="dialog" aria-modal="true" aria-labelledby="activatePatronModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="activatePatronModalTitle">Kích hoạt hồ sơ bạn đọc mới</h2>
+        <button class="icon-button" type="button" data-close="activatePatronModal" aria-label="Đóng">✕</button>
+      </div>
+      <form class="modal-body" id="activatePatronForm">
+        <p class="modal-caption">Kích hoạt hồ sơ bạn đọc cho tài khoản trường học <code>app_user</code> hiện hữu (Học sinh/Giáo viên mới nhập học hoặc chuyển tới).</p>
+
+        <div class="field">
+          <label for="activateUserSelect">Chọn tài khoản người dùng chưa có hồ sơ <span class="required">*</span></label>
+          <select class="control" id="activateUserSelect" required>
+            <option value="U-1088">Vũ Thu Ngân · Học sinh lớp 6A2 (Mã: HS2026-088)</option>
+            <option value="U-1089">Lê Gia Huy · Học sinh lớp 6A2 (Mã: HS2026-089)</option>
+            <option value="U-2055">Thầy Trần Minh Trí · Giáo viên Thể dục (Mã: GV-1055)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="checkbox-line" style="display: flex; align-items: center; gap: 8px; font-size: 13.5px; cursor: pointer;">
+            <input type="checkbox" id="activateAutoIssueCard" checked style="width: 16px; height: 16px;">
+            <span>Phát hành ngay thẻ thư viện đầu tiên sau khi kích hoạt</span>
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button class="button secondary" type="button" data-close="activatePatronModal">Hủy</button>
+          <button class="button" type="submit" id="btnSubmitActivatePatron">Kích hoạt hồ sơ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ==========================================
+       JAVASCRIPT TƯƠNG TÁC CHÍNH (SELF-CONTAINED)
+       ========================================== -->
+  <script>
+  (() => {
+    // -------------------------------------------------------------
+    // 1. DỮ LIỆU MINH HỌA (MOCK DATASET)
+    // -------------------------------------------------------------
+    const patrons = [
+      {
+        id: 'PAT-001',
+        userId: 1001,
+        fullName: 'Nguyễn Văn A',
+        userCode: 'HS2026-001',
+        patronType: 'STUDENT',
+        classroom: '6A1',
+        dob: '17/06/2011',
+        status: 'ACTIVE',
+        joinedAt: '05/09/2026',
+        suspendedReason: null,
+        currentCard: {
+          id: 'CARD-101',
+          cardNo: 'LIB-2026-000101',
+          status: 'ACTIVE',
+          issuedAt: '05/09/2026',
+          expiresAt: '31/05/2029',
+          payloadVersion: 'v1',
+          signature: '8f3e2b9a7c4d1e5f0a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f',
+          revokedAt: null,
+          revokedReason: null
+        },
+        cardHistory: [
+          { cardNo: 'LIB-2026-000101', issuedAt: '05/09/2026', expiresAt: '31/05/2029', status: 'ACTIVE', reason: 'Cấp mới đầu cấp', issuer: 'thu.hoang' }
+        ]
+      },
+      {
+        id: 'PAT-002',
+        userId: 1002,
+        fullName: 'Trần Thị B',
+        userCode: 'HS2026-002',
+        patronType: 'STUDENT',
+        classroom: '6A1',
+        dob: '22/10/2011',
+        status: 'ACTIVE',
+        joinedAt: '05/09/2026',
+        suspendedReason: null,
+        currentCard: {
+          id: 'CARD-102',
+          cardNo: 'LIB-2026-000102',
+          status: 'ACTIVE',
+          issuedAt: '05/09/2026',
+          expiresAt: '31/05/2029',
+          payloadVersion: 'v1',
+          signature: '7e2d1c0b9a8f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d',
+          revokedAt: null,
+          revokedReason: null
+        },
+        cardHistory: [
+          { cardNo: 'LIB-2026-000102', issuedAt: '05/09/2026', expiresAt: '31/05/2029', status: 'ACTIVE', reason: 'Cấp mới đầu cấp', issuer: 'thu.hoang' }
+        ]
+      },
+      {
+        id: 'PAT-003',
+        userId: 1003,
+        fullName: 'Lê Hoàng C',
+        userCode: 'HS2025-045',
+        patronType: 'STUDENT',
+        classroom: '7B2',
+        dob: '08/03/2010',
+        status: 'ACTIVE',
+        joinedAt: '05/09/2025',
+        suspendedReason: null,
+        currentCard: {
+          id: 'CARD-103',
+          cardNo: 'LIB-2026-000103',
+          status: 'ACTIVE',
+          issuedAt: '12/09/2026',
+          expiresAt: '31/05/2028',
+          payloadVersion: 'v1',
+          signature: '1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b',
+          revokedAt: null,
+          revokedReason: null
+        },
+        cardHistory: [
+          { cardNo: 'LIB-2025-000042', issuedAt: '05/09/2025', expiresAt: '31/05/2028', status: 'REVOKED', reason: 'Báo mất thẻ vật lý', issuer: 'minh.nguyen' },
+          { cardNo: 'LIB-2026-000103', issuedAt: '12/09/2026', expiresAt: '31/05/2028', status: 'ACTIVE', reason: 'Cấp lại do mất thẻ', issuer: 'thu.hoang' }
+        ]
+      },
+      {
+        id: 'PAT-004',
+        userId: 1004,
+        fullName: 'Phạm Thu D',
+        userCode: 'HS2025-089',
+        patronType: 'STUDENT',
+        classroom: '7B2',
+        dob: '15/11/2010',
+        status: 'ACTIVE',
+        joinedAt: '15/09/2026',
+        suspendedReason: null,
+        currentCard: null,
+        cardHistory: []
+      },
+      {
+        id: 'PAT-005',
+        userId: 1005,
+        fullName: 'Hoàng Minh E',
+        userCode: 'HS2024-112',
+        patronType: 'STUDENT',
+        classroom: '8A3',
+        dob: '19/01/2009',
+        status: 'BORROWING_SUSPENDED',
+        joinedAt: '05/09/2024',
+        suspendedReason: 'Mượn sách quá hạn 45 ngày chưa hoàn trả tài liệu',
+        currentCard: {
+          id: 'CARD-105',
+          cardNo: 'LIB-2026-000105',
+          status: 'ACTIVE',
+          issuedAt: '05/09/2026',
+          expiresAt: '31/05/2027',
+          payloadVersion: 'v1',
+          signature: '3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c',
+          revokedAt: null,
+          revokedReason: null
+        },
+        cardHistory: [
+          { cardNo: 'LIB-2026-000105', issuedAt: '05/09/2026', expiresAt: '31/05/2027', status: 'ACTIVE', reason: 'Gia hạn năm học mới', issuer: 'thu.hoang' }
+        ]
+      },
+      {
+        id: 'PAT-006',
+        userId: 1006,
+        fullName: 'Đặng Quỳnh F',
+        userCode: 'HS2023-018',
+        patronType: 'STUDENT',
+        classroom: '9C1',
+        dob: '04/05/2008',
+        status: 'ACTIVE',
+        joinedAt: '05/09/2023',
+        suspendedReason: null,
+        currentCard: {
+          id: 'CARD-106',
+          cardNo: 'LIB-2023-000018',
+          status: 'EXPIRED',
+          issuedAt: '05/09/2023',
+          expiresAt: '31/05/2026',
+          payloadVersion: 'v1',
+          signature: '5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e',
+          revokedAt: null,
+          revokedReason: null
+        },
+        cardHistory: [
+          { cardNo: 'LIB-2023-000018', issuedAt: '05/09/2023', expiresAt: '31/05/2026', status: 'EXPIRED', reason: 'Hết niên hạn khóa học', issuer: 'minh.nguyen' }
+        ]
+      },
+      {
+        id: 'PAT-007',
+        userId: 2001,
+        fullName: 'Vũ Đình G',
+        userCode: 'GV-101',
+        patronType: 'TEACHER',
+        classroom: 'Tổ Toán - Tin',
+        dob: '12/04/1986',
+        status: 'ACTIVE',
+        joinedAt: '01/08/2020',
+        suspendedReason: null,
+        currentCard: {
+          id: 'CARD-107',
+          cardNo: 'LIB-2026-000107',
+          status: 'ACTIVE',
+          issuedAt: '01/09/2026',
+          expiresAt: '31/05/2028',
+          payloadVersion: 'v1',
+          signature: '9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b',
+          revokedAt: null,
+          revokedReason: null
+        },
+        cardHistory: [
+          { cardNo: 'LIB-2026-000107', issuedAt: '01/09/2026', expiresAt: '31/05/2028', status: 'ACTIVE', reason: 'Cấp thẻ giảng viên', issuer: 'thu.hoang' }
+        ]
+      },
+      {
+        id: 'PAT-008',
+        userId: 2002,
+        fullName: 'Mai Lan H',
+        userCode: 'GV-102',
+        patronType: 'TEACHER',
+        classroom: 'Tổ Ngữ Văn',
+        dob: '28/09/1990',
+        status: 'ACTIVE',
+        joinedAt: '01/08/2021',
+        suspendedReason: null,
+        currentCard: {
+          id: 'CARD-108',
+          cardNo: 'LIB-2026-000108',
+          status: 'ACTIVE',
+          issuedAt: '01/09/2026',
+          expiresAt: '31/05/2028',
+          payloadVersion: 'v1',
+          signature: '2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a',
+          revokedAt: null,
+          revokedReason: null
+        },
+        cardHistory: [
+          { cardNo: 'LIB-2026-000108', issuedAt: '01/09/2026', expiresAt: '31/05/2028', status: 'ACTIVE', reason: 'Cấp thẻ giảng viên', issuer: 'thu.hoang' }
+        ]
+      },
+      {
+        id: 'PAT-009',
+        userId: 1009,
+        fullName: 'Bùi Tuấn I',
+        userCode: 'HS2026-009',
+        patronType: 'STUDENT',
+        classroom: '6A1',
+        dob: '03/01/2011',
+        status: 'ACTIVE',
+        joinedAt: '05/09/2026',
+        suspendedReason: null,
+        currentCard: null,
+        cardHistory: []
+      },
+      {
+        id: 'PAT-010',
+        userId: 1010,
+        fullName: 'Đỗ Kim K',
+        userCode: 'HS2024-055',
+        patronType: 'STUDENT',
+        classroom: '8A3',
+        dob: '14/12/2009',
+        status: 'ACTIVE',
+        joinedAt: '05/09/2024',
+        suspendedReason: null,
+        currentCard: {
+          id: 'CARD-110',
+          cardNo: 'LIB-2026-000110',
+          status: 'ACTIVE',
+          issuedAt: '05/09/2026',
+          expiresAt: '31/05/2027',
+          payloadVersion: 'v1',
+          signature: '4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b',
+          revokedAt: null,
+          revokedReason: null
+        },
+        cardHistory: [
+          { cardNo: 'LIB-2026-000110', issuedAt: '05/09/2026', expiresAt: '31/05/2027', status: 'ACTIVE', reason: 'Gia hạn năm học mới', issuer: 'thu.hoang' }
+        ]
+      },
+      {
+        id: 'PAT-011',
+        userId: 1011,
+        fullName: 'Ngô Bảo L',
+        userCode: 'HS2025-072',
+        patronType: 'STUDENT',
+        classroom: '7B2',
+        dob: '30/08/2010',
+        status: 'ACTIVE',
+        joinedAt: '05/09/2025',
+        suspendedReason: null,
+        currentCard: {
+          id: 'CARD-111',
+          cardNo: 'LIB-2025-000072',
+          status: 'REVOKED',
+          issuedAt: '05/09/2025',
+          expiresAt: '31/05/2028',
+          payloadVersion: 'v1',
+          signature: '6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d',
+          revokedAt: '10/09/2026',
+          revokedReason: 'Chuyển trường sang địa phương khác'
+        },
+        cardHistory: [
+          { cardNo: 'LIB-2025-000072', issuedAt: '05/09/2025', expiresAt: '31/05/2028', status: 'REVOKED', reason: 'Chuyển trường sang địa phương khác', issuer: 'thu.hoang' }
+        ]
+      },
+      {
+        id: 'PAT-012',
+        userId: 2003,
+        fullName: 'Phan Thanh M',
+        userCode: 'GV-103',
+        patronType: 'TEACHER',
+        classroom: 'Tổ Vật Lý',
+        dob: '05/02/1988',
+        status: 'ACTIVE',
+        joinedAt: '01/08/2022',
+        suspendedReason: null,
+        currentCard: {
+          id: 'CARD-112',
+          cardNo: 'LIB-2026-000112',
+          status: 'ACTIVE',
+          issuedAt: '01/09/2026',
+          expiresAt: '31/05/2028',
+          payloadVersion: 'v1',
+          signature: '8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f',
+          revokedAt: null,
+          revokedReason: null
+        },
+        cardHistory: [
+          { cardNo: 'LIB-2026-000112', issuedAt: '01/09/2026', expiresAt: '31/05/2028', status: 'ACTIVE', reason: 'Cấp thẻ giáo viên', issuer: 'thu.hoang' }
+        ]
+      }
+    ];
+
+    let nextCardIndex = 113;
+
+    // -------------------------------------------------------------
+    // 2. STATE ỨNG DỤNG
+    // -------------------------------------------------------------
+    const state = {
+      view: 'management', // 'management' | 'detail' | 'mycard' | 'compare'
+      role: 'librarian',   // 'librarian' | 'admin' | 'reader'
+      screenState: 'normal', // 'normal' | 'loading' | 'empty' | 'error' | 'forbidden' | 'conflict'
+      activeQuickTab: 'all',
+      query: '',
+      type: '',
+      patronStatus: '',
+      cardStatus: '',
+      page: 0,
+      pageSize: 10,
+      selectedPatronId: null, // Chi tiết bạn đọc đang mở
+      checkedPatronIds: new Set(), // Checkboxes được chọn trong bảng
+      // Modal context
+      targetPatronForCard: null,
+      targetCardForRevoke: null,
+      targetPatronForSuspend: null
+    };
+
+    const $ = id => document.getElementById(id);
+    const norm = s => (s || '').toLocaleLowerCase('vi');
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    function toast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    // -------------------------------------------------------------
+    // 3. SVG ASSETS (CHUẨN 100% VECTOR KHÔNG TẢI BÊN NGOÀI)
+    // -------------------------------------------------------------
+    const SVG_LOGO = `
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="47" stroke="#1d4ed8" stroke-width="3" fill="#ffffff"/>
+        <!-- Vòng nguyệt quế -->
+        <path d="M22 66C20 54 24 38 34 26M78 66C80 54 76 38 66 26" stroke="#047857" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="25" cy="40" r="3" fill="#047857"/>
+        <circle cx="28" cy="52" r="3" fill="#047857"/>
+        <circle cx="75" cy="40" r="3" fill="#047857"/>
+        <circle cx="72" cy="52" r="3" fill="#047857"/>
+        <!-- Cuốn sách mở -->
+        <path d="M30 68C38 64 46 65 50 69C54 65 62 64 70 68V48C62 44 54 45 50 49C46 45 38 44 30 48Z" fill="#1d4ed8"/>
+        <path d="M50 49V69" stroke="#ffffff" stroke-width="2"/>
+        <!-- Ngọn đuốc tri thức -->
+        <path d="M47 48L50 34L53 48Z" fill="#b45309"/>
+        <path d="M50 20C47 24 45 28 47 32C49 34 52 34 53 32C55 28 53 24 50 20Z" fill="#dc2626"/>
+      </svg>`;
+
+    const SVG_LOTUS = `
+      <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M100 20C100 60 70 90 70 130C70 160 85 180 100 180C115 180 130 160 130 130C130 90 100 20 100 20Z" fill="#38bdf8"/>
+        <path d="M100 60C80 80 50 110 50 140C50 165 70 180 90 180C75 160 75 130 100 100Z" fill="#60a5fa"/>
+        <path d="M100 60C120 80 150 110 150 140C150 165 130 180 110 180C125 160 125 130 100 100Z" fill="#60a5fa"/>
+        <path d="M100 100C60 115 30 140 30 165C30 180 50 185 80 180C50 170 60 140 100 130Z" fill="#93c5fd"/>
+        <path d="M100 100C140 115 170 140 170 165C170 180 150 185 120 180C150 170 140 140 100 130Z" fill="#93c5fd"/>
+      </svg>`;
+
+    function generateQrSvg(code) {
+      // Vector QR representation với 3 mắt căn chỉnh chuẩn ISO
+      return `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+          <rect width="100" height="100" fill="#ffffff"/>
+          <!-- Vị trí góc trên trái -->
+          <rect x="8" y="8" width="24" height="24" fill="#0f172a"/>
+          <rect x="12" y="12" width="16" height="16" fill="#ffffff"/>
+          <rect x="16" y="16" width="8" height="8" fill="#0f172a"/>
+          <!-- Vị trí góc trên phải -->
+          <rect x="68" y="8" width="24" height="24" fill="#0f172a"/>
+          <rect x="72" y="12" width="16" height="16" fill="#ffffff"/>
+          <rect x="76" y="16" width="8" height="8" fill="#0f172a"/>
+          <!-- Vị trí góc dưới trái -->
+          <rect x="8" y="68" width="24" height="24" fill="#0f172a"/>
+          <rect x="12" y="72" width="16" height="16" fill="#ffffff"/>
+          <rect x="16" y="76" width="8" height="8" fill="#0f172a"/>
+          <!-- Đường căn lề timing -->
+          <rect x="36" y="18" width="28" height="4" fill="#0f172a"/>
+          <rect x="18" y="36" width="4" height="28" fill="#0f172a"/>
+          <!-- Ma trận dữ liệu giả lập sắc nét -->
+          <rect x="36" y="8" width="4" height="4" fill="#0f172a"/>
+          <rect x="44" y="8" width="4" height="4" fill="#0f172a"/>
+          <rect x="52" y="8" width="4" height="4" fill="#0f172a"/>
+          <rect x="60" y="8" width="4" height="4" fill="#0f172a"/>
+          <rect x="36" y="28" width="4" height="4" fill="#0f172a"/>
+          <rect x="44" y="28" width="8" height="4" fill="#0f172a"/>
+          <rect x="56" y="28" width="4" height="4" fill="#0f172a"/>
+          <rect x="38" y="38" width="6" height="6" fill="#0f172a"/>
+          <rect x="48" y="38" width="6" height="6" fill="#0f172a"/>
+          <rect x="58" y="38" width="6" height="6" fill="#0f172a"/>
+          <rect x="68" y="38" width="6" height="6" fill="#0f172a"/>
+          <rect x="78" y="38" width="4" height="4" fill="#0f172a"/>
+          <rect x="86" y="38" width="6" height="6" fill="#0f172a"/>
+          <rect x="38" y="48" width="8" height="4" fill="#0f172a"/>
+          <rect x="50" y="48" width="4" height="4" fill="#0f172a"/>
+          <rect x="58" y="48" width="8" height="4" fill="#0f172a"/>
+          <rect x="70" y="48" width="4" height="4" fill="#0f172a"/>
+          <rect x="82" y="48" width="4" height="4" fill="#0f172a"/>
+          <rect x="38" y="58" width="4" height="4" fill="#0f172a"/>
+          <rect x="46" y="58" width="8" height="4" fill="#0f172a"/>
+          <rect x="58" y="58" width="4" height="4" fill="#0f172a"/>
+          <rect x="66" y="58" width="8" height="4" fill="#0f172a"/>
+          <rect x="78" y="58" width="4" height="4" fill="#0f172a"/>
+          <rect x="86" y="58" width="6" height="6" fill="#0f172a"/>
+          <rect x="38" y="68" width="4" height="4" fill="#0f172a"/>
+          <rect x="46" y="68" width="4" height="4" fill="#0f172a"/>
+          <rect x="54" y="68" width="6" height="6" fill="#0f172a"/>
+          <rect x="64" y="68" width="4" height="4" fill="#0f172a"/>
+          <rect x="74" y="68" width="6" height="6" fill="#0f172a"/>
+          <rect x="84" y="68" width="4" height="4" fill="#0f172a"/>
+          <rect x="38" y="78" width="8" height="4" fill="#0f172a"/>
+          <rect x="50" y="78" width="6" height="6" fill="#0f172a"/>
+          <rect x="60" y="78" width="4" height="4" fill="#0f172a"/>
+          <rect x="68" y="78" width="8" height="4" fill="#0f172a"/>
+          <rect x="80" y="78" width="6" height="6" fill="#0f172a"/>
+          <rect x="38" y="88" width="6" height="6" fill="#0f172a"/>
+          <rect x="48" y="88" width="4" height="4" fill="#0f172a"/>
+          <rect x="56" y="88" width="6" height="6" fill="#0f172a"/>
+          <rect x="66" y="88" width="4" height="4" fill="#0f172a"/>
+          <rect x="74" y="88" width="4" height="4" fill="#0f172a"/>
+          <rect x="82" y="88" width="6" height="6" fill="#0f172a"/>
+        </svg>`;
+    }
+
+    // -------------------------------------------------------------
+    // 4. HTML RENDERER CHO THẺ THƯ VIỆN CR-80 CHUẨN
+    // -------------------------------------------------------------
+    function renderCr80CardHtml(p, card = null) {
+      const activeCard = card || p.currentCard;
+      const isRevoked = activeCard && activeCard.status === 'REVOKED';
+      const isExpired = activeCard && activeCard.status === 'EXPIRED';
+      const cardNo = activeCard ? activeCard.cardNo : 'CHƯA CẤP THẺ';
+      const expiresAt = activeCard ? activeCard.expiresAt : '—';
+      const qrSvg = generateQrSvg(cardNo);
+
+      return `
+        <div class="library-card" data-patron-id="${p.id}">
+          ${isRevoked ? `
+            <div class="card-revoked-overlay">
+              <div class="card-revoked-stamp">ĐÃ THU HỒI</div>
+              <div style="font-size: 13px; font-weight: 600;">Lý do: ${esc(activeCard.revokedReason || 'Thu hồi theo quy định')}</div>
+            </div>` : ''}
+
+          <!-- Header Banner xanh dương -->
+          <div class="card-banner">
+            <div class="card-logo-emblem">
+              ${SVG_LOGO}
+            </div>
+            <div class="card-banner-divider"></div>
+            <div class="card-banner-texts">
+              <span class="card-banner-dept">SỞ GIÁO DỤC VÀ ĐÀO TẠO TP HỒ CHÍ MINH</span>
+              <span class="card-banner-school">TRƯỜNG TRUNG HỌC CƠ SỞ NGUYỄN X</span>
+            </div>
+          </div>
+
+          <!-- Thân thẻ -->
+          <div class="card-inner-body">
+            <div class="card-type-title">THẺ THƯ VIỆN</div>
+
+            <div class="card-grid-content">
+              <!-- Cột trái: QR và Mã thẻ -->
+              <div class="card-col-qr">
+                <div class="qr-frame">
+                  ${qrSvg}
+                </div>
+                <div class="card-code-display">
+                  <div class="card-code-title">MÃ THẺ</div>
+                  <div class="card-code-string">${esc(cardNo)}</div>
+                </div>
+              </div>
+
+              <!-- Cột phải: Thông tin bạn đọc -->
+              <div class="card-col-details">
+                <div class="card-field-row">
+                  <span class="card-field-icon">👤</span>
+                  <span class="card-field-lbl">Họ và tên:</span>
+                  <span class="card-field-val">${esc(p.fullName)}</span>
+                </div>
+                <div class="card-field-row">
+                  <span class="card-field-icon">🎓</span>
+                  <span class="card-field-lbl">${p.patronType === 'TEACHER' ? 'Tổ / Phòng:' : 'Lớp:'}</span>
+                  <span class="card-field-val">${esc(p.classroom)}</span>
+                </div>
+                <div class="card-field-row">
+                  <span class="card-field-icon">🪪</span>
+                  <span class="card-field-lbl">Mã độc giả:</span>
+                  <span class="card-field-val">${esc(p.userCode || p.id)}</span>
+                </div>
+                <div class="card-field-row">
+                  <span class="card-field-icon">📅</span>
+                  <span class="card-field-lbl">Ngày sinh:</span>
+                  <span class="card-field-val">${esc(p.dob)}</span>
+                </div>
+                <div class="card-field-row">
+                  <span class="card-field-icon">🕒</span>
+                  <span class="card-field-lbl">Hiệu lực thẻ:</span>
+                  <span class="card-field-val" style="${isExpired ? 'color: var(--error);' : ''}">${esc(expiresAt)}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Họa tiết trang trí chìm & chân thẻ -->
+            <div class="card-lotus-watermark">
+              ${SVG_LOTUS}
+            </div>
+            <div class="card-bottom-strip-left"></div>
+            <div class="card-bottom-strip-accents">
+              <span class="accent-stripe"></span>
+              <span class="accent-stripe"></span>
+              <span class="accent-stripe"></span>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    // -------------------------------------------------------------
+    // 5. BỘ LỌC VÀ TÍNH TOÁN DỮ LIỆU
+    // -------------------------------------------------------------
+    function getFilteredPatrons() {
+      let list = [...patrons];
+
+      // Quick tabs
+      if (state.activeQuickTab === 'active-card') {
+        list = list.filter(p => p.currentCard && p.currentCard.status === 'ACTIVE');
+      } else if (state.activeQuickTab === 'no-card') {
+        list = list.filter(p => !p.currentCard);
+      } else if (state.activeQuickTab === 'revoked-expired') {
+        list = list.filter(p => p.currentCard && (p.currentCard.status === 'REVOKED' || p.currentCard.status === 'EXPIRED'));
+      } else if (state.activeQuickTab === 'suspended') {
+        list = list.filter(p => p.status === 'BORROWING_SUSPENDED');
+      }
+
+      // Toolbar filters
+      if (state.query) {
+        const q = norm(state.query);
+        list = list.filter(p =>
+          norm(p.fullName).includes(q) ||
+          norm(p.userCode).includes(q) ||
+          norm(p.id).includes(q) ||
+          (p.currentCard && norm(p.currentCard.cardNo).includes(q))
+        );
+      }
+
+      if (state.type) {
+        list = list.filter(p => p.patronType === state.type);
+      }
+
+      if (state.patronStatus) {
+        list = list.filter(p => p.status === state.patronStatus);
+      }
+
+      if (state.cardStatus) {
+        if (state.cardStatus === 'NONE') {
+          list = list.filter(p => !p.currentCard);
+        } else {
+          list = list.filter(p => p.currentCard && p.currentCard.status === state.cardStatus);
+        }
+      }
+
+      return list;
+    }
+
+    function updateKpiBadges() {
+      const total = patrons.length;
+      const activeCards = patrons.filter(p => p.currentCard && p.currentCard.status === 'ACTIVE').length;
+      const pendingCards = patrons.filter(p => !p.currentCard || (p.currentCard && p.currentCard.status === 'EXPIRED')).length;
+      const revokedCards = patrons.filter(p => p.currentCard && p.currentCard.status === 'REVOKED').length;
+      const suspended = patrons.filter(p => p.status === 'BORROWING_SUSPENDED').length;
+      const noCard = patrons.filter(p => !p.currentCard).length;
+
+      $('kpiTotalPatrons').textContent = total;
+      $('kpiActiveCards').textContent = activeCards;
+      $('kpiPendingCards').textContent = pendingCards;
+      $('kpiRevokedCards').textContent = revokedCards;
+
+      $('tabBadgeAll').textContent = total;
+      $('tabBadgeActiveCard').textContent = activeCards;
+      $('tabBadgeNoCard').textContent = noCard;
+      $('tabBadgeRevoked').textContent = patrons.filter(p => p.currentCard && (p.currentCard.status === 'REVOKED' || p.currentCard.status === 'EXPIRED')).length;
+      $('tabBadgeSuspended').textContent = suspended;
+    }
+
+    // -------------------------------------------------------------
+    // 6. RENDER GIAO DIỆN CHÍNH (MANAGEMENT LIST)
+    // -------------------------------------------------------------
+    function renderManagementStateHtml() {
+      if (state.screenState === 'loading') {
+        return `
+          <div class="surface state-surface">
+            <span class="state-icon">◌</span>
+            <h2>Đang tải danh sách bạn đọc &amp; thẻ thư viện...</h2>
+            <p>Vui lòng chờ trong giây lát trong khi hệ thống đồng bộ dữ liệu.</p>
+          </div>`;
+      }
+      if (state.screenState === 'empty') {
+        return `
+          <div class="surface state-surface">
+            <span class="state-icon">⌕</span>
+            <h2>Không tìm thấy bạn đọc nào phù hợp bộ lọc</h2>
+            <p>Hãy thử thay đổi từ khóa hoặc đặt lại tiêu chí tìm kiếm.</p>
+            <button class="button secondary" type="button" onclick="window.wireResetFilters()">Đặt lại bộ lọc</button>
+          </div>`;
+      }
+      if (state.screenState === 'error') {
+        return `
+          <div class="surface state-surface">
+            <span class="state-icon">!</span>
+            <h2>Không thể tải danh sách bạn đọc</h2>
+            <p>Đã xảy ra sự cố khi kết nối tới dịch vụ quản lý bạn đọc. Bạn có thể thử lại.</p>
+            <button class="button" type="button" onclick="window.wireRetry()">↻ Thử lại</button>
+          </div>`;
+      }
+      if (state.screenState === 'forbidden') {
+        return `
+          <div class="surface state-surface">
+            <span class="state-icon">⛨</span>
+            <h2>Bạn không có quyền quản lý bạn đọc &amp; cấp thẻ (403 Forbidden)</h2>
+            <p>Chỉ người dùng mang vai trò <strong>LIBRARIAN</strong> hoặc <strong>ADMIN</strong> mới có quyền truy cập màn hình này.</p>
+          </div>`;
+      }
+      return '';
+    }
+
+    function renderPatronTable() {
+      const stateBox = $('managementStateSurface');
+      const tableSurf = $('tableSurface');
+      const stateHtml = renderManagementStateHtml();
+
+      stateBox.innerHTML = stateHtml;
+      if (stateHtml) {
+        tableSurf.hidden = true;
+        return;
+      }
+      tableSurf.hidden = false;
+
+      const rows = getFilteredPatrons();
+      const totalPages = Math.max(1, Math.ceil(rows.length / state.pageSize));
+      state.page = Math.min(state.page, totalPages - 1);
+      const pageSlice = rows.slice(state.page * state.pageSize, (state.page + 1) * state.pageSize);
+
+      const tbody = $('patronTableRows');
+      if (pageSlice.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:32px; color:var(--text-muted);">Chưa có bạn đọc nào trong danh sách.</td></tr>`;
+      } else {
+        tbody.innerHTML = pageSlice.map(p => {
+          const isChecked = state.checkedPatronIds.has(p.id);
+          const hasCard = Boolean(p.currentCard);
+          const cardStatus = hasCard ? p.currentCard.status : 'NONE';
+          const isSuspended = p.status === 'BORROWING_SUSPENDED';
+
+          // Status tags
+          let patronBadge = `<span class="tag success">● Đang hoạt động</span>`;
+          if (isSuspended) patronBadge = `<span class="tag danger" title="${esc(p.suspendedReason || '')}">⏸ Đình chỉ mượn</span>`;
+          else if (p.status === 'CLOSED') patronBadge = `<span class="tag neutral">✖ Đã đóng</span>`;
+
+          let cardBadge = `<span class="tag neutral">Chưa cấp thẻ</span>`;
+          if (cardStatus === 'ACTIVE') cardBadge = `<span class="tag success">● Đang hiệu lực</span>`;
+          else if (cardStatus === 'REVOKED') cardBadge = `<span class="tag danger">✕ Đã thu hồi</span>`;
+          else if (cardStatus === 'EXPIRED') cardBadge = `<span class="tag warning">⌛ Hết hạn</span>`;
+
+          return `
+            <tr class="${isChecked ? 'row-selected' : ''}">
+              <td style="text-align: center;">
+                <input type="checkbox" class="row-checkbox" data-id="${p.id}" ${isChecked ? 'checked' : ''} aria-label="Chọn ${esc(p.fullName)}">
+              </td>
+              <td>
+                <div class="patron-cell">
+                  <div class="patron-avatar ${p.patronType === 'TEACHER' ? 'teacher' : ''}">
+                    ${p.patronType === 'TEACHER' ? 'GV' : 'HS'}
+                  </div>
+                  <div class="patron-meta">
+                    <span class="patron-name">${esc(p.fullName)}</span>
+                    <span class="patron-sub">
+                      <span>${esc(p.userCode || p.id)}</span>
+                      <span>·</span>
+                      <span>${p.patronType === 'TEACHER' ? 'Giáo viên' : 'Học sinh'}</span>
+                    </span>
+                  </div>
+                </div>
+              </td>
+              <td>${esc(p.classroom)}</td>
+              <td>${patronBadge}</td>
+              <td>
+                <div style="display:grid; gap:3px;">
+                  <span class="card-code-tag">${hasCard ? esc(p.currentCard.cardNo) : '—'}</span>
+                  <div>${cardBadge}</div>
+                </div>
+              </td>
+              <td>
+                <span style="font-size:12.5px; color:#334155;">
+                  ${hasCard ? esc(p.currentCard.expiresAt) : '—'}
+                </span>
+              </td>
+              <td>
+                <div class="table-actions">
+                  <button class="button text sm" type="button" data-action="view" data-id="${p.id}">Xem</button>
+                  ${(!hasCard || cardStatus === 'REVOKED' || cardStatus === 'EXPIRED') ? `
+                    <button class="button sm" type="button" data-action="issue" data-id="${p.id}" style="background:#2563eb;">Cấp thẻ</button>
+                  ` : `
+                    <button class="button sm secondary" type="button" data-action="reissue" data-id="${p.id}" title="Cấp lại thẻ mới">Cấp lại</button>
+                    <button class="button sm danger" type="button" data-action="revoke" data-id="${p.id}" title="Thu hồi thẻ này">Thu hồi</button>
+                  `}
+                  <button class="icon-button" type="button" data-action="suspend" data-id="${p.id}" title="Đổi trạng thái quyền mượn">⏸</button>
+                </div>
+              </td>
+            </tr>`;
+        }).join('');
+      }
+
+      // Summary & Paging
+      const start = rows.length ? state.page * state.pageSize + 1 : 0;
+      const end = Math.min((state.page + 1) * state.pageSize, rows.length);
+      $('pageSummary').textContent = rows.length ? `Hiển thị ${start}–${end} trong tổng số ${rows.length} bạn đọc` : 'Không có bạn đọc';
+      $('pageIndicator').textContent = `${state.page + 1} / ${totalPages}`;
+      $('prevPageBtn').disabled = state.page === 0;
+      $('nextPageBtn').disabled = state.page >= totalPages - 1;
+
+      // Update bulk bar
+      const bulkBar = $('bulkBar');
+      const count = state.checkedPatronIds.size;
+      $('bulkSelectedCount').textContent = count;
+      bulkBar.hidden = count === 0;
+      $('selectAllCheckbox').checked = pageSlice.length > 0 && pageSlice.every(p => state.checkedPatronIds.has(p.id));
+    }
+
+    // -------------------------------------------------------------
+    // 7. RENDER CHI TIẾT BẠN ĐỌC & LỊCH SỬ THẺ
+    // -------------------------------------------------------------
+    function renderDetailView() {
+      const p = patrons.find(x => x.id === state.selectedPatronId);
+      if (!p) {
+        state.view = 'management';
+        renderView();
+        return;
+      }
+
+      $('detailHeadingName').textContent = p.fullName;
+      $('detailHeadingMeta').textContent = `${p.patronType === 'TEACHER' ? 'Giáo viên' : 'Học sinh'} · ${p.classroom} · Mã độc giả: ${p.userCode || p.id} · Tham gia: ${p.joinedAt}`;
+
+      // Card CR-80 preview
+      $('detailCardWrapper').innerHTML = renderCr80CardHtml(p);
+
+      // Detail Actions in Header
+      const hasActiveCard = p.currentCard && p.currentCard.status === 'ACTIVE';
+      $('detailHeadingActions').innerHTML = `
+        ${!hasActiveCard ? `
+          <button class="button" type="button" id="detailBtnIssue">🪪 Phát hành thẻ mới</button>
+        ` : `
+          <button class="button secondary" type="button" id="detailBtnReissue">🔄 Cấp lại thẻ mới</button>
+          <button class="button danger" type="button" id="detailBtnRevoke">🚫 Thu hồi thẻ</button>
+        `}
+        <button class="button secondary" type="button" id="detailBtnSuspend">
+          ${p.status === 'BORROWING_SUSPENDED' ? '✔ Gỡ đình chỉ mượn' : '⏸ Tạm đình chỉ mượn'}
+        </button>`;
+
+      // Detail Info List
+      const isSuspended = p.status === 'BORROWING_SUSPENDED';
+      $('detailInfoList').innerHTML = `
+        <div class="detail-info-row">
+          <span class="detail-info-label">Trạng thái hồ sơ bạn đọc:</span>
+          <span class="detail-info-value">
+            ${isSuspended ? `<span class="tag danger">BORROWING_SUSPENDED</span>` : `<span class="tag success">ACTIVE</span>`}
+          </span>
+        </div>
+        ${isSuspended ? `
+          <div class="detail-info-row">
+            <span class="detail-info-label">Lý do đình chỉ mượn:</span>
+            <span class="detail-info-value" style="color:var(--error);">${esc(p.suspendedReason || 'Theo quyết định thủ thư')}</span>
+          </div>` : ''}
+        <div class="detail-info-row">
+          <span class="detail-info-label">Tài khoản liên kết:</span>
+          <span class="detail-info-value">app_user #${p.userId} (${esc(p.userCode)})</span>
+        </div>
+        <div class="detail-info-row">
+          <span class="detail-info-label">Ngày sinh:</span>
+          <span class="detail-info-value">${esc(p.dob)}</span>
+        </div>
+        <div class="detail-info-row">
+          <span class="detail-info-label">Thẻ thư viện hiện tại:</span>
+          <span class="detail-info-value">
+            ${p.currentCard ? `<strong class="card-code-tag">${esc(p.currentCard.cardNo)}</strong> (${esc(p.currentCard.status)})` : '<span style="color:var(--text-muted);">Chưa có thẻ</span>'}
+          </span>
+        </div>
+        <div class="detail-info-row">
+          <span class="detail-info-label">Quyền mượn sách:</span>
+          <span class="detail-info-value">
+            ${(!isSuspended && hasActiveCard) ? '<span class="tag success">Đủ điều kiện mượn sách</span>' : '<span class="tag warning">Không đủ điều kiện mượn</span>'}
+          </span>
+        </div>`;
+
+      // History Table
+      const historyTbody = $('cardHistoryRows');
+      if (!p.cardHistory || p.cardHistory.length === 0) {
+        historyTbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-muted);">Chưa có lịch sử phát hành thẻ.</td></tr>`;
+      } else {
+        historyTbody.innerHTML = p.cardHistory.map(h => `
+          <tr>
+            <td><strong class="card-code-tag">${esc(h.cardNo)}</strong></td>
+            <td>${esc(h.issuedAt)}</td>
+            <td>${esc(h.expiresAt)}</td>
+            <td>
+              <span class="tag ${h.status === 'ACTIVE' ? 'success' : h.status === 'REVOKED' ? 'danger' : 'warning'}">
+                ${esc(h.status)}
+              </span>
+            </td>
+            <td>${esc(h.reason || '—')}</td>
+            <td>${esc(h.issuer || 'hệ thống')}</td>
+            <td style="text-align: right;">
+              <button class="button text sm" type="button" data-viewqr="${esc(h.cardNo)}">Xem QR</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      // Bind events in detail
+      $('detailBtnIssue')?.addEventListener('click', () => openIssueModal(p));
+      $('detailBtnReissue')?.addEventListener('click', () => openReissueModal(p));
+      $('detailBtnRevoke')?.addEventListener('click', () => openRevokeModal(p));
+      $('detailBtnSuspend')?.addEventListener('click', () => openSuspendModal(p));
+      $('btnPrintSingleCard').onclick = () => {
+        openBatchPrintModal([p]);
+      };
+      $('btnViewCardQr').onclick = () => {
+        if (p.currentCard) openQrModal(p.currentCard.cardNo, p);
+      };
+      historyTbody.querySelectorAll('[data-viewqr]').forEach(btn => {
+        btn.onclick = () => openQrModal(btn.dataset.viewqr, p);
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 8. RENDER THẺ CỦA TÔI (CHO BẠN ĐỌC)
+    // -------------------------------------------------------------
+    function renderMyCardView() {
+      // Giả lập tài khoản bạn đọc Nguyễn Văn A
+      const me = patrons[0];
+      $('myCardContainer').innerHTML = renderCr80CardHtml(me);
+
+      const alertBox = $('myCardEligibilityAlert');
+      if (me.status === 'BORROWING_SUSPENDED') {
+        alertBox.className = 'alert warning';
+        alertBox.innerHTML = `<span>⚠</span><div><strong>Tài khoản đang bị tạm đình chỉ mượn sách</strong><div style="font-size:12.5px; margin-top:2px;">Lý do: ${esc(me.suspendedReason)}</div></div>`;
+      } else {
+        alertBox.className = 'alert info';
+        alertBox.innerHTML = `<span>ℹ</span><div><strong>Điều kiện mượn sách: Đủ điều kiện</strong><div style="font-size:12.5px; margin-top:2px;">Hồ sơ bạn đọc đang ở trạng thái ACTIVE và có thẻ thư viện số hợp lệ.</div></div>`;
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 9. CHUYỂN ĐỔI CHẾ ĐỘ XEM CHÍNH
+    // -------------------------------------------------------------
+    function renderView() {
+      $('managementView').hidden = state.view !== 'management';
+      $('detailView').hidden = state.view !== 'detail';
+      $('myCardView').hidden = state.view !== 'mycard';
+      $('sampleCompareView').hidden = state.view !== 'compare';
+
+      // Update demo rail tabs
+      $('tabNavManagement').classList.toggle('active', state.view === 'management' || state.view === 'detail');
+      $('tabNavMyCard').classList.toggle('active', state.view === 'mycard');
+      $('tabNavSampleCompare').classList.toggle('active', state.view === 'compare');
+
+      if (state.view === 'management') {
+        renderPatronTable();
+        updateKpiBadges();
+      } else if (state.view === 'detail') {
+        renderDetailView();
+      } else if (state.view === 'mycard') {
+        renderMyCardView();
+      } else if (state.view === 'compare') {
+        $('sampleCompareReconstruct').innerHTML = renderCr80CardHtml(patrons[0]);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 10. MODAL DIALOGS VÀ XỬ LÝ HÀNH ĐỘNG
+    // -------------------------------------------------------------
+    function openModal(id) { $(id).classList.add('open'); }
+    function closeModal(id) { $(id).classList.remove('open'); }
+
+    // Issue Card Modal
+    function openIssueModal(patron = null) {
+      if (state.role === 'reader') {
+        toast('Bạn đọc không có quyền phát hành thẻ.');
+        return;
+      }
+      state.targetPatronForCard = patron;
+      $('issueCardAlert').hidden = true;
+
+      const select = $('issuePatronSelect');
+      select.innerHTML = patrons.map(p => {
+        const hasCard = p.currentCard && p.currentCard.status === 'ACTIVE';
+        return `<option value="${p.id}" ${hasCard ? 'disabled' : ''} ${patron && patron.id === p.id ? 'selected' : ''}>
+          ${esc(p.fullName)} (${esc(p.classroom)}) ${hasCard ? '— [Đã có thẻ Active]' : ''}
+        </option>`;
+      }).join('');
+
+      $('issueCardPrefixPreview').value = `LIB-2026-000${nextCardIndex}`;
+
+      // Expiry default 12 months
+      const d = new Date();
+      d.setFullYear(d.getFullYear() + 1);
+      $('issueExpiresAt').value = d.toISOString().split('T')[0];
+
+      openModal('issueCardModal');
+    }
+
+    // Revoke Card Modal
+    function openRevokeModal(patron) {
+      if (state.role === 'reader') {
+        toast('Bạn đọc không có quyền thu hồi thẻ.');
+        return;
+      }
+      if (!patron || !patron.currentCard || patron.currentCard.status !== 'ACTIVE') {
+        toast('Bạn đọc không có thẻ ACTIVE để thu hồi.');
+        return;
+      }
+      state.targetCardForRevoke = patron;
+      $('revokeCardNoText').textContent = patron.currentCard.cardNo;
+      $('revokePatronNameText').textContent = `${patron.fullName} (${patron.classroom})`;
+      $('revokeReasonSelect').value = '';
+      $('revokeNotes').value = '';
+      openModal('revokeCardModal');
+    }
+
+    // Reissue Card Modal
+    function openReissueModal(patron) {
+      if (state.role === 'reader') {
+        toast('Bạn đọc không có quyền cấp lại thẻ.');
+        return;
+      }
+      state.targetPatronForCard = patron;
+      $('reissuePatronNameText').textContent = `${patron.fullName} (${patron.classroom})`;
+      $('reissueOldCardNoText').textContent = patron.currentCard ? patron.currentCard.cardNo : 'Không có';
+      $('reissueNewCardNoText').textContent = `LIB-2026-000${nextCardIndex}`;
+
+      const d = new Date();
+      d.setFullYear(d.getFullYear() + 1);
+      $('reissueExpiresAt').value = d.toISOString().split('T')[0];
+      $('reissueNotes').value = '';
+
+      openModal('reissueCardModal');
+    }
+
+    // Suspend Modal
+    function openSuspendModal(patron) {
+      if (state.role === 'reader') {
+        toast('Bạn đọc không có quyền đình chỉ quyền mượn.');
+        return;
+      }
+      state.targetPatronForSuspend = patron;
+      $('suspendPatronNameText').textContent = `${patron.fullName} (${patron.classroom})`;
+      const isSuspended = patron.status === 'BORROWING_SUSPENDED';
+      $('suspendCurrentStatusBadge').innerHTML = isSuspended ? `<span class="tag danger">Bị đình chỉ</span>` : `<span class="tag success">Đang hoạt động</span>`;
+      $('suspendActionSelect').value = isSuspended ? 'UNSUSPEND' : 'SUSPEND';
+      $('suspendReason').value = patron.suspendedReason || '';
+      openModal('suspendPatronModal');
+    }
+
+    // QR Detail Modal
+    function openQrModal(cardNo, patron = null) {
+      const p = patron || patrons.find(x => x.currentCard && x.currentCard.cardNo === cardNo) || patrons[0];
+      $('qrDetailModalTitle').textContent = `Mã QR thẻ ${cardNo}`;
+      $('qrCardNoLarge').textContent = cardNo;
+      $('qrLargeDisplay').innerHTML = generateQrSvg(cardNo);
+
+      const expDay = '21700 (31/05/2029)';
+      const signature = (p.currentCard && p.currentCard.signature) || '8f3e2b9a7c4d1e5f0a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f';
+      const payload = `v1|${cardNo}|${p.id}|21700|${signature}`;
+
+      $('qrRawPayloadText').textContent = payload;
+      $('qrPatronIdMeta').textContent = `${p.id} (${p.fullName})`;
+      $('qrEpochDayMeta').textContent = expDay;
+
+      openModal('qrDetailModal');
+    }
+
+    // Batch Print Modal
+    function openBatchPrintModal(targetList = null) {
+      const list = targetList || (state.checkedPatronIds.size > 0
+        ? patrons.filter(p => state.checkedPatronIds.has(p.id))
+        : patrons.filter(p => p.currentCard && p.currentCard.status === 'ACTIVE'));
+
+      const container = $('printSheetContainer');
+      if (list.length === 0) {
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 32px; color: var(--text-muted);">Không có thẻ nào phù hợp để in.</div>`;
+      } else {
+        container.innerHTML = list.map(p => renderCr80CardHtml(p)).join('');
+      }
+
+      $('printBatchSummary').textContent = `Xem trước ${list.length} thẻ thư viện được bố trí trên lưới in A4 chuẩn CR-80.`;
+      openModal('printBatchModal');
+    }
+
+    // Verify QR Simulator
+    function runVerifySimulation(payloadOrCode) {
+      const input = (payloadOrCode || $('verifyPayloadInput').value).trim();
+      if (!input) {
+        toast('Vui lòng nhập chuỗi QR hoặc mã thẻ để kiểm tra.');
+        return;
+      }
+
+      const s1 = $('step1'), s2 = $('step2'), s3 = $('step3'), s4 = $('step4'), s5 = $('step5'), s6 = $('step6');
+      [s1, s2, s3, s4, s5, s6].forEach(el => { el.className = 'verify-step'; });
+
+      let cardNo = input;
+      let isTampered = input.includes('TAMPER') || input.includes('fake');
+
+      if (input.startsWith('v1|')) {
+        const parts = input.split('|');
+        if (parts.length >= 2) cardNo = parts[1];
+      }
+
+      const foundPatron = patrons.find(p => p.currentCard && p.currentCard.cardNo === cardNo) ||
+                          patrons.find(p => p.cardHistory && p.cardHistory.some(h => h.cardNo === cardNo));
+
+      // Step 1: Parse
+      setTimeout(() => {
+        s1.classList.add('pass');
+      }, 100);
+
+      // Step 2: Signature
+      setTimeout(() => {
+        if (isTampered) {
+          s2.classList.add('fail');
+          showVerifyOutcome(false, 'Chữ ký số không hợp lệ (CARD_SIGNATURE_INVALID). Dữ liệu thẻ đã bị sửa đổi hoặc giả mạo.');
+          return;
+        }
+        s2.classList.add('pass');
+
+        // Step 3: Expiry
+        setTimeout(() => {
+          const isExpired = foundPatron && foundPatron.currentCard && foundPatron.currentCard.status === 'EXPIRED';
+          if (isExpired) {
+            s3.classList.add('fail');
+            showVerifyOutcome(false, `Thẻ đã hết hạn hiệu lực (CARD_EXPIRED). Ngày hết hạn: ${foundPatron.currentCard.expiresAt}.`);
+            return;
+          }
+          s3.classList.add('pass');
+
+          // Step 4: DB Lookup
+          setTimeout(() => {
+            if (!foundPatron) {
+              s4.classList.add('fail');
+              showVerifyOutcome(false, `Không tìm thấy thẻ ${cardNo} trong cơ sở dữ liệu thư viện.`);
+              return;
+            }
+            s4.classList.add('pass');
+
+            // Step 5: Active Status
+            setTimeout(() => {
+              const isRevoked = foundPatron.currentCard && foundPatron.currentCard.status === 'REVOKED';
+              if (isRevoked) {
+                s5.classList.add('fail');
+                showVerifyOutcome(false, `Thẻ ${cardNo} đã bị thu hồi (CARD_REVOKED). Lý do: ${foundPatron.currentCard.revokedReason || 'Thu hồi theo quy định'}.`);
+                return;
+              }
+              s5.classList.add('pass');
+
+              // Step 6: Patron Eligibility
+              setTimeout(() => {
+                if (foundPatron.status === 'BORROWING_SUSPENDED') {
+                  s6.classList.add('fail');
+                  showVerifyOutcome(false, `Thẻ hợp lệ nhưng bạn đọc đang bị tạm đình chỉ mượn sách (PATRON_BORROWING_SUSPENDED). Lý do: ${foundPatron.suspendedReason}.`);
+                  return;
+                }
+                s6.classList.add('pass');
+                showVerifyOutcome(true, `Xác thực thành công 100%! Bạn đọc: <strong>${esc(foundPatron.fullName)}</strong> (${esc(foundPatron.classroom)}) - Đủ điều kiện mượn sách.`);
+              }, 120);
+            }, 120);
+          }, 120);
+        }, 120);
+      }, 120);
+    }
+
+    function showVerifyOutcome(isSuccess, message) {
+      const box = $('verifyOutcomeBox');
+      box.className = `alert ${isSuccess ? 'success' : 'error'}`;
+      box.style.marginTop = '14px';
+      box.innerHTML = `<span>${isSuccess ? '✔' : '✖'}</span><div>${message}</div>`;
+    }
+
+    // -------------------------------------------------------------
+    // 11. BIND TOÀN BỘ SỰ KIỆN TƯƠNG TÁC
+    // -------------------------------------------------------------
+    function setupEventListeners() {
+      // Demo Rail Role Switcher
+      $('roleMode').onchange = e => {
+        state.role = e.target.value;
+        if (state.role === 'reader') {
+          $('headerUserWelcome').innerHTML = 'Xin chào, <strong>nguyen.van.a (Bạn đọc)</strong>';
+          $('headerRoleBadge').textContent = 'STUDENT';
+          state.view = 'mycard';
+        } else if (state.role === 'admin') {
+          $('headerUserWelcome').innerHTML = 'Xin chào, <strong>admin.le (Quản trị viên)</strong>';
+          $('headerRoleBadge').textContent = 'ADMIN';
+          state.view = 'management';
+        } else {
+          $('headerUserWelcome').innerHTML = 'Xin chào, <strong>thu.hoang (Thủ thư)</strong>';
+          $('headerRoleBadge').textContent = 'LIBRARIAN';
+          state.view = 'management';
+        }
+        renderView();
+      };
+
+      // Demo Rail State Switcher
+      $('stateMode').onchange = e => {
+        state.screenState = e.target.value;
+        renderView();
+      };
+
+      // Demo Rail Navigation Tabs
+      $('tabNavManagement').onclick = () => { state.view = 'management'; renderView(); };
+      $('tabNavMyCard').onclick = () => { state.view = 'mycard'; renderView(); };
+      $('tabNavSampleCompare').onclick = () => { state.view = 'compare'; renderView(); };
+
+      // Sidebar link
+      $('sideNavPatronCard').onclick = e => {
+        e.preventDefault();
+        state.view = state.role === 'reader' ? 'mycard' : 'management';
+        renderView();
+      };
+
+      // Quick Tabs
+      document.querySelectorAll('.tab-pill').forEach(btn => {
+        btn.onclick = () => {
+          document.querySelectorAll('.tab-pill').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.activeQuickTab = btn.dataset.tab;
+          state.page = 0;
+          renderPatronTable();
+        };
+      });
+
+      // Filter Toolbar
+      $('btnFilterSubmit').onclick = () => {
+        state.query = $('searchInput').value.trim();
+        state.type = $('typeFilter').value;
+        state.patronStatus = $('patronStatusFilter').value;
+        state.cardStatus = $('cardStatusFilter').value;
+        state.page = 0;
+        state.screenState = 'normal';
+        renderPatronTable();
+      };
+      $('searchInput').onkeydown = e => {
+        if (e.key === 'Enter') { e.preventDefault(); $('btnFilterSubmit').click(); }
+      };
+
+      window.wireResetFilters = () => {
+        $('searchInput').value = '';
+        $('typeFilter').value = '';
+        $('patronStatusFilter').value = '';
+        $('cardStatusFilter').value = '';
+        state.query = '';
+        state.type = '';
+        state.patronStatus = '';
+        state.cardStatus = '';
+        state.screenState = 'normal';
+        state.activeQuickTab = 'all';
+        document.querySelectorAll('.tab-pill').forEach((b, i) => b.classList.toggle('active', i === 0));
+        renderPatronTable();
+      };
+      $('btnFilterReset').onclick = window.wireResetFilters;
+
+      window.wireRetry = () => {
+        state.screenState = 'normal';
+        $('stateMode').value = 'normal';
+        renderView();
+        toast('Đã tải lại dữ liệu thành công.');
+      };
+
+      // Pagination
+      $('pageSizeSelect').onchange = e => {
+        state.pageSize = Number(e.target.value);
+        state.page = 0;
+        renderPatronTable();
+      };
+      $('prevPageBtn').onclick = () => {
+        if (state.page > 0) { state.page--; renderPatronTable(); }
+      };
+      $('nextPageBtn').onclick = () => {
+        state.page++;
+        renderPatronTable();
+      };
+
+      // Checkbox selections
+      $('selectAllCheckbox').onchange = e => {
+        const rows = getFilteredPatrons();
+        const pageSlice = rows.slice(state.page * state.pageSize, (state.page + 1) * state.pageSize);
+        if (e.target.checked) {
+          pageSlice.forEach(p => state.checkedPatronIds.add(p.id));
+        } else {
+          pageSlice.forEach(p => state.checkedPatronIds.delete(p.id));
+        }
+        renderPatronTable();
+      };
+
+      $('patronTableRows').addEventListener('change', e => {
+        if (e.target.classList.contains('row-checkbox')) {
+          const id = e.target.dataset.id;
+          if (e.target.checked) state.checkedPatronIds.add(id);
+          else state.checkedPatronIds.delete(id);
+          renderPatronTable();
+        }
+      });
+
+      $('btnBulkDeselect').onclick = () => {
+        state.checkedPatronIds.clear();
+        renderPatronTable();
+      };
+
+      $('btnBatchPrintSelected').onclick = () => {
+        openBatchPrintModal();
+      };
+
+      $('btnBatchIssueSelected').onclick = () => {
+        const selected = patrons.filter(p => state.checkedPatronIds.has(p.id) && (!p.currentCard || p.currentCard.status !== 'ACTIVE'));
+        if (selected.length === 0) {
+          toast('Các bạn đọc đã chọn đều đã có thẻ ACTIVE.');
+          return;
+        }
+        selected.forEach(p => {
+          const newCode = `LIB-2026-000${nextCardIndex++}`;
+          p.currentCard = {
+            id: `CARD-${nextCardIndex}`,
+            cardNo: newCode,
+            status: 'ACTIVE',
+            issuedAt: '08/10/2026',
+            expiresAt: '31/05/2029',
+            payloadVersion: 'v1',
+            signature: '8f3e2b9a7c4d1e5f0a2b3c4d5e6f7a8b9c0d1e2f',
+            revokedAt: null,
+            revokedReason: null
+          };
+          p.cardHistory.unshift({ cardNo: newCode, issuedAt: '08/10/2026', expiresAt: '31/05/2029', status: 'ACTIVE', reason: 'Cấp hàng loạt', issuer: 'thu.hoang' });
+        });
+        state.checkedPatronIds.clear();
+        updateKpiBadges();
+        renderPatronTable();
+        toast(`Đã cấp thẻ mới cho ${selected.length} bạn đọc.`);
+      };
+
+      // Table Action Click
+      $('patronTableRows').addEventListener('click', e => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
+        const patron = patrons.find(x => x.id === id);
+        if (!patron) return;
+
+        if (action === 'view') {
+          state.selectedPatronId = id;
+          state.view = 'detail';
+          renderView();
+        } else if (action === 'issue') {
+          openIssueModal(patron);
+        } else if (action === 'reissue') {
+          openReissueModal(patron);
+        } else if (action === 'revoke') {
+          openRevokeModal(patron);
+        } else if (action === 'suspend') {
+          openSuspendModal(patron);
+        }
+      });
+
+      // Back to management
+      $('btnBackToManagement').onclick = () => {
+        state.view = 'management';
+        renderView();
+      };
+
+      // Top action buttons
+      $('btnIssueCardModal').onclick = () => openIssueModal();
+      $('btnActivatePatronModal').onclick = () => openModal('activatePatronModal');
+      $('btnVerifyModal').onclick = () => {
+        $('verifyPayloadInput').value = '';
+        $('verifyOutcomeBox').innerHTML = '';
+        [1,2,3,4,5,6].forEach(i => { $(`step${i}`).className = 'verify-step'; });
+        openModal('verifyModal');
+      };
+
+      // Close modal triggers
+      document.querySelectorAll('[data-close]').forEach(btn => {
+        btn.onclick = () => closeModal(btn.dataset.close);
+      });
+      document.querySelectorAll('.modal-backdrop').forEach(bg => {
+        bg.addEventListener('click', e => {
+          if (e.target === bg) bg.classList.remove('open');
+        });
+      });
+
+      // FORM SUBMISSIONS
+      // 1. Issue Card Submit
+      $('issueCardForm').onsubmit = e => {
+        e.preventDefault();
+        if (state.screenState === 'conflict') {
+          toast('Xung đột phiên bản: Dữ liệu bạn đọc đã thay đổi. Vui lòng tải lại.');
+          return;
+        }
+        const patronId = $('issuePatronSelect').value;
+        const p = patrons.find(x => x.id === patronId);
+        if (!p) return;
+
+        if (p.currentCard && p.currentCard.status === 'ACTIVE') {
+          $('issueCardAlert').textContent = `Lỗi CARD_ALREADY_ACTIVE: Bạn đọc ${p.fullName} đã có thẻ ${p.currentCard.cardNo} đang hoạt động. Phải thu hồi thẻ cũ trước khi cấp thẻ mới.`;
+          $('issueCardAlert').hidden = false;
+          return;
+        }
+
+        const exp = $('issueExpiresAt').value;
+        const newCode = `LIB-2026-000${nextCardIndex++}`;
+        const newCard = {
+          id: `CARD-${nextCardIndex}`,
+          cardNo: newCode,
+          status: 'ACTIVE',
+          issuedAt: '08/10/2026',
+          expiresAt: exp,
+          payloadVersion: 'v1',
+          signature: '8f3e2b9a7c4d1e5f0a2b3c4d5e6f7a8b9c0d1e2f',
+          revokedAt: null,
+          revokedReason: null
+        };
+
+        p.currentCard = newCard;
+        p.cardHistory.unshift({ cardNo: newCode, issuedAt: '08/10/2026', expiresAt: exp, status: 'ACTIVE', reason: $('issueNotes').value || 'Phát hành mới', issuer: 'thu.hoang' });
+
+        closeModal('issueCardModal');
+        updateKpiBadges();
+        if (state.view === 'detail') renderDetailView();
+        else renderPatronTable();
+        toast(`Đã phát hành thành công thẻ ${newCode} cho ${p.fullName}.`);
+      };
+
+      // 2. Revoke Card Submit
+      $('revokeCardForm').onsubmit = e => {
+        e.preventDefault();
+        const p = state.targetCardForRevoke;
+        if (!p || !p.currentCard) return;
+
+        const reasonSelect = $('revokeReasonSelect').value;
+        const notes = $('revokeNotes').value.trim();
+        const fullReason = `${$('revokeReasonSelect').selectedOptions[0].text}: ${notes}`;
+
+        p.currentCard.status = 'REVOKED';
+        p.currentCard.revokedAt = '08/10/2026';
+        p.currentCard.revokedReason = fullReason;
+
+        const h = p.cardHistory.find(x => x.cardNo === p.currentCard.cardNo);
+        if (h) {
+          h.status = 'REVOKED';
+          h.reason = fullReason;
+        }
+
+        closeModal('revokeCardModal');
+        updateKpiBadges();
+        if (state.view === 'detail') renderDetailView();
+        else renderPatronTable();
+        toast(`Đã thu hồi thẻ ${p.currentCard.cardNo} kèm lý do.`);
+      };
+
+      // 3. Reissue Card Submit
+      $('reissueCardForm').onsubmit = e => {
+        e.preventDefault();
+        const p = state.targetPatronForCard;
+        if (!p) return;
+
+        const exp = $('reissueExpiresAt').value;
+        const reason = $('reissueReasonSelect').selectedOptions[0].text;
+        const notes = $('reissueNotes').value.trim();
+
+        // Thu hồi thẻ cũ nếu có
+        if (p.currentCard) {
+          p.currentCard.status = 'REVOKED';
+          p.currentCard.revokedAt = '08/10/2026';
+          p.currentCard.revokedReason = `Cấp lại thẻ: ${reason} (${notes})`;
+          const oldHist = p.cardHistory.find(x => x.cardNo === p.currentCard.cardNo);
+          if (oldHist) {
+            oldHist.status = 'REVOKED';
+            oldHist.reason = `Cấp lại thẻ: ${reason}`;
+          }
+        }
+
+        // Tạo thẻ mới
+        const newCode = `LIB-2026-000${nextCardIndex++}`;
+        const newCard = {
+          id: `CARD-${nextCardIndex}`,
+          cardNo: newCode,
+          status: 'ACTIVE',
+          issuedAt: '08/10/2026',
+          expiresAt: exp,
+          payloadVersion: 'v1',
+          signature: '7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b',
+          revokedAt: null,
+          revokedReason: null
+        };
+        p.currentCard = newCard;
+        p.cardHistory.unshift({ cardNo: newCode, issuedAt: '08/10/2026', expiresAt: exp, status: 'ACTIVE', reason: `Cấp lại: ${reason}`, issuer: 'thu.hoang' });
+
+        closeModal('reissueCardModal');
+        updateKpiBadges();
+        if (state.view === 'detail') renderDetailView();
+        else renderPatronTable();
+        toast(`Đã cấp lại thẻ mới ${newCode} thành công cho ${p.fullName}.`);
+      };
+
+      // 4. Suspend Patron Submit
+      $('suspendPatronForm').onsubmit = e => {
+        e.preventDefault();
+        const p = state.targetPatronForSuspend;
+        if (!p) return;
+
+        const action = $('suspendActionSelect').value;
+        if (action === 'SUSPEND') {
+          p.status = 'BORROWING_SUSPENDED';
+          p.suspendedReason = $('suspendReason').value.trim() || 'Tạm đình chỉ quyền mượn sách theo yêu cầu thủ thư';
+          toast(`Đã đình chỉ quyền mượn của ${p.fullName}.`);
+        } else {
+          p.status = 'ACTIVE';
+          p.suspendedReason = null;
+          toast(`Đã khôi phục quyền mượn cho ${p.fullName}.`);
+        }
+
+        closeModal('suspendPatronModal');
+        updateKpiBadges();
+        if (state.view === 'detail') renderDetailView();
+        else renderPatronTable();
+      };
+
+      // 5. Activate Patron Submit
+      $('activatePatronForm').onsubmit = e => {
+        e.preventDefault();
+        const autoCard = $('activateAutoIssueCard').checked;
+        const newPatron = {
+          id: `PAT-0${patrons.length + 1}`,
+          userId: 1088,
+          fullName: 'Vũ Thu Ngân',
+          userCode: 'HS2026-088',
+          patronType: 'STUDENT',
+          classroom: '6A2',
+          dob: '09/09/2011',
+          status: 'ACTIVE',
+          joinedAt: '08/10/2026',
+          suspendedReason: null,
+          currentCard: null,
+          cardHistory: []
+        };
+
+        if (autoCard) {
+          const newCode = `LIB-2026-000${nextCardIndex++}`;
+          newPatron.currentCard = {
+            id: `CARD-${nextCardIndex}`,
+            cardNo: newCode,
+            status: 'ACTIVE',
+            issuedAt: '08/10/2026',
+            expiresAt: '31/05/2029',
+            payloadVersion: 'v1',
+            signature: '8f3e2b9a7c4d1e5f0a2b3c4d5e6f7a8b9c0d1e2f',
+            revokedAt: null,
+            revokedReason: null
+          };
+          newPatron.cardHistory.push({ cardNo: newCode, issuedAt: '08/10/2026', expiresAt: '31/05/2029', status: 'ACTIVE', reason: 'Kích hoạt hồ sơ', issuer: 'thu.hoang' });
+        }
+
+        patrons.unshift(newPatron);
+        closeModal('activatePatronModal');
+        updateKpiBadges();
+        renderPatronTable();
+        toast(`Đã kích hoạt hồ sơ bạn đọc cho ${newPatron.fullName}.`);
+      };
+
+      // Copy QR Payload
+      $('btnCopyPayload').onclick = () => {
+        navigator.clipboard?.writeText($('qrRawPayloadText').textContent.trim());
+        toast('Đã sao chép chuỗi payload vào bộ nhớ tạm.');
+      };
+
+      // Verify simulator buttons
+      $('btnRunVerify').onclick = () => runVerifySimulation();
+      $('btnSampleValid').onclick = () => {
+        $('verifyPayloadInput').value = 'v1|LIB-2026-000101|PAT-001|21700|8f3e2b9a7c4d1e5f0a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f';
+        runVerifySimulation($('verifyPayloadInput').value);
+      };
+      $('btnSampleRevoked').onclick = () => {
+        $('verifyPayloadInput').value = 'v1|LIB-2025-000072|PAT-011|21700|6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d';
+        runVerifySimulation($('verifyPayloadInput').value);
+      };
+      $('btnSampleSuspended').onclick = () => {
+        $('verifyPayloadInput').value = 'v1|LIB-2026-000105|PAT-005|21700|3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c';
+        runVerifySimulation($('verifyPayloadInput').value);
+      };
+      $('btnSampleTampered').onclick = () => {
+        $('verifyPayloadInput').value = 'v1|LIB-2026-000101|PAT-001|21700|TAMPERED_FAKE_SIGNATURE_xyz';
+        runVerifySimulation($('verifyPayloadInput').value);
+      };
+
+      // Print dialog buttons
+      $('btnFilterPrintGrade6').onclick = () => {
+        openBatchPrintModal(patrons.filter(p => p.classroom === '6A1' && p.currentCard && p.currentCard.status === 'ACTIVE'));
+      };
+      $('btnFilterPrintAllActive').onclick = () => {
+        openBatchPrintModal(patrons.filter(p => p.currentCard && p.currentCard.status === 'ACTIVE'));
+      };
+      $('btnTriggerBrowserPrint').onclick = () => {
+        window.print();
+      };
+
+      // Report lost button in My Card view
+      $('btnReportLostCard').onclick = () => {
+        toast('Hệ thống đã ghi nhận yêu cầu báo mất thẻ. Thủ thư sẽ liên hệ xác minh.');
+      };
+
+      // Logout button
+      $('logoutButton').onclick = () => {
+        toast('Đã đăng xuất khỏi phiên làm việc minh họa.');
+      };
+    }
+
+    // Khởi chạy ứng dụng
+    setupEventListeners();
+    updateKpiBadges();
+    renderView();
+
+  })();
+  </script>
+</body>
+</html>

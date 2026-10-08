@@ -70,6 +70,17 @@ REVOKED
 
 Mỗi patron có tối đa một ACTIVE card.
 
+### Mẫu thiết kế thẻ thư viện (Card Template)
+
+Mẫu thiết kế thẻ in và hiển thị số (chuẩn CR-80) được lưu trữ tại [`../assets/sample-library-card.jpg`](../assets/sample-library-card.jpg) và wireframe tại [`document/wireframes/fe/library/097-library-patron-and-card/`](../../../wireframes/fe/library/097-library-patron-and-card/README.md).
+
+Thẻ bao gồm:
+- Header: Cơ quan chủ quản (`SỞ GIÁO DỤC VÀ ĐÀO TẠO`), Đơn vị trường (`TRƯỜNG THCS NGUYỄN X`), biểu trưng logo.
+- Tiêu đề: `THẺ THƯ VIỆN`.
+- Khối trái: Mã QR động (ký HMAC-SHA256) và `MÃ THẺ` (ví dụ `LIB-0001234`).
+- Khối phải: Họ và tên, Lớp, Mã độc giả, Ngày sinh, Hiệu lực thẻ.
+- Họa tiết nền chìm hoa sen và vệt xiên trang trí.
+
 ## QR payload
 
 Baseline:
