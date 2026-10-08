@@ -51,6 +51,10 @@ const router = createRouter({
       path: '/notifications',
       redirect: '/v2/notifications',
     },
+    { path: '/library/books', redirect: '/v2/library/books' },
+    { path: '/library/books/new', redirect: '/v2/library/books/new' },
+    { path: '/library/books/:bookId/edit', redirect: (to) => `/v2/library/books/${to.params.bookId}/edit` },
+    { path: '/library/books/:bookId', redirect: (to) => `/v2/library/books/${to.params.bookId}` },
     {
       path: '/lesson-logs',
       redirect: '/v2/lesson-logs',
@@ -92,6 +96,26 @@ const router = createRouter({
           name: 'v2-student-edit',
           component: () => import('@/views/student/StudentFormView.vue'),
           meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+        },
+        {
+          path: 'library/books',
+          name: 'v2-library-books',
+          component: () => import('@/views/library/LibraryBookListView.vue'),
+        },
+        {
+          path: 'library/books/new',
+          name: 'v2-library-book-create',
+          component: () => import('@/views/library/LibraryBookFormView.vue'),
+        },
+        {
+          path: 'library/books/:bookId',
+          name: 'v2-library-book-detail',
+          component: () => import('@/views/library/LibraryBookDetailView.vue'),
+        },
+        {
+          path: 'library/books/:bookId/edit',
+          name: 'v2-library-book-edit',
+          component: () => import('@/views/library/LibraryBookFormView.vue'),
         },
         {
           path: 'academic-years',
@@ -302,7 +326,8 @@ router.beforeEach((to) => {
   if (to.name === 'v2-shell') {
     return firstPermittedWorkspacePath(roles)
   }
-  if (to.meta.requiresAuth && isStudentWorkspace(roles) && !isStudentWorkspacePath(to.path)) {
+  const isLibraryRoute = to.path === '/v2/library' || to.path.startsWith('/v2/library/')
+  if (to.meta.requiresAuth && isStudentWorkspace(roles) && !isStudentWorkspacePath(to.path) && !isLibraryRoute) {
     return studentWorkspacePaths[0]
   }
   if (to.meta.requiresAuth && isTeacherWorkspace(roles) && to.meta.allowedRoles && !roles.some((role) => to.meta.allowedRoles?.includes(role))) {
