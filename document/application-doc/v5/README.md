@@ -4,6 +4,7 @@
 
 - Ngày khởi tạo: 2026-10-07.
 - Status: **DRAFT — requirement review; implementation approval pending**.
+- Foundation inventory: [`FoundationAndContractFreeze.md`](FoundationAndContractFreeze.md) is `INVENTORY_COMPLETE`; implementation freeze is **not reached**. The user-reported local target is `java_coban`; exact MySQL version/applied Flyway head are unknown. F8 DDL proof is blocked, and F9 API/error/audit/notification/FE contract planning is deferred and blocks affected implementation.
 - Loại: feature baseline mới trên nền ứng dụng quản lý trường học hiện hữu.
 - Nguồn nghiệp vụ ban đầu: đề training **“Thẻ Mượn Số”**; các giả định standalone đã được chuyển đổi để phù hợp với Java-CoBan-RS.
 - v5 không thay thế các contract học vụ v3/v4. Identity, authentication, authorization infrastructure, audit, notification, database, deployment và frontend shell hiện hữu tiếp tục là platform baseline.
@@ -18,6 +19,8 @@ v5 bổ sung bounded context **Library Management** cho hệ thống trường h
 4. phí trễ hạn bằng Spring Batch, có idempotency và restart;
 5. barcode/QR và quét camera;
 6. các tính năng AI hỗ trợ nghiệp vụ thư viện bằng Spring AI hiện hữu.
+
+Đây là mục tiêu của toàn bộ v5; theo quyết định core-first, mọi Library AI requirement được giữ trong baseline nhưng triển khai ở plan/release sau.
 
 ## Không phải mục tiêu
 
@@ -65,6 +68,7 @@ Không suy diễn requirement từ đề standalone nếu requirement đó đã 
 | Integration boundaries | [`contract/IntegrationBoundaries.md`](contract/IntegrationBoundaries.md) |
 | FE/API contract | [`frontend-api/README.md`](frontend-api/README.md) |
 | Main CR | [`change-request/CR-V5-001-library-management.md`](change-request/CR-V5-001-library-management.md) |
+| Foundation inventory and slice gates | [`FoundationAndContractFreeze.md`](FoundationAndContractFreeze.md) |
 
 ## API versioning rule
 
