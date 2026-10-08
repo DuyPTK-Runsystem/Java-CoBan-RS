@@ -31,6 +31,7 @@ Remaining gates: exact MySQL version/applied Flyway head; MySQL DDL/concurrency 
 - Requirement-ID coverage: `PASS` (68 baseline IDs mapped).
 - Local Markdown-link target check: `PASS` across six edited/index Markdown files.
 - Local Markdown heading-anchor check: `PASS` across the edited/index Markdown links.
+- Summary-table structure check: initially missed blank lines that detached both 095 index rows from their tables; removed those two separators. Rechecked both headers/delimiters, five-column row consistency, 095 row continuity, and link targets: `PASS`.
 - `git diff --check`: `PASS`.
 - Unit/integration/full tests, DB/cloud/provider/browser checks: `NOT RUN` (documentation-only scope; no runtime mutation).
 
