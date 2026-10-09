@@ -319,6 +319,7 @@ jobs:
           ROUTER_BASE_URL: ${{ vars.SPRING_AI_OPENAI_BASE_URL }}
           ROUTER_MODEL: ${{ vars.SPRING_AI_OPENAI_CHAT_MODEL }}
           ROUTER_API_KEY_SECRET_NAME: ${{ vars.SPRING_AI_OPENAI_API_KEY_SECRET_NAME }}
+          LIBRARY_CARD_HMAC_SECRET: ${{ vars.LIBRARY_CARD_HMAC_SECRET }}
         run: |
             set -euo pipefail
             app="$ACA_NAME"
@@ -331,6 +332,7 @@ jobs:
             test -n "$ROUTER_BASE_URL" || { echo 'Missing GitHub variable SPRING_AI_OPENAI_BASE_URL.' >&2; exit 1; }
             test -n "$ROUTER_MODEL" || { echo 'Missing GitHub variable SPRING_AI_OPENAI_CHAT_MODEL.' >&2; exit 1; }
             test -n "$ROUTER_API_KEY_SECRET_NAME" || { echo 'Missing GitHub variable SPRING_AI_OPENAI_API_KEY_SECRET_NAME.' >&2; exit 1; }
+            test -n "$LIBRARY_CARD_HMAC_SECRET" || { echo 'Missing GitHub variable LIBRARY_CARD_HMAC_SECRET.' >&2; exit 1; }
             test -n "$DEMO_KEY_VAULT_NAME" || { echo 'Missing GitHub variable DEMO_KEY_VAULT_NAME.' >&2; exit 1; }
 
             mode="$(az containerapp show --name "$app" --resource-group "$group" --query properties.configuration.activeRevisionsMode --output tsv)"
@@ -348,11 +350,14 @@ jobs:
               *) echo 'Container App needs a system-assigned managed identity with Key Vault secret read access.' >&2; exit 1 ;;
             esac
 
-            # Configure provider credentials as ACA Key Vault references. The
-            # workflow receives only the secret name, never the API key value.
+            # Configure provider credentials and the HMAC as ACA Key Vault
+            # references. The workflow receives only secret names, never
+            # secret values.
             az containerapp secret set \
               --name "$app" --resource-group "$group" \
-              --secrets "spring-ai-openai-api-key=keyvaultref:https://${DEMO_KEY_VAULT_NAME}.vault.azure.net/secrets/${ROUTER_API_KEY_SECRET_NAME},identityref:system"
+              --secrets \
+                "spring-ai-openai-api-key=keyvaultref:https://${DEMO_KEY_VAULT_NAME}.vault.azure.net/secrets/${ROUTER_API_KEY_SECRET_NAME},identityref:system" \
+                "library-card-hmac-secret=keyvaultref:https://${DEMO_KEY_VAULT_NAME}.vault.azure.net/secrets/${LIBRARY_CARD_HMAC_SECRET},identityref:system"
 
             if [ "$operation" = 'bootstrap' ]; then
               seed_flag='true'
@@ -399,6 +404,7 @@ jobs:
                 SPRING_AI_OPENAI_BASE_URL="$ROUTER_BASE_URL" \
                 SPRING_AI_OPENAI_API_KEY=secretref:spring-ai-openai-api-key \
                 SPRING_AI_OPENAI_CHAT_MODEL="$ROUTER_MODEL" \
+                LIBRARY_CARD_HMAC_SECRET=secretref:library-card-hmac-secret \
                 APP_AI_TIMETABLE_ENABLED="$TIMETABLE_AI_ENABLED" \
                 APP_AI_TIMETABLE_MAX_CLASS_COUNT="$TIMETABLE_AI_MAX_CLASS_COUNT" \
                 APP_AI_TIMETABLE_MAX_CONTEXT_CHARACTERS="$TIMETABLE_AI_MAX_CONTEXT_CHARACTERS" \

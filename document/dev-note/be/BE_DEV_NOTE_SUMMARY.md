@@ -127,6 +127,7 @@
 | 096 | library catalog | [096 Library Catalog & Book Copy](library/096-library-catalog-and-book-copy-2026-10-08.md) | BE validation BLOCKED after10 rounds:130 focused tests/2 failures,30 Catalog PMD findings,27 Catalog Checkstyle warnings; further full test user-SKIPPED | 2026-10-08 |
 | 097 | library patron/card | [097 Library Patron & Card](library/097-library-patron-and-card-2026-10-09.md) | scoped acceptance complete: focused BE 35/35; disposable Spring/MySQL duplicate activation, issue race and reissue rollback PASS; pmdMain/checkstyle/assemble PASS; pmdTest/full suites SKIPPED by user; one-off runtime probe source/launch entry later removed | 2026-10-09 |
 | 098 | library circulation | [098 Library circulation](library/098-library-circulation-2026-10-09.md) | IMPLEMENTED — scoped gates PASS: BE focused 26/26, pmdMain, Checkstyle, build and final-source disposable MySQL acceptance; full test/pmdTest/scanner SKIPPED by user; target DB and hard-crash STARTED recovery NOT VERIFIED | 2026-10-09 |
+| 097.1 | workflow-skill | [Library-card HMAC deployment wiring](workflow-skill/097.1-library-card-hmac-deployment-2026-10-09.md) | Workflow requires GitHub Variable `LIBRARY_CARD_HMAC_SECRET` containing the Key Vault secret name, stores an Azure Key Vault reference as an ACA secret, and maps it through `secretref` to the runtime variable. Diff check and YAML parse PASS; live GitHub/Azure readback and deployment NOT RUN. | 2026-10-09 |
 
 ## Module folders
 
