@@ -2,16 +2,18 @@
 
 ## Fine policy
 
-Với `d = max(0, daysLate)`:
+Với `d = max(0, daysLate)`, các bậc ngày, đơn giá và trần được đọc từ policy snapshot của lần tính. Giá trị mặc định là:
 
 ```text
 fine(d) =
 min(
-  500000,
-  5000  * min(d, 7)
-+ 10000 * clamp(d - 7, 0, 23)
-+ 20000 * max(d - 30, 0)
+  fineCapPerLoan,
+  tierOneRate * min(d, tierOneDays)
++ tierTwoRate * clamp(d - tierOneDays, 0, tierTwoDays - tierOneDays)
++ tierThreeRate * max(d - tierTwoDays, 0)
 )
+
+Default policy: `fineCapPerLoan=500000`, `tierOneRate=5000`, `tierOneDays=7`, `tierTwoRate=10000`, `tierTwoDays=30`, `tierThreeRate=20000`.
 ```
 
 Reference values:

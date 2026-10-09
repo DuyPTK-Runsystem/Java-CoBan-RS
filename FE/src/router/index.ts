@@ -138,6 +138,39 @@ const router = createRouter({
           component: () => import('@/views/library/LibraryMyCardView.vue'),
         },
         {
+          path: 'library/circulation',
+          name: 'v2-library-circulation',
+          component: () => import('@/views/library/LibraryCirculationView.vue'),
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.LIBRARIAN] },
+        },
+        {
+          path: 'library/loans',
+          name: 'v2-library-loans',
+          component: () => import('@/views/library/LibraryLoanHistoryView.vue'),
+        },
+        {
+          path: 'library/reservations',
+          name: 'v2-library-reservations',
+          component: () => import('@/views/library/LibraryReservationQueueView.vue'),
+        },
+        {
+          path: 'library/fines',
+          name: 'v2-library-fines',
+          component: () => import('@/views/library/LibraryFineView.vue'),
+        },
+        {
+          path: 'library/policy',
+          name: 'v2-library-policy',
+          component: () => import('@/views/library/LibraryPolicyView.vue'),
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.LIBRARIAN] },
+        },
+        {
+          path: 'library/batch-jobs',
+          name: 'v2-library-batch-jobs',
+          component: () => import('@/views/library/LibraryBatchJobsView.vue'),
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.LIBRARIAN] },
+        },
+        {
           path: 'academic-years',
           name: 'v2-academic-years',
           component: () => import('@/views/academic/AcademicYearListView.vue'),

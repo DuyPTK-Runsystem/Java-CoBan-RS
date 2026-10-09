@@ -16,6 +16,10 @@ public interface LibraryPatronRepository extends JpaRepository<LibraryPatron, Lo
     Optional<LibraryPatron> findByUserId(Long userId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from LibraryPatron p where p.id in :ids order by p.id")
+    java.util.List<LibraryPatron> findAllByIdsForUpdate(@Param("ids") java.util.List<Long> ids);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from LibraryPatron p where p.id = :id")
     Optional<LibraryPatron> findByIdForUpdate(@Param("id") Long id);
 

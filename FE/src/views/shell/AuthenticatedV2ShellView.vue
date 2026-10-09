@@ -65,6 +65,9 @@ onBeforeUnmount(() => {
 const navigation = computed<NavigationItem[]>(() => {
   const items: NavigationItem[] = [
     { label: 'Danh mục sách', to: '/v2/library/books', icon: 'pi pi-book' },
+    { label: 'Lịch sử loan', to: '/v2/library/loans', icon: 'pi pi-history', active: route?.path === '/v2/library/loans' },
+    { label: 'Reservation', to: '/v2/library/reservations', icon: 'pi pi-bookmark', active: route?.path === '/v2/library/reservations' },
+    { label: 'Fine', to: '/v2/library/fines', icon: 'pi pi-wallet', active: route?.path === '/v2/library/fines' },
     { label: 'Thẻ thư viện của tôi', to: '/v2/library/my-card', icon: 'pi pi-id-card', active: route?.path === '/v2/library/my-card' },
     { label: 'Năm học & học kỳ', to: '/v2/academic-years', icon: 'pi pi-calendar' },
     { label: 'Khối', to: '/v2/academic-catalog/grades', icon: 'pi pi-sitemap' },
@@ -80,6 +83,11 @@ const navigation = computed<NavigationItem[]>(() => {
   const isNonStudent = roles.some((role) => role === USER_ROLE.ADMIN || role === USER_ROLE.ACADEMIC_OFFICE || role === USER_ROLE.TEACHER)
 
   if (roles.some((role) => role === USER_ROLE.ADMIN || role === USER_ROLE.LIBRARIAN)) {
+    items.splice(1, 0,
+      { label: 'Quầy lưu thông', to: '/v2/library/circulation', icon: 'pi pi-sync', active: route?.path === '/v2/library/circulation' },
+      { label: 'Chính sách thư viện', to: '/v2/library/policy', icon: 'pi pi-sliders-h', active: route?.path === '/v2/library/policy' },
+      { label: 'Overdue fine batch', to: '/v2/library/batch-jobs', icon: 'pi pi-clock', active: route?.path === '/v2/library/batch-jobs' },
+    )
     items.splice(1, 0, {
       label: 'Bạn đọc & Thẻ thư viện',
       to: '/v2/library/patrons',
@@ -160,8 +168,9 @@ const navigation = computed<NavigationItem[]>(() => {
   }
   const catalogOnly = roles.includes(USER_ROLE.LIBRARIAN)
     && !roles.some((role) => role === USER_ROLE.ADMIN || role === USER_ROLE.ACADEMIC_OFFICE || role === USER_ROLE.TEACHER || role === USER_ROLE.STUDENT)
-  if (catalogOnly) return items.filter((item) => item.to === '/v2/library/books' || item.to === '/v2/library/patrons' || item.to === '/v2/library/my-card' || item.to === '/v2/notifications')
-  if (isStudentWorkspace(roles)) return items.filter((item) => isStudentWorkspacePath(item.to) || item.to === '/v2/library/books' || item.to === '/v2/library/my-card')
+  const librarySelfServicePaths = new Set(['/v2/library/books', '/v2/library/loans', '/v2/library/reservations', '/v2/library/fines', '/v2/library/my-card'])
+  if (catalogOnly) return items.filter((item) => item.to === '/v2/library/books' || item.to === '/v2/library/patrons' || item.to === '/v2/library/my-card' || item.to === '/v2/library/loans' || item.to === '/v2/library/reservations' || item.to === '/v2/library/fines' || item.to === '/v2/library/circulation' || item.to === '/v2/library/policy' || item.to === '/v2/library/batch-jobs' || item.to === '/v2/notifications')
+  if (isStudentWorkspace(roles)) return items.filter((item) => isStudentWorkspacePath(item.to) || librarySelfServicePaths.has(item.to))
   if (isTeacherWorkspace(roles)) {
     const teacherRestrictedPaths = new Set([
       '/v2/academic-years',

@@ -5,23 +5,19 @@ import java.util.Optional;
 
 import com.JavaTraining.BaiTap_RS.library.catalog.domain.entity.BookCopy;
 import com.JavaTraining.BaiTap_RS.library.catalog.domain.entity.BookCopyStatus;
-import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface BookCopyRepository extends JpaRepository<BookCopy, Long> {
+public interface BookCopyRepository extends JpaRepository<BookCopy, Long>, BookCopyLockQueries {
 
     Optional<BookCopy> findByBarcode(String barcode);
 
-    @Query("select c.book.id from BookCopy c where c.barcode = :barcode")
-    Optional<Long> findBookIdByBarcode(@Param("barcode") String barcode);
+    List<BookCopy> findAllByBarcodeIn(List<String> barcodes);
 
-    @org.springframework.data.jpa.repository.Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select c from BookCopy c where c.barcode = :barcode")
-    Optional<BookCopy> findByBarcodeForUpdate(@Param("barcode") String barcode);
+    Optional<BookCopy> findFirstByBookId(Long bookId);
 
     long countByBookId(Long bookId);
 

@@ -20,7 +20,12 @@ public class LibraryOperationAuditService {
     private final ObjectMapper objectMapper;
 
     public void record(String action, String type, Long id, Map<String, Object> before, Map<String, Object> after) {
-        auditLogRepository.save(new AuditLog(AuditContext.currentUserId(), action, type,
+        record(AuditContext.currentUserId(), action, type, id, before, after);
+    }
+
+    public void record(Long actorId, String action, String type, Long id,
+            Map<String, Object> before, Map<String, Object> after) {
+        auditLogRepository.save(new AuditLog(actorId, action, type,
                 id == null ? "pending" : id.toString(), json(before), json(after),
                 AuditContext.requestId(), AuditContext.ipAddress()));
     }

@@ -44,17 +44,20 @@ QR ECC level tối thiểu M nếu implementation dùng ZXing.
 
 ## Camera
 
-Decode tại browser.
+Decode tại browser. Vì không có thiết bị thực tế trong demo, core FE dùng upload ảnh QR/barcode làm input thay thế; ảnh được đọc và decode thành chuỗi ngay ở FE.
 
 Preferred implementation có thể dùng native `BarcodeDetector` khi available và ZXing fallback nếu dependency được plan duyệt.
 
 Bắt buộc:
 
 - manual input fallback;
+- upload-image demo cho QR user/thẻ và barcode sách;
 - stop media tracks khi unmount/leave page;
 - handle permission denied;
 - duplicate scan guard;
 - HTTPS hoặc localhost requirement được ghi trong runbook/demo.
+
+Backend circulation nhận chuỗi đã decode, không nhận camera frame hoặc file ảnh trong hot path.
 
 ## Circulation UX
 

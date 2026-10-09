@@ -90,6 +90,9 @@ describe('AuthenticatedV2ShellView.vue', () => {
 
     expect(wrapper.findAll('[data-to]').map((item) => [item.attributes('data-to'), item.text()])).toEqual([
       ['/v2/library/books', 'Danh mục sách'],
+      ['/v2/library/loans', 'Lịch sử loan'],
+      ['/v2/library/reservations', 'Reservation'],
+      ['/v2/library/fines', 'Fine'],
       ['/v2/library/my-card', 'Thẻ thư viện của tôi'],
       ['/v2/attendance', 'Điểm danh'],
       ['/v2/transcripts', 'Bảng điểm'],
@@ -115,7 +118,16 @@ describe('AuthenticatedV2ShellView.vue', () => {
     })
 
     expect(wrapper.findAll('a').map((item) => item.attributes('href'))).toEqual([
-      '/v2/library/books', '/v2/library/patrons', '/v2/library/my-card', '/v2/notifications',
+      '/v2/library/books',
+      '/v2/library/patrons',
+      '/v2/library/circulation',
+      '/v2/library/policy',
+      '/v2/library/batch-jobs',
+      '/v2/library/loans',
+      '/v2/library/reservations',
+      '/v2/library/fines',
+      '/v2/library/my-card',
+      '/v2/notifications',
     ])
   })
 
@@ -154,6 +166,9 @@ describe('AuthenticatedV2ShellView.vue', () => {
 
     expect(wrapper.findAll('a').map((item) => item.attributes('href'))).toEqual([
       '/v2/library/books',
+      '/v2/library/loans',
+      '/v2/library/reservations',
+      '/v2/library/fines',
       '/v2/library/my-card',
       '/v2/attendance',
       '/v2/transcripts',

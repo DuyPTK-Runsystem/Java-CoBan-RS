@@ -10,4 +10,9 @@ public interface LibraryPatronSuspensionRepository extends JpaRepository<Library
     List<LibraryPatronSuspension> findAllByPatronIdAndResolvedAtIsNullOrderBySuspendedAtAsc(Long patronId);
 
     boolean existsByPatronIdAndResolvedAtIsNull(Long patronId);
+
+    boolean existsByPatronIdAndResolvedAtIsNullAndSource(Long patronId, String source);
+
+    List<LibraryPatronSuspension> findAllByPatronIdAndResolvedAtIsNullAndSourceOrderBySuspendedAtAsc(
+            Long patronId, String source);
 }

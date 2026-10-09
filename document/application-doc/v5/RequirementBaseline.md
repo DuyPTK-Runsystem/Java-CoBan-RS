@@ -45,9 +45,9 @@
 - `FR-V5-LIB-CIRC-005`: Patron đặt giữ đầu sách khi không có copy khả dụng; queue theo thời điểm đặt.
 - `FR-V5-LIB-CIRC-006`: Librarian đánh dấu copy LOST; tạo fine theo policy.
 
-- `BR-V5-LIB-CIRC-001`: Một patron giữ tối đa 5 active loans.
-- `BR-V5-LIB-CIRC-002`: Hạn trả mặc định 14 ngày từ ngày mượn.
-- `BR-V5-LIB-CIRC-003`: Gia hạn tối đa 2 lần, mỗi lần +7 ngày và chỉ khi không có reservation đang chờ có priority trên đầu sách.
+- `BR-V5-LIB-CIRC-001`: Một patron không vượt quá giới hạn active loans do policy cấu hình; mặc định là 5.
+- `BR-V5-LIB-CIRC-002`: Hạn trả mặc định 14 ngày từ ngày mượn; duration được policy cấu hình và snapshot theo loan.
+- `BR-V5-LIB-CIRC-003`: Giới hạn renewal và số ngày cộng mỗi lần do policy cấu hình; mặc định là tối đa 2 lần, mỗi lần +7 ngày, đồng thời không có reservation đang chờ có priority trên đầu sách.
 - `BR-V5-LIB-CIRC-004`: Một copy chỉ có tối đa một active loan tại mọi thời điểm, kể cả concurrent requests.
 - `BR-V5-LIB-CIRC-005`: Patron `BORROWING_SUSPENDED`, card không hợp lệ hoặc account không đủ borrower eligibility không được tạo loan mới.
 - `BR-V5-LIB-CIRC-006`: LOST fine = `book.listPrice + 50,000 VND`.
@@ -63,14 +63,14 @@
 - `FR-V5-LIB-FINE-006`: Card-expiry reminder job là SHOULD; có thể tách plan sau core circulation.
 - `FR-V5-LIB-FINE-007`: AI enrichment batch là SHOULD và phụ thuộc Library AI feature flag.
 
-- `BR-V5-LIB-FINE-001`: Fine trễ hạn lũy tiến:
+- `BR-V5-LIB-FINE-001`: Fine trễ hạn lũy tiến theo các bậc ngày, đơn giá và trần do policy cấu hình; mặc định:
   - ngày 1–7: 5,000 VND/ngày;
   - ngày 8–30: 10,000 VND/ngày;
   - từ ngày 31: 20,000 VND/ngày;
   - trần một loan: 500,000 VND.
 - `BR-V5-LIB-FINE-002`: Tiền dùng `BigDecimal`/MySQL `DECIMAL`, không dùng floating point.
 - `BR-V5-LIB-FINE-003`: Mỗi loan có tối đa một overdue-fine record; LOST fine nếu cần tách loại phải có explicit fine type.
-- `BR-V5-LIB-FINE-004`: Tổng unpaid fine > 500,000 VND chuyển patron sang `BORROWING_SUSPENDED`.
+- `BR-V5-LIB-FINE-004`: Tổng unpaid fine vượt ngưỡng suspension do policy cấu hình (mặc định 500,000 VND) chuyển patron sang `BORROWING_SUSPENDED`.
 - `BR-V5-LIB-FINE-005`: Khi unpaid fine trở lại ngưỡng cho phép, patron có thể trở lại ACTIVE nếu không có lý do suspension khác.
 - `BR-V5-LIB-FINE-006`: Job không được ghi đè PAID/WAIVED fine bằng một kết quả cũ.
 
