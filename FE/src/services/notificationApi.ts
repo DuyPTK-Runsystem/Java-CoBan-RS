@@ -28,12 +28,17 @@ export function startNotificationEventStream(token: string, onInboxChanged: () =
   let resumeReconnect: (() => void) | undefined
 
   const waitBeforeReconnect = () => new Promise<void>((resolve) => {
+    if (stopped) {
+      resolve()
+      return
+    }
     resumeReconnect = resolve
-    reconnectTimer = window.setTimeout(() => {
+    const scheduleTimer = typeof window !== 'undefined' ? window.setTimeout.bind(window) : setTimeout
+    reconnectTimer = scheduleTimer(() => {
       reconnectTimer = undefined
       resumeReconnect = undefined
       resolve()
-    }, reconnectDelayMs)
+    }, reconnectDelayMs) as unknown as number
   })
 
   const readEvents = async (): Promise<void> => {
@@ -49,6 +54,7 @@ export function startNotificationEventStream(token: string, onInboxChanged: () =
           },
           signal: activeController.signal,
         })
+        if (stopped || activeController.signal.aborted) return
         if (response.status === 401 || response.status === 403) return
         if (!response.ok || !response.body) throw new Error('Notification event stream unavailable')
 
@@ -59,33 +65,44 @@ export function startNotificationEventStream(token: string, onInboxChanged: () =
         const reader = response.body.getReader()
         const decoder = new TextDecoder()
         let buffer = ''
-        while (!stopped) {
-          const { done, value } = await reader.read()
-          if (done) break
-          buffer += decoder.decode(value, { stream: true })
-          const frames = buffer.split(/\r?\n\r?\n/)
-          buffer = frames.pop() ?? ''
-          frames.forEach((frame) => {
-            if (frame.split(/\r?\n/).some((line) => /^event:\s*inbox-changed$/.test(line))) {
-              onInboxChanged()
-            }
-          })
+        try {
+          while (!stopped) {
+            const { done, value } = await reader.read()
+            if (done || stopped) break
+            buffer += decoder.decode(value, { stream: true })
+            const frames = buffer.split(/\r?\n\r?\n/)
+            buffer = frames.pop() ?? ''
+            frames.forEach((frame) => {
+              if (frame.split(/\r?\n/).some((line) => /^event:\s*inbox-changed$/.test(line))) {
+                onInboxChanged()
+              }
+            })
+          }
+        } finally {
+          reader.releaseLock?.()
         }
       } catch {
-        if (stopped || activeController.signal.aborted) return
+        if (stopped || activeController?.signal.aborted) return
       }
       if (stopped) return
       if (connectedAt > 0 && Date.now() - connectedAt >= MAX_RECONNECT_DELAY_MS) reconnectDelayMs = 1000
       await waitBeforeReconnect()
+      if (stopped) return
       reconnectDelayMs = Math.min(reconnectDelayMs * 2, MAX_RECONNECT_DELAY_MS)
     }
   }
 
-  void readEvents()
+  void readEvents().catch(() => {})
   return () => {
+    if (stopped) return
     stopped = true
     activeController?.abort()
-    if (reconnectTimer !== undefined) window.clearTimeout(reconnectTimer)
+    activeController = undefined
+    if (reconnectTimer !== undefined) {
+      const cancelTimer = typeof window !== 'undefined' ? window.clearTimeout.bind(window) : clearTimeout
+      cancelTimer(reconnectTimer)
+      reconnectTimer = undefined
+    }
     resumeReconnect?.()
     resumeReconnect = undefined
   }

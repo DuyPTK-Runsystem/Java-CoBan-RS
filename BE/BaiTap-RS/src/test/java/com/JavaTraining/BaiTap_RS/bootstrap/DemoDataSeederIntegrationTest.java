@@ -88,6 +88,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
         "spring.datasource.username=sa",
         "spring.datasource.password=",
         "spring.jpa.hibernate.ddl-auto=none",
+        "spring.flyway.target=29",
         "app.seed.demo.enabled=true",
         "spring.ai.model.audio.speech=none",
         "spring.ai.model.audio.transcription=none",

@@ -1,10 +1,12 @@
-import { mount } from '@vue/test-utils'
+import { enableAutoUnmount, mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { clearAuthSession, getAuthSession, saveAuthSession } from '@/services/authSession'
 import AuthenticatedV2ShellView from '@/views/shell/AuthenticatedV2ShellView.vue'
 
 import router from './index'
+
+enableAutoUnmount(afterEach)
 
 describe('router authentication guard', () => {
   afterEach(async () => {
@@ -239,6 +241,7 @@ describe('router authentication guard', () => {
 
     expect(wrapper.get('[data-testid="authenticated-layout"]').exists()).toBe(true)
     expect(wrapper.get('[data-testid="nested-route-outlet"]').exists()).toBe(true)
+    wrapper.unmount()
   })
 
   it('renders nested v2 students child through authenticated layout', async () => {
