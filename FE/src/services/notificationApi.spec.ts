@@ -200,4 +200,69 @@ describe('notificationApi', () => {
     expect(url).not.toContain('studentClassId=null')
     expect(url).not.toContain('teacherClassId=null')
   })
+
+  it('stops stream before fetch resolves without unhandled rejection', async () => {
+    let abortSignal: AbortSignal | undefined
+    fetchMock.mockImplementation((_url, options) => new Promise((_resolve, reject) => {
+      abortSignal = options?.signal
+      abortSignal?.addEventListener('abort', () => reject(new Error('Aborted')))
+    }))
+    vi.stubGlobal('fetch', fetchMock)
+    const onInboxChanged = vi.fn()
+    const stop = startNotificationEventStream('test-token', onInboxChanged)
+    expect(fetchMock).toHaveBeenCalledOnce()
+    stop()
+    expect(abortSignal?.aborted).toBe(true)
+    await flushPromises()
+    expect(onInboxChanged).not.toHaveBeenCalled()
+  })
+
+  it('cancels pending reconnect timer cleanly when stopped during reconnect wait', async () => {
+    vi.useFakeTimers()
+    fetchMock.mockRejectedValue(new Error('Network error'))
+    vi.stubGlobal('fetch', fetchMock)
+    const onInboxChanged = vi.fn()
+    const stop = startNotificationEventStream('test-token', onInboxChanged)
+    try {
+      await vi.advanceTimersByTimeAsync(0)
+      expect(fetchMock).toHaveBeenCalledOnce()
+      expect(vi.getTimerCount()).toBe(1)
+      stop()
+      expect(vi.getTimerCount()).toBe(0)
+      await vi.advanceTimersByTimeAsync(60000)
+      expect(fetchMock).toHaveBeenCalledOnce()
+    } finally {
+      stop()
+      vi.useRealTimers()
+    }
+  })
+
+  it('handles calling stop multiple times idempotently', () => {
+    vi.useFakeTimers()
+    fetchMock.mockImplementation(() => new Promise(() => {}))
+    vi.stubGlobal('fetch', fetchMock)
+    const stop = startNotificationEventStream('test-token', vi.fn())
+    expect(() => {
+      stop()
+      stop()
+      stop()
+    }).not.toThrow()
+    vi.useRealTimers()
+  })
+
+  it('handles stream network errors without generating unhandled rejections', async () => {
+    vi.useFakeTimers()
+    fetchMock.mockRejectedValue(new Error('Network failure'))
+    vi.stubGlobal('fetch', fetchMock)
+    const onInboxChanged = vi.fn()
+    const stop = startNotificationEventStream('test-token', onInboxChanged)
+    try {
+      await vi.advanceTimersByTimeAsync(0)
+      expect(fetchMock).toHaveBeenCalledOnce()
+      stop()
+    } finally {
+      stop()
+      vi.useRealTimers()
+    }
+  })
 })
