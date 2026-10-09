@@ -59,7 +59,7 @@ onMounted(() => void loadJobs())
     <Message v-if="!canRun" severity="warn" :closable="false">Chỉ ADMIN và LIBRARIAN được chạy batch bằng tay.</Message>
     <form class="run-panel content-surface" @submit.prevent="runBatch">
       <label for="run-date">Ngày tính fine (Asia/Ho_Chi_Minh)</label>
-      <input id="run-date" v-model="runDate" type="date" required :disabled="!canRun || running">
+      <input id="run-date" v-model="runDate" type="date" required :max="localDate()" :disabled="!canRun || running">
       <Button label="Chạy overdue fine batch" icon="pi pi-play" type="submit" :loading="running" :disabled="!canRun || !runDate" />
       <p class="helper">Batch chạy lại cùng runDate phải idempotent; backend giữ trạng thái job, tiến độ và kết quả.</p>
     </form>

@@ -57,6 +57,11 @@ const expectedDueDate = computed(() => {
   return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium', timeZone: 'UTC' }).format(expected)
 })
 
+function displayDate(value: string | null | undefined): string {
+  if (!value) return '—'
+  return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium', timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date(value))
+}
+
 function showError(error: unknown, fallback: string): void {
   alert.value = { severity: 'error', text: getLibraryErrorMessage(error, fallback) }
 }
@@ -190,7 +195,7 @@ async function renew(): Promise<void> {
   alert.value = null
   try {
     const loan = await renewLibraryLoan(id, token.value)
-    alert.value = { severity: 'success', text: `Đã gia hạn loan #${loan.loanId}; hạn mới ${loan.dueAt}.` }
+    alert.value = { severity: 'success', text: `Đã gia hạn loan #${loan.loanId}; hạn mới ${displayDate(loan.dueAt)}.` }
   } catch (error) {
     showError(error, 'Không thể gia hạn loan.')
   } finally {
@@ -278,7 +283,7 @@ onMounted(() => void loadPolicy())
           <p v-else class="helper">Quét hoặc nhập tay barcode. Nhóm borrow được gửi all-or-nothing.</p>
           <div class="action-row"><Button label="Tạo loan" icon="pi pi-check" :loading="mutationBusy" :disabled="!canBorrow || mutationBusy" @click="borrow" /></div>
           <div v-if="borrowResult" class="return-result">
-            <p v-for="loan in borrowResult.items" :key="loan.loanId">{{ loan.bookTitle }} · {{ loan.copyBarcode }} · hạn {{ loan.dueAt }} · policy v{{ loan.policyVersion }}</p>
+            <p v-for="loan in borrowResult.items" :key="loan.loanId">{{ loan.bookTitle }} · {{ loan.copyBarcode }} · hạn {{ displayDate(loan.dueAt) }} · policy v{{ loan.policyVersion }}</p>
           </div>
         </article>
 

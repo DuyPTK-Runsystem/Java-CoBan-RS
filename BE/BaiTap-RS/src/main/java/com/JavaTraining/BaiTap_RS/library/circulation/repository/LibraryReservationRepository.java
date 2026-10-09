@@ -66,14 +66,22 @@ public interface LibraryReservationRepository extends JpaRepository<LibraryReser
     List<Long> findExpiredBookIds(@Param(STATUS_PARAMETER) ReservationStatus status,
             @Param("pickupDueAt") java.time.LocalDateTime pickupDueAt);
 
-    @Query("select r from LibraryReservation r where (:bookId is null or r.bookId = :bookId) "
+    @Query(value = "select r from LibraryReservation r where (:bookId is null or r.bookId = :bookId) "
+            + "and r.patronId = :patronId "
+            + "and (:status is null or r.status = :status) "
+            + "order by r.policySnapshot.reservedAt asc, r.id asc",
+            countQuery = "select count(r) from LibraryReservation r where (:bookId is null or r.bookId = :bookId) "
             + "and r.patronId = :patronId "
             + "and (:status is null or r.status = :status)")
     Page<LibraryReservation> pageForPatron(@Param(BOOK_ID_PARAMETER) Long bookId,
             @Param(PATRON_ID_PARAMETER) Long patronId,
             @Param(STATUS_PARAMETER) ReservationStatus status, Pageable pageable);
 
-    @Query("select r from LibraryReservation r where (:bookId is null or r.bookId = :bookId) "
+    @Query(value = "select r from LibraryReservation r where (:bookId is null or r.bookId = :bookId) "
+            + "and (:patronId is null or r.patronId = :patronId) "
+            + "and (:status is null or r.status = :status) "
+            + "order by r.policySnapshot.reservedAt asc, r.id asc",
+            countQuery = "select count(r) from LibraryReservation r where (:bookId is null or r.bookId = :bookId) "
             + "and (:patronId is null or r.patronId = :patronId) "
             + "and (:status is null or r.status = :status)")
     Page<LibraryReservation> pageForStaff(@Param(BOOK_ID_PARAMETER) Long bookId,

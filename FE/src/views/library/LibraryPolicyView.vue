@@ -28,6 +28,10 @@ function localNow(): string {
   return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`
 }
 function toOffsetDateTime(value: string): string { return `${value.length === 16 ? `${value}:00` : value}+07:00` }
+function displayDate(value: string | null | undefined): string {
+  if (!value) return '—'
+  return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date(value))
+}
 function applyPolicy(value: LibraryCirculationPolicy): void {
   policy.value = value
   form.maxActiveLoans = value.maxActiveLoans
@@ -97,7 +101,7 @@ onMounted(() => { effectiveAtInput.value = localNow(); void loadPolicy() })
     <Message v-if="!canEdit" severity="warn" :closable="false">Policy editor dành cho ADMIN và LIBRARIAN.</Message>
     <div v-if="loading && !policy" class="content-surface">Đang tải policy…</div>
     <article v-else-if="policy" class="content-surface">
-      <div class="surface-heading"><div><span class="step-label">Policy version</span><h2>Version {{ policy.policyVersion }}</h2></div><Tag :value="`Hiệu lực ${policy.effectiveAt}`" severity="success" /></div>
+      <div class="surface-heading"><div><span class="step-label">Policy version</span><h2>Version {{ policy.policyVersion }}</h2></div><Tag :value="`Hiệu lực ${displayDate(policy.effectiveAt)}`" severity="success" /></div>
       <div class="policy-grid">
         <label>Tối đa loan đang hoạt động / patron<InputNumber v-model="form.maxActiveLoans" :min="1" :max="100" :disabled="!canEdit" /></label>
         <label>Thời hạn loan (ngày)<InputNumber v-model="form.loanDurationDays" :min="1" :max="365" :disabled="!canEdit" /></label>
@@ -122,7 +126,7 @@ onMounted(() => { effectiveAtInput.value = localNow(); void loadPolicy() })
         </div>
       </section>
       <div class="policy-foot"><label>Trần fine / loan (VND)<InputNumber v-model="form.fineCapPerLoan" :min="0" :max="1000000000" :step="1000" :disabled="!canEdit" /></label><div class="preview"><strong>Ước tính 8 ngày trễ</strong><span>{{ new Intl.NumberFormat('vi-VN').format(previewFine(8)) }} VND</span></div></div>
-      <div class="audit-row"><span>Cập nhật bởi #{{ policy.updatedBy }} · {{ policy.updatedAt }}</span><Button label="Tạo version mới" icon="pi pi-save" :loading="saving" :disabled="!canEdit || saving" @click="savePolicy" /></div>
+      <div class="audit-row"><span>Cập nhật bởi #{{ policy.updatedBy }} · {{ displayDate(policy.updatedAt) }}</span><Button label="Tạo version mới" icon="pi pi-save" :loading="saving" :disabled="!canEdit || saving" @click="savePolicy" /></div>
       <p class="helper">Lưu tạo version/effective time/audit mới. Loan, fine đã chốt và lịch sử cũ không bị thay đổi.</p>
     </article>
   </section>

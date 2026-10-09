@@ -17,6 +17,8 @@ const LIBRARY_ERROR_MESSAGES: Record<string, string> = {
   PATRON_NOT_FOUND: 'Không tìm thấy bạn đọc.',
   RESERVATION_ALREADY_EXISTS: 'Bạn đọc đã có reservation đang hoạt động cho đầu sách này.',
   INVALID_FINE_AMOUNT: 'Số tiền fine không hợp lệ.',
+  INVALID_BATCH_RUN_DATE: 'Ngày chạy tính phí không được ở tương lai.',
+  INVALID_POLICY_EFFECTIVE_AT: 'Thời điểm hiệu lực không được nằm trong quá khứ.',
   LIBRARY_RESOURCE_FORBIDDEN: 'Tài khoản không có quyền thực hiện thao tác này.',
   VERSION_CONFLICT: 'Dữ liệu đã được cập nhật bởi người khác. Tải lại rồi thử lại.',
 }

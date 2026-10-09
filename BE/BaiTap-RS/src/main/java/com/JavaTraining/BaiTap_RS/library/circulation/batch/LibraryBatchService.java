@@ -1,6 +1,9 @@
 package com.JavaTraining.BaiTap_RS.library.circulation.batch;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import com.JavaTraining.BaiTap_RS.common.audit.AuditContext;
@@ -26,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class LibraryBatchService {
 
+    private static final ZoneId LIBRARY_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
+
     private final JobLauncher jobLauncher;
     @Qualifier("libraryOverdueFineJob")
     private final Job libraryOverdueFineJob;
@@ -45,13 +50,33 @@ public class LibraryBatchService {
     }
 
     public LibraryBatchRunDTO run(LocalDate runDate) {
+        validateRunDate(runDate);
         Long actorId = AuditContext.currentUserId();
         LibraryBatchRun run = runCreationService.createOrRestart(runDate, actorId);
-        JobParameters parameters = new JobParametersBuilder()
+        JobParameters parameters = buildJobParameters(runDate, run.getId(), actorId);
+        executeJob(parameters, run.getId());
+        return dto(runRepository.findById(run.getId()).orElse(run));
+    }
+
+    private void validateRunDate(LocalDate runDate) {
+        LocalDate today = LocalDate.now(LIBRARY_ZONE);
+        if (runDate.isAfter(today)) {
+            throw new LibraryCirculationException(HttpStatus.BAD_REQUEST,
+                    "INVALID_BATCH_RUN_DATE", "Ngày chạy tính phí không được ở tương lai");
+        }
+    }
+
+    private JobParameters buildJobParameters(LocalDate runDate, Long runId, Long actorId) {
+        JobParametersBuilder parametersBuilder = new JobParametersBuilder()
                 .addString("runDate", runDate.toString())
-                .addLong("runId", run.getId())
-                .addLong("actorId", actorId)
-                .toJobParameters();
+                .addLong("runId", runId);
+        if (actorId != null) {
+            parametersBuilder.addLong("actorId", actorId);
+        }
+        return parametersBuilder.toJobParameters();
+    }
+
+    private void executeJob(JobParameters parameters, Long runId) {
         try {
             JobExecution execution = jobLauncher.run(libraryOverdueFineJob, parameters);
             if (execution.getStatus().isUnsuccessful()) {
@@ -63,11 +88,10 @@ public class LibraryBatchService {
                     "LIBRARY_BATCH_ALREADY_RUNNING", "Đợt tính phí trễ hạn đang được xử lý", exception);
         } catch (JobInstanceAlreadyCompleteException | JobRestartException
                 | InvalidJobParametersException | org.springframework.core.task.TaskRejectedException exception) {
-            runStatusService.fail(run.getId(), 0, 0);
+            runStatusService.fail(runId, 0, 0);
             throw new LibraryCirculationException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "LIBRARY_BATCH_FAILED", "Không thể chạy đợt tính phí trễ hạn", exception);
         }
-        return dto(runRepository.findById(run.getId()).orElse(run));
     }
 
     @Transactional(readOnly = true)
@@ -77,6 +101,11 @@ public class LibraryBatchService {
 
     public LibraryBatchRunDTO dto(LibraryBatchRun run) {
         return new LibraryBatchRunDTO(run.getId(), run.getJobName(), run.getRunDate(), run.getStatus(),
-                run.getProcessedCount(), run.getSkippedCount(), run.getStartedAt(), run.getCompletedAt());
+                run.getProcessedCount(), run.getSkippedCount(), toOffsetDateTime(run.getStartedAt()),
+                toOffsetDateTime(run.getCompletedAt()));
+    }
+
+    private static OffsetDateTime toOffsetDateTime(LocalDateTime localDateTime) {
+        return localDateTime == null ? null : localDateTime.atZone(LIBRARY_ZONE).toOffsetDateTime();
     }
 }

@@ -24,6 +24,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -50,36 +51,70 @@ class LibraryPolicyControllerHttpTest {
     @MockitoBean
     private com.JavaTraining.BaiTap_RS.security.JwtTokenService jwtTokenService;
 
-    @Test
-    void allowsAdminAndLibrarianToReadPolicy() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get(POLICY_PATH)
-                        .with(SecurityMockMvcRequestPostProcessors.user("admin").roles("ADMIN")))
-                .andExpect(status().isOk());
-        mockMvc.perform(MockMvcRequestBuilders.get(POLICY_PATH)
-                        .with(SecurityMockMvcRequestPostProcessors.user("librarian").roles("LIBRARIAN")))
-                .andExpect(status().isOk());
-
-        verify(policyService, Mockito.times(2)).current();
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        Mockito.reset(policyService);
     }
 
     @Test
-    void allowsAdminAndLibrarianToUpdatePolicy() throws Exception {
+    void allowsAdminAndLibrarianToReadPolicyWithTimezoneOffset() throws Exception {
+        java.time.OffsetDateTime effectiveAt = java.time.OffsetDateTime.of(2026, 10, 9, 15, 30, 0, 0,
+                java.time.ZoneOffset.ofHours(7));
+        com.JavaTraining.BaiTap_RS.library.circulation.domain.DTOs.response.LibraryPolicyDTO policyDto =
+                new com.JavaTraining.BaiTap_RS.library.circulation.domain.DTOs.response.LibraryPolicyDTO(
+                        "LIB-POL-1", effectiveAt, 5, 14, 2, 7, 3, java.util.List.of(),
+                        new java.math.BigDecimal("500000.00"), new java.math.BigDecimal("500000.00"),
+                        effectiveAt, 1L);
+        when(policyService.current()).thenReturn(policyDto);
+
+        mockMvc.perform(MockMvcRequestBuilders.get(POLICY_PATH)
+                        .with(SecurityMockMvcRequestPostProcessors.user("admin").roles("ADMIN")))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.data.effectiveAt").value("2026-10-09T15:30:00+07:00"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.data.updatedAt").value("2026-10-09T15:30:00+07:00"));
+
+        verify(policyService).current();
+    }
+
+    @Test
+    void allowsAdminAndLibrarianToUpdatePolicyWithExplicitOffset() throws Exception {
+        String fePayload = POLICY_REQUEST_JSON.replace("2099-01-01T00:00:00", "2099-01-01T00:00:00+07:00");
         mockMvc.perform(MockMvcRequestBuilders.put(POLICY_PATH)
                         .contentType(JSON_CONTENT_TYPE)
-                        .content(POLICY_REQUEST_JSON)
+                        .content(fePayload)
                         .with(SecurityMockMvcRequestPostProcessors.user("admin").roles("ADMIN")))
                 .andExpect(status().isOk());
+
+        verify(policyService).update(Mockito.any());
+    }
+
+    @Test
+    void allowsUpdateWithEquivalentUtcOffset() throws Exception {
+        String utcPayload = POLICY_REQUEST_JSON.replace("2099-01-01T00:00:00", "2098-12-31T17:00:00Z");
         mockMvc.perform(MockMvcRequestBuilders.put(POLICY_PATH)
                         .contentType(JSON_CONTENT_TYPE)
-                        .content(POLICY_REQUEST_JSON)
+                        .content(utcPayload)
                         .with(SecurityMockMvcRequestPostProcessors.user("librarian").roles("LIBRARIAN")))
                 .andExpect(status().isOk());
 
-        verify(policyService, Mockito.times(2)).update(Mockito.any());
+        verify(policyService).update(Mockito.any());
+    }
+
+    @Test
+    void rejectsInvalidTimestampFormatWithBadRequest() throws Exception {
+        String invalidPayload = POLICY_REQUEST_JSON.replace("2099-01-01T00:00:00", "not-a-valid-timestamp");
+        mockMvc.perform(MockMvcRequestBuilders.put(POLICY_PATH)
+                        .contentType(JSON_CONTENT_TYPE)
+                        .content(invalidPayload)
+                        .with(SecurityMockMvcRequestPostProcessors.user("admin").roles("ADMIN")))
+                .andExpect(status().isBadRequest());
+
+        verify(policyService, never()).update(Mockito.any());
     }
 
     @Test
     void deniesStudentAndAnonymousAccessBeforeCallingPolicyService() throws Exception {
+        String fePayload = POLICY_REQUEST_JSON.replace("2099-01-01T00:00:00", "2099-01-01T00:00:00+07:00");
         mockMvc.perform(MockMvcRequestBuilders.get(POLICY_PATH)
                         .with(SecurityMockMvcRequestPostProcessors.user("student").roles("STUDENT")))
                 .andExpect(status().isForbidden());
@@ -87,7 +122,7 @@ class LibraryPolicyControllerHttpTest {
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(MockMvcRequestBuilders.put(POLICY_PATH)
                         .contentType(JSON_CONTENT_TYPE)
-                        .content(POLICY_REQUEST_JSON)
+                        .content(fePayload)
                         .with(SecurityMockMvcRequestPostProcessors.user("student").roles("STUDENT")))
                 .andExpect(status().isForbidden());
 

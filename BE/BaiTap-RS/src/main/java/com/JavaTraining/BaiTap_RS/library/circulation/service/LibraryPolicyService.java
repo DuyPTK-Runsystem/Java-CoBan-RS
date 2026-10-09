@@ -1,6 +1,7 @@
 package com.JavaTraining.BaiTap_RS.library.circulation.service;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
@@ -32,9 +33,7 @@ public class LibraryPolicyService {
 
     @Transactional(readOnly = true)
     public LibraryPolicyDTO current() {
-        return mapper.toDto(policyRepository.findFirstByOrderByIdDesc().orElseThrow(() ->
-                error(HttpStatus.SERVICE_UNAVAILABLE, "LIBRARY_POLICY_NOT_CONFIGURED",
-                        "Chưa cấu hình chính sách thư viện")));
+        return mapper.toDto(resolveCurrent(LocalDateTime.now(LIBRARY_ZONE)));
     }
 
     @Transactional
@@ -46,18 +45,20 @@ public class LibraryPolicyService {
             throw error(HttpStatus.CONFLICT, "VERSION_CONFLICT", "Chính sách đã được cập nhật; hãy tải lại");
         }
         validateTiers(request.fineTiers());
-        LocalDateTime now = LocalDateTime.now(LIBRARY_ZONE);
+        OffsetDateTime now = OffsetDateTime.now(LIBRARY_ZONE);
         if (request.effectiveAt().isBefore(now)) {
             throw error(HttpStatus.BAD_REQUEST, "INVALID_POLICY_EFFECTIVE_AT",
                     "Thời điểm hiệu lực không được nằm trong quá khứ");
         }
+        LocalDateTime effectiveAtLocal = request.effectiveAt().atZoneSameInstant(LIBRARY_ZONE).toLocalDateTime();
+        LocalDateTime nowLocal = now.atZoneSameInstant(LIBRARY_ZONE).toLocalDateTime();
         Long actor = AuditContext.currentUserId();
         String version = "LIB-POL-" + UUID.randomUUID();
         LibraryCirculationPolicyTerms terms = new LibraryCirculationPolicyTerms(request.maxActiveLoans(),
                 request.loanDurationDays(), request.maxRenewals(), request.renewalDurationDays(),
                 request.reservationPickupDays(), request.fineCapPerLoan(), request.fineSuspensionThreshold());
         LibraryCirculationPolicySnapshot snapshot = new LibraryCirculationPolicySnapshot(version,
-                request.effectiveAt(), terms, actor, now);
+                effectiveAtLocal, terms, actor, nowLocal);
         LibraryCirculationPolicy policy = new LibraryCirculationPolicy(snapshot);
         for (int index = 0; index < request.fineTiers().size(); index++) {
             policy.addTier(toEntityTier(index, request.fineTiers().get(index)));
@@ -65,7 +66,7 @@ public class LibraryPolicyService {
         LibraryCirculationPolicy saved = policyRepository.saveAndFlush(policy);
         auditService.record("CIRCULATION_POLICY_UPDATED", "library_circulation_policy", saved.getId(),
                 Map.of("policyVersion", latest.getPolicyVersion()),
-                Map.of("policyVersion", version, "effectiveAt", request.effectiveAt().toString()));
+                Map.of("policyVersion", version, "effectiveAt", effectiveAtLocal.toString()));
         return mapper.toDto(saved);
     }
 

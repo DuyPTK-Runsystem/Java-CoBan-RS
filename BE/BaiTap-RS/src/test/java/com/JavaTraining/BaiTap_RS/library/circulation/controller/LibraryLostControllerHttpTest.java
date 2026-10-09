@@ -50,7 +50,8 @@ class LibraryLostControllerHttpTest {
 
     @Test
     void returnsLoanAndLostFineInApprovedResponseShape() throws Exception {
-        LocalDateTime timestamp = LocalDateTime.of(2026, 10, 9, 10, 0);
+        java.time.OffsetDateTime timestamp = java.time.OffsetDateTime.of(2026, 10, 9, 10, 0, 0, 0,
+                java.time.ZoneOffset.ofHours(7));
         LibraryLoanDTO loan = new LibraryLoanDTO(22L, 7L, 31L, "LOST-31", 12L, "Lost book", "CARD-51",
                 LoanStatus.LOST, timestamp.minusDays(25), timestamp.minusDays(5), null, timestamp, 0, "LIB-POL-1");
         LibraryFineDTO fine = new LibraryFineDTO(88L, 22L, FineType.LOST_ITEM, FineStatus.UNPAID,
@@ -66,6 +67,7 @@ class LibraryLostControllerHttpTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.loan.loanId").value(22))
                 .andExpect(jsonPath("$.data.loan.status").value("LOST"))
+                .andExpect(jsonPath("$.data.loan.lostAt").value("2026-10-09T10:00:00+07:00"))
                 .andExpect(jsonPath("$.data.fine.fineId").value(88))
                 .andExpect(jsonPath("$.data.fine.type").value("LOST_ITEM"))
                 .andExpect(jsonPath("$.data.fine.amount").isString())

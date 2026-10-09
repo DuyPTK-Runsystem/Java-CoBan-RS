@@ -131,7 +131,7 @@ onMounted(() => void loadReservations())
           </thead>
           <tbody>
             <tr v-for="(reservation, index) in result.result" :key="reservation.reservationId">
-              <td>#{{ reservation.reservationId }}</td><td>{{ index + 1 }}</td><td>{{ reservation.bookTitle }}</td><td>#{{ reservation.patronId }}</td><td>{{ displayDate(reservation.reservedAt) }}</td><td><Tag :value="reservation.status" :severity="reservation.status === 'READY' ? 'success' : reservation.status === 'WAITING' ? 'warn' : 'secondary'" /></td><td>{{ reservation.allocatedCopyBarcode ?? '—' }}</td><td>{{ displayDate(reservation.pickupDueAt) }}</td><td><Button v-if="['WAITING', 'READY'].includes(reservation.status)" label="Hủy" icon="pi pi-times" severity="secondary" text :loading="busyReservation === reservation.reservationId" :disabled="busyReservation !== null" @click="cancelReservation(reservation)" /></td>
+              <td>#{{ reservation.reservationId }}</td><td>{{ (result.meta.page * result.meta.pageSize) + index + 1 }}</td><td>{{ reservation.bookTitle }}</td><td>#{{ reservation.patronId }}</td><td>{{ displayDate(reservation.reservedAt) }}</td><td><Tag :value="reservation.status" :severity="reservation.status === 'READY' ? 'success' : reservation.status === 'WAITING' ? 'warn' : 'secondary'" /></td><td>{{ reservation.allocatedCopyBarcode ?? '—' }}</td><td>{{ displayDate(reservation.pickupDueAt) }}</td><td><Button v-if="['WAITING', 'READY'].includes(reservation.status)" label="Hủy" icon="pi pi-times" severity="secondary" text :loading="busyReservation === reservation.reservationId" :disabled="busyReservation !== null" @click="cancelReservation(reservation)" /></td>
             </tr>
           </tbody>
         </table>

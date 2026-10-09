@@ -73,7 +73,8 @@ class LibraryPolicyServiceTest {
         when(policyRepository.findLatestForUpdate()).thenReturn(Optional.of(policy("LIB-POL-1")));
 
         LibraryCirculationException exception = assertThrows(LibraryCirculationException.class,
-                () -> service.update(request("LIB-POL-1", validTiers(), LocalDateTime.of(2020, 1, 1, 0, 0))));
+                () -> service.update(request("LIB-POL-1", validTiers(),
+                        java.time.OffsetDateTime.of(2020, 1, 1, 0, 0, 0, 0, java.time.ZoneOffset.ofHours(7)))));
 
         assertEquals("INVALID_POLICY_EFFECTIVE_AT", exception.getCode());
         verify(policyRepository, never()).saveAndFlush(any());
@@ -90,8 +91,39 @@ class LibraryPolicyServiceTest {
         verify(policyRepository).findEffective(requestedTime);
     }
 
+    @Test
+    void currentReturnsCurrentlyEffectivePolicyIgnoringFutureDatedPolicy() {
+        LibraryCirculationPolicy currentEffective = policy("LIB-POL-1");
+        when(policyRepository.findEffective(any())).thenReturn(List.of(currentEffective));
+        when(mapper.toDto(currentEffective)).thenReturn(new com.JavaTraining.BaiTap_RS.library.circulation.domain.DTOs.response.LibraryPolicyDTO(
+                "LIB-POL-1", java.time.OffsetDateTime.now(), 5, 14, 2, 7, 3, List.of(),
+                new BigDecimal("500000.00"), new BigDecimal("500000.00"), java.time.OffsetDateTime.now(), 1L));
+
+        var dto = service.current();
+
+        assertEquals("LIB-POL-1", dto.policyVersion());
+        verify(policyRepository).findEffective(any());
+        verify(policyRepository, never()).findFirstByOrderByIdDesc();
+    }
+
+    @Test
+    void equivalentInstantsWithDifferentOffsetsHandledConsistently() {
+        when(policyRepository.findLatestForUpdate()).thenReturn(Optional.of(policy("LIB-POL-1")));
+        LibraryCirculationPolicy saved = policy("LIB-POL-2");
+        when(policyRepository.saveAndFlush(any())).thenReturn(saved);
+        when(mapper.toDto(saved)).thenReturn(new com.JavaTraining.BaiTap_RS.library.circulation.domain.DTOs.response.LibraryPolicyDTO(
+                "LIB-POL-2", java.time.OffsetDateTime.now(), 5, 14, 2, 7, 3, List.of(),
+                new BigDecimal("500000.00"), new BigDecimal("500000.00"), java.time.OffsetDateTime.now(), 1L));
+
+        java.time.OffsetDateTime utcInstant = java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC).plusDays(2);
+        var result = service.update(request("LIB-POL-1", validTiers(), utcInstant));
+
+        assertEquals("LIB-POL-2", result.policyVersion());
+        verify(policyRepository).saveAndFlush(any());
+    }
+
     private ReqLibraryPolicyDTO request(String version, List<ReqLibraryPolicyDTO.FineTier> tiers,
-            LocalDateTime effectiveAt) {
+            java.time.OffsetDateTime effectiveAt) {
         return new ReqLibraryPolicyDTO(version, effectiveAt, 5, 14, 2, 7, 3, tiers,
                 new BigDecimal("500000.00"), new BigDecimal("500000.00"));
     }
@@ -102,12 +134,12 @@ class LibraryPolicyServiceTest {
                 new ReqLibraryPolicyDTO.FineTier(null, new BigDecimal("20000.00")));
     }
 
-    private LocalDateTime future() {
-        return LocalDateTime.now().plusDays(2);
+    private java.time.OffsetDateTime future() {
+        return java.time.OffsetDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).plusDays(2);
     }
 
     private LibraryCirculationPolicy policy(String version) {
-        LocalDateTime effectiveAt = future();
+        LocalDateTime effectiveAt = LocalDateTime.now().plusDays(2);
         LocalDateTime updatedAt = LocalDateTime.now();
         LibraryCirculationPolicyTerms terms = new LibraryCirculationPolicyTerms(5, 14, 2, 7, 3,
                 new BigDecimal("500000.00"), new BigDecimal("500000.00"));

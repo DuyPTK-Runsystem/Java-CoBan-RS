@@ -108,8 +108,10 @@ class LibraryLostServiceTest {
         LibraryFine lostFine = new LibraryFine(LOAN_ID, FineType.LOST_ITEM, new BigDecimal("173456.78"), false,
                 lossDate, "LIB-POL-1", LocalDateTime.now(LIBRARY_ZONE));
         LibraryLoanDTO loanDto = new LibraryLoanDTO(LOAN_ID, 7L, COPY_ID, "LOST-31", 12L, "Lost book",
-                "CARD-51", LoanStatus.LOST, loan.getBorrowedAt(), loan.getDueAt(), null,
-                LocalDateTime.now(LIBRARY_ZONE), 0, "LIB-POL-1");
+                "CARD-51", LoanStatus.LOST,
+                loan.getBorrowedAt().atZone(LIBRARY_ZONE).toOffsetDateTime(),
+                loan.getDueAt().atZone(LIBRARY_ZONE).toOffsetDateTime(), null,
+                LocalDateTime.now(LIBRARY_ZONE).atZone(LIBRARY_ZONE).toOffsetDateTime(), 0, "LIB-POL-1");
         LibraryFineDTO fineDto = new LibraryFineDTO(1L, LOAN_ID, FineType.LOST_ITEM, FineStatus.UNPAID,
                 new BigDecimal("173456.78"), "VND", lossDate, "LIB-POL-1", null, null, null, null, false);
         when(fineService.createLostFine(eq(loan), eq(new BigDecimal("123456.78")), eq(lossDate), eq(policy)))

@@ -96,7 +96,7 @@ class LibraryLoanBorrowServiceTest {
     }
 
     private LibraryLoanDTO loanDto(Long loanId, Long copyId) {
-        LocalDateTime now = LocalDateTime.now();
+        java.time.OffsetDateTime now = java.time.OffsetDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
         return new LibraryLoanDTO(loanId, PATRON_ID, copyId, "COPY-" + copyId, 101L, "Title", "CARD-4",
                 LoanStatus.ACTIVE, now, now.plusDays(14), null, null, 0, "LIB-POL-1");
     }
