@@ -1,5 +1,6 @@
 package com.JavaTraining.BaiTap_RS.library.card.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +15,9 @@ import org.springframework.data.repository.query.Param;
 public interface LibraryCardRepository extends JpaRepository<LibraryCard, Long> {
 
     Optional<LibraryCard> findFirstByPatronIdAndStatusOrderByIssuedAtDesc(Long patronId, LibraryCardStatus status);
+
+    List<LibraryCard> findAllByPatronIdInAndStatusOrderByIssuedAtDesc(Collection<Long> patronIds,
+            LibraryCardStatus status);
 
     List<LibraryCard> findAllByPatronIdOrderByIssuedAtDesc(Long patronId);
 

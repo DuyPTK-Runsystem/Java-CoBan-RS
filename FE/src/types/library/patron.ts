@@ -75,7 +75,7 @@ export interface VerifyLibraryCardRequest {
 export interface LibraryCardVerificationResult {
   valid: boolean
   card?: LibraryCardSummary | null
-  patron?: LibraryPatronSummary | null
+  patronStatus?: LibraryPatronStatus | null
   code?: string | null
   message?: string | null
 }

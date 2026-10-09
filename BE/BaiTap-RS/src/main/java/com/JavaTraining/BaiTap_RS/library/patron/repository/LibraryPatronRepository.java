@@ -30,7 +30,9 @@ public interface LibraryPatronRepository extends JpaRepository<LibraryPatron, Lo
                    or exists (select s.id from Student s where s.userId = u.id
                        and lower(s.studentName) like lower(concat('%', :keyword, '%')))
                    or exists (select t.id from Teacher t where t.userId = u.id
-                       and lower(t.teacherName) like lower(concat('%', :keyword, '%'))))
+                       and lower(t.teacherName) like lower(concat('%', :keyword, '%')))
+                   or str(p.id) like concat('%', :keyword, '%')
+                   or str(p.userId) like concat('%', :keyword, '%'))
             """)
     Page<LibraryPatron> search(@Param("keyword") String keyword,
             @Param("status") com.JavaTraining.BaiTap_RS.library.patron.domain.entity.LibraryPatronStatus status,

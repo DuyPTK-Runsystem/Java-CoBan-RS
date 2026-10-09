@@ -90,13 +90,14 @@ async function verifyCardQr(): Promise<void> {
   alert.value = null
   try {
     const result = await verifyLibraryCard({ payload }, token.value)
-    if (!result.valid || !result.patron || !result.card) {
+    if (!result.valid || !result.card) {
       alert.value = { severity: 'error', text: result.message || 'QR thẻ không hợp lệ. Hãy kiểm tra thẻ hoặc nhập mã bạn đọc.' }
       return
     }
-    patron.value = result.patron
-    patronId.value = result.patron.patronId
-    patronSearch.value = String(result.patron.patronId)
+    const verifiedPatron = await getLibraryPatron(result.card.patronId, token.value)
+    patron.value = verifiedPatron
+    patronId.value = verifiedPatron.patronId
+    patronSearch.value = String(verifiedPatron.patronId)
     cardNo.value = result.card.cardNo
     cardQrPayload.value = ''
     alert.value = { severity: 'success', text: 'Đã xác thực QR thẻ ở máy chủ và chọn bạn đọc.' }
