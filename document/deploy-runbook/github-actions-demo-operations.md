@@ -47,6 +47,8 @@ The workflow uses the Vercel CLI to pull production project settings, build, and
 
 For the 9Router key, add a secret to the same Azure Key Vault referenced by `DEMO_KEY_VAULT_NAME`; set its name in `SPRING_AI_OPENAI_API_KEY_SECRET_NAME`. Enable the Container App's system-assigned managed identity and grant it `Key Vault Secrets User` on the vault (or the individual secret scope, if supported by the selected setup). The deploy workflow checks that the system identity exists before configuring the secret reference. GitHub Actions passes only the secret name into `az containerapp secret set`; the API key value stays in Key Vault and ACA exposes it to Spring as `SPRING_AI_OPENAI_API_KEY`. Set `SPRING_AI_OPENAI_CHAT_MODEL` to the exact model identifier enabled by 9Router for that account. In local Docker, copy `docker/.env.example` to the ignored `docker/.env`, then fill the provider URL, key, and model there. Never commit that file or put the key in a Docker build argument/image.
 
+For library-card QR signing, add a separate secret to the same Azure Key Vault with at least 32 UTF-8 bytes and set its Key Vault secret name in the repository Actions variable `LIBRARY_CARD_HMAC_SECRET`. The deploy workflow passes only that name to ACA; the HMAC value is never placed in GitHub Actions or workflow output. The Container App system identity must have `Key Vault Secrets User` access to this secret.
+
 ## Azure identities and permissions
 
 - GitHub-hosted `ubuntu-latest` uses federated OIDC to call the ACA Job start and status APIs only. It must not query MySQL directly. The ACA Job runs in the verified VNet-attached WLP environment and has the MySQL client/TLS verification script and read-only-account verifier in its immutable ACR image.

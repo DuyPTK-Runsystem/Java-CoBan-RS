@@ -12,7 +12,15 @@ export type FieldErrors<T extends string> = Partial<Record<T, string>>
 export type LoginField = keyof LoginValues
 export type RegisterField = keyof RegisterValues
 
-export type UserRole = 'ADMIN' | 'ACADEMIC_OFFICE' | 'TEACHER' | 'STUDENT' | 'LIBRARIAN'
+export const USER_ROLE = {
+  ADMIN: 'ADMIN',
+  ACADEMIC_OFFICE: 'ACADEMIC_OFFICE',
+  TEACHER: 'TEACHER',
+  STUDENT: 'STUDENT',
+  LIBRARIAN: 'LIBRARIAN',
+} as const
+
+export type UserRole = typeof USER_ROLE[keyof typeof USER_ROLE]
 
 export interface UserSummary {
   id: number

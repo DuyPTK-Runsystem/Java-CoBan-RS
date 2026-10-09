@@ -13,11 +13,11 @@ Baseline quầy mượn:
 
 ## Business rules
 
-- Max active loans: 5.
-- Default due: borrowed date + 14 days.
+- Max active loans: policy-configured; default 5.
+- Default due: borrowed date + policy-configured duration; default 14 days.
 - Reference-only copy không được mượn.
-- Max renew count: 2.
-- Mỗi renew +7 days.
+- Max renew count: policy-configured; default 2.
+- Mỗi renew cộng policy-configured duration; default +7 days.
 - Không renew khi reservation queue tạo conflict theo policy.
 - Copy chỉ có tối đa một active loan.
 - Borrowing-suspended patron không tạo loan mới.

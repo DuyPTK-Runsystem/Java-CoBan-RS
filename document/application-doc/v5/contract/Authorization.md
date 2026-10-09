@@ -16,6 +16,8 @@ chỉ cho Library.
 
 ## Roles
 
+For Plan 097, each user has exactly one role. Reuse the existing role enum/shared constants when checking eligibility; do not hardcode role names. Any user with an eligible patron may borrow except users whose role is `ADMIN` or `LIBRARIAN`.
+
 | Capability | ADMIN | LIBRARIAN | ACADEMIC_OFFICE | TEACHER | STUDENT |
 |---|---:|---:|---:|---:|---:|
 | Catalog read | ✓ | ✓ | ✓ | ✓ | ✓ |
@@ -49,15 +51,7 @@ và authorize object ownership.
 
 ## Borrowing eligibility
 
-Authorization role và business eligibility tách biệt.
-
-Một TEACHER có quyền gọi self-service API nhưng loan creation vẫn fail nếu:
-
-- no patron;
-- patron suspended/closed;
-- card invalid khi flow yêu cầu card;
-- max loans;
-- fine/business constraints.
+Authorization role và business eligibility tách biệt. Any user except `ADMIN`/`LIBRARIAN` may be a borrower when they have an eligible patron. A request to borrow still fails when the patron is absent, suspended/closed, a required card is invalid, or the Plan 098 circulation/fine limits are not met.
 
 Không dùng Spring Security account lock cho Library debt state.
 

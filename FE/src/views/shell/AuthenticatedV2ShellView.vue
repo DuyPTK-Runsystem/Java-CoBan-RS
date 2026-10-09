@@ -12,6 +12,7 @@ import {
 } from '@/services/notificationApi'
 import { isStudentWorkspace, isStudentWorkspacePath, isTeacherWorkspace } from '@/services/studentNavigation'
 import { logout as logoutApi } from '@/services/userApi'
+import { USER_ROLE } from '@/types/user'
 
 const router = useRouter()
 const route = useRoute()
@@ -64,6 +65,10 @@ onBeforeUnmount(() => {
 const navigation = computed<NavigationItem[]>(() => {
   const items: NavigationItem[] = [
     { label: 'Danh mục sách', to: '/v2/library/books', icon: 'pi pi-book' },
+    { label: 'Lịch sử loan', to: '/v2/library/loans', icon: 'pi pi-history', active: route?.path === '/v2/library/loans' },
+    { label: 'Reservation', to: '/v2/library/reservations', icon: 'pi pi-bookmark', active: route?.path === '/v2/library/reservations' },
+    { label: 'Fine', to: '/v2/library/fines', icon: 'pi pi-wallet', active: route?.path === '/v2/library/fines' },
+    { label: 'Thẻ thư viện của tôi', to: '/v2/library/my-card', icon: 'pi pi-id-card', active: route?.path === '/v2/library/my-card' },
     { label: 'Năm học & học kỳ', to: '/v2/academic-years', icon: 'pi pi-calendar' },
     { label: 'Khối', to: '/v2/academic-catalog/grades', icon: 'pi pi-sitemap' },
     { label: 'Lớp', to: '/v2/academic-catalog/classes', icon: 'pi pi-building' },
@@ -75,7 +80,21 @@ const navigation = computed<NavigationItem[]>(() => {
     { label: 'Điểm danh', to: '/v2/attendance', icon: 'pi pi-calendar' },
   ]
   const roles = session.value?.user.roles ?? []
-  const isNonStudent = roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE' || role === 'TEACHER')
+  const isNonStudent = roles.some((role) => role === USER_ROLE.ADMIN || role === USER_ROLE.ACADEMIC_OFFICE || role === USER_ROLE.TEACHER)
+
+  if (roles.some((role) => role === USER_ROLE.ADMIN || role === USER_ROLE.LIBRARIAN)) {
+    items.splice(1, 0,
+      { label: 'Quầy lưu thông', to: '/v2/library/circulation', icon: 'pi pi-sync', active: route?.path === '/v2/library/circulation' },
+      { label: 'Chính sách thư viện', to: '/v2/library/policy', icon: 'pi pi-sliders-h', active: route?.path === '/v2/library/policy' },
+      { label: 'Overdue fine batch', to: '/v2/library/batch-jobs', icon: 'pi pi-clock', active: route?.path === '/v2/library/batch-jobs' },
+    )
+    items.splice(1, 0, {
+      label: 'Bạn đọc & Thẻ thư viện',
+      to: '/v2/library/patrons',
+      icon: 'pi pi-users',
+      active: Boolean(route?.path?.startsWith('/v2/library/patrons')),
+    })
+  }
 
   // Tab Bảng điểm chỉ hiển thị cho học sinh, ẩn hoàn toàn đối với non-student user
   if (!isNonStudent) {
@@ -115,7 +134,7 @@ const navigation = computed<NavigationItem[]>(() => {
     items.push({ label: 'Sổ điểm', to: '/v2/scorebooks', icon: 'pi pi-book' })
     items.push({ label: 'Yêu cầu sửa điểm', to: '/v2/score-change-requests', icon: 'pi pi-file-edit' })
   }
-  if (!roles.length || roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE')) {
+  if (!roles.length || roles.some((role) => role === USER_ROLE.ADMIN || role === USER_ROLE.ACADEMIC_OFFICE)) {
     items.push({ label: 'Kết quả thi lại', to: '/v2/retake-exams', icon: 'pi pi-check-square' })
     items.push({ label: 'Phòng chức năng', to: '/v2/functional-rooms', icon: 'pi pi-home' })
     items.push({
@@ -125,7 +144,7 @@ const navigation = computed<NavigationItem[]>(() => {
       active: Boolean(route?.path?.startsWith('/v2/timetables')),
     })
   }
-  if (roles.includes('TEACHER')) {
+  if (roles.includes(USER_ROLE.TEACHER)) {
     items.push({
       label: 'Thời khóa biểu của tôi',
       to: '/v2/my-timetable',
@@ -139,7 +158,7 @@ const navigation = computed<NavigationItem[]>(() => {
       active: Boolean(route?.path?.startsWith('/v2/my-lesson-logs')),
     })
   }
-  if (roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE' || role === 'TEACHER')) {
+  if (roles.some((role) => role === USER_ROLE.ADMIN || role === USER_ROLE.ACADEMIC_OFFICE || role === USER_ROLE.TEACHER)) {
     items.push({
       label: 'Sổ đầu bài',
       to: '/v2/lesson-logs',
@@ -147,10 +166,11 @@ const navigation = computed<NavigationItem[]>(() => {
       active: Boolean(route?.path?.startsWith('/v2/lesson-logs')),
     })
   }
-  const catalogOnly = roles.includes('LIBRARIAN')
-    && !roles.some((role) => role === 'ADMIN' || role === 'ACADEMIC_OFFICE' || role === 'TEACHER' || role === 'STUDENT')
-  if (catalogOnly) return items.filter((item) => item.to === '/v2/library/books' || item.to === '/v2/notifications')
-  if (isStudentWorkspace(roles)) return items.filter((item) => isStudentWorkspacePath(item.to) || item.to === '/v2/library/books')
+  const catalogOnly = roles.includes(USER_ROLE.LIBRARIAN)
+    && !roles.some((role) => role === USER_ROLE.ADMIN || role === USER_ROLE.ACADEMIC_OFFICE || role === USER_ROLE.TEACHER || role === USER_ROLE.STUDENT)
+  const librarySelfServicePaths = new Set(['/v2/library/books', '/v2/library/loans', '/v2/library/reservations', '/v2/library/fines', '/v2/library/my-card'])
+  if (catalogOnly) return items.filter((item) => item.to === '/v2/library/books' || item.to === '/v2/library/patrons' || item.to === '/v2/library/my-card' || item.to === '/v2/library/loans' || item.to === '/v2/library/reservations' || item.to === '/v2/library/fines' || item.to === '/v2/library/circulation' || item.to === '/v2/library/policy' || item.to === '/v2/library/batch-jobs' || item.to === '/v2/notifications')
+  if (isStudentWorkspace(roles)) return items.filter((item) => isStudentWorkspacePath(item.to) || librarySelfServicePaths.has(item.to))
   if (isTeacherWorkspace(roles)) {
     const teacherRestrictedPaths = new Set([
       '/v2/academic-years',
