@@ -88,8 +88,69 @@ class LibraryPatronStatusServiceTest {
                         new ReqUpdateLibraryPatronStatusDTO(LibraryPatronStatus.ACTIVE, null)));
 
         assertEquals("PATRON_STATUS_CONFLICT", exception.getCode());
-        verify(suspensionService, never()).resolveAll(eq(PATRON_ID), org.mockito.ArgumentMatchers.any(),
+        verify(suspensionService, never()).resolveManual(eq(PATRON_ID), org.mockito.ArgumentMatchers.any(),
                 org.mockito.ArgumentMatchers.any(LocalDateTime.class));
+    }
+
+    @Test
+    void activeRequestResolvesManualSuspensionAndActivatesWhenNoOtherReasonRemains() {
+        LibraryPatron patron = patron(LibraryPatronStatus.BORROWING_SUSPENDED);
+        when(patronRepository.findByIdForUpdate(PATRON_ID)).thenReturn(Optional.of(patron));
+        when(readModelService.suspensionReasons(PATRON_ID)).thenReturn(List.of("MANUAL"), List.of());
+        when(suspensionService.resolveManual(eq(PATRON_ID), org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(LocalDateTime.class))).thenReturn(true);
+        when(suspensionService.hasUnresolved(PATRON_ID)).thenReturn(false);
+        when(readModelService.patron(patron)).thenReturn(response(patron, LibraryPatronStatus.ACTIVE));
+
+        ResLibraryPatronDTO result = service.updateStatus(PATRON_ID,
+                new ReqUpdateLibraryPatronStatusDTO(LibraryPatronStatus.ACTIVE, null));
+
+        assertEquals(LibraryPatronStatus.ACTIVE, result.status());
+        assertEquals(LibraryPatronStatus.ACTIVE, patron.getStatus());
+        verify(suspensionService).resolveManual(eq(PATRON_ID), org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(LocalDateTime.class));
+        verify(auditService).record(eq("LIBRARY_PATRON_STATUS_CHANGED"), eq("library_patron"), eq(PATRON_ID),
+                anyMap(), anyMap());
+    }
+
+    @Test
+    void activeRequestKeepsFineSuspensionAndEligibilityStatus() {
+        LibraryPatron patron = patron(LibraryPatronStatus.BORROWING_SUSPENDED);
+        when(patronRepository.findByIdForUpdate(PATRON_ID)).thenReturn(Optional.of(patron));
+        when(readModelService.suspensionReasons(PATRON_ID)).thenReturn(List.of("FINE"));
+        when(suspensionService.resolveManual(eq(PATRON_ID), org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(LocalDateTime.class))).thenReturn(false);
+        when(suspensionService.hasUnresolved(PATRON_ID)).thenReturn(true);
+        when(readModelService.patron(patron)).thenReturn(response(patron, LibraryPatronStatus.BORROWING_SUSPENDED));
+
+        ResLibraryPatronDTO result = service.updateStatus(PATRON_ID,
+                new ReqUpdateLibraryPatronStatusDTO(LibraryPatronStatus.ACTIVE, null));
+
+        assertEquals(LibraryPatronStatus.BORROWING_SUSPENDED, result.status());
+        assertEquals(LibraryPatronStatus.BORROWING_SUSPENDED, patron.getStatus());
+        verify(suspensionService, never()).suspendManually(eq(PATRON_ID), org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.any(LocalDateTime.class));
+        verify(auditService, never()).record(eq("LIBRARY_PATRON_STATUS_CHANGED"), eq("library_patron"),
+                eq(PATRON_ID), anyMap(), anyMap());
+    }
+
+    @Test
+    void activeRequestResolvesManualButRetainsSuspendedStatusForFineReason() {
+        LibraryPatron patron = patron(LibraryPatronStatus.BORROWING_SUSPENDED);
+        when(patronRepository.findByIdForUpdate(PATRON_ID)).thenReturn(Optional.of(patron));
+        when(readModelService.suspensionReasons(PATRON_ID)).thenReturn(List.of("MANUAL", "FINE"), List.of("FINE"));
+        when(suspensionService.resolveManual(eq(PATRON_ID), org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(LocalDateTime.class))).thenReturn(true);
+        when(suspensionService.hasUnresolved(PATRON_ID)).thenReturn(true);
+        when(readModelService.patron(patron)).thenReturn(response(patron, LibraryPatronStatus.BORROWING_SUSPENDED));
+
+        ResLibraryPatronDTO result = service.updateStatus(PATRON_ID,
+                new ReqUpdateLibraryPatronStatusDTO(LibraryPatronStatus.ACTIVE, null));
+
+        assertEquals(LibraryPatronStatus.BORROWING_SUSPENDED, result.status());
+        assertEquals(LibraryPatronStatus.BORROWING_SUSPENDED, patron.getStatus());
+        verify(auditService).record(eq("LIBRARY_PATRON_STATUS_CHANGED"), eq("library_patron"), eq(PATRON_ID),
+                anyMap(), anyMap());
     }
 
     private LibraryPatron patron(LibraryPatronStatus status) {

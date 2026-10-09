@@ -1,6 +1,7 @@
 package com.JavaTraining.BaiTap_RS.library.patron.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.JavaTraining.BaiTap_RS.library.patron.domain.entity.LibraryPatronSuspension;
 import com.JavaTraining.BaiTap_RS.library.patron.repository.LibraryPatronSuspensionRepository;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class LibraryPatronSuspensionService {
 
+    private static final String MANUAL_SOURCE = "MANUAL";
     private final LibraryPatronSuspensionRepository repository;
 
     @Transactional
@@ -20,9 +22,19 @@ public class LibraryPatronSuspensionService {
     }
 
     @Transactional
-    public void resolveAll(Long patronId, Long actorId, LocalDateTime now) {
-        repository.findAllByPatronIdAndResolvedAtIsNullOrderBySuspendedAtAsc(patronId)
-                .forEach(suspension -> suspension.resolve(actorId, now));
-        repository.flush();
+    public boolean resolveManual(Long patronId, Long actorId, LocalDateTime now) {
+        List<LibraryPatronSuspension> manualSuspensions = repository
+                .findAllByPatronIdAndResolvedAtIsNullAndSourceOrderBySuspendedAtAsc(patronId, MANUAL_SOURCE);
+        manualSuspensions.forEach(suspension -> suspension.resolve(actorId, now));
+        if (!manualSuspensions.isEmpty()) {
+            repository.flush();
+            return true;
+        }
+        return false;
+    }
+
+    @Transactional(readOnly = true)
+    public boolean hasUnresolved(Long patronId) {
+        return repository.existsByPatronIdAndResolvedAtIsNull(patronId);
     }
 }

@@ -11,9 +11,14 @@ import com.JavaTraining.BaiTap_RS.library.catalog.domain.entity.BookCopy;
 import com.JavaTraining.BaiTap_RS.library.catalog.domain.entity.BookCopyStatus;
 import com.JavaTraining.BaiTap_RS.library.catalog.repository.BookCopyRepository;
 import com.JavaTraining.BaiTap_RS.library.catalog.repository.BookRepository;
+import com.JavaTraining.BaiTap_RS.library.circulation.domain.DTOs.response.LibraryFineDTO;
+import com.JavaTraining.BaiTap_RS.library.circulation.domain.DTOs.response.LibraryLoanDTO;
+import com.JavaTraining.BaiTap_RS.library.circulation.domain.entity.FineStatus;
+import com.JavaTraining.BaiTap_RS.library.circulation.domain.entity.FineType;
 import com.JavaTraining.BaiTap_RS.library.circulation.domain.entity.LibraryCirculationPolicy;
 import com.JavaTraining.BaiTap_RS.library.circulation.domain.entity.LibraryCirculationPolicySnapshot;
 import com.JavaTraining.BaiTap_RS.library.circulation.domain.entity.LibraryCirculationPolicyTerms;
+import com.JavaTraining.BaiTap_RS.library.circulation.domain.entity.LibraryFine;
 import com.JavaTraining.BaiTap_RS.library.circulation.domain.entity.LibraryLoan;
 import com.JavaTraining.BaiTap_RS.library.circulation.domain.entity.LoanStatus;
 import com.JavaTraining.BaiTap_RS.library.circulation.repository.LibraryLoanRepository;
@@ -29,6 +34,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -83,12 +89,6 @@ class LibraryLostServiceTest {
         when(copyRepository.findBookIdByBarcode("LOST-31")).thenReturn(Optional.of(12L));
         when(bookRepository.findByIdForUpdate(12L)).thenReturn(Optional.of(copy.getBook()));
         when(copyRepository.findByBarcodeForUpdate("LOST-31")).thenReturn(Optional.of(copy));
-        when(loanRepository.findFirstByCopyIdAndStatus(COPY_ID, LoanStatus.ACTIVE)).thenReturn(Optional.of(loan));
-        when(loanRepository.findByIdForUpdate(LOAN_ID)).thenReturn(Optional.of(loan));
-        LibraryPatron patron = new LibraryPatron(17L, now);
-        ReflectionTestUtils.setField(patron, "id", 7L);
-        when(patronRepository.findByIdForUpdate(7L)).thenReturn(Optional.of(patron));
-        when(policyService.resolveCurrent(org.mockito.ArgumentMatchers.any())).thenReturn(policy);
     }
 
     @AfterEach
@@ -99,12 +99,48 @@ class LibraryLostServiceTest {
     @Test
     void freezesOverdueCalculationAtLossDateAndUsesCopyListPriceForLostCharge() {
         LocalDate lossDate = LocalDate.now(LIBRARY_ZONE);
+        when(loanRepository.findFirstByCopyIdAndStatus(COPY_ID, LoanStatus.ACTIVE)).thenReturn(Optional.of(loan));
+        when(loanRepository.findByIdForUpdate(LOAN_ID)).thenReturn(Optional.of(loan));
+        LibraryPatron patron = new LibraryPatron(17L, LocalDateTime.now(LIBRARY_ZONE));
+        ReflectionTestUtils.setField(patron, "id", 7L);
+        when(patronRepository.findByIdForUpdate(7L)).thenReturn(Optional.of(patron));
+        when(policyService.resolveCurrent(org.mockito.ArgumentMatchers.any())).thenReturn(policy);
+        LibraryFine lostFine = new LibraryFine(LOAN_ID, FineType.LOST_ITEM, new BigDecimal("173456.78"), false,
+                lossDate, "LIB-POL-1", LocalDateTime.now(LIBRARY_ZONE));
+        LibraryLoanDTO loanDto = new LibraryLoanDTO(LOAN_ID, 7L, COPY_ID, "LOST-31", 12L, "Lost book",
+                "CARD-51", LoanStatus.LOST, loan.getBorrowedAt(), loan.getDueAt(), null,
+                LocalDateTime.now(LIBRARY_ZONE), 0, "LIB-POL-1");
+        LibraryFineDTO fineDto = new LibraryFineDTO(1L, LOAN_ID, FineType.LOST_ITEM, FineStatus.UNPAID,
+                new BigDecimal("173456.78"), "VND", lossDate, "LIB-POL-1", null, null, null, null, false);
+        when(fineService.createLostFine(eq(loan), eq(new BigDecimal("123456.78")), eq(lossDate), eq(policy)))
+                .thenReturn(lostFine);
+        when(mapper.loan(loan)).thenReturn(loanDto);
+        when(mapper.fine(lostFine)).thenReturn(fineDto);
 
-        service.markLost("LOST-31", "confirmed missing");
+        var result = service.markLost("LOST-31", "confirmed missing");
 
+        org.junit.jupiter.api.Assertions.assertEquals(loanDto, result.loan());
+        org.junit.jupiter.api.Assertions.assertEquals(fineDto, result.fine());
         org.junit.jupiter.api.Assertions.assertEquals(LoanStatus.LOST, loan.getStatus());
         org.junit.jupiter.api.Assertions.assertEquals(BookCopyStatus.LOST, copy.getStatus());
         verify(fineService).recalculateOverdue(eq(loan), eq(lossDate), eq(false), eq(policy));
         verify(fineService).createLostFine(eq(loan), eq(new BigDecimal("123456.78")), eq(lossDate), eq(policy));
+    }
+
+    @Test
+    void rejectsRepeatedLostRequestWithoutCreatingAnotherFineOrAudit() {
+        when(loanRepository.findFirstByCopyIdAndStatus(COPY_ID, LoanStatus.ACTIVE)).thenReturn(Optional.empty());
+
+        var exception = org.junit.jupiter.api.Assertions.assertThrows(
+                com.JavaTraining.BaiTap_RS.library.circulation.exception.LibraryCirculationException.class,
+                () -> service.markLost("LOST-31", "confirmed missing"));
+
+        org.junit.jupiter.api.Assertions.assertEquals("ACTIVE_LOAN_NOT_FOUND", exception.getCode());
+        verify(fineService, never()).createLostFine(org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any());
+        verify(auditService, never()).record(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any());
     }
 }

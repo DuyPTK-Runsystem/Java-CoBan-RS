@@ -47,10 +47,11 @@ public class LibraryReservationController {
     @PreAuthorize("isAuthenticated()")
     @ApiMessage("Lịch sử và hàng chờ đặt giữ")
     public ResultPaginationDTO<LibraryReservationDTO> page(
+            @RequestParam(required = false) @Positive Long bookId,
             @RequestParam(required = false) @Positive Long patronId,
             @RequestParam(required = false) ReservationStatus status,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int pageSize) {
-        return reservationService.page(patronId, status, page, pageSize);
+        return reservationService.page(bookId, patronId, status, page, pageSize);
     }
 }

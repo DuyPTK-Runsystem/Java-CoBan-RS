@@ -2,7 +2,7 @@ package com.JavaTraining.BaiTap_RS.library.circulation.controller;
 
 import com.JavaTraining.BaiTap_RS.common.annotation.ApiMessage;
 import com.JavaTraining.BaiTap_RS.library.circulation.domain.DTOs.requests.ReqReasonDTO;
-import com.JavaTraining.BaiTap_RS.library.circulation.domain.DTOs.response.LibraryLoanDTO;
+import com.JavaTraining.BaiTap_RS.library.circulation.domain.DTOs.response.LibraryLostResultDTO;
 import com.JavaTraining.BaiTap_RS.library.circulation.service.LibraryLostService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -27,7 +27,7 @@ public class LibraryLostController {
     @PostMapping("/{barcode}/lost")
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     @ApiMessage("Đánh dấu sách bị mất")
-    public LibraryLoanDTO markLost(@PathVariable @NotBlank @Size(max = 64) String barcode,
+    public LibraryLostResultDTO markLost(@PathVariable @NotBlank @Size(max = 64) String barcode,
             @Valid @RequestBody ReqReasonDTO request) {
         return lostService.markLost(barcode, request.reason());
     }

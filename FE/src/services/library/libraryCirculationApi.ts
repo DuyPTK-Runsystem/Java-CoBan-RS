@@ -7,6 +7,7 @@ import type {
   LibraryReturnRequest,
   LibraryReturnResponse,
   LibraryLoan,
+  LibraryLostResult,
 } from '@/types/library/circulation'
 
 const LOANS_PATH = '/api/v2/loans'
@@ -28,6 +29,6 @@ export function returnLibraryCopies(request: LibraryReturnRequest, token: string
   return apiClient.post<LibraryReturnResponse>(RETURNS_PATH, request, { token })
 }
 
-export function markLibraryCopyLost(barcode: string, reason: string, token: string): Promise<LibraryLoan> {
-  return apiClient.post<LibraryLoan>(`/api/v2/book-copies/${encodeURIComponent(barcode)}/lost`, { reason }, { token })
+export function markLibraryCopyLost(barcode: string, reason: string, token: string): Promise<LibraryLostResult> {
+  return apiClient.post<LibraryLostResult>(`/api/v2/book-copies/${encodeURIComponent(barcode)}/lost`, { reason }, { token })
 }

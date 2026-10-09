@@ -207,8 +207,9 @@ async function markLost(): Promise<void> {
   mutationBusy.value = true
   alert.value = null
   try {
-    const loan = await markLibraryCopyLost(barcode, reason.value.trim(), token.value)
-    alert.value = { severity: 'success', text: `Đã đóng loan #${loan.loanId} theo trạng thái LOST.` }
+    const result = await markLibraryCopyLost(barcode, reason.value.trim(), token.value)
+    const amount = new Intl.NumberFormat('vi-VN').format(Number(result.fine.amount))
+    alert.value = { severity: 'success', text: `Đã ghi nhận mất sách cho lượt mượn #${result.loan.loanId}. Khoản phạt mất sách #${result.fine.fineId}: ${amount} ${result.fine.currency}.` }
     lostInput.value = ''
     reason.value = ''
   } catch (error) {

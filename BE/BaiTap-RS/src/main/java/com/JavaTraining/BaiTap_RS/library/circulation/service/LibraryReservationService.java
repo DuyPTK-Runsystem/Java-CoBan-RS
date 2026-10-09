@@ -22,9 +22,9 @@ public class LibraryReservationService {
         return commandService.cancel(reservationId);
     }
 
-    public ResultPaginationDTO<LibraryReservationDTO> page(Long patronId, ReservationStatus status,
+    public ResultPaginationDTO<LibraryReservationDTO> page(Long bookId, Long patronId, ReservationStatus status,
             int page, int pageSize) {
-        return queryService.page(patronId, status, page, pageSize);
+        return queryService.page(bookId, patronId, status, page, pageSize);
     }
 
     public int expireReadyReservations(Long actorUserId) {

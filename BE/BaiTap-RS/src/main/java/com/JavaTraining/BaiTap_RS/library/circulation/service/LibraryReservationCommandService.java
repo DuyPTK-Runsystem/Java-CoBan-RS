@@ -39,9 +39,11 @@ public class LibraryReservationCommandService {
 
     @Transactional
     public LibraryReservationDTO create(ReqReservationDTO request) {
-        Long patronId = eligibilityService.validateCreation(request.bookId(), AuditContext.currentUserId());
+        Long patronId = eligibilityService.lockAndValidateCreationEligibility(
+                request.bookId(), AuditContext.currentUserId());
         LocalDateTime now = LocalDateTime.now(LIBRARY_ZONE);
         expirationService.expireForBook(request.bookId(), now, AuditContext.currentUserId());
+        eligibilityService.validateCreationAvailabilityAndDuplicate(request.bookId(), patronId);
         LibraryCirculationPolicy policy = policyService.resolveCurrent(now);
         LibraryReservation reservation = reservationRepository.save(new LibraryReservation(request.bookId(),
                 patronId, now, policy.getPolicyVersion(), policy.getReservationPickupDays()));

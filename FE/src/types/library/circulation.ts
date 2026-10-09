@@ -1,4 +1,5 @@
 import type { ResultPaginationDTO } from '@/types/notification'
+import type { LibraryFine } from '@/types/library/fine'
 
 export type LibraryLoanStatus = 'ACTIVE' | 'RETURNED' | 'LOST'
 export type LibraryErrorCode =
@@ -53,6 +54,11 @@ export interface LibraryReturnItem {
 
 export interface LibraryReturnResponse {
   items: LibraryReturnItem[]
+}
+
+export interface LibraryLostResult {
+  loan: LibraryLoan
+  fine: LibraryFine
 }
 
 export interface LibraryLoanQuery {

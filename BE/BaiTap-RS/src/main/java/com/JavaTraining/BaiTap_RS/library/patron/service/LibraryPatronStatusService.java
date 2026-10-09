@@ -41,13 +41,16 @@ public class LibraryPatronStatusService {
                 HttpStatus.NOT_FOUND, "PATRON_NOT_FOUND", "Không tìm thấy hồ sơ bạn đọc"));
         validateTransition(patron, request);
         String reason = request.reason() == null ? null : request.reason().trim();
-        if (isIdempotentStatus(patron, request.status())) {
+        if (isIdempotentStatus(patron, request.status()) && request.status() != LibraryPatronStatus.ACTIVE) {
             return readModelService.patron(patron);
         }
         Map<String, Object> before = statusSnapshot(patron);
         LocalDateTime now = LocalDateTime.now();
-        updateSuspensions(patron, request.status(), reason, now);
-        patron.setStatus(request.status(), now);
+        LibraryPatronStatus effectiveStatus = updateSuspensions(patron, request.status(), reason, now);
+        if (effectiveStatus == patron.getStatus() && before.equals(statusSnapshot(patron))) {
+            return readModelService.patron(patron);
+        }
+        patron.setStatus(effectiveStatus, now);
         Map<String, Object> after = new HashMap<>(statusSnapshot(patron));
         after.put("changeReason", reason);
         auditService.record("LIBRARY_PATRON_STATUS_CHANGED", ENTITY_TYPE, patron.getId(), before, after);
@@ -63,13 +66,17 @@ public class LibraryPatronStatusService {
         }
     }
 
-    private void updateSuspensions(LibraryPatron patron, LibraryPatronStatus status, String reason,
+    private LibraryPatronStatus updateSuspensions(LibraryPatron patron, LibraryPatronStatus status, String reason,
             LocalDateTime now) {
         if (status == LibraryPatronStatus.BORROWING_SUSPENDED) {
             suspensionService.suspendManually(patron.getId(), reason, now);
+            return LibraryPatronStatus.BORROWING_SUSPENDED;
         } else if (status == LibraryPatronStatus.ACTIVE) {
-            suspensionService.resolveAll(patron.getId(), AuditContext.currentUserId(), now);
+            suspensionService.resolveManual(patron.getId(), AuditContext.currentUserId(), now);
+            return suspensionService.hasUnresolved(patron.getId())
+                    ? LibraryPatronStatus.BORROWING_SUSPENDED : LibraryPatronStatus.ACTIVE;
         }
+        return status;
     }
 
     private boolean isIdempotentStatus(LibraryPatron patron, LibraryPatronStatus requested) {

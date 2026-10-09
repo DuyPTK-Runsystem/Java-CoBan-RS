@@ -9,8 +9,9 @@ import com.JavaTraining.BaiTap_RS.library.catalog.domain.entity.BookCopy;
 import com.JavaTraining.BaiTap_RS.library.catalog.domain.entity.BookCopyStatus;
 import com.JavaTraining.BaiTap_RS.library.catalog.repository.BookCopyRepository;
 import com.JavaTraining.BaiTap_RS.library.catalog.repository.BookRepository;
-import com.JavaTraining.BaiTap_RS.library.circulation.domain.DTOs.response.LibraryLoanDTO;
+import com.JavaTraining.BaiTap_RS.library.circulation.domain.DTOs.response.LibraryLostResultDTO;
 import com.JavaTraining.BaiTap_RS.library.circulation.domain.entity.LibraryCirculationPolicy;
+import com.JavaTraining.BaiTap_RS.library.circulation.domain.entity.LibraryFine;
 import com.JavaTraining.BaiTap_RS.library.circulation.domain.entity.LibraryLoan;
 import com.JavaTraining.BaiTap_RS.library.circulation.domain.entity.LoanStatus;
 import com.JavaTraining.BaiTap_RS.library.circulation.exception.LibraryCirculationException;
@@ -36,7 +37,7 @@ public class LibraryLostService {
     private final LibraryOperationAuditService auditService;
 
     @Transactional
-    public LibraryLoanDTO markLost(String barcode, String reason) {
+    public LibraryLostResultDTO markLost(String barcode, String reason) {
         Long bookId = copyRepository.findBookIdByBarcode(barcode).orElseThrow(() ->
                 error(HttpStatus.NOT_FOUND, "COPY_NOT_FOUND", "Không tìm thấy bản sao"));
         bookRepository.findByIdForUpdate(bookId).orElseThrow(() ->
@@ -58,11 +59,11 @@ public class LibraryLostService {
         loan.markLost(now);
         copy.setStatus(BookCopyStatus.LOST);
         fineService.recalculateOverdue(loan, now.toLocalDate(), false, policy);
-        fineService.createLostFine(loan, copy.getBook().getListPrice(), now.toLocalDate(), policy);
+        LibraryFine lostFine = fineService.createLostFine(loan, copy.getBook().getListPrice(), now.toLocalDate(), policy);
         auditService.record("COPY_MARKED_LOST", "library_loan", loan.getId(), null,
                 Map.of("copyId", copy.getId(), "reason", reason.trim(),
                         "actorUserId", AuditContext.currentUserId(), "lostAt", now.toString()));
-        return mapper.loan(loan);
+        return new LibraryLostResultDTO(mapper.loan(loan), mapper.fine(lostFine));
     }
 
     private LibraryCirculationException error(HttpStatus status, String code, String message) {

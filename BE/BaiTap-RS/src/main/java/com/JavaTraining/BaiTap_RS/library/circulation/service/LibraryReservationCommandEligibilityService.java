@@ -42,20 +42,23 @@ public class LibraryReservationCommandEligibilityService {
         this.accessPolicy = accessPolicy;
     }
 
-    public Long validateCreation(Long bookId, Long actorUserId) {
+    public Long lockAndValidateCreationEligibility(Long bookId, Long actorUserId) {
         LibraryEligibilityService.BorrowingEligibility eligibility =
                 eligibilityService.assertCanBorrow(actorUserId, false);
-        Book book = lockReservableBook(bookId);
+        lockReservableBook(bookId);
         LibraryPatron patron = lockEligiblePatron(eligibility.patronId());
-        if (!copyRepository.findAvailableCopiesForUpdate(book.getId(), BookCopyStatus.AVAILABLE).isEmpty()) {
+        return patron.getId();
+    }
+
+    public void validateCreationAvailabilityAndDuplicate(Long bookId, Long patronId) {
+        if (!copyRepository.findAvailableCopiesForUpdate(bookId, BookCopyStatus.AVAILABLE).isEmpty()) {
             throw error(HttpStatus.CONFLICT, "RESERVATION_NOT_NEEDED", "Có bản sao đang sẵn sàng để mượn");
         }
         if (!reservationRepository.findActiveByPatronAndBookForUpdate(
-                patron.getId(), book.getId(), ACTIVE_STATES).isEmpty()) {
+                patronId, bookId, ACTIVE_STATES).isEmpty()) {
             throw error(HttpStatus.CONFLICT, "RESERVATION_ALREADY_EXISTS",
                     "Bạn đã có yêu cầu đặt giữ đang hoạt động");
         }
-        return patron.getId();
     }
 
     public void validateCancellationOwner(Long patronId) {

@@ -26,14 +26,14 @@ public class LibraryReservationQueryService {
     private final LibraryAccessPolicy accessPolicy;
 
     @Transactional(readOnly = true)
-    public ResultPaginationDTO<LibraryReservationDTO> page(Long patronId, ReservationStatus status, int page,
-            int pageSize) {
+    public ResultPaginationDTO<LibraryReservationDTO> page(Long bookId, Long patronId, ReservationStatus status,
+            int page, int pageSize) {
         Long self = patronRepository.findByUserId(AuditContext.currentUserId()).map(LibraryPatron::getId).orElse(null);
         boolean manager = accessPolicy.isManager();
         Long requestedPatron = resolveRequestedPatron(patronId, self, manager);
         Page<LibraryReservation> items = manager
-                ? reservationRepository.pageForStaff(requestedPatron, status, PageRequest.of(page, pageSize))
-                : reservationRepository.pageForPatron(requestedPatron, status, PageRequest.of(page, pageSize));
+                ? reservationRepository.pageForStaff(bookId, requestedPatron, status, PageRequest.of(page, pageSize))
+                : reservationRepository.pageForPatron(bookId, requestedPatron, status, PageRequest.of(page, pageSize));
         return new ResultPaginationDTO<>(new ResultPaginationDTO.Meta(page, pageSize, items.getTotalPages(),
                 items.getTotalElements()), items.getContent().stream().map(mapper::reservation).toList());
     }

@@ -16,6 +16,7 @@ import org.springframework.data.repository.query.Param;
 public interface LibraryReservationRepository extends JpaRepository<LibraryReservation, Long> {
 
     String PATRON_ID_PARAMETER = "patronId";
+    String BOOK_ID_PARAMETER = "bookId";
     String STATUS_PARAMETER = "status";
 
     interface ReservationLockInfo {
@@ -31,19 +32,20 @@ public interface LibraryReservationRepository extends JpaRepository<LibraryReser
     @Query("select r from LibraryReservation r where r.patronId = :patronId and r.bookId = :bookId "
             + "and r.status in :statuses order by r.id")
     List<LibraryReservation> findActiveByPatronAndBookForUpdate(@Param(PATRON_ID_PARAMETER) Long patronId,
-            @Param("bookId") Long bookId, @Param("statuses") List<ReservationStatus> statuses);
+            @Param(BOOK_ID_PARAMETER) Long bookId, @Param("statuses") List<ReservationStatus> statuses);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select r from LibraryReservation r where r.bookId = :bookId and r.status = :status "
             + "and r.pickupDueAt <= :pickupDueAt order by r.id")
-    List<LibraryReservation> findExpiredByBookForUpdate(@Param("bookId") Long bookId,
+    List<LibraryReservation> findExpiredByBookForUpdate(@Param(BOOK_ID_PARAMETER) Long bookId,
             @Param(STATUS_PARAMETER) ReservationStatus status,
             @Param("pickupDueAt") java.time.LocalDateTime pickupDueAt);
 
     @Query("select r from LibraryReservation r where r.bookId = :bookId and r.status = :status "
             + "order by r.policySnapshot.reservedAt, r.id")
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    List<LibraryReservation> findQueue(@Param("bookId") Long bookId, @Param(STATUS_PARAMETER) ReservationStatus status);
+    List<LibraryReservation> findQueue(@Param(BOOK_ID_PARAMETER) Long bookId,
+            @Param(STATUS_PARAMETER) ReservationStatus status);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select r from LibraryReservation r where r.patronId = :patronId "
@@ -64,13 +66,17 @@ public interface LibraryReservationRepository extends JpaRepository<LibraryReser
     List<Long> findExpiredBookIds(@Param(STATUS_PARAMETER) ReservationStatus status,
             @Param("pickupDueAt") java.time.LocalDateTime pickupDueAt);
 
-    @Query("select r from LibraryReservation r where r.patronId = :patronId "
+    @Query("select r from LibraryReservation r where (:bookId is null or r.bookId = :bookId) "
+            + "and r.patronId = :patronId "
             + "and (:status is null or r.status = :status)")
-    Page<LibraryReservation> pageForPatron(@Param(PATRON_ID_PARAMETER) Long patronId,
+    Page<LibraryReservation> pageForPatron(@Param(BOOK_ID_PARAMETER) Long bookId,
+            @Param(PATRON_ID_PARAMETER) Long patronId,
             @Param(STATUS_PARAMETER) ReservationStatus status, Pageable pageable);
 
-    @Query("select r from LibraryReservation r where (:patronId is null or r.patronId = :patronId) "
+    @Query("select r from LibraryReservation r where (:bookId is null or r.bookId = :bookId) "
+            + "and (:patronId is null or r.patronId = :patronId) "
             + "and (:status is null or r.status = :status)")
-    Page<LibraryReservation> pageForStaff(@Param(PATRON_ID_PARAMETER) Long patronId,
+    Page<LibraryReservation> pageForStaff(@Param(BOOK_ID_PARAMETER) Long bookId,
+            @Param(PATRON_ID_PARAMETER) Long patronId,
             @Param(STATUS_PARAMETER) ReservationStatus status, Pageable pageable);
 }
