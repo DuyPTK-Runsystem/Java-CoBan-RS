@@ -90,6 +90,7 @@ describe('AuthenticatedV2ShellView.vue', () => {
 
     expect(wrapper.findAll('[data-to]').map((item) => [item.attributes('data-to'), item.text()])).toEqual([
       ['/v2/library/books', 'Danh mục sách'],
+      ['/v2/library/my-card', 'Thẻ thư viện của tôi'],
       ['/v2/attendance', 'Điểm danh'],
       ['/v2/transcripts', 'Bảng điểm'],
       ['/v2/notifications', 'Thông báo'],
@@ -99,7 +100,7 @@ describe('AuthenticatedV2ShellView.vue', () => {
     expect(wrapper.find('[data-to="/v2/class-transcripts"]').exists()).toBe(false)
   })
 
-  it('keeps a pure LIBRARIAN shell limited to catalog and notification inbox', () => {
+  it('shows patron management, catalog, self-card, and notification navigation for LIBRARIAN', () => {
     saveAuthSession({ accessToken: 'token-lib', user: { id: 31, username: 'librarian', roles: ['LIBRARIAN'] } })
     const wrapper = mount(AuthenticatedV2ShellView, {
       global: {
@@ -113,7 +114,9 @@ describe('AuthenticatedV2ShellView.vue', () => {
       },
     })
 
-    expect(wrapper.findAll('a').map((item) => item.attributes('href'))).toEqual(['/v2/library/books', '/v2/notifications'])
+    expect(wrapper.findAll('a').map((item) => item.attributes('href'))).toEqual([
+      '/v2/library/books', '/v2/library/patrons', '/v2/library/my-card', '/v2/notifications',
+    ])
   })
 
   it.each(['STUDENT', 'TEACHER'] as const)('includes catalog access for %s while retaining its existing workspace menu', (role) => {
@@ -151,6 +154,7 @@ describe('AuthenticatedV2ShellView.vue', () => {
 
     expect(wrapper.findAll('a').map((item) => item.attributes('href'))).toEqual([
       '/v2/library/books',
+      '/v2/library/my-card',
       '/v2/attendance',
       '/v2/transcripts',
       '/v2/notifications',
@@ -172,6 +176,8 @@ describe('AuthenticatedV2ShellView.vue', () => {
     })
 
     expect(wrapper.find('a[href="/v2/library/books"]').exists()).toBe(true)
+    expect(wrapper.find('a[href="/v2/library/patrons"]').exists()).toBe(true)
+    expect(wrapper.find('a[href="/v2/library/my-card"]').exists()).toBe(true)
     expect(wrapper.find('a[href="/v2/academic-catalog/classes"]').exists()).toBe(true)
     expect(wrapper.find('a[href="/v2/academic-catalog/subjects"]').exists()).toBe(true)
     expect(wrapper.find('a[href="/v2/my-timetable"]').exists()).toBe(true)

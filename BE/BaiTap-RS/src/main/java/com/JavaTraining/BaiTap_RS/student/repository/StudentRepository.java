@@ -20,6 +20,8 @@ public interface StudentRepository extends JpaRepository<Student, Long>, JpaSpec
 
     Optional<Student> findByUserId(Long userId);
 
+    List<Student> findAllByUserIdIn(Collection<Long> userIds);
+
     @Query("select student.studentCode from Student student where student.studentCode in :studentCodes")
     List<String> findExistingStudentCodes(@Param("studentCodes") Collection<String> studentCodes);
 }

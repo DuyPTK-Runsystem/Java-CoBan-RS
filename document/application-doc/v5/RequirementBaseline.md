@@ -31,7 +31,7 @@
 - `FR-V5-LIB-CARD-004`: Patron tự xem thẻ hiện tại của chính mình.
 
 - `BR-V5-LIB-PATRON-001`: `library_patron` tham chiếu `app_user`; không duplicate application identity.
-- `BR-V5-LIB-PATRON-002`: STUDENT/TEACHER có patron ACTIVE mới được dùng borrower operations.
+- `BR-V5-LIB-PATRON-002`: Any user with an eligible patron may borrow except users whose role is ADMIN or LIBRARIAN. Plan 097 approval clarifies one role per user; authorization checks reuse the existing role enum/shared constants, not hardcoded strings.
 - `BR-V5-LIB-PATRON-003`: Nợ vượt ngưỡng chuyển patron sang `BORROWING_SUSPENDED`; không lock/disable `app_user`.
 - `BR-V5-LIB-CARD-001`: Thẻ hết hạn/revoked không hợp lệ dù signature đúng.
 - `BR-V5-LIB-CARD-002`: Mỗi patron có tối đa một thẻ ACTIVE tại một thời điểm.
@@ -110,7 +110,7 @@
 - `SEC-V5-LIB-002`: Thêm `LIBRARIAN` role vào role model bằng migration, không thêm `MEMBER`.
 - `SEC-V5-LIB-003`: Own-data checks dùng authenticated `app_user` → `library_patron` mapping phía backend.
 - `SEC-V5-LIB-004`: ADMIN có Library admin capability. ACADEMIC_OFFICE không mặc nhiên có Librarian mutation capability.
-- `SEC-V5-LIB-005`: STUDENT/TEACHER chỉ được borrower/self-service capability khi patron hợp lệ.
+- `SEC-V5-LIB-005`: Users other than ADMIN/LIBRARIAN may use borrower/self-service capability when their patron is eligible; Plan 097 approved one-role-per-user and shared role enum/constants.
 - `COMP-V5-LIB-001`: Existing `/api/v1`, `/api/v2`, `/api/v3` contracts không thay đổi ngầm.
 - `COMP-V5-LIB-002`: API mới ưu tiên `/api/v2`; collision phải namespace `/api/v2/library/*`.
 

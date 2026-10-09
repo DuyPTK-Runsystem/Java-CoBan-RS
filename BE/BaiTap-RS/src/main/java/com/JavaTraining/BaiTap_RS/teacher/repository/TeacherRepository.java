@@ -2,6 +2,7 @@ package com.JavaTraining.BaiTap_RS.teacher.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Collection;
 
 import com.JavaTraining.BaiTap_RS.teacher.domain.entity.Teacher;
 import com.JavaTraining.BaiTap_RS.teacher.domain.entity.TeacherStatus;
@@ -20,6 +21,8 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
     boolean existsByUserIdAndIdNot(Long userId, Long id);
 
     Optional<Teacher> findByUserId(Long userId);
+
+    List<Teacher> findAllByUserIdIn(Collection<Long> userIds);
 
     List<Teacher> findAllByStatusOrderByTeacherCodeAsc(TeacherStatus status);
 

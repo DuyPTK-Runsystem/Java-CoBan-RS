@@ -26,12 +26,14 @@ Source requirement giả định một ứng dụng thư viện độc lập v�
 2. MySQL/Flyway stream hiện tại là persistence baseline.
 3. `app_user` là identity; Library thêm `library_patron`.
 4. Thêm role `LIBRARIAN`; không thêm role `MEMBER`.
-5. Student/Teacher có thể là borrower nếu có patron hợp lệ.
+5. Any user except ADMIN/LIBRARIAN may be a borrower if the patron is eligible. Plan 097 approval clarifies exactly one role per user; reuse role enums/shared constants instead of hardcoded role strings.
 6. Nợ thư viện suspend borrowing, không lock account toàn hệ thống.
 7. Reuse existing Spring Security/JWT, Batch, notification/mail, audit, Spring AI và FE shell.
 8. API mới mặc định `/api/v2`; namespace `/api/v2/library` chỉ khi cần.
 9. AI provider/model configurable qua Spring AI.
 10. PostgreSQL-specific schema/concurrency phải được chuyển sang MySQL-safe design.
+11. Card issuance accepts an expiry date. The FE may compute it from a duration in months or accept a directly entered date; both modes send the expiry date to BE.
+12. Plan 098 owns Loan, Return, Renewal and Lost, including circulation transactions, copy locking, due dates, returns, renewals and lost-book handling.
 
 ## Compatibility
 

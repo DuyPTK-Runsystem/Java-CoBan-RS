@@ -8,7 +8,7 @@
 
 - **Phiên bản tài liệu ứng dụng:** v5 — Quản lý thư viện.
 
-- **Trạng thái:** **CHƯA PHÊ DUYỆT — Chỉ lập kế hoạch, chưa triển khai**.
+- **Trạng thái:** **ĐÃ PHÊ DUYỆT — triển khai trong phạm vi Plan 097 với các làm rõ tại §1.3**.
 
 - **Kế hoạch phụ thuộc:** Plan 095 và Plan 096.
 
@@ -65,6 +65,23 @@ Kế hoạch này kế thừa trực tiếp các quyết định tại Plan 095:
 - Ngày hết hạn vẫn là ngày còn hiệu lực. Thẻ chỉ hết hiệu lực từ đầu ngày tiếp theo theo múi giờ `Asia/Ho_Chi_Minh`.
 
 Những quyết định trên không cần xin phê duyệt lại. Chỉ các phương án kỹ thuật và các vấn đề còn mở trong phạm vi Plan 097 mới cần được xem xét.
+
+### 1.3. Phê duyệt và các làm rõ đã được người dùng duyệt
+
+Plan 097 được phê duyệt. Các quyết định sau có hiệu lực và được ưu tiên khi nội dung cũ trong kế hoạch hoặc tài liệu v5 mâu thuẫn:
+
+- Mọi user đủ điều kiện có thể là bạn đọc/mượn sách, ngoại trừ user có role `ADMIN` hoặc `LIBRARIAN`. Theo role model hiện tại mỗi user có đúng một role; tái sử dụng role enum/shared constants, không hardcode tên role thành string literal.
+- Khi phát hành thẻ, người dùng có thể nhập thời hạn theo số tháng hoặc ngày hết hạn. Nếu nhập số tháng, FE tính ngày hết hạn; cả hai chế độ đều gửi `expiresAt` cho BE xử lý.
+- Plan 098 sở hữu các luồng Loan, Return, Renewal và Lost, gồm giao dịch lưu thông, khóa bản sao, hạn trả, trả/gia hạn và xử lý mất sách. Plan 097 chỉ cung cấp dữ liệu/thành phần cần tích hợp, không triển khai các luồng này.
+- PMD (`pmdMain`, `pmdTest`) và toàn bộ test suite BE/FE được phép bỏ qua và phải ghi `SKIPPED`. Không chạy các gate này. Chỉ báo `PASS` cho lệnh thực sự đã chạy; ghi chính xác gate tập trung, compile, Checkstyle, lint/type/build và test mục tiêu đã chạy.
+
+### 1.4. Test plan trọng điểm
+
+**Backend:** test service/controller/API cho activation candidates (mọi tài khoản chưa có patron, không lọc role), tạo patron, trùng user, cập nhật trạng thái, ownership và authorization; borrower eligibility cho role thường so với `ADMIN`/`LIBRARIAN`; cấp/thu hồi/cấp lại thẻ, `expiresAt` bao gồm ngày hết hạn và hết hiệu lực từ ngày kế tiếp; QR đúng/sai chữ ký, payload sai phiên bản, QR của thẻ hết hạn/thu hồi; đảm bảo không lộ secret. Test cạnh tranh tạo patron/thẻ và ràng buộc một thẻ ACTIVE chỉ được coi là bằng chứng DB/concurrency nếu chạy bằng MySQL hoặc môi trường tương thích; mock/unit không chứng minh được tính chất đó.
+
+**Frontend:** test request/response mapping cho API, danh sách và lựa chọn activation candidate; ngày hết hạn được tính từ duration theo quy tắc hiện có và payload gửi BE luôn là ngày ISO; nhập trực tiếp ngày hết hạn; validation ngày không hợp lệ/quá khứ; trạng thái tải/rỗng/lỗi/quyền và tương tác cấp/thu hồi; QR và ngày hiệu lực trình bày đúng.
+
+**Lệnh và giới hạn:** chạy focused tests theo module sau khi implementation sẵn sàng; chạy compile/type-check, Checkstyle, lint/build phù hợp với thay đổi. Không chạy PMD hoặc full suites theo quyết định đã duyệt. Coverage chỉ báo nếu JaCoCo task/report sẵn có; không tự thêm ngưỡng. MySQL/live DB, runtime/provider và browser evidence chỉ báo khi được chạy thực tế, không suy ra từ mock/source.
 
 ## 2. Yêu cầu và nguồn đối chiếu
 
@@ -1044,15 +1061,15 @@ Mọi kết quả kiểm thử phải ghi rõ **ĐẠT**, **KHÔNG ĐẠT**, **C
 
 | Mã     | Nội dung                                                           | Trạng thái                         |
 | ------ | ------------------------------------------------------------------ | ---------------------------------- |
-| P97-01 | Phạm vi và quyền triển khai Plan 097                               | Chưa phê duyệt                     |
-| P97-02 | Định dạng mã thẻ, bộ đếm theo năm và xử lý vượt giới hạn           | Cần chốt                           |
-| P97-03 | Quy tắc phát hành lại và xử lý thẻ hết hạn chưa đồng bộ trạng thái | Cần chốt                           |
-| P97-04 | Cơ chế lưu nhiều nguyên nhân đình chỉ                              | Cần chốt                           |
-| P97-05 | Cơ chế ràng buộc một thẻ ACTIVE trên MySQL                         | Chưa có bằng chứng môi trường đích |
-| P97-06 | Hợp đồng API, DTO và các mã lỗi bổ sung                            | Cần chốt                           |
-| P97-07 | Mô hình chính sách thời hạn dùng chung                             | Cần chốt                           |
-| P97-08 | Quy trình cấp LIBRARIAN khi Reservation chưa triển khai            | Bị chặn bởi điều kiện phụ thuộc    |
-| P97-09 | Quy tắc kích hoạt patron cho tài khoản không gắn Student/Teacher   | Cần đối chiếu chính sách hiện hành |
+| P97-01 | Phạm vi và quyền triển khai Plan 097                               | Đã được người dùng phê duyệt       |
+| P97-02 | Định dạng mã thẻ, bộ đếm theo năm và xử lý vượt giới hạn           | Lựa chọn kỹ thuật trong implementation; ghi rõ quyết định thực tế |
+| P97-03 | Cấp lại thẻ đang hoạt động                                         | Hợp đồng đã chốt: reissue nguyên tử, thu hồi thẻ cũ và tạo thẻ mới cùng transaction |
+| P97-04 | Lưu nhiều nguyên nhân đình chỉ                                     | Lựa chọn kỹ thuật trong implementation; không mở khóa khi còn nguyên nhân khác |
+| P97-05 | Cơ chế ràng buộc một thẻ ACTIVE trên MySQL                         | Phải xác minh tương thích MySQL; runtime DB đích vẫn chưa có bằng chứng |
+| P97-06 | Hợp đồng API, DTO và các mã lỗi bổ sung                            | Chốt theo hợp đồng BE↔FE đã phối hợp; ghi các sai khác thực tế trong Dev Note |
+| P97-07 | Mô hình chính sách thời hạn dùng chung                             | Tái sử dụng nếu có; nếu không, dùng lựa chọn kỹ thuật phù hợp và ghi trong Dev Note |
+| P97-08 | Quy trình cấp LIBRARIAN khi Reservation chưa triển khai            | Role assignment phụ thuộc khả năng kiểm tra Reservation; deferral nếu chưa có nguồn dữ liệu |
+| P97-09 | Patron cho user không có Student/Teacher                           | Đã giải quyết bởi quyết định mọi user trừ ADMIN/LIBRARIAN có thể đủ điều kiện khi patron hợp lệ |
 
 Các quyết định về vai trò `LIBRARIAN`, cách tính ngày hết hạn, tên bảng `library_card` và việc không lưu tệp QR lâu dài đã được phê duyệt trong Plan 095; không đưa vào danh sách cần xin duyệt lại.
 
@@ -1136,7 +1153,7 @@ Chỉ đánh dấu **HOÀN THÀNH** khi các nội dung bắt buộc trong phạ
 
 - Tất cả kết quả triển khai phải được đối chiếu với trạng thái thực tế của mã nguồn và cơ sở dữ liệu.
 
-**Trạng thái cuối của tài liệu:** CHƯA PHÊ DUYỆT — chờ xem xét và chốt các điểm kỹ thuật còn mở.
+**Trạng thái cuối của tài liệu:** ĐÃ PHÊ DUYỆT — Plan 097 được triển khai theo phạm vi và làm rõ tại §1.3; các lựa chọn kỹ thuật và bằng chứng còn thiếu phải được ghi trong Dev Note, không làm thay đổi nghiệp vụ đã duyệt.
 
 **Thông điệp commit đề xuất sau khi tài liệu được duyệt:**
 

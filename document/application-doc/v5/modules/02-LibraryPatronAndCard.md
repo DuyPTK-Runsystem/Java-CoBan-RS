@@ -25,14 +25,12 @@ Display name/contact được resolve từ canonical profile hiện hữu theo a
 
 ## Eligibility
 
-Baseline borrower:
+Plan 097 approved borrower eligibility:
 
-- STUDENT có account + patron ACTIVE;
-- TEACHER có account + patron ACTIVE.
+- Any user with a patron in an eligible state may borrow, except users whose single role is `ADMIN` or `LIBRARIAN`.
+- The current role model assigns exactly one role per user. Reuse the shared role enum/constants; do not compare hardcoded role-name strings.
 
-LIBRARIAN có thể đồng thời có patron nếu có nhu cầu mượn; role và patron là hai chiều độc lập.
-
-ACADEMIC_OFFICE không mặc nhiên có borrower/library-admin capability nếu chưa có patron/role tương ứng.
+`ADMIN` and `LIBRARIAN` are excluded from borrowing eligibility. Other role categories, including `ACADEMIC_OFFICE`, are eligible when a valid patron exists. Backend authorization remains authoritative.
 
 ## Lifecycle
 
@@ -49,7 +47,7 @@ Auto suspension do fine và manual suspension nếu sau này có phải được
 ## Card
 
 ```text
-membership_card
+library_card
 - id
 - patron_id
 - card_no
@@ -106,22 +104,29 @@ Signature hợp lệ không đồng nghĩa thẻ đang ACTIVE.
 
 ```text
 GET  /api/v2/library-patrons
+GET  /api/v2/library-patrons/activation-candidates
 POST /api/v2/library-patrons
 GET  /api/v2/library-patrons/{patronId}
-GET  /api/v2/library-patrons/{patronId}/loans
-GET  /api/v2/library-patrons/{patronId}/fines
-
+GET  /api/v2/library-patrons/{patronId}/cards
 POST /api/v2/library-cards
 GET  /api/v2/library-cards/{cardNo}/qr.png
-GET  /api/v2/library-cards/{cardNo}/card.pdf
 POST /api/v2/library-cards/verify
 POST /api/v2/library-cards/{cardNo}/revoke
+POST /api/v2/library-cards/{cardNo}/reissue
 
 GET  /api/v2/library-patrons/me
 GET  /api/v2/library-cards/me
+GET  /api/v2/library-cards/me/history
 ```
 
 `POST /library-patrons` nhận `userId`, không nhận một payload để tạo Student/Teacher/User mới.
+Activation candidates trả về tài khoản chưa có patron; role không giới hạn việc tạo patron. Quy tắc loại `ADMIN`/`LIBRARIAN` áp dụng cho borrower eligibility, không áp dụng cho activation.
+
+Card issuance nhận `expiresAt` là ngày hết hạn. Giao diện cho phép nhập số tháng hoặc nhập ngày trực tiếp; chế độ số tháng được tính ở FE, và cả hai chế độ đều gửi ngày hết hạn cho BE xử lý. Ngày hết hạn là ngày còn hiệu lực, với thời điểm hết hạn tính từ đầu ngày tiếp theo theo `Asia/Ho_Chi_Minh`.
+
+Reissue thay thế nguyên tử qua API riêng: thu hồi thẻ cũ và tạo thẻ mới trong cùng giao dịch, kèm lý do và audit cho cả hai thay đổi. Lịch sử thẻ chỉ đọc; admin/librarian xem lịch sử theo patron, owner xem lịch sử của chính mình.
+
+Loan, return, renewal, lost, circulation transaction/copy locking, due-date calculation và lost-book handling thuộc Plan 098. Các màn hình Plan 097 không triển khai hoặc thay thế các luồng đó.
 
 ## Acceptance
 

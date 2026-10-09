@@ -4,7 +4,7 @@ import { configureApiClient } from '@/services/apiClient'
 import { hasAuthenticatedSession } from '@/services/authSession'
 import { getAuthSession } from '@/services/authSession'
 import { firstPermittedWorkspacePath, isStudentWorkspace, isStudentWorkspacePath, isTeacherWorkspace, studentWorkspacePaths } from '@/services/studentNavigation'
-import type { UserRole } from '@/types/user'
+import { USER_ROLE, type UserRole } from '@/types/user'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -55,6 +55,9 @@ const router = createRouter({
     { path: '/library/books/new', redirect: '/v2/library/books/new' },
     { path: '/library/books/:bookId/edit', redirect: (to) => `/v2/library/books/${to.params.bookId}/edit` },
     { path: '/library/books/:bookId', redirect: (to) => `/v2/library/books/${to.params.bookId}` },
+    { path: '/library/patrons', redirect: '/v2/library/patrons' },
+    { path: '/library/patrons/:patronId', redirect: (to) => `/v2/library/patrons/${to.params.patronId}` },
+    { path: '/library/my-card', redirect: '/v2/library/my-card' },
     {
       path: '/lesson-logs',
       redirect: '/v2/lesson-logs',
@@ -77,25 +80,25 @@ const router = createRouter({
           path: 'students',
           name: 'v2-students',
           component: () => import('@/views/student/StudentListView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE', 'TEACHER'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE, USER_ROLE.TEACHER] },
         },
         {
           path: 'students/new',
           name: 'v2-student-create',
           component: () => import('@/views/student/StudentFormView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE] },
         },
         {
           path: 'students/:studentId',
           name: 'v2-student-detail',
           component: () => import('@/views/student/StudentDetailView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE', 'TEACHER'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE, USER_ROLE.TEACHER] },
         },
         {
           path: 'students/:studentId/edit',
           name: 'v2-student-edit',
           component: () => import('@/views/student/StudentFormView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE] },
         },
         {
           path: 'library/books',
@@ -118,22 +121,39 @@ const router = createRouter({
           component: () => import('@/views/library/LibraryBookFormView.vue'),
         },
         {
+          path: 'library/patrons',
+          name: 'v2-library-patrons',
+          component: () => import('@/views/library/LibraryPatronListView.vue'),
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.LIBRARIAN] },
+        },
+        {
+          path: 'library/patrons/:patronId',
+          name: 'v2-library-patron-detail',
+          component: () => import('@/views/library/LibraryPatronDetailView.vue'),
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.LIBRARIAN] },
+        },
+        {
+          path: 'library/my-card',
+          name: 'v2-library-my-card',
+          component: () => import('@/views/library/LibraryMyCardView.vue'),
+        },
+        {
           path: 'academic-years',
           name: 'v2-academic-years',
           component: () => import('@/views/academic/AcademicYearListView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE] },
         },
         {
           path: 'academic-years/:academicYearId/semesters',
           name: 'v2-semesters',
           component: () => import('@/views/academic/SemesterListView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE] },
         },
         {
           path: 'academic-catalog/grades',
           name: 'v2-academic-grades',
           component: () => import('@/views/academic/GradeListView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE] },
         },
         {
           path: 'academic-catalog/classes',
@@ -154,19 +174,19 @@ const router = createRouter({
           path: 'enrollments',
           name: 'v2-enrollments',
           component: () => import('@/views/enrollment/EnrollmentListView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE] },
         },
         {
           path: 'enrollments/placement/new',
           name: 'v2-placement-new',
           component: () => import('@/views/enrollment/PlacementWorkspaceView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE] },
         },
         {
           path: 'enrollments/placement/:placementSessionId',
           name: 'v2-placement-session',
           component: () => import('@/views/enrollment/PlacementWorkspaceView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE] },
         },
         {
           path: 'teachers',
@@ -212,73 +232,73 @@ const router = createRouter({
           path: 'scorebooks/operations',
           name: 'v2-scorebook-operations',
           component: () => import('@/views/calculation/CalculationOperationsView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE] },
         },
         {
           path: 'functional-rooms',
           name: 'v2-functional-rooms',
           component: () => import('@/views/functional-room/FunctionalRoomListView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE] },
         },
         {
           path: 'timetables',
           name: 'v2-timetables',
           component: () => import('@/views/timetable/TimetableListView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE] },
         },
         {
           path: 'timetables/settings',
           name: 'v2-timetable-settings',
           component: () => import('@/views/timetable/TimetableSettingsView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE] },
         },
         {
           path: 'timetables/unavailability',
           name: 'v2-timetable-unavailability-admin',
           component: () => import('@/views/timetable/TeacherUnavailabilityView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE] },
         },
         {
           path: 'timetables/:timetableId',
           name: 'v2-timetable-workspace',
           component: () => import('@/views/timetable/TimetableWorkspaceView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE] },
         },
         {
           path: 'my-timetable',
           name: 'v2-my-timetable',
           component: () => import('@/views/timetable/MyTimetableView.vue'),
-          meta: { allowedRoles: ['TEACHER'] },
+          meta: { allowedRoles: [USER_ROLE.TEACHER] },
         },
         {
           path: 'my-timetable/unavailability',
           name: 'v2-my-timetable-unavailability',
           component: () => import('@/views/timetable/TeacherUnavailabilityView.vue'),
-          meta: { allowedRoles: ['TEACHER'] },
+          meta: { allowedRoles: [USER_ROLE.TEACHER] },
         },
         {
           path: 'my-lesson-logs',
           name: 'v2-my-lesson-logs',
           component: () => import('@/views/lesson-log/TeacherLessonLogView.vue'),
-          meta: { allowedRoles: ['TEACHER'] },
+          meta: { allowedRoles: [USER_ROLE.TEACHER] },
         },
         {
           path: 'lesson-logs',
           name: 'v2-lesson-logs',
           component: () => import('@/views/lesson-log/ClassLessonLogWorkspaceView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE', 'TEACHER'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE, USER_ROLE.TEACHER] },
         },
         {
           path: 'lesson-logs/classes/:classId',
           name: 'v2-lesson-log-class',
           component: () => import('@/views/lesson-log/ClassLessonLogWorkspaceView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE', 'TEACHER'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE, USER_ROLE.TEACHER] },
         },
         {
           path: 'lesson-logs/settings',
           name: 'v2-lesson-log-settings',
           component: () => import('@/views/lesson-log/LessonLogSettingsView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE] },
         },
         {
           path: 'notifications',
@@ -289,13 +309,13 @@ const router = createRouter({
           path: 'notifications/manage',
           name: 'v2-notifications-manage',
           component: () => import('@/views/notification/NotificationManagementView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE', 'TEACHER'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE, USER_ROLE.TEACHER] },
         },
         {
           path: 'notifications/compose',
           name: 'v2-notifications-compose',
           component: () => import('@/views/notification/NotificationComposerView.vue'),
-          meta: { allowedRoles: ['ADMIN', 'ACADEMIC_OFFICE', 'TEACHER'] },
+          meta: { allowedRoles: [USER_ROLE.ADMIN, USER_ROLE.ACADEMIC_OFFICE, USER_ROLE.TEACHER] },
         },
         {
           path: 'notifications/:notificationId',
